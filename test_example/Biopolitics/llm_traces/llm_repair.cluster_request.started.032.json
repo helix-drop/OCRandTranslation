@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LECON DU 24 JANVIER 1979",
+      "cluster_id": "ch-fallback-0004:nr-fn-ch-0016-ch-fallback-0004:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        71,
+        71
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0004",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0053",
+          "note_kind": "footnote",
+          "page_no": 71,
+          "region_id": "nr-fn-ch-0016-ch-fallback-0004",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p71",
+          "text": "Le manuscrit ajoute, p. 5 : «en arrêtant la partie lorsque les pertes et les gains des différents partenaires s’écartent trop de la situation de départ (problème pascalien de l'interruption de la partie) »."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 70,
+        "ocr_excerpt": "tence par conséquent d'un jeu à somme non nulle implique, bien entendu, que le monde tout entier soit convoqué autour de l'Europe pour échanger, dans un marché qui sera le marché européen, ses propres produits et les produits de l'Europe. Bien entendu, je ne veux pas dire par là que c'est la première fois que l'Europe pense au monde ou que l'Europe pense le monde. Je veux dire, simplement, que c'est peut-être la première fois que l'Europe en tant qu'unité économique, que sujet économique se présente ainsi au monde ou réfléchit le monde comme pouvant et devant être son domaine économique. C'est la première fois que l'Europe, me semble-t-il, apparaît à ses propres yeux comme devant avoir le monde pour marché indéfini. L'Europe n'est plus simplement en état de convoitise par rapport à toutes les richesses du monde qui miroitaient dans ses rêves ou dans ses perceptions. L'Europe est maintenant en état d'enrichissement permanent et collectif par sa propre concurrence, à condition que ce soit le monde entier qui constitue son marché. Bref, le calcul d'une balance européenne, à l'époque du mercantilisme, à l'époque de la raison d'État, à l'époque de l'État de police, etc., était ce qui permettait de bloquer les conséquences d'un jeu économique qui était conçu comme fini*. Maintenant, c'est l'ouverture d'un marché mondial qui va permettre que le jeu économique ne soit pas fini et que, ...",
+        "page_no": 71,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0004:nr-fn-ch-0016-ch-fallback-0004:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5210,
+    "cluster_id": "ch-fallback-0004:nr-fn-ch-0016-ch-fallback-0004:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

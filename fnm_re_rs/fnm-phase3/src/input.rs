@@ -2,21 +2,22 @@
 //!
 //! ←→ Python: FNM_RE/models.py Phase3 相关 dataclass（输入侧）
 
-use fnm_core::records::{NoteItemRecord, NoteRegionRecord, PagePartitionRecord};
+use fnm_core::records::{
+    ChapterRecord, HeadingCandidate, NoteItemRecord, NoteRegionRecord, PagePartitionRecord,
+    SectionHeadRecord,
+};
 use fnm_phase1::input::RawPage;
 use serde_json::Value;
 
 /// Phase 3 的完整输入。
 ///
 /// 所有上游数据均从 DB 读取（Phase 1 + Phase 2 产物），不直接在内存接收 Phase2Structure。
-///
-/// 注：原有 `phase2_chapter_note_modes` 字段已删除——`build_phase3_structure`
-/// 内部 `phase2_rebuild::phase2_from_chapter_layers` 会从 chapter_layers 重新
-/// 生成 chapter_note_modes（包含 mode_override_reason 等审计字段），caller 传
-/// chapter_note_modes 是冗余且会被丢弃的死参（AGENTS.md §8）。
+/// Phase1/2 facts（heading_candidates / section_heads）透传至输出以保持 byte-equal。
 pub struct Phase3Input<'a> {
-    pub phase1_chapters: &'a [fnm_core::records::ChapterRecord],
+    pub phase1_chapters: &'a [ChapterRecord],
     pub phase1_pages: &'a [PagePartitionRecord],
+    pub phase1_heading_candidates: &'a [HeadingCandidate],
+    pub phase1_section_heads: &'a [SectionHeadRecord],
     pub phase2_note_regions: &'a [NoteRegionRecord],
     pub phase2_note_items: &'a [NoteItemRecord],
     pub raw_pages: &'a [RawPage],

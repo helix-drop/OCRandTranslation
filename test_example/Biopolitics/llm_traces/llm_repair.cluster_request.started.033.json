@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LECON DU 24 JANVIER 1979",
+      "cluster_id": "ch-fallback-0004:nr-fn-ch-0017-ch-fallback-0004:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        74,
+        74
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0004",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0054",
+          "note_kind": "footnote",
+          "page_no": 74,
+          "region_id": "nr-fn-ch-0017-ch-fallback-0004",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p74",
+          "text": "M. Foucault ajoute : ça promet déjà"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 73,
+        "ocr_excerpt": "le précepte même de la nature, va pouvoir promettre ce qui était en quelque sorte dessiné déjà, dès le premier geste de la nature quand elle avait peuplé le monde tout entier : *quelque chose comme la paix perpé-tuelle. La paix perpétuelle, elle est garantie par la nature et cette garantie est manifestée par le peuplement du monde tout entier et le réseau des relations commerciales qui se tendent à travers tout le monde. La garantie de la paix perpétuelle, c'est donc en effet la planétarisation commerciale. II faudrait, sans doute, ajouter bien des choses, mais en tout cas répondre tout de suite à une objection. Quand je vous dis qu’on a là, dans cette pensée des physiocrates, d’Adam Smith, de Kant aussi, des juristes du XVIIIe siècle, la manifestation d’une nouvelle forme de calcul politique à l’échelle internationale, je ne veux pas dire du tout que toute autre forme, et de réflexion et de calcul et d’analyse, toute autre pratique gouvernementale disparaît pour autant. Car s’il est vrai que se découvre à cette époque quelque chose comme un marché mondial et planétaire, si s’affirme à ce moment-là la position privilégiée de l’Europe par rapport à ce marché mondial, si s’affirme également à cette époque l’idée que la concurrence entre États européens est un facteur de l’enrichissement commun, bien entendu – l’histoire le prouve par tous les bouts –, ça ne veut pas dire pour aut ...",
+        "page_no": 74,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0004:nr-fn-ch-0017-ch-fallback-0004:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5210,
+    "cluster_id": "ch-fallback-0004:nr-fn-ch-0017-ch-fallback-0004:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

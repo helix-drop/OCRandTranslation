@@ -1,0 +1,128 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 14 FÉVRIER 1979",
+      "cluster_id": "ch-fallback-0007:nr-fn-ch-0037-ch-fallback-0007:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        162,
+        163
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0007",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0174",
+          "note_kind": "footnote",
+          "page_no": 162,
+          "region_id": "nr-fn-ch-0037-ch-fallback-0007",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p162",
+          "text": "Suite de mots inaudibles, s’achevant par : certaines catégories, etc."
+        },
+        {
+          "chapter_id": "ch-fallback-0007",
+          "is_reconstructed": false,
+          "marker": "**",
+          "marker_type": "",
+          "note_item_id": "fn-0175",
+          "note_kind": "footnote",
+          "page_no": 162,
+          "region_id": "nr-fn-ch-0037-ch-fallback-0007",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p162",
+          "text": "Manuscrit, p. Passage inaudibie dans l’enregistrement : [...] sur la part de revenus une tranche qui serait normalement dirigée vers l’épargne ou l’investissement"
+        },
+        {
+          "chapter_id": "ch-fallback-0007",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0177",
+          "note_kind": "footnote",
+          "page_no": 163,
+          "region_id": "nr-fn-ch-0037-ch-fallback-0007",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p163",
+          "text": "Le manuscrit ajoute : « Mais comme on ne peut pas le définir [le minimum vital], ce sera sans doute le partage des transferts de consommation possibles. »"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 161,
+        "ocr_excerpt": "familiales [...] Enfin, troisièmement, dans une économie de bien-être une politique sociale est une politique qui admet que plus une croissance est forte, plus la politique sociale, en quelque sorte en récompense et en compensation, doit être active, intense [et] généreuse. Ce sont ces trois principes que l'ordolibéralisme a mis très tôt en doute. D'abord, disent les ordolibéraux, une politique sociale, si elle veut réellement s'intégrer à une politique économique et si elle ne veut pas être destructrice par rapport à cette politique économique, ne peut pas lui servir de contrepoids et ne doit pas être définie comme ce qui compensera les effets des processus économiques. Et en particulier l'égalisation, la relativeégalisation, la péréquation dans l'accès de chacun aux biens de consommation ne peut en aucun cas constituer un objectif. Elle ne peut pas constituer un objectif dans un système où, justement, la régulation économique, c'est-à-dire le mécanisme des prix, s'obtient non pas du tout par des phénomènes d'égalisation, mais par un jeu de différenciations qui est propre à tout mécanisme de concurrence et qui s'établit à travers les oscillations qui n'ont leur fonction, et leurs effets régulateurs, qu'à la condition, bien sûr, qu'on les laisse jouer et qu'on les laisse jouer par des différences. En gros, il faut bien qu'il y ait des gens qui travaillent et d'autres qui ne tra ...",
+        "page_no": 162,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 162,
+        "ocr_excerpt": "Et la prélever, par conséquent, ça serait soustraire à l'investissement une part de revenus et la reverser à la consommation. La seule chose que l'on puisse faire, c'est prélever sur les revenus les plus élevés une part qui de toute façon serait consacrée à la consommation, ou, disons, à la surconsommation, et cette part de sur-consommation la transférer à ceux qui, soit pour des raisons de handicap définitif, soit pour des raisons d'aléas partagés, se trouvent dans un état de sous-consommation. Mais rien de plus. Caractère donc très limité, vous le voyez, des transferts sociaux. Il s'agit simplement d'assurer, en gros, non pas du tout le maintien d'un pouvoir d'achat, mais un minimum vital pour ceux qui, à titre définitif ou passager, ne pourraient pas assurer leur propre existence.* C'est le transfert marginal d'un maximum à un minimum. Ce n'est absolument pas l'établissement, la régulation vers une moyenne. Et deuxièmement, l'instrument de cette politique sociale, si on peut appeler cela une politique sociale, ne sera pas la socialisation de la consommation et des revenus. Ce ne peut être, au contraire, qu'une privatisation, c'est-à-dire qu'on ne va pas demander à la société tout entière de garantir les individus contre les risques, que ce soit les risques individuels, du genre maladie ou accident, ou les risques collectifs comme les dommages par exemple; on ne va pas demand ...",
+        "page_no": 163,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0007:nr-fn-ch-0037-ch-fallback-0007:footnote",
+    "image_count": 0,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 6247,
+    "cluster_id": "ch-fallback-0007:nr-fn-ch-0037-ch-fallback-0007:footnote",
+    "estimated_prompt_tokens": 1791,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 3
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1791,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

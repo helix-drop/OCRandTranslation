@@ -1,0 +1,110 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "confidence": 0.8,
+        "marker": "",
+        "note_item_id": "",
+        "note_text": "",
+        "reason": "Note item content is empty, cannot verify anchor location or synthesize."
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 28 MARS 1979",
+      "cluster_id": "ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        296,
+        296
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0011",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0407",
+          "note_kind": "footnote",
+          "page_no": 296,
+          "region_id": "nr-fn-ch-0069-ch-fallback-0011",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p296",
+          "text": "M.F.: l’administration"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 295,
+        "ocr_excerpt": "n'est pas la peine d'y insister beaucoup, à savoir que, puisque la mécanique économique implique que chacun suive son propre intérêt, il faut donc laisser faire chacun. Il n'y a pas à intervenir, pour le pouvoir politique, dans cette dynamique que la nature a inscrite dans le cœur de l'homme. Il est donc interdit au gouvernement de faire obstacle à cet intérêt des individus. C'est ce que dit Adam Smith, lorsqu'il écrit : l'intérêt commun exige que chacun sache entendre le sien (d'intérêt) et puisse lui obéir sans obstacle $ ^{28} $. Autrement dit, le pouvoir, le gouvernement ne peut pas faire obstacle au jeu des intérêts individuels. Mais il faut aller plus loin. Non seulement le gouvernement ne doit pas faire obstacle à l'intérêt de chacun, mais il est impossible que le souverain puisse avoir sur le mécanisme économique un point de vue qui totalise chacun des éléments et permette de les combiner artificiellement ou volontairement. La main invisible qui combine spontanément les intérêts interdit, en même temps, toute forme d'intervention, bien mieux, toute forme de regard en surplomb qui permettrait de totaliser le processus économique. Sur ce point un texte de Ferguson est très clair. Il dit dans l'Histoire de la société civile $ ^{29} $ : « Plus l'individu gagne pour son propre compte, plus il augmente la masse de la richesse nationale. [...] Toutes les fois que l'administrat ...",
+        "page_no": 296,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote",
+    "image_refused": false,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"chapter_body_excerpt\": \"# LEÇON DU 28 MARS 1979 Le modèle de l'homo œconomicus. – Sa généralisation à toute forme de comportement dans le néolibéralisme américain. – Analyse économique et techniques comportementales. – L'homo œconomicus comme élément de base de la nouvelle raison gouvernementale apparue au xviii<sup>e</sup> siècle. – Éléments pour une histoire de la notion d'homo œconomicus avant Walras et Pareto. – Le sujet d'intérêt dans la philosophie empiriste anglaise (Hume). – L'hétérogénéité entre sujet d'intérêt et sujet de droit : (1) Le caractère irréductible de l'intérêt par rapport à la volonté juridique. (2) La logique inverse du marché et du contrat. – Seconde innovation par rapport au modèle juridique : la relation du sujet économique avec le pouvoir politique. Condorcet. La « main invisible » d'Adam Smith : l'invisibilité du lien entre la recherche du profit individuel et l'accroissement de la richesse collective. Caractère intolaisable du monde économique. La nécessaire ignorance du souverain. – L'économie politique comme critique de la raison gouvernementale : disqualification de la possibilité d'un souverain économique, sous ses deux formes mercantiliste et physiocratique. – L'économie politique, science latérale par rapport à l'art de gouverner. Aujourd’hui, je voudrais partir de ce que je vous avais expliqué au cours des dernières semaines et remonter un petit peu vers ce qui m'avait servi de point de départ au début de l'année. La dernière fois, j'avais essayé de vous montrer comment, chez les néolibéraux américains, on trouvait une application, ou en tout cas une tentative d'application, de l'analyse économiste à une série d'objets, de domaines de comportements ou de conduites, qui n'étaient pas des comportements ou des conduites de marché : tentative, par exemple, d'app ...\",\n  \"chapter_title\": \"LEÇON DU 28 MARS 1979\",\n  \"cluster_id\": \"ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote\",\n  \"matched_examples\": [],\n  \"note_system\": \"footnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"n'est pas la peine d'y insister beaucoup, à savoir que, puisque la mécanique économique implique que chacun suive son propre intérêt, il faut donc laisser faire chacun. Il n'y a pas à intervenir, pour le pouvoir politique, dans cette dynamique que la nature a inscrite dans le cœur de l'homme. Il est donc interdit au gouvernement de faire obstacle à cet intérêt des individus. C'est ce que dit Adam Smith, lorsqu'il écrit : l'intérêt commun exige que chacun sache entendre le sien (d'intérêt) et puisse lui obéir sans obstacle $ ^{28} $. Autrement dit, le pouvoir, le gouvernement ne peut pas faire obstacle au jeu des intérêts individuels. Mais il faut aller plus loin. Non seulement le gouvernemen ...\",\n      \"page_no\": 296\n    }\n  ],\n  \"page_range\": [\n    296,\n    296\n  ],\n  \"rebind_candidates\": [],\n  \"request_mode\": \"note_only_with_body\",\n  \"unmatched_anchors\": [],\n  \"unmatched_note_items\": [\n    {\n      \"marker\": \"*\",\n      \"note_item_id\": \"fn-0407\",\n      \"page_no\": 296,\n      \"source_text\": \"\"\n    }\n  ]\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "confidence": 0.8,
+      "marker": "",
+      "note_item_id": "",
+      "note_text": "",
+      "reason": "Note item content is empty, cannot verify anchor location or synthesize."
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Note item content is empty, cannot verify anchor location or synthesize.\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 953
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 1377,
+    "output_tokens": 38,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 1415
+  },
+  "usage": {
+    "completion_tokens": 38,
+    "prompt_tokens": 1377,
+    "request_count": 1,
+    "total_tokens": 1415
+  }
+}

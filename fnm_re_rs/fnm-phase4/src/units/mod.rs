@@ -354,7 +354,6 @@ mod tests {
     use super::*;
     use fnm_core::records::PagePartitionRecord;
     use fnm_core::types::{BoundaryState, ChapterSource, PageRole};
-    use body_pages::StructuredBodyPage;
 
     fn make_chapter(chapter_id: &str, title: &str, start: i64, end: i64) -> ChapterRecord {
         ChapterRecord {
@@ -417,7 +416,7 @@ mod tests {
             make_raw_page(1, "# Chapter 1\n\nBody text page 1."),
             make_raw_page(2, "Body text page 2."),
         ];
-        let (units, summary) = build_translation_units(&phase4, &raw_pages, 6000);
+        let (units, _summary) = build_translation_units(&phase4, &raw_pages, 6000);
         assert!(!units.is_empty());
         assert!(units.iter().any(|u| u.kind == "body"));
     }

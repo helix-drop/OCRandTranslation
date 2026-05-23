@@ -82,8 +82,16 @@ pub fn extract_provider_error_detail(body: Option<&Value>, fallback: &str) -> St
                 Value::Object(err_map) => err_map
                     .get("message")
                     .and_then(|v| v.as_str())
-                    .or_else(|| err_map.get("code").and_then(|v| v.as_str()))
-                    .map(|s| s.to_string()),
+                    .or_else(|| err_map.get("status").and_then(|v| v.as_str()))
+                    .map(|s| s.to_string())
+                    .or_else(|| {
+                        err_map.get("code").map(|v| {
+                            v.as_str()
+                                .map(|s| s.to_string())
+                                .unwrap_or_else(|| v.to_string())
+                        })
+                    })
+                    .or_else(|| serde_json::to_string(err).ok()),
                 Value::String(s) => Some(s.clone()),
                 _ => None,
             };
@@ -280,5 +288,75 @@ mod tests {
     fn test_extract_detail_falls_back() {
         let detail = extract_provider_error_detail(None, "  fallback message  ");
         assert_eq!(detail, "fallback message");
+    }
+
+    #[test]
+    fn test_gemini_400_invalid_argument() {
+        // Gemini 特有的错误格式：code 为 number，status 为 string
+        let body = json!({
+            "error": {
+                "code": 400,
+                "message": "Request contains an invalid argument.",
+                "status": "INVALID_ARGUMENT"
+            }
+        });
+        let detail = extract_provider_error_detail(Some(&body), "fallback");
+        assert_eq!(detail, "Request contains an invalid argument.");
+    }
+
+    #[test]
+    fn test_gemini_400_code_number() {
+        // code 为 number 类型（非 string）
+        let body = json!({
+            "error": {
+                "code": 400,
+                "message": "Some invalid param"
+            }
+        });
+        let detail = extract_provider_error_detail(Some(&body), "fallback");
+        assert_eq!(detail, "Some invalid param");
+    }
+
+    #[test]
+    fn test_gemini_400_fallback_to_status() {
+        // 有 status 但无 message
+        let body = json!({
+            "error": {
+                "code": 400,
+                "status": "INVALID_ARGUMENT"
+            }
+        });
+        let detail = extract_provider_error_detail(Some(&body), "fallback");
+        assert_eq!(detail, "INVALID_ARGUMENT");
+    }
+
+    #[test]
+    fn test_gemini_400_unknown_field() {
+        // enable_thinking unknown field 场景：extra_body 里有不认识的字段
+        let body = json!({
+            "error": {
+                "code": 400,
+                "message": "Unknown field: enable_thinking",
+                "status": "INVALID_ARGUMENT",
+                "details": [{
+                    "@type": "google.rpc.BadRequest"
+                }]
+            }
+        });
+        let detail = extract_provider_error_detail(Some(&body), "fallback");
+        assert_eq!(detail, "Unknown field: enable_thinking");
+    }
+
+    #[test]
+    fn test_openai_compatible_error() {
+        let body = json!({
+            "error": {
+                "message": "The model `nonexistent` does not exist.",
+                "type": "invalid_request_error",
+                "code": "model_not_found"
+            }
+        });
+        let err = classify_provider_error(Some(400), None, Some(&body), "Bad Request");
+        assert!(matches!(err, ProviderError::NonRetryable { .. }));
     }
 }

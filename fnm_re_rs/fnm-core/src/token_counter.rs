@@ -217,7 +217,7 @@ mod tests {
         );
         let records = get_usage_records();
         // 可能有并行测试污染，至少 1 条
-        assert!(records.len() >= 1);
+        assert!(!records.is_empty());
         let found = records
             .iter()
             .any(|r| r.stage == "records_test_stage" && r.prompt_tokens == 200);

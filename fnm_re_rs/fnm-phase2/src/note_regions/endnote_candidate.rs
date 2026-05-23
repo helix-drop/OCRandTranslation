@@ -46,29 +46,26 @@ pub fn is_endnote_candidate_page(
         .map(|s| s.as_str())
         .unwrap_or("");
 
-    // page_role == "note"
+    // page_role == "note" — 需要 endnote 正向证据
     if page_role == "note" {
         if !first_notes_heading(&page.markdown).is_empty() {
             return true;
         }
-        let has_items_or_kind = page
+        // 必须 page_kind 是 endnote 或存在 endnote kind 的 scan items
+        let has_endnote_evidence = page
             .note_scan
             .as_ref()
             .map(|ns| {
-                let has_items = ns
-                    .get("items")
-                    .and_then(|v| v.as_array())
-                    .map(|a| !a.is_empty())
-                    .unwrap_or(false);
-                let has_kind = ns
+                let has_endnote_kind = ns
                     .get("page_kind")
                     .and_then(|v| v.as_str())
-                    .map(|k| !k.is_empty())
+                    .map(|k| k == "endnote_collection" || k == "mixed_body_endnotes")
                     .unwrap_or(false);
-                has_items || has_kind
+                let has_endnote_items = has_endnote_scan_items(page);
+                has_endnote_kind || has_endnote_items
             })
             .unwrap_or(false);
-        return has_items_or_kind;
+        return has_endnote_evidence;
     }
 
     // front matter 且无 heading → 排除

@@ -12,14 +12,6 @@ use std::collections::HashSet;
 #[derive(Debug, Clone)]
 pub struct Layer2Recovery {
     pub marker: String,
-    #[allow(dead_code)]
-    pub before: String,
-    #[allow(dead_code)]
-    pub after: String,
-    #[allow(dead_code)]
-    pub found_in: String,
-    #[allow(dead_code)]
-    pub mode: String, // "direct_digit" | "ocr_surrogate" | "ocr_suffix" | "ocr_symbol_after_year"
 }
 
 /// ←→ Python `_ocr_surrogate_for_marker`：全 1 的 marker 用 `!{n,}` 匹配。
@@ -56,43 +48,6 @@ fn ocr_symbol_surrogate_for_marker(marker: &str) -> &'static str {
     }
 }
 
-// ── UTF-8 安全切片辅助 ──────────────────────────────────────────
-
-/// 从字符串中按 char 边界向左截取 N 字符。
-fn chars_before(text: &str, byte_pos: usize, max_chars: usize) -> &str {
-    let safe_pos = byte_pos.min(text.len());
-    let prefix = &text[..safe_pos];
-    let mut start = safe_pos;
-    let mut count = 0;
-    for (idx, _) in prefix.char_indices().rev() {
-        if count == max_chars {
-            break;
-        }
-        start = idx;
-        count += 1;
-    }
-    &prefix[start..]
-}
-
-/// 从字符串中按 char 边界向右截取 N 字符。
-fn chars_after(text: &str, byte_pos: usize, max_chars: usize) -> &str {
-    let safe_pos = byte_pos.min(text.len());
-    let suffix = &text[safe_pos..];
-    let mut end = 0;
-    for (i, (idx, ch)) in suffix.char_indices().enumerate() {
-        if i == max_chars {
-            end = idx;
-            return &suffix[..end];
-        }
-        end = idx + ch.len_utf8();
-    }
-    &suffix[..end]
-}
-
-fn truncate_to_chars(text: &str, max_chars: usize) -> &str {
-    chars_after(text, 0, max_chars)
-}
-
 // ── 主入口 ───────────────────────────────────────────────────────
 
 /// 在 block 文本中搜索缺失的 markers。←→ Python `_layer2_raw_blocks` 4 种模式。
@@ -127,19 +82,9 @@ pub fn find_markers_in_blocks(
             );
             if let Ok(re) = Regex::new(&pattern_str) {
                 if let Some(caps) = re.captures(block_text) {
-                    if let Some(full) = caps.get(0) {
-                        let pos = full.start();
-                        let before = chars_before(block_text, pos + 1, 30);
-                        let after_end = full.end() - 1;
-                        let after = chars_after(block_text, after_end, 40);
+                    if caps.get(0).is_some() {
                         seen.insert(m.clone());
-                        results.push(Layer2Recovery {
-                            marker: m.clone(),
-                            before: before.to_string(),
-                            after: after.to_string(),
-                            found_in: truncate_to_chars(block_text, 40).to_string(),
-                            mode: "direct_digit".into(),
-                        });
+                        results.push(Layer2Recovery { marker: m.clone() });
                     }
                 }
             }
@@ -161,19 +106,9 @@ pub fn find_markers_in_blocks(
             );
             if let Ok(re) = Regex::new(&pattern_str) {
                 if let Some(caps) = re.captures(block_text) {
-                    if let Some(sur_match) = caps.name("surrogate") {
-                        let pos = sur_match.start();
-                        let before = chars_before(block_text, pos, 40);
-                        let after_start = sur_match.end();
-                        let after = chars_after(block_text, after_start, 40);
+                    if caps.name("surrogate").is_some() {
                         seen.insert(m.clone());
-                        results.push(Layer2Recovery {
-                            marker: m.clone(),
-                            before: before.trim_end().to_string(),
-                            after: after.to_string(),
-                            found_in: truncate_to_chars(block_text, 40).to_string(),
-                            mode: "ocr_surrogate".into(),
-                        });
+                        results.push(Layer2Recovery { marker: m.clone() });
                     }
                 }
             }
@@ -195,19 +130,9 @@ pub fn find_markers_in_blocks(
             );
             if let Ok(re) = Regex::new(&pattern_str) {
                 for caps in re.captures_iter(block_text) {
-                    if let Some(suf_match) = caps.name("suffix") {
-                        let pos = suf_match.start();
-                        let before = chars_before(block_text, pos, 40);
-                        let after_start = suf_match.end();
-                        let after = chars_after(block_text, after_start, 40);
+                    if caps.name("suffix").is_some() {
                         seen.insert(m.clone());
-                        results.push(Layer2Recovery {
-                            marker: m.clone(),
-                            before: before.trim_end().to_string(),
-                            after: after.to_string(),
-                            found_in: truncate_to_chars(block_text, 40).to_string(),
-                            mode: "ocr_suffix".into(),
-                        });
+                        results.push(Layer2Recovery { marker: m.clone() });
                         break;
                     }
                 }
@@ -231,19 +156,9 @@ pub fn find_markers_in_blocks(
             );
             if let Ok(re) = Regex::new(&pattern_str) {
                 for caps in re.captures_iter(block_text) {
-                    if let Some(sym_match) = caps.name("symbol") {
-                        let pos = sym_match.start();
-                        let before = chars_before(block_text, pos, 50);
-                        let after_start = sym_match.end();
-                        let after = chars_after(block_text, after_start, 50);
+                    if caps.name("symbol").is_some() {
                         seen.insert(m.clone());
-                        results.push(Layer2Recovery {
-                            marker: m.clone(),
-                            before: before.trim_end().to_string(),
-                            after: after.to_string(),
-                            found_in: truncate_to_chars(block_text, 40).to_string(),
-                            mode: "ocr_symbol_after_year".into(),
-                        });
+                        results.push(Layer2Recovery { marker: m.clone() });
                         break;
                     }
                 }
@@ -272,8 +187,6 @@ pub fn has_marker(markdown: &str, marker: &str) -> bool {
         .or_insert_with(|| Regex::new(&pattern).unwrap());
     re.is_match(markdown)
 }
-
-
 
 #[cfg(test)]
 mod tests {
@@ -311,12 +224,5 @@ mod tests {
         assert!(has_marker("text $^{5}$ more", "5"));
         assert!(has_marker("text [^5] more", "5"));
         assert!(!has_marker("text 5 more", "5"));
-    }
-
-    #[test]
-    fn chars_before_handles_multibyte() {
-        let text = "français ça va";
-        let result = chars_before(text, text.len(), 4);
-        assert_eq!(result.chars().count(), 4);
     }
 }

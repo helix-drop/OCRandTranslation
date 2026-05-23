@@ -1,0 +1,106 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 14 FÉVRIER 1979",
+      "cluster_id": "ch-fallback-0007:nr-fn-ch-0036-ch-fallback-0007:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        157,
+        157
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0007",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0172",
+          "note_kind": "footnote",
+          "page_no": 157,
+          "region_id": "nr-fn-ch-0036-ch-fallback-0007",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p157",
+          "text": "M. Foucault laisse ici de côté les p. 8-10 du manuscrit consacrées à la législation anti-cartel allemande de 1957."
+        },
+        {
+          "chapter_id": "ch-fallback-0007",
+          "is_reconstructed": false,
+          "marker": "**",
+          "marker_type": "",
+          "note_item_id": "fn-0173",
+          "note_kind": "footnote",
+          "page_no": 157,
+          "region_id": "nr-fn-ch-0036-ch-fallback-0007",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p157",
+          "text": "Suit une courte phrase en partie inaudible : Le néo-kantisme [...] littérature."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 156,
+        "ocr_excerpt": "à intervenir directement dans le processus économique, puisque le processus économique, porteur en lui, si on le laisse jouer pleinement, d'une structure régulatrice qui est celle de la concurrence, ne se déréglera jamais. Ce qui fait le propre de la concurrence, c'est la rigueur formelle de son processus. Mais ce qui garantit que ce processus formel ne se déréglera pas c'est que dans la réalité, si on le laisse jouer, il n'y aura rien venant de la concurrence, venant du processus économique lui-même, qui sera de nature à en changer le cours. Par conséquent, la non-intervention à ce niveau-là est nécessaire. Non-intervention sous la réserve qu'il faut, bien entendu, établir un cadre institutionnel qui aura à empêcher que des gens, soit des pouvoirs individuels soit des pouvoirs publics, interviennent pour créer le monopole. Et c'est ainsi que vous trouvez dans la législation allemande tout un énorme cadre institutionnel anti-monopolistique, mais qui n'a pas du tout pour fonction d'intervenir dans le champ économique pour empêcher l'économie elle-même de produire le monopole. C'est pour empêcher que les processus externes n'interviennent et ne créent le phénomène monopolistique.* Deuxième point important dans ce programme néolibéral, c'est la question des actions conformes $ ^{31} $. Cette théorie des actions conformes, cette programmation des actions conformes, on la trouve ess ...",
+        "page_no": 157,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0007:nr-fn-ch-0036-ch-fallback-0007:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5349,
+    "cluster_id": "ch-fallback-0007:nr-fn-ch-0036-ch-fallback-0007:footnote",
+    "estimated_prompt_tokens": 1541,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 2
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1541,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

@@ -20,7 +20,7 @@ pub fn build_footnote_links(
 ) -> (Vec<fnm_core::records::NoteLinkRecord>, usize, usize, usize) {
     let mut links: Vec<fnm_core::records::NoteLinkRecord> = Vec::new();
     let mut link_serial = link_serial_start;
-    let mut synthetic_serial = synthetic_serial_start;
+    let synthetic_serial = synthetic_serial_start;
     let mut ocr_repaired_count = 0usize;
 
     for note_item in note_items {
@@ -58,8 +58,7 @@ pub fn build_footnote_links(
                     a.chapter_id == chapter_id
                         && !a.synthetic
                         && !used_anchor_ids.contains(&a.anchor_id)
-                        && (a.anchor_kind == AnchorKind::Footnote
-                            || a.anchor_kind == AnchorKind::Unknown)
+                        && a.anchor_kind == AnchorKind::Footnote
                         && a.normalized_marker.trim() == marker
                         && a.page_no == note_item.page_no
                 })
@@ -200,7 +199,7 @@ pub fn build_footnote_links(
             if !crate::link_utils::within_footnote_window(a.page_no, note_item.page_no, 1) {
                 continue;
             }
-            if a.anchor_kind != AnchorKind::Footnote && a.anchor_kind != AnchorKind::Unknown {
+            if a.anchor_kind != AnchorKind::Footnote {
                 continue;
             }
             let norm_a = a.normalized_marker.trim();
@@ -216,7 +215,6 @@ pub fn build_footnote_links(
             let (ref anchor_id, ref original_marker) = repair_candidates[0];
             if let Some(a) = anchors.iter_mut().find(|a| a.anchor_id == *anchor_id) {
                 a.normalized_marker = marker.to_string();
-                a.anchor_kind = AnchorKind::Footnote;
                 a.certainty = 1.0;
                 a.ocr_repaired_from_marker = original_marker.clone();
             }
@@ -242,36 +240,19 @@ pub fn build_footnote_links(
             continue;
         }
 
-        // 最终降级：synthetic footnote anchor
-        let synthetic_id = format!("synthetic-footnote-{synthetic_serial:05}");
-        synthetic_serial += 1;
-        anchors.push(BodyAnchorRecord {
-            anchor_id: synthetic_id.clone(),
-            chapter_id: chapter_id.to_string(),
-            page_no: note_item.page_no,
-            paragraph_index: 999,
-            char_start: 0,
-            char_end: 0,
-            source_marker: marker.to_string(),
-            normalized_marker: marker.to_string(),
-            anchor_kind: AnchorKind::Footnote,
-            certainty: 0.4,
-            source_text: note_item.text.clone(),
-            source: "synthetic".to_string(),
-            synthetic: true,
-            ocr_repaired_from_marker: String::new(),
-        });
-        used_anchor_ids.insert(synthetic_id.clone());
+        // 无法匹配 → orphan_note，留待 LLM repair（Phase 3.5）。
+        // 不创建 synthetic anchor：无坐标的 synthetic 锚点会被 Phase 4 跳过，
+        // 不应在 Phase 3 伪装为 Matched（铁律 §3：禁止上游伪装）。
         links.push(crate::link_utils::link_new_link(
             &crate::link_utils::NewLinkParams {
                 serial: link_serial,
                 chapter_id,
                 region_id: &note_item.region_id,
                 note_item_id: &note_item.note_item_id,
-                anchor_id: &synthetic_id,
-                status: LinkStatus::Matched,
-                resolver: LinkResolver::Fallback,
-                confidence: 0.4,
+                anchor_id: "",
+                status: LinkStatus::OrphanNote,
+                resolver: LinkResolver::Rule,
+                confidence: 0.0,
                 note_kind: NoteKind::Footnote,
                 marker,
                 page_no_start: note_item.page_no,
@@ -279,36 +260,6 @@ pub fn build_footnote_links(
             },
         ));
         link_serial += 1;
-    }
-
-    // --- synthetic 替换为同页显式 anchor ---
-    for link in links.iter_mut() {
-        if link.note_kind != NoteKind::Footnote || link.status != LinkStatus::Matched {
-            continue;
-        }
-        if !link.anchor_id.starts_with("synthetic-footnote-") {
-            continue;
-        }
-        let explicit = crate::link_utils::link_candidate_anchors(
-            anchors,
-            &crate::link_utils::CandidateFilter {
-                chapter_id: &link.chapter_id,
-                marker: &link.marker,
-                expected_kinds: &[AnchorKind::Footnote, AnchorKind::Unknown],
-                used_anchor_ids,
-                page_no: Some(link.page_no_start),
-                footnote_window: true,
-                include_synthetic: false,
-                allow_cross_chapter: false,
-            },
-        );
-        if explicit.len() == 1 {
-            let selected = explicit[0];
-            used_anchor_ids.insert(selected.anchor_id.clone());
-            link.anchor_id = selected.anchor_id.clone();
-            link.resolver = LinkResolver::Repair;
-            link.confidence = selected.certainty.clamp(0.0, 1.0);
-        }
     }
 
     (links, link_serial, synthetic_serial, ocr_repaired_count)

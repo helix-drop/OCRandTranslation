@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 14 MARS 1979",
+      "cluster_id": "ch-fallback-0010:nr-fn-ch-0057-ch-fallback-0010:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        242,
+        242
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0010",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0310",
+          "note_kind": "footnote",
+          "page_no": 242,
+          "region_id": "nr-fn-ch-0057-ch-fallback-0010",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p242",
+          "text": "M. Foucault ajoute : et qui va produire quelque chose qui sont"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 241,
+        "ocr_excerpt": "c'est tout simplement un revenu. Du point de vue du travailleur, le salaire, ce n'est pas le prix de vente de sa force de travail, c'est un revenu. Et alors là, les néolibéraux américains se réfèrent à la vieille définition, qui date tout à fait du début du xx<sup>e</sup> siècle, d'Irving Fisher<sup>26</sup> qui disait : un revenu qu'est-ce que c'est ? Comment est-ce qu'on peut définir un revenu ? Un revenu, c'est tout simplement le produit ou le rendement d'un capital. Et inversement, on appellera « capital » tout ce qui peut être d'une manière ou d'une autre source de revenus futurs<sup>27</sup>. Par conséquent, à partir de là, si on admet que le salaire c'est un revenu, le salaire est donc le revenu d'un capital. Or, qu'est-ce que c'est que le capital dont le salaire est le revenu? Eh bien, c'est l'ensemble de tous les facteurs physiques, psychologiques, qui rendent quelqu'un capable de gagner tel ou tel salaire, de sorte que, vu du côté du travailleur, le travail ce n'est pas une marchandise réduite par abstraction à la force de travail et au temps [pendant] lequel on l'utilise. Décomposé du point de vue du travailleur en termes économiques, le travail comporte un capital, c'est-à-dire une aptitude, une compétence ; comme ils disent : c'est une « machine<sup>28</sup> ». Et d'un autre côté c'est un revenu, c'est-à-dire un salaire ou plutôt un ensemble de salaires ; comme ils ...",
+        "page_no": 242,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0010:nr-fn-ch-0057-ch-fallback-0010:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5240,
+    "cluster_id": "ch-fallback-0010:nr-fn-ch-0057-ch-fallback-0010:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

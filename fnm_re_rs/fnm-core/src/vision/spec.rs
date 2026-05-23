@@ -194,7 +194,12 @@ pub fn resolve_custom_model_spec(slot: &ModelPoolSlot, capability: &str) -> Reso
     };
     let model_id = slot.model_id.trim().to_string();
     let builtin_key = infer_builtin_key_from_custom_model(&provider, &model_id, Some(capability));
-    let builtin_spec = MODEL_SPECS.get(&builtin_key).cloned();
+    let builtin_spec = match provider.as_str() {
+        "qwen" | "qwen_mt" | "deepseek" | "glm" | "kimi" | "mimo" | "mimo_token_plan" => {
+            MODEL_SPECS.get(&builtin_key).cloned()
+        }
+        _ => None,
+    };
     let (api_key, base_url) = match provider.as_str() {
         "qwen" | "qwen_mt" => {
             let region = if slot.qwen_region.is_empty() {
@@ -225,24 +230,36 @@ pub fn resolve_custom_model_spec(slot: &ModelPoolSlot, capability: &str) -> Reso
     let thinking_enabled = slot.thinking_enabled;
     let mut request_overrides =
         thinking_request_overrides(&provider, &builtin_spec, thinking_enabled);
-    if provider == "qwen" {
-        let extra = if !slot.extra_body.is_null() {
-            slot.extra_body.clone()
-        } else {
-            serde_json::json!({ "enable_thinking": thinking_enabled })
-        };
-        request_overrides = serde_json::json!({ "extra_body": extra });
-    } else if provider == "qwen_mt" {
-        let extra = if !slot.extra_body.is_null() {
-            slot.extra_body.clone()
-        } else {
-            serde_json::json!({})
-        };
-        request_overrides = serde_json::json!({ "extra_body": extra });
-    } else if request_overrides.is_null() {
-        if let Value::Object(extra) = &slot.extra_body {
-            if !extra.is_empty() {
-                request_overrides = serde_json::json!({ "extra_body": slot.extra_body });
+    // 仅对明确支持的 builtin provider 继承 builtin request override
+    match provider.as_str() {
+        "qwen" => {
+            let extra = if !slot.extra_body.is_null() {
+                slot.extra_body.clone()
+            } else {
+                serde_json::json!({ "enable_thinking": thinking_enabled })
+            };
+            request_overrides = serde_json::json!({ "extra_body": extra });
+        }
+        "qwen_mt" => {
+            let extra = if !slot.extra_body.is_null() {
+                slot.extra_body.clone()
+            } else {
+                serde_json::json!({})
+            };
+            request_overrides = serde_json::json!({ "extra_body": extra });
+        }
+        "deepseek" | "glm" | "kimi" | "mimo" | "mimo_token_plan" => {
+            // 这些 provider 的 builtin override 已由 thinking_request_overrides 计算
+            // 保留 builtin_spec 的结果，不做额外覆盖
+        }
+        _ => {
+            // Gemini 等自定义 provider：不继承任何 builtin request override
+            // 只使用 custom slot 显式设置的 extra_body
+            request_overrides = Value::Null;
+            if let Value::Object(extra) = &slot.extra_body {
+                if !extra.is_empty() {
+                    request_overrides = serde_json::json!({ "extra_body": slot.extra_body });
+                }
             }
         }
     }
@@ -384,6 +401,56 @@ mod tests {
         assert_eq!(
             spec.request_overrides["extra_body"]["enable_thinking"],
             serde_json::json!(true)
+        );
+    }
+
+    #[test]
+    fn custom_gemini_has_no_enable_thinking() {
+        let slot = ModelPoolSlot {
+            mode: "custom".into(),
+            provider_type: "gemini".into(),
+            model_id: "gemini-3.1-flash-lite".into(),
+            ..Default::default()
+        };
+        let spec = resolve_custom_model_spec(&slot, "fnm");
+        assert_eq!(spec.provider, "gemini");
+        // Gemini 自定义 provider 不应继承 Qwen 的 enable_thinking
+        assert!(
+            spec.request_overrides.is_null() || spec.request_overrides == serde_json::json!({}),
+            "gemini should not inherit enable_thinking, got {:?}",
+            spec.request_overrides
+        );
+        // api_key / base_url 应来自 custom slot，不走 Qwen builtin 路径
+        assert!(
+            !spec.base_url.contains("dashscope"),
+            "gemini should not route to dashscope, got {}",
+            spec.base_url
+        );
+    }
+
+    #[test]
+    fn custom_gemini_respects_explicit_extra_body() {
+        let slot = ModelPoolSlot {
+            mode: "custom".into(),
+            provider_type: "gemini".into(),
+            model_id: "gemini-3.1-flash-lite".into(),
+            extra_body: serde_json::json!({"temperature": 0.0}),
+            ..Default::default()
+        };
+        let spec = resolve_custom_model_spec(&slot, "fnm");
+        assert_eq!(spec.provider, "gemini");
+        // 显式设置的 extra_body 应保留
+        assert!(
+            spec.request_overrides["extra_body"]["temperature"] == serde_json::json!(0.0),
+            "explicit extra_body should be preserved, got {:?}",
+            spec.request_overrides
+        );
+        // 不应包含 enable_thinking
+        let body_str = spec.request_overrides.to_string();
+        assert!(
+            !body_str.contains("enable_thinking"),
+            "gemini should not have enable_thinking, got {}",
+            body_str
         );
     }
 

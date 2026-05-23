@@ -285,6 +285,22 @@ pub fn chapter_contracts(
         }
 
         // def_anchor_mismatch 与 marker gap 计算
+        // 分离 footnote / endnote def_count，使 def_anchor_mismatch 只对比 endnote 侧。
+        // 铁律 §3：禁止广播——脚注的定义数不混入尾注的 def count。
+        let count_numeric_defs = |items: &[fnm_core::records::NoteItemRecord]| -> i64 {
+            let mut seen: HashSet<i64> = HashSet::new();
+            for item in items {
+                let v = safe_int(&normalize_note_marker(&item.marker));
+                if v > 0 {
+                    seen.insert(v);
+                }
+            }
+            seen.len() as i64
+        };
+        let endnote_def_count = count_numeric_defs(&chapter.endnote_items);
+        let footnote_def_count = count_numeric_defs(&chapter.footnote_items);
+
+        // def_count：总定义数（footnote + endnote），保持 fnm-core/records.rs 兼容语义。
         let all_def_items: Vec<_> = chapter
             .footnote_items
             .iter()
@@ -301,22 +317,38 @@ pub fn chapter_contracts(
         }
         def_numeric_markers.sort_unstable();
         let def_count = def_numeric_markers.len();
+
+        // endnote 专属数字 marker 序列——用于 endnote contract 的 gap/first-marker/sequence，
+        // 不混入 footnote marker（铁律 §1：分类源头唯一；§3：禁止广播）。
+        let mut endnote_numeric_markers: Vec<i64> = Vec::new();
+        let mut endnote_seen: HashSet<i64> = HashSet::new();
+        for item in &chapter.endnote_items {
+            let marker_value = safe_int(&normalize_note_marker(&item.marker));
+            if marker_value > 0 && !endnote_seen.contains(&marker_value) {
+                endnote_numeric_markers.push(marker_value);
+                endnote_seen.insert(marker_value);
+            }
+        }
+        endnote_numeric_markers.sort_unstable();
+
         let anchor_total = *chapter_marker_counts.get(&chapter_id).unwrap_or(&0) as i64;
 
-        let contract_first_marker_is_one =
-            def_numeric_markers.first().map(|&m| m == 1).unwrap_or(true);
-        if !def_numeric_markers.is_empty() {
-            first_marker_is_one = contract_first_marker_is_one;
+        let endnote_first_marker_is_one = endnote_numeric_markers
+            .first()
+            .map(|&m| m == 1)
+            .unwrap_or(true);
+        if !endnote_numeric_markers.is_empty() {
+            first_marker_is_one = endnote_first_marker_is_one;
         } else if !requires_endnote_contract {
             first_marker_is_one = true;
         }
 
-        let mut unique_markers: Vec<i64> = def_numeric_markers.clone();
-        unique_markers.dedup();
+        let mut endnote_unique_markers: Vec<i64> = endnote_numeric_markers.clone();
+        endnote_unique_markers.dedup();
         let has_marker_gap = if note_mode == "book_endnote_bound" {
             false
-        } else if !unique_markers.is_empty() {
-            let mut truncated = unique_markers.clone();
+        } else if !endnote_unique_markers.is_empty() {
+            let mut truncated = endnote_unique_markers.clone();
             if truncated.len() >= 2 {
                 for i in (1..truncated.len()).rev() {
                     let gap_ratio = (truncated[i] - truncated[i - 1]) as f64
@@ -337,7 +369,7 @@ pub fn chapter_contracts(
         {
             false
         } else if anchor_total > 0 {
-            def_count as i64 != anchor_total
+            endnote_def_count != anchor_total
         } else {
             false
         };
@@ -368,9 +400,11 @@ pub fn chapter_contracts(
             failure_link_ids,
             has_marker_gap,
             def_anchor_mismatch,
+            endnote_def_count,
+            footnote_def_count,
             def_count: def_count as i64,
             anchor_total,
-            marker_sequence: unique_markers,
+            marker_sequence: endnote_unique_markers,
         });
 
         contract_evidence.insert(

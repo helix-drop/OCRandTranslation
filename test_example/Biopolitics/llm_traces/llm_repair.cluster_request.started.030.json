@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 17 JANVIER 1979",
+      "cluster_id": "ch-fallback-0003:nr-fn-ch-0012-ch-fallback-0003:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        53,
+        53
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0003",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0043",
+          "note_kind": "footnote",
+          "page_no": 53,
+          "region_id": "nr-fn-ch-0012-ch-fallback-0003",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p53",
+          "text": "M. Foucault ajoute : Ce couplage qui, maintenant, nous paraît très bizarre entre économie politique et droit public. {phrase inachevée]"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 52,
+        "ocr_excerpt": "exercer son pouvoir et jusque dans quelles limites de droit on peut inscrire l'action du souverain. Donc, ce n'était pas complètement déséquilibré, ce n'était pas complètement illimité dans la raison d'État, mais il y avait un système à, si vous voulez, deux parties relativement externes l'une à l'autre. Je vous ai indiqué aussi que dans le nouveau système, dans la nouvelle raison gouvernementale mise au point au XVIII<sup>e</sup> siècle, le système du gouvernement frugal ou le système de la raison du moindre État impliquait quelque chose de très différent. D’une part, une limitation et, d’autre part, une limitation interne. Limitation interne, mais dont il ne faudrait tout de même pas croire que c’est une limitation de nature tout à fait différente du droit. C’est une limitation qui est malgré tout et toujours une limitation juridique, le problème étant précisément de savoir comment, dans le régime de la nouvelle raison gouvernementale, de cette raison gouvernementale autolimitée, on peut formuler en termes de droit cette limitation. Vous voyez comme le problème est différent, puisque d’un côté, dans le système de l’ancienne raison d’État, vous aviez une gouvernementalité à tendance indéfinie, avec, à l’extérieur, un système de droit qui s’opposait, qui s’opposait d’ailleurs dans des limites politiques concrètes et qu’on connaît bien : entre le pouvoir royal [d’un côté] et les ...",
+        "page_no": 53,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0003:nr-fn-ch-0012-ch-fallback-0003:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5205,
+    "cluster_id": "ch-fallback-0003:nr-fn-ch-0012-ch-fallback-0003:footnote",
+    "estimated_prompt_tokens": 1507,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1507,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

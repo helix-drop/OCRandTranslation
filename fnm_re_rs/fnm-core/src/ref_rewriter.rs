@@ -52,20 +52,6 @@ pub fn marker_aliases(raw: &str) -> HashSet<String> {
     aliases.into_iter().filter(|t| !t.is_empty()).collect()
 }
 
-/// 规范化 endnote id（保证 `en-` 前缀）。
-#[allow(dead_code)]
-fn normalize_endnote_note_id(note_id: &str) -> String {
-    let token = note_id.trim();
-    if token.is_empty() {
-        return String::new();
-    }
-    if token.to_lowercase().starts_with("en-") {
-        token.to_string()
-    } else {
-        format!("en-{}", token)
-    }
-}
-
 /// 解析 note_id（尝试匹配 note_text_by_id 中的 key）。
 /// 与 Python `_resolve_note_id` 一致。
 pub fn resolve_note_id(note_id: &str, note_text_by_id: &HashMap<String, String>) -> String {
@@ -252,11 +238,11 @@ pub fn replace_raw_bracket_refs_with_local_labels(
             let full_match = caps.get(0).map(|m| (m.start(), m.end()));
             if let Some((start, end)) = full_match {
                 let before = text[..start].chars().last();
-                if before.map_or(false, |c| c.is_ascii_digit()) {
+                if before.is_some_and(|c| c.is_ascii_digit()) {
                     return caps.get(0).unwrap().as_str().to_string();
                 }
                 let after = text[end..].chars().next();
-                if after.map_or(false, |c| c.is_ascii_digit()) {
+                if after.is_some_and(|c| c.is_ascii_digit()) {
                     return caps.get(0).unwrap().as_str().to_string();
                 }
             }

@@ -1,0 +1,10 @@
+{
+  "doc_id": "",
+  "stage": "visual_toc.preflight",
+  "usage": {
+    "completion_tokens": 19,
+    "prompt_tokens": 1140,
+    "request_count": 1,
+    "total_tokens": 1159
+  }
+}

@@ -2,6 +2,7 @@
 //! 年份误标过滤 + 序列异常值修正。
 
 use fnm_core::records::NoteItemRecord;
+use fnm_core::types::NoteKind;
 
 fn try_parse_int(s: &str) -> Option<i64> {
     let trimmed = s.trim();
@@ -14,9 +15,23 @@ fn try_parse_int(s: &str) -> Option<i64> {
 /// 修正 OCR 将出版年份误作尾注 marker 的情况。
 /// ←→ Python `_fix_year_markers_in_place`
 ///
-/// - 若 marker 是年份（1500-2100）且夹在连续数字之间 → 删除该条目
-/// - 若 marker 是年份且前后差一位 → 将年份替换为插值数字
-pub fn fix_year_markers_in_place(records: Vec<NoteItemRecord>) -> Vec<NoteItemRecord> {
+/// 只处理同一 `(chapter_id, region_id, note_kind)` 分组内的相邻 item，
+/// 不允许跨 region/chapter 边界做 prev/curr/next 推断。
+///
+/// - 若 marker 是年份（1500-2100）→ 一律删除，不插值。
+///   年份不是有效 note marker，插值会引入幽灵 marker。
+pub fn fix_year_markers_in_place_grouped(
+    groups: Vec<(String, String, NoteKind, Vec<NoteItemRecord>)>,
+) -> Vec<NoteItemRecord> {
+    let mut result = Vec::new();
+    for (_chapter_id, _region_id, _kind, records) in groups {
+        result.extend(fix_year_markers_in_group(records));
+    }
+    result
+}
+
+/// 单分组内的年份修复——不允许跨 region/chapter/kind 边界。
+fn fix_year_markers_in_group(records: Vec<NoteItemRecord>) -> Vec<NoteItemRecord> {
     if records.len() < 3 {
         return records;
     }
@@ -30,7 +45,7 @@ pub fn fix_year_markers_in_place(records: Vec<NoteItemRecord>) -> Vec<NoteItemRe
         let curr_val = try_parse_int(&updated[i].marker);
         let next_val = try_parse_int(&updated[i + 1].marker);
 
-        let (Some(prev), Some(curr), Some(next)) = (prev_val, curr_val, next_val) else {
+        let (Some(_prev), Some(curr), Some(_next)) = (prev_val, curr_val, next_val) else {
             continue;
         };
 
@@ -39,14 +54,8 @@ pub fn fix_year_markers_in_place(records: Vec<NoteItemRecord>) -> Vec<NoteItemRe
             continue;
         }
 
-        if prev + 1 == next {
-            // 年份夹在连续数字之间 → 幽灵条目，删除
-            to_remove.push(i);
-        } else if prev + 2 == next {
-            // 年份占据了一个数字位 → 插值替换
-            let corrected = (prev + 1).to_string();
-            updated[i].marker = corrected;
-        }
+        // 年份一律删除，不插值
+        to_remove.push(i);
     }
 
     // 倒序移除以免移位
@@ -57,6 +66,26 @@ pub fn fix_year_markers_in_place(records: Vec<NoteItemRecord>) -> Vec<NoteItemRe
     }
 
     updated
+}
+
+/// 旧 API 包装器——内部按 `(chapter_id, region_id, note_kind)` 分组后调用 grouped 版本。
+/// 保留此函数供现有调用者使用，确保边界安全。
+pub fn fix_year_markers_in_place(records: Vec<NoteItemRecord>) -> Vec<NoteItemRecord> {
+    if records.len() < 3 {
+        return records;
+    }
+    // 自动分组
+    let mut groups: std::collections::HashMap<(String, String, NoteKind), Vec<NoteItemRecord>> =
+        std::collections::HashMap::new();
+    for r in records {
+        let key = (r.chapter_id.clone(), r.region_id.clone(), r.note_kind);
+        groups.entry(key).or_default().push(r);
+    }
+    let grouped: Vec<_> = groups
+        .into_iter()
+        .map(|((chapter_id, region_id, kind), items)| (chapter_id, region_id, kind, items))
+        .collect();
+    fix_year_markers_in_place_grouped(grouped)
 }
 
 /// 修正序列异常值 marker（远大于预期值且同 region 内前后连续）。
@@ -163,16 +192,17 @@ mod tests {
     }
 
     #[test]
-    fn interpolate_year_with_gap() {
-        // 3, 1976, 5 → prev+2 == 5 → 插值 4
+    fn remove_year_even_with_gap() {
+        // 3, 1976, 5 → 年份一律删除，不插值
         let items = vec![
             make_item("3", "r1", "c1"),
             make_item("1976", "r1", "c1"),
             make_item("5", "r1", "c1"),
         ];
         let result = fix_year_markers_in_place(items);
-        assert_eq!(result.len(), 3);
-        assert_eq!(result[1].marker, "4");
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].marker, "3");
+        assert_eq!(result[1].marker, "5");
     }
 
     #[test]
@@ -202,6 +232,47 @@ mod tests {
     }
 
     // ── outlier filter ──
+
+    #[test]
+    fn cross_region_boundary_no_remove() {
+        // region A 末尾 33, region B 开头 1944, 35 不得跨 region 删除
+        let items = vec![
+            make_item("33", "r1", "c1"),
+            make_item("1944", "r2", "c1"),
+            make_item("35", "r2", "c1"),
+        ];
+        let result = fix_year_markers_in_place(items);
+        // 1944 在 r2 内，prev=33 在 r1。分组后 r1: [33], r2: [1944, 35]
+        // r1 长度 < 3 不处理，r2 长度 < 3 不处理 → 1944 保留
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn cross_chapter_boundary_no_remove() {
+        // ch-A 末尾 33, ch-B 开头 1944, 35 不得跨章
+        let items = vec![
+            make_item("33", "r1", "ch-A"),
+            make_item("1944", "r1", "ch-B"),
+            make_item("35", "r1", "ch-B"),
+        ];
+        let result = fix_year_markers_in_place(items);
+        // 分组后 ch-A: [33], ch-B: [1944, 35] → 都不足 3
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn endnote_region_year_between_normals_removed() {
+        // endnote 内 33, 1944, 35 → 1944 移除
+        let items = vec![
+            make_item("33", "r1", "c1"),
+            make_item("1944", "r1", "c1"),
+            make_item("35", "r1", "c1"),
+        ];
+        let result = fix_year_markers_in_place(items);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].marker, "33");
+        assert_eq!(result[1].marker, "35");
+    }
 
     #[test]
     fn outlier_fix() {

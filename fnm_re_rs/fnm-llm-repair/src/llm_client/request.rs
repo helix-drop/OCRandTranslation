@@ -531,6 +531,14 @@ async fn call_provider(args: &Value, system_prompt: &str, user_content: &[Value]
             .get("error")
             .and_then(|e| e.get("message"))
             .and_then(|v| v.as_str())
+            .or_else(|| {
+                let trimmed = body_text.trim();
+                if trimmed.is_empty() {
+                    None
+                } else {
+                    Some(trimmed)
+                }
+            })
             .unwrap_or("provider returned non-2xx")
             .to_string();
         return Err(classify_provider_error(

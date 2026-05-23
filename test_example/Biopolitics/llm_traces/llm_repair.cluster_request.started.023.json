@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 10 JANVIER 1979",
+      "cluster_id": "ch-fallback-0002:nr-fn-ch-0003-ch-fallback-0002:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        25,
+        25
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0011",
+          "note_kind": "footnote",
+          "page_no": 25,
+          "region_id": "nr-fn-ch-0003-ch-fallback-0002",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p25",
+          "text": "Le manuscrit précise, p. 10: «(sauf dans les États allemands, qui ont à se fonder en droit contre l’Empire) »."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 24,
+        "ocr_excerpt": "théories de ce qu'on pourrait appeler le droit public, la réapparition de ces thèmes du droit naturel, du droit originaire, du contrat, etc., qui avaient été formulés au Moyen Âge dans un tout autre contexte, tout ceci est en quelque sorte l'envers et la conséquence, et la réaction contre cette nouvelle manière de gouverner qui s'établissait à partir de la raison d'État. En fait, le droit, les institutions judiciaires qui avaient été intrinsèques au développement du pouvoir royal, voilà que maintenant ils deviennent en quelque sorte extérieurs et comme exorbitants par rapport à l'exercice d'un gouvernement selon la raison d'État. Ce n'est pas étonnant que tous ces problèmes de droit, vous les voyiez toujours formulés, en première instance au moins, par ceux qui s'opposent au système nouveau de la raison d'État. C'est, en France par exemple, les parlementaires, c'est les protestants, ce sont les nobles qui eux se réfèrent plutôt à l'aspect historico-juridique. En Angleterre, ça a été la bourgeoisie contre la monarchie absolue des Stuarts, ça a été les dissidents religieux à partir du début du XVIIIe siècle. Bref, c'est toujours du côté de l'opposition que l'on fait objection de droit à la raison d'État et que, par conséquent, on fait jouer la réflexion juridique, les règles de droit, l'instance du droit contre la raison d'État. Le droit public, disons d'un mot, est oppositionnel ...",
+        "page_no": 25,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0002:nr-fn-ch-0003-ch-fallback-0002:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5212,
+    "cluster_id": "ch-fallback-0002:nr-fn-ch-0003-ch-fallback-0002:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

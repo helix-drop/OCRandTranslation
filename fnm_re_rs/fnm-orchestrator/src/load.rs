@@ -5,6 +5,7 @@
 use crate::error::{OrchestratorError, Result};
 use fnm_core::db::Repository;
 use fnm_core::records::*;
+use fnm_core::types::NoteKind;
 
 /// 从 DB 读 phase1-6 全部表 → 组装 Phase6Structure。
 ///
@@ -71,6 +72,12 @@ pub fn load_phase6_structure(
         .map_err(|e| OrchestratorError::Phase6(e.into()))?
         .unwrap_or_default();
 
+    let has_export_bundle =
+        !export_bundle.chapters.is_empty() || !export_bundle.chapter_files.is_empty();
+    let has_export_audit = !export_audit.structure_state.is_empty()
+        || !export_audit.blocking_reasons.is_empty()
+        || export_audit.can_ship;
+
     let (diagnostic_pages, diagnostic_notes) = if include_diag {
         let diag_pages = repo
             .list_fnm_diagnostic_pages(doc_id)
@@ -82,6 +89,11 @@ pub fn load_phase6_structure(
     } else {
         (vec![], vec![])
     };
+
+    let chapter_endnote_region_alignment_ok = note_regions
+        .iter()
+        .filter(|r| r.note_kind == NoteKind::Endnote)
+        .all(|r| r.region_marker_alignment_ok);
 
     Ok(Phase6Structure {
         pages,
@@ -101,7 +113,30 @@ pub fn load_phase6_structure(
         export_chapters,
         export_bundle,
         export_audit,
-        status: StructureStatusRecord::default(),
+        status: StructureStatusRecord {
+            structure_state: if has_export_audit {
+                String::new()
+            } else {
+                "incomplete: export audit not found".into()
+            },
+            blocking_reasons: if has_export_bundle && has_export_audit {
+                vec![]
+            } else {
+                let mut reasons = Vec::new();
+                if !has_export_bundle {
+                    reasons.push("export_bundle_missing".into());
+                }
+                if !has_export_audit {
+                    reasons.push("export_audit_missing".into());
+                }
+                reasons
+            },
+            chapter_endnote_region_alignment_ok,
+            toc_semantic_contract_ok: true,
+            export_ready_test: true,
+            export_ready_real: true,
+            ..Default::default()
+        },
         summary: Phase6Summary::default(),
     })
 }

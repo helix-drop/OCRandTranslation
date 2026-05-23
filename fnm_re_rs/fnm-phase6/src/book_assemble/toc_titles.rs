@@ -134,7 +134,7 @@ mod tests {
             boundary_state: fnm_core::types::BoundaryState::Ready,
         }];
         let container = vec!["Introduction".to_string(), "Another Container".to_string()];
-        let (filtered, _, _, role_summary) =
+        let (filtered, _, _, _role_summary) =
             toc_titles_and_summary(&[], &chapters, &container, &[], &[]);
         // "Introduction" 已被导出章节占用，应从 container 中移除
         assert_eq!(filtered.len(), 1);

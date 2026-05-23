@@ -68,27 +68,30 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         input.raw_pages,
     );
 
-    // 2. 调用核心编排——返回的 result.phase2 已包含 materialize 后的 phase2
-    //    （避免本函数再调一次 `phase2_from_chapter_layers`，省 ~100ms）
-    let mut result = note_linking::build_note_link_table(
+    // 2. 调用核心编排——返回的 result.phase2_build 已包含 materialize 后的 note 数据
+    let result = note_linking::build_note_link_table(
         &chapter_layers,
         input.raw_pages,
         input.overrides,
         input.pdf_path.unwrap_or(""),
+        input.phase1_chapters,
+        input.phase1_pages,
     );
-    let phase2 = std::mem::take(&mut result.phase2);
 
     // 3. 按章产物：paragraph_footnotes / paragraph_endnotes / chapter_anchor_alignment
+    // 数据来源从 raw markdown 改为 Phase2 NoteItem（铁律 §4：下游不重新构造上游事实）。
     let (paragraph_footnotes, footnote_summary) = paragraph_footnotes::build_paragraph_footnotes(
         input.phase1_chapters,
         input.phase1_pages,
         input.raw_pages,
-        "", // doc_id 由调用方处理
+        &result.phase2_build.note_items,
+        "",
     );
     let (paragraph_endnotes, endnote_summary) = paragraph_endnotes::build_paragraph_endnotes(
         input.phase1_chapters,
         input.phase1_pages,
         input.raw_pages,
+        &result.phase2_build.note_items,
         "",
     );
     let (chapter_anchor_alignments, alignment_summary) =
@@ -115,15 +118,15 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
     });
     let alignment_summary_value = serde_json::to_value(&alignment_summary).unwrap_or(Value::Null);
 
-    // 5b. 组装 Phase3Structure（所有字段均来自真实数据，无 default()）
+    // 5b. 组装 Phase3Structure：Phase1/2 事实来自原始输入，Phase3 产物来自 result
     let structure = Phase3Structure {
-        pages: phase2.pages,
-        heading_candidates: phase2.heading_candidates,
-        chapters: phase2.chapters,
-        section_heads: phase2.section_heads,
-        note_regions: phase2.note_regions,
-        note_items: phase2.note_items,
-        chapter_note_modes: phase2.chapter_note_modes,
+        pages: input.phase1_pages.to_vec(),
+        heading_candidates: input.phase1_heading_candidates.to_vec(),
+        chapters: input.phase1_chapters.to_vec(),
+        section_heads: input.phase1_section_heads.to_vec(),
+        note_regions: result.phase2_build.note_regions,
+        note_items: result.phase2_build.note_items,
+        chapter_note_modes: result.phase2_build.chapter_note_modes,
         body_anchors: result.data.anchors.clone(),
         note_links: renumber_link_ids(result.data.effective_links.clone()),
         paragraph_footnotes,

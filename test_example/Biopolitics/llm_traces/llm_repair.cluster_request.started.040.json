@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 14 MARS 1979",
+      "cluster_id": "ch-fallback-0010:nr-fn-ch-0055-ch-fallback-0010:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        233,
+        233
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0010",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0307",
+          "note_kind": "footnote",
+          "page_no": 233,
+          "region_id": "nr-fn-ch-0055-ch-fallback-0010",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p233",
+          "text": "M. Foucault annonce, au début de cette leçon, qu’il va « être obligé de partir à onze heures, parce qu[’il a] une réunion »."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 232,
+        "ocr_excerpt": "# LEÇON DU 14 MARS 1979 Le néolibéralisme américain. Son contexte. – Différences entre les néolibéralismes américain et européen. – Le néolibéralisme américain comme revendication globale, foyer utopique et méthode de pensée. – Aspects de ce néolibéralisme : (1) La théorie du capital humain. Les deux processus qu'elle représente : (a) une avancée de l'analyse économique à l'intérieur de son propre domaine : critique de l'analyse classique du travail en termes de facteur temps ; (b) une extension de l'analyse économique à des domaines considérés jusque-là comme non économiques. – La mutation épistémologique produite par l'analyse néolibérale : de l'analyse des processus économiques à l'analyse de la rationalité interne des comportements humains. – Le travail comme conduite économique. – Sa décomposition en capital-compétence et en revenu. – La redéfinition de l'homo œconomicus comme entrepreneur de lui-même. – La notion de « capital humain ». Ses éléments constitutifs : (a) les éléments innés et la question de l'amélioration du capital humain génétique ; (b) les éléments acquis et le problème de la formation du capital humain (éducation, santé, etc.). – Intérêt de ces analyses : reprise du problème de l'innovation sociale et économique (Schumpeter). Une nouvelle conception de la politique de croissance. Aujourd'hui*, je voudrais commencer à vous parler de ce qui est en train de ...",
+        "page_no": 233,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0010:nr-fn-ch-0055-ch-fallback-0010:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5263,
+    "cluster_id": "ch-fallback-0010:nr-fn-ch-0055-ch-fallback-0010:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

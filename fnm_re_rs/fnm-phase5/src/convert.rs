@@ -331,7 +331,7 @@ pub fn to_diagnostic_pages(
 mod tests {
     use super::*;
     use fnm_core::records::NoteItemRecord;
-    use fnm_core::types::{NoteKind, RegionScope, RegionSource};
+    use fnm_core::types::{NoteKind, RegionScope};
     use fnm_phase2::chapter_split::BodyPageLayer;
 
     fn make_body_layer(page_no: i64) -> BodyPageLayer {

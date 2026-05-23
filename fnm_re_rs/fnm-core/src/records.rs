@@ -331,8 +331,8 @@ impl Default for NoteItemRecord {
             source: String::new(),
             source_page_label: String::new(),
             is_reconstructed: false,
-            review_required: false,
-            note_kind: NoteKind::Footnote,
+            review_required: true,
+            note_kind: NoteKind::Unknown,
             projection_mode: None,
             owner_chapter_id: None,
             source_marker: None,
@@ -371,6 +371,11 @@ pub struct ChapterLinkContract {
     pub failure_link_ids: Vec<String>,
     pub has_marker_gap: bool,
     pub def_anchor_mismatch: bool,
+    /// 仅 endnote 定义的去重数字 marker 数（供 def_anchor_mismatch 使用）。
+    pub endnote_def_count: i64,
+    /// 仅 footnote 定义的去重数字 marker 数（用于分类型 contract 审计）。
+    pub footnote_def_count: i64,
+    /// 总定义数（footnote + endnote）。保留 Python 兼容。
     pub def_count: i64,
     pub anchor_total: i64,
     #[serde(default)]
@@ -566,10 +571,10 @@ impl Default for NoteLinkRecord {
             region_id: String::new(),
             note_item_id: String::new(),
             anchor_id: String::new(),
-            status: LinkStatus::Matched,
-            resolver: LinkResolver::Rule,
+            status: LinkStatus::OrphanNote,
+            resolver: LinkResolver::Fallback,
             confidence: 0.0,
-            note_kind: NoteKind::Footnote,
+            note_kind: NoteKind::Unknown,
             marker: String::new(),
             page_no_start: 0,
             page_no_end: 0,

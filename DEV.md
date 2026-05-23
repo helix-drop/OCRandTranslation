@@ -213,12 +213,14 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 
 ### 工程脚本（2026-04-29 清理后）
 
-保留的 13 个活跃脚本：
+当前活跃的核心脚本（含 FNM 测试入口）：
 
 | 脚本 | 用途 |
 |------|------|
+| `test_fnm_batch.py` | 不调用真实翻译的主链/导出批测，写入测试占位译文 |
 | `test_fnm_incremental.py` | 单本或少量书的 FNM 增量验证；冻结已确认成果，层层推进 |
-| `test_fnm_real_batch.py` | 多书回归批测（含 LLM repair + Obsidian 导出） |
+| `test_fnm_real_batch.py` | 真实视觉 TOC + 真实 LLM repair + 导出的阶段交付批测 |
+| `fnm_semantic_golden.py` | 从只读人工底本生成段落级 JSONL，并与 DB 产物对照 |
 | `onboard_example_books.py` | 新样本接入（导入 PDF + OCR + FNM 快照） |
 | `generate_visual_toc_snapshots.py` | 生成/刷新 visual TOC 快照 |
 | `audit_fnm_exports.py` | FNM 导出全量审计 |
@@ -234,12 +236,16 @@ FNM_RE 采用严格的分层架构，依赖方向为 `shared ← stages ← modu
 
 ### FNM 测试脚本分层
 
-三种测试脚本，数据源和产物不同，禁止混用。详细说明见 [AGENTS.md § FNM 测试脚本分层](/Users/hao/OCRandTranslation/AGENTS.md)。
+完整入口、参数、产物路径和验收边界见 [FNM_TESTING.md](/Users/hao/OCRandTranslation/FNM_TESTING.md)。数据源和产物不同，禁止混用；规则约束另见 [AGENTS.md § FNM 测试脚本分层](/Users/hao/OCRandTranslation/AGENTS.md)。
 
 | 脚本 | 用途 | LLM 消耗 | 产物 |
 |---|---|---|---|
 | `test_fnm_incremental.py` | 单书快速验证 + LLM repair，冻结已确认成果 | 可选（`--repair`） | 终端输出（含时间戳） |
-| `test_fnm_real_batch.py` | 多书完整回归 | 视觉模型 + LLM repair | `latest.fnm.obsidian.zip` + `FNM_REAL_TEST_REPORT.md` 等 |
+| `test_fnm_batch.py` | 非真实模型主链与导出批测 | 不调用真实翻译 | `output/fnm_batch_test_result.{json,md}` |
+| `test_fnm_real_batch.py` | 多书完整交付回归 | 视觉模型 + LLM repair | `output/fnm_real_batch/<tag>/` + 单书 trace/report |
+| `fnm_semantic_golden.py` | 人工底本派生和段对段 DB 对照 | 无 | `semantic_golden_v1.jsonl` + `output/fnm_golden_compare/` |
+
+**底本口径**：`test_example/<folder>/golden_exports/real_golden_template/` 是人工内容底本，不由程序回写；`semantic_golden_v1.jsonl` 只可由它单向派生。当前阶段 `[待翻译]` 可接受，但不表示正文对照已经通过。
 
 **时间戳约定**：
 - 增量脚本每次运行输出 `run_ts`（UTC ISO8601），作为本次数据的唯一时间标识。

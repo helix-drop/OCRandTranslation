@@ -117,7 +117,7 @@ mod tests {
 
         // 验证可以读取
         let reader = Cursor::new(&bytes);
-        let mut archive = zip::ZipArchive::new(reader).unwrap();
+        let archive = zip::ZipArchive::new(reader).unwrap();
         assert_eq!(archive.len(), 2); // chapter + index.md
     }
 

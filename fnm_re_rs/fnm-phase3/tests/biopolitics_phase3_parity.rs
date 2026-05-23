@@ -73,6 +73,8 @@ fn biopolitics_phase3_smoke() {
     let input = fnm_phase3::input::Phase3Input {
         phase1_chapters: &chapters,
         phase1_pages: &phase1_partitions.partitions,
+        phase1_heading_candidates: &[],
+        phase1_section_heads: &[],
         phase2_note_regions: &[],
         phase2_note_items: &[],
         raw_pages: &pages,
@@ -118,6 +120,8 @@ fn spec_biopolitics_contract_v2_def_anchor_mismatch() {
     let input = fnm_phase3::input::Phase3Input {
         phase1_chapters: &chapters,
         phase1_pages: &phase1_partitions.partitions,
+        phase1_heading_candidates: &[],
+        phase1_section_heads: &[],
         phase2_note_regions: &phase2_output.note_regions,
         phase2_note_items: &phase2_output.note_items,
         raw_pages: &pages,
@@ -285,6 +289,8 @@ fn run_biopolitics_phase3_with_phase2() -> fnm_phase3::output::Phase3Output {
     let phase3_input = fnm_phase3::input::Phase3Input {
         phase1_chapters: &chapters,
         phase1_pages: &phase1_partitions.partitions,
+        phase1_heading_candidates: &[],
+        phase1_section_heads: &[],
         phase2_note_regions: &phase2_output.note_regions,
         phase2_note_items: &phase2_output.note_items,
         raw_pages: &pages,
@@ -304,16 +310,11 @@ fn run_biopolitics_phase3_with_phase2() -> fnm_phase3::output::Phase3Output {
 //
 // 上游修复后，直接 `cargo test ... -- --ignored` 验真。
 
-const PHASE2_GOLDEN_DIFF_REASON: &str =
-    "Rust phase2 note_items=564 vs golden=584 (-20); cascade 到 phase3 body_anchor 数量； \
-     see known_golden_diffs.md §1. Run with --ignored after phase2 调校.";
-
 // ── SPEC: Body anchor field-by-field parity ────────────────────
 
 #[test]
 #[ignore = "phase2 调校未完成（known_golden_diffs.md §1）"]
 fn biopolitics_phase3_body_anchors_parity() {
-    let _ = PHASE2_GOLDEN_DIFF_REASON;
     let golden = load_phase3_golden();
     let output = run_biopolitics_phase3_with_phase2();
     let rust_anchors = &output.structure.body_anchors;

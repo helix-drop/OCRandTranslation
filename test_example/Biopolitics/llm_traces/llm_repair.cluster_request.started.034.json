@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 31 JANVIER 1979",
+      "cluster_id": "ch-fallback-0005:nr-fn-ch-0022-ch-fallback-0005:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        99,
+        99
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0005",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0098",
+          "note_kind": "footnote",
+          "page_no": 99,
+          "region_id": "nr-fn-ch-0022-ch-fallback-0005",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p99",
+          "text": "M. Foucault ajoute : car c’est là, je crois, un des traits essentiels sur lesquels il va falloir réfléchir et dont la programmation me paraît être [un des traits] fondamentaux de ce néolibéralisme allemand"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 98,
+        "ocr_excerpt": "effet que par la suite. Je rajoute tout un poids d'histoire qui n'est pas encore présent, mais je crois que – j'essaierai de vous expliquer comment et pourquoi – ce sens à la fois théorique, politique, programmatique était effectivement dans la tête sinon de celui qui a prononcé la phrase, du moins dans la tête de ceux qui ont écrit pour lui son discours. Cette idée d'une fondation légitimante de l'État sur l'exercice garanti d'une liberté économique, c'est en effet, je crois, quelque chose d'important. Bien sûr, il faut reprendre cette idée et la formulation de cette idée dans le contexte précis où on la voit apparaître, et du coup on reconnaît très facilement une astuce tactique et stratégique. Il s'agissait de trouver un palliatif juridique pour demander à un régime économique ce qu'on ne pouvait pas demander directement soit au droit constitutionnel, soit au droit international, soit même tout simplement aux partenaires politiques. C'était, plus précisément encore, une habileté à l'égard et des Américains et de l'Europe, puisqu'en garantissant la liberté économique à l'Allemagne, à l'Allemagne en train de se reconstituer et avant tout appareil étatique, on garantissait aux Américains, et disons aux différents lobbies américains, la certitude qu'ils pourraient avoir avec cette industrie et cette économie allemandes les libres rapports qu'ils pourraient choisir. Et, deuxièmem ...",
+        "page_no": 99,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0005:nr-fn-ch-0022-ch-fallback-0005:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5231,
+    "cluster_id": "ch-fallback-0005:nr-fn-ch-0022-ch-fallback-0005:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

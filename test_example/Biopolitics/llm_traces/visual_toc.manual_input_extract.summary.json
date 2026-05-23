@@ -1,0 +1,10 @@
+{
+  "doc_id": "",
+  "stage": "visual_toc.manual_input_extract",
+  "usage": {
+    "completion_tokens": 3288,
+    "prompt_tokens": 13510,
+    "request_count": 6,
+    "total_tokens": 16798
+  }
+}

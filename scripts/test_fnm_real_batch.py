@@ -34,6 +34,7 @@ from FNM_RE import (  # noqa: E402
     run_llm_repair,
 )
 from persistence.sqlite_store import SQLiteRepository  # noqa: E402
+from persistence.sqlite_db_paths import get_document_db_path  # noqa: E402
 from persistence.storage import get_pdf_path  # noqa: E402
 from pipeline.document_tasks import run_auto_visual_toc_for_doc  # noqa: E402
 from scripts.reingest_fnm_from_snapshots import reingest_book  # noqa: E402
@@ -1425,6 +1426,7 @@ def _process_book(
         _advance("reingest", "skipped", "子进程已完成")
 
     pdf_path = str(get_pdf_path(book.doc_id) or "").strip()
+    doc_db_path = str(get_document_db_path(book.doc_id))
     if not subprocess_did_pipeline:
         try:
             if pdf_path:
@@ -1450,9 +1452,18 @@ def _process_book(
 
     try:
         if subprocess_did_pipeline:
-            pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress, start_phase="toc") or {}
+            pipeline_result = run_fnm_pipeline(
+                book.doc_id,
+                progress_callback=pipeline_progress,
+                start_phase="toc",
+                db_path=doc_db_path,
+            ) or {}
         else:
-            pipeline_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress) or {}
+            pipeline_result = run_fnm_pipeline(
+                book.doc_id,
+                progress_callback=pipeline_progress,
+                db_path=doc_db_path,
+            ) or {}
         base_result["pipeline"] = pipeline_result
         _advance("fnm_pipeline", "done", str(pipeline_result.get("structure_state") or ""))
         if not bool(pipeline_result.get("ok")):
@@ -1487,6 +1498,7 @@ def _process_book(
 
             repair_result = run_llm_repair(
                 book.doc_id,
+                db_path=doc_db_path,
                 slug=book.slug,
                 cluster_limit=None,
                 auto_apply=True,
@@ -1508,13 +1520,18 @@ def _process_book(
 
         try:
             if int(repair_result.get("auto_applied_count") or 0) > 0:
-                rebuild_result = run_fnm_pipeline(book.doc_id, progress_callback=pipeline_progress, start_phase="note_link_table") or {}
+                rebuild_result = run_fnm_pipeline(
+                    book.doc_id,
+                    progress_callback=pipeline_progress,
+                    start_phase="note_link_table",
+                    db_path=doc_db_path,
+                ) or {}
             base_result["rebuild"] = rebuild_result
             _advance("fnm_pipeline_rebuild", "done", str(rebuild_result.get("structure_state") or "skipped"))
         except Exception as exc:
             rebuild_result = {"ok": False, "error": str(exc), "blocking_reasons": ["fnm_pipeline_rebuild_exception"]}
             base_result["rebuild"] = rebuild_result
-            _record_stage_error("fnm_pipeline_rebuild", "fnm_pipeline_rebuild_exception", exc)
+            _advance("fnm_pipeline_rebuild", "blocked", str(exc))
     else:
         repair_result = {"auto_applied_count": 0, "usage_summary": {}}
         base_result["llm_repair"] = repair_result
@@ -1522,8 +1539,13 @@ def _process_book(
 
     if not subprocess_did_pipeline:
         try:
-            snapshot = load_fnm_doc_structure(book.doc_id, slug=book.doc_id, start_phase="note_link_table")
-            structure = verify_fnm_structure(book.doc_id, snapshot=snapshot)
+            snapshot = load_fnm_doc_structure(
+                book.doc_id,
+                slug=book.doc_id,
+                start_phase="note_link_table",
+                db_path=doc_db_path,
+            )
+            structure = verify_fnm_structure(book.doc_id, snapshot=snapshot, db_path=doc_db_path)
             base_result["structure"] = structure
             base_result["blocking_reasons"] = _dedupe_strings(
                 list(base_result.get("blocking_reasons") or []) + list(structure.get("blocking_reasons") or [])
@@ -1561,7 +1583,7 @@ def _process_book(
         _advance("placeholder_translate", "skipped", "已跳过 placeholder 翻译")
     else:
         try:
-            placeholder_result = materialize_test_placeholders(book.doc_id)
+            placeholder_result = materialize_test_placeholders(book.doc_id, db_path=doc_db_path)
             base_result["placeholders"] = placeholder_result
             _advance("placeholder_translate", "done", f"translated_paras={int(placeholder_result.get('translated_paras') or 0)}")
         except Exception as exc:
@@ -1578,6 +1600,7 @@ def _process_book(
             require_zip_persist=True,
             doc_slug=book.slug,
             doc_name=book.doc_name,
+            db_path=doc_db_path,
         )
         blocked = bool(export_result.get("blocked"))
         base_result["export"] = export_result
@@ -1602,7 +1625,11 @@ def _process_book(
     fallback_zip_bytes: bytes | None = None
     if source_zip_path is None:
         try:
-            fallback_zip_bytes = build_fnm_obsidian_export_zip(book.doc_id, snapshot=snapshot)
+            fallback_zip_bytes = build_fnm_obsidian_export_zip(
+                book.doc_id,
+                snapshot=snapshot,
+                db_path=doc_db_path,
+            )
         except Exception:
             fallback_zip_bytes = None
     zip_result = _write_zip_aliases(

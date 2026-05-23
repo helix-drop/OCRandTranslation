@@ -384,7 +384,7 @@ mod tests {
     #[test]
     fn test_audit_phase6_export_empty() {
         let phase6 = Phase6Structure::default();
-        let (report, summary) = audit_phase6_export(&phase6, "test", None);
+        let (report, _summary) = audit_phase6_export(&phase6, "test", None);
         assert_eq!(report.slug, "test");
         assert!(report.can_ship);
         assert!(report.files.is_empty());

@@ -24,11 +24,14 @@ fn is_explicit_body_anchor(anchor: &BodyAnchorRecord) -> bool {
     true
 }
 
-/// anchor_kind 兼容性判断。
+/// anchor_kind 兼容性判断（用于 override 匹配——严格匹配）。
+/// unknown 不自动匹配 footnote/endnote，防止 override 跳过正确锚点。
+///
+/// ←→ `note_kind_inference::anchor_kind_compatible_for_link`
 fn anchor_kind_compatible(left: &str, right: &str) -> bool {
     let left_kind = if left.is_empty() { "unknown" } else { left };
     let right_kind = if right.is_empty() { "unknown" } else { right };
-    left_kind == right_kind || left_kind == "unknown" || right_kind == "unknown"
+    left_kind == right_kind
 }
 
 /// 检查是否已存在同章同页同 marker 的显式锚点。

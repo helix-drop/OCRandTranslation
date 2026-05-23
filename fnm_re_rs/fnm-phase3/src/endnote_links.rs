@@ -37,6 +37,7 @@ pub fn build_endnote_links(
     link_serial_start: usize,
     regions_by_id: &HashMap<String, &NoteRegionRecord>,
     anchor_count_by_chapter: &HashMap<String, usize>,
+    chapter_body_pages: &HashMap<String, HashSet<i64>>,
 ) -> (Vec<fnm_core::records::NoteLinkRecord>, Vec<usize>) {
     let mut links: Vec<fnm_core::records::NoteLinkRecord> = Vec::new();
     let mut link_serial = link_serial_start;
@@ -274,17 +275,6 @@ pub fn build_endnote_links(
         .collect();
 
     if !remaining_orphans.is_empty() {
-        // 构建每章 body page 集合
-        let mut chapter_body_pages: HashMap<String, HashSet<i64>> = HashMap::new();
-        for a in anchors.iter() {
-            if a.page_no > 0 {
-                chapter_body_pages
-                    .entry(a.chapter_id.clone())
-                    .or_default()
-                    .insert(a.page_no);
-            }
-        }
-
         // 预构建 marker → patterns 缓存（避免 hot loop 内 `Regex::new`，
         // 也避免静态 `Mutex<HashMap>`——caller-owned 局部 cache）。
         let mut marker_cache: MarkerPatterns = HashMap::new();

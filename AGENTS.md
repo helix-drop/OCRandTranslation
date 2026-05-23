@@ -17,6 +17,7 @@
 | 文档 | 作用 |
 |---|---|
 | [DEV.md](/Users/hao/OCRandTranslation/DEV.md) | 稳定说明、结构、运行方式、数据位置 |
+| [FNM_TESTING.md](/Users/hao/OCRandTranslation/FNM_TESTING.md) | FNM 测试入口、产物、新鲜度与验收边界 |
 | [PROGRESS.md](/Users/hao/OCRandTranslation/PROGRESS.md) | 当前进度、最近实测、下一步工作 |
 | [CLAUDE.md](/Users/hao/OCRandTranslation/CLAUDE.md) | 给 Claude/同类代理看的简版约束 |
 | [verification.md](/Users/hao/OCRandTranslation/verification.md) | 验证记录 |
@@ -174,7 +175,7 @@ Phase 1 → Phase 2 → Phase 3 → Phase 3.5 → Phase 4 → Phase 5 → Phase 
 
 ## FNM 测试脚本分层
 
-三种测试脚本，数据源和产物不同，禁止混用：
+统一使用说明、参数与产物路径见 [FNM_TESTING.md](/Users/hao/OCRandTranslation/FNM_TESTING.md)。各入口数据源和结论不同，禁止混用：
 
 ### 1. 增量测试 `scripts/test_fnm_incremental.py`
 
@@ -186,27 +187,48 @@ Phase 1 → Phase 2 → Phase 3 → Phase 3.5 → Phase 4 → Phase 5 → Phase 
 
 **关键约定**：Module 和 Persisted 是同一次 pipeline run 的两个视角，但数值可能不同——Phase 4 会把未注入的 matched link 重新打开成 orphan_note。当两者分叉时，**以 Module Phase 3 作为 Phase 3 gate 的判断来源**，Persisted 的分叉由 Phase 4 blocker 解释。
 
-**产物**：只输出到终端，不写文件。
+**产物**：默认输出到终端；显式使用 `--checkpoint` 时写入 DB 的 `fnm_dev_snapshots` / `fnm_phase_runs`。
 
-### 2. 实批 `scripts/test_fnm_real_batch.py`
+### 2. 常规批测 `scripts/test_fnm_batch.py`
+
+**用途**：清理并重跑 pipeline，以测试占位译文完成导出装配和 export audit。它验证主链/导出合同，不覆盖真实视觉 TOC 或真实 LLM repair 的调用行为。
+
+**产物**：`output/fnm_batch_test_result.{json,md}` 与通过时的 `test_example/<folder>/latest.fnm.obsidian.zip`。
+
+### 3. 实批 `scripts/test_fnm_real_batch.py`
 
 **用途**：真实视觉 TOC + 真实 LLM repair 的完整集成测试。
 
 **数据源**：同批测，但额外调用视觉模型和 LLM repair API。
 
 **产物**：
-- `test_example/<书名>/FNM_REAL_TEST_REPORT.md`（注意：可能过期）
-- `test_example/<书名>/fnm_real_test_modules.json`
-- `test_example/<书名>/fnm_real_test_progress.json`
-- `test_example/<书名>/fnm_real_test_result.json`
-- `test_example/<书名>/llm_traces/`
+- `test_example/<folder>/FNM_REAL_TEST_REPORT.md`（注意：可能过期）
+- `test_example/<folder>/fnm_real_test_modules.json`
+- `test_example/<folder>/fnm_real_test_progress.json`
+- `test_example/<folder>/fnm_real_test_result.json`
+- `test_example/<folder>/llm_traces/`
+
+### 4. 段落底本对照 `scripts/fnm_semantic_golden.py`
+
+**用途**：将人工 `golden_exports/real_golden_template/` 单向派生为可追溯 JSONL，并将 DB 当前内容与底本按段落对照，用差异向上游追查规则问题。
+
+**关键约定**：
+- `real_golden_template/` 是只读根底本，禁止用当前 Rust/DB 输出覆盖。
+- `semantic_golden_v1.jsonl` 是程序格式派生物，可以从根底本重建。
+- 当前阶段 `[待翻译]` 占位符允许存在，但不能据此宣称文本已对齐。
+- `body-pages` 层仅用于追查上游来源，不能单独作为最终验收 gate。
+
+**产物**：
+- `test_example/Biopolitics/golden_exports/semantic_golden_v1.jsonl`
+- `test_example/post-revolutionary/golden_exports/semantic_golden_v1.jsonl`
+- `output/fnm_golden_compare/<slug>_<layer>_db_report.json`
 
 ### 时间戳约定
 
 - 每次 pipeline run 都会在 SQLite `fnm_runs` 表中创建一条记录，包含 `created_at`。
 - 增量脚本输出的 `Module Phase 2/3` 数据来自当次 snapshot 构建，不是历史 DB 数据。
 - 实批报告 `FNM_REAL_TEST_REPORT.md` 的 `generated_at` 字段记录了报告生成时间；如果该时间早于最近一次 pipeline run，报告数据视为过期。
-- **判断任何 blocker 前，先确认数据来源的时间戳**：增量看终端输出时间，批测看 `latest_export_status.json` 的 `timestamp`，实批看报告 `generated_at`。
+- **判断任何 blocker 前，先确认数据来源的时间戳**：增量看终端输出时间，批测看 `latest_export_status.json` 的 `generated_at`，实批看报告 `generated_at`。
 
 ## FNM 调试方法论
 
@@ -501,4 +523,3 @@ pub fn build_visual_recovery_overrides() -> anyhow::Result<ReviewOverrides> {
 - [ ] 0 个循环内 `Regex::new()`
 - [ ] 0 个新增 `#![allow(clippy::*)]` 抑制
 - [ ] PR 描述说明：复用了 fnm-core 的哪些 API，没复用的解释为什么
-

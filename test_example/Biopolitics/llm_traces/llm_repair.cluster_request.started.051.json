@@ -1,0 +1,101 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "Situation du cours",
+      "cluster_id": "ch-fallback-0013:nr-fn-ch-0079-ch-fallback-0013:footnote",
+      "matched_examples": [
+        {
+          "anchor_excerpt": "MICHEL SENELLART $ ^{*} $\n\n# Situation du cours",
+          "anchor_id": "anchor-00539",
+          "link_id": "link-00464",
+          "marker": "*",
+          "note_excerpt": "",
+          "note_item_id": "fn-0486"
+        }
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        343,
+        343
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0013",
+          "is_reconstructed": false,
+          "marker": "400",
+          "marker_type": "",
+          "note_item_id": "fn-0487",
+          "note_kind": "footnote",
+          "page_no": 343,
+          "region_id": "nr-fn-ch-0079-ch-fallback-0013",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p343",
+          "text": "-403.]"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 342,
+        "ocr_excerpt": "MICHEL SENELLART $ ^{*} $ # Situation du cours",
+        "page_no": 343,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0013:nr-fn-ch-0079-ch-fallback-0013:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 4721,
+    "cluster_id": "ch-fallback-0013:nr-fn-ch-0079-ch-fallback-0013:footnote",
+    "estimated_prompt_tokens": 1378,
+    "image_refused": false,
+    "matched_examples": 1,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1378,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

@@ -11,7 +11,7 @@ use crate::error::{OrchestratorError, Result};
 use crate::pipeline;
 use crate::types::{
     ModulePipelineSnapshot, PipelineConfig, SerPhase1, SerPhase2, SerPhase3, SerPhase4, SerPhase5,
-    SerPhase6,
+    SerPhase6, StartPhase,
 };
 
 use fnm_core::db::{
@@ -142,7 +142,6 @@ pub fn run_pipeline_for_doc<R: Repository>(
     );
     let phase4 = pipeline::run_phase4(
         &phase1,
-        &phase2,
         &phase3,
         &chapter_layers,
         &raw_pages,
@@ -251,6 +250,13 @@ pub fn run_pipeline_from_db<R: Repository>(
     config: PipelineConfig,
     llm_repair: Option<LlmRepairOptions<'_>>,
 ) -> Result<ModulePipelineSnapshot> {
+    // start_phase != Toc 且未实现真实续跑 → 直接报错
+    if config.start_phase != StartPhase::Toc {
+        return Err(OrchestratorError::Phase1(anyhow::anyhow!(
+            "start_phase={:?} 续跑未实现，仅支持 start_phase=Toc",
+            config.start_phase
+        )));
+    }
     let pages = repo
         .load_raw_pages_for_doc(doc_id)
         .map_err(|e| OrchestratorError::Phase1(anyhow::anyhow!("load pages: {}", e)))?;
@@ -301,7 +307,7 @@ pub fn run_pipeline_from_db<R: Repository>(
             let blocking_reasons_json =
                 serde_json::to_string(&blocking_reasons).unwrap_or_default();
 
-            let _ = repo.update_fnm_run(
+            repo.update_fnm_run(
                 run_id,
                 "done",
                 section_count,
@@ -310,7 +316,10 @@ pub fn run_pipeline_from_db<R: Repository>(
                 &structure_state,
                 &blocking_reasons_json,
                 "",
-            );
+            )
+            .map_err(|e| {
+                OrchestratorError::Phase1(anyhow::anyhow!("finalize fnm_run done: {}", e))
+            })?;
 
             Ok(snapshot)
         }

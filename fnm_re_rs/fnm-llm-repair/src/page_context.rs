@@ -13,7 +13,6 @@
 //! - `attach_repair_images_to_contexts` ←→ `_attach_repair_images_to_contexts` (行 1223)
 //! - `page_context_trace_rows` ←→ `_page_context_trace_rows` (行 1243)
 
-use anyhow::Result;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 use fnm_core::db::Repository;
@@ -531,12 +530,6 @@ pub fn page_context_trace_rows(page_contexts: &[Value]) -> Vec<Value> {
         }));
     }
     rows
-}
-
-/// 兼容接口：与 Python 一样支持 anyhow::Result 包装（虽然当前实现不会出错）。
-#[allow(dead_code)]
-fn _force_used_result_marker() -> Result<()> {
-    Ok(())
 }
 
 // ── 测试 ────────────────────────────────────────────────────────

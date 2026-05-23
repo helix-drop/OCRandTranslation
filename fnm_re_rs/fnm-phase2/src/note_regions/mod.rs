@@ -97,12 +97,6 @@ pub fn build_note_regions(
     let (endnote_regions, _promoted_count) =
         post_body_promote::promote_post_body_regions(endnote_regions, phase1_chapters);
 
-    // 4b. Endnote chapter explorer（←→ Python `explore_endnote_chapter_regions`）
-    // 当前 stub（20% 完成度），接入但不期望实际修改 regions。
-    // 待完整实现后，此处结果应参与后序 rebind/章节重绑定。
-    let _explorations =
-        crate::endnote_chapter_explorer::explore_endnote_chapter_regions(pages, phase1_chapters);
-
     // 5. Rebind book regions
     let (endnote_regions, _rebind_count) =
         book_regions::rebind_book_regions(endnote_regions, phase1_chapters, heading_candidates);

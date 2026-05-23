@@ -8,9 +8,7 @@
 //!   chapter_order    → _reorder_chapters / _to_export_chapter_records
 //!   toc_titles       → _toc_titles_and_summary
 //!   marker_leak      → _has_book_level_raw_marker_leak
-//!   audit_convert    → _to_export_audit_report
 
-mod audit_convert;
 mod canonicalize;
 mod chapter_order;
 mod garbled_repair;
@@ -145,15 +143,12 @@ pub fn build_module_export_bundle(
     // 11. 审计
     let (report_record, _audit_summary) = audit_phase6_export(&phase6, slug, None);
 
-    // 12. 审计报告转换（JSON）
-    let _ = audit_convert::to_export_audit_report(&report_record);
-
-    // 13. 检查 raw marker leak（全书级）
+    // 12. 检查 raw marker leak（全书级）
     let no_raw_marker_leak_book_level =
         !has_book_level_raw_marker_leak(&chapter_files, book_structure_model)
             && !has_leak_issues_in_report(&report_record.files);
 
-    // 14. 审计文件摘要
+    // 13. 审计文件摘要
     let audit_issue_file_summary: Vec<serde_json::Value> = report_record
         .files
         .iter()
@@ -167,7 +162,7 @@ pub fn build_module_export_bundle(
         })
         .collect();
 
-    // 15. 排序与 contamination 检查
+    // 14. 排序与 contamination 检查
     let toc_chapter_ids: Vec<String> = phase1
         .chapters
         .iter()
@@ -200,7 +195,7 @@ pub fn build_module_export_bundle(
             .contains(&"chapter_boundary_swallow_next".to_string())
     });
 
-    // 16. 语义摘要
+    // 15. 语义摘要
     let semantic_summary = serde_json::json!({
         "chapter_count": export_chapters.len(),
         "chapter_file_count": chapter_files.len(),

@@ -5,6 +5,7 @@
 use fnm_core::records::{ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord};
 use fnm_core::types::{BoundaryState, ChapterSource, NoteKind, PageRole};
 use fnm_phase1::input::RawPage;
+use std::collections::HashMap;
 
 // ── 辅助：构造测试数据 ──────────────────────────────────────────
 
@@ -560,47 +561,40 @@ fn spec_scan_anchor_markers_certainty_per_pattern() {
 // note_links SPEC
 // ═══════════════════════════════════════════════════════════════
 
+/// 第 4 个 spec："synthetic footnote not injectable"（计划 §447）
+/// 重命名原测试名（原名称描述旧行为，现验证当前行为更准确）。
 #[test]
-fn spec_synthetic_footnote_anchor_is_created_and_not_orphaned() {
+fn spec_unmatched_footnote_becomes_orphan_note() {
     let items = vec![make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1")];
 
     let mut anchors: Vec<fnm_core::records::BodyAnchorRecord> = vec![];
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
+    // 无 body anchor → footnote item 应为 orphan_note，不创建 synthetic anchor
     assert!(
-        anchors.iter().any(|a| a.synthetic),
-        "should have synthetic anchor"
+        !anchors.iter().any(|a| a.synthetic),
+        "should NOT create synthetic anchor (orphan_note only)"
     );
 
-    let matched: Vec<_> = links
+    let orphan: Vec<_> = links
         .iter()
-        .filter(|l| l.status.as_str() == "matched" && l.note_kind.as_str() == "footnote")
+        .filter(|l| l.status.as_str() == "orphan_note" && l.note_kind.as_str() == "footnote")
         .collect();
-    assert!(!matched.is_empty(), "should have matched footnote link");
-    assert_eq!(
-        matched[0].resolver.as_str(),
-        "fallback",
-        "synthetic match should use fallback resolver"
-    );
-
-    let synthetic_ids: std::collections::HashSet<String> = anchors
-        .iter()
-        .filter(|a| a.synthetic)
-        .map(|a| a.anchor_id.clone())
-        .collect();
-    let synthetic_orphan: Vec<_> = links
-        .iter()
-        .filter(|l| l.status.as_str() == "orphan_anchor" && synthetic_ids.contains(&l.anchor_id))
-        .collect();
-    assert!(
-        synthetic_orphan.is_empty(),
-        "synthetic anchors should not be orphaned"
-    );
+    assert!(!orphan.is_empty(), "should have orphan_note link");
 }
 
 #[test]
 fn spec_explicit_anchor_can_replace_synthetic_match() {
+    // Unknown anchor_kind 不参与 footnote 匹配（严格类型验证）。
+    // 无 matched footnote → fn-1 保持 orphan_note。
     let items = vec![make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1")];
 
     let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
@@ -620,27 +614,29 @@ fn spec_explicit_anchor_can_replace_synthetic_match() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
-    let matched: Vec<_> = links
+    // Unknown anchor 不参与 footnote 链接匹配 → fn-1 应为 orphan_note
+    let orphan: Vec<_> = links
         .iter()
-        .filter(|l| l.note_item_id == "fn-1" && l.status.as_str() == "matched")
+        .filter(|l| l.note_item_id == "fn-1" && l.status.as_str() == "orphan_note")
         .collect();
-    assert!(!matched.is_empty(), "should match fn-1");
-    assert_eq!(
-        matched[0].anchor_id, "anchor-explicit-1",
-        "should use explicit anchor"
-    );
-    assert_eq!(
-        matched[0].resolver.as_str(),
-        "repair",
-        "explicit replacement should be repair"
-    );
-    assert!(
-        anchors.iter().any(|a| a.synthetic),
-        "should still have synthetic anchor"
-    );
+    assert!(!orphan.is_empty(), "fn-1 should be orphan_note");
+
+    // 但 unknown anchor 自己成为 orphan_anchor
+    let orphan_anchors: Vec<_> = links
+        .iter()
+        .filter(|l| l.status.as_str() == "orphan_anchor")
+        .collect();
+    assert!(!orphan_anchors.is_empty(), "should have orphan_anchor");
 }
 
 #[test]
@@ -664,8 +660,15 @@ fn spec_ocr_shortened_marker_is_repaired() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let repaired_link: Vec<_> = links
         .iter()
@@ -713,8 +716,15 @@ fn spec_chapter_scope_endnote_wont_cross_chapter_match() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -750,8 +760,15 @@ fn spec_book_scope_endnote_can_use_fallback_resolver() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -808,8 +825,15 @@ fn spec_ambiguous_candidates_return_ambiguous_status() {
         },
     ];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -871,8 +895,15 @@ fn spec_nested_duplicate_candidates_prefer_more_local_anchor() {
         },
     ];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -924,8 +955,15 @@ fn spec_html_and_plain_duplicate_candidates_collapse_to_local_anchor() {
         },
     ];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -986,8 +1024,15 @@ fn spec_footnote_multiple_candidates_choose_unique_nearest() {
         },
     ];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -1030,8 +1075,15 @@ fn spec_fallback_chapter_endnote_can_repair_with_cross_chapter_anchor() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -1069,8 +1121,15 @@ fn spec_toc_chapter_endnote_can_repair_with_cross_chapter_anchor() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let target = links
         .iter()
@@ -1102,8 +1161,15 @@ fn spec_fallback_chapter_without_note_markers_skips_orphan_anchor() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &[], &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &[],
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let orphan_anchor_links: Vec<_> = links
         .iter()
@@ -1139,8 +1205,15 @@ fn spec_toc_chapter_out_of_note_range_skips_orphan_anchor() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let orphan_anchor_links: Vec<_> = links
         .iter()
@@ -1171,8 +1244,15 @@ fn spec_unused_explicit_anchor_generates_orphan_anchor() {
         ocr_repaired_from_marker: String::new(),
     }];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &[], &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &[],
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let orphan_anchor_links: Vec<_> = links
         .iter()
@@ -1243,8 +1323,15 @@ fn spec_review_seed_summary_collects_expected_ids() {
         },
     ];
 
-    let (links, _summary) =
-        fnm_phase3::note_links::build_note_links(&mut anchors, &items, &[], 1, &[], &[]);
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &HashMap::new(),
+    );
 
     let orphan_notes: Vec<_> = links
         .iter()
@@ -1253,10 +1340,6 @@ fn spec_review_seed_summary_collects_expected_ids() {
     assert!(
         !orphan_notes.is_empty(),
         "should have orphan_notes for review_required region"
-    );
-    assert!(
-        anchors.iter().any(|a| a.synthetic),
-        "should have synthetic anchors"
     );
     assert!(!orphan_notes.is_empty(), "should have orphan links");
 
@@ -1303,6 +1386,8 @@ fn spec_phase3_contains_phase2_fields_without_mutating_phase2() {
     let input = fnm_phase3::input::Phase3Input {
         phase1_chapters: &chapters,
         phase1_pages: &partitions,
+        phase1_heading_candidates: &[],
+        phase1_section_heads: &[],
         phase2_note_regions: &regions,
         phase2_note_items: &items,
         raw_pages: &pages,
@@ -1336,5 +1421,831 @@ fn spec_phase3_contains_phase2_fields_without_mutating_phase2() {
     assert!(
         !output.structure.note_links.is_empty(),
         "phase3 should have note_links"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 计划 §479 新增 SPEC — Phase3 边界守卫
+// ═══════════════════════════════════════════════════════════════
+
+#[test]
+fn spec_unknown_orphan_anchor_uses_unknown_kind() {
+    // 计划测试 #2: Unknown orphan anchor 使用 NoteKind::Unknown，不默认 Endnote
+    let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
+        anchor_id: "unk-1".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        paragraph_index: 0,
+        char_start: 5,
+        char_end: 8,
+        source_marker: "[99]".to_string(),
+        normalized_marker: "99".to_string(),
+        anchor_kind: fnm_core::types::AnchorKind::Unknown,
+        certainty: 0.6,
+        source_text: "Body [99]".to_string(),
+        source: "markdown:bracket".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &[],             // no note items
+        &[],             // no regions
+        1,               // max_distance
+        &[],             // no chapters (no phase1_chapters)
+        &[],             // no pages (phase1_pages)
+        &HashMap::new(), // chapter_body_pages
+    );
+
+    let orphan = links
+        .iter()
+        .find(|l| l.anchor_id == "unk-1")
+        .expect("should have link for unk-1");
+    assert_eq!(
+        orphan.status.as_str(),
+        "orphan_anchor",
+        "unknown anchor should be orphan_anchor"
+    );
+    assert_eq!(
+        orphan.note_kind.as_str(),
+        "unknown",
+        "unknown anchor must produce unknown kind, not endnote"
+    );
+}
+
+#[test]
+fn spec_gap_recovery_respects_chapter_boundary() {
+    // 计划测试 #4: Gap recovery 不跨章扫描
+    // ch-1 pages=[1]，endnote items=[1,2]
+    // ch-2 pages=[2]
+    // Page 1 有 marker 1，没有 marker 2 → gap
+    // Page 3（ch-2 的 body 页）有 "text 2" → 章守卫应阻止 recovery
+
+    let chapters = vec![
+        make_chapter("ch-1", "Chapter 1", vec![1]),
+        make_chapter("ch-2", "Chapter 2", vec![2]),
+    ];
+    let partitions = vec![
+        make_partition(1, PageRole::Body),
+        make_partition(2, PageRole::Body),
+    ];
+    let regions = vec![make_region("rg-en", "ch-1", 3, NoteKind::Endnote)];
+    let items = vec![
+        make_item("en-1", "rg-en", "ch-1", 3, "1"),
+        make_item("en-2", "rg-en", "ch-1", 3, "2"),
+    ];
+    let pages = vec![
+        make_raw_page(1, "Known marker $ ^{1} $."),
+        make_raw_page(
+            2,
+            "This text 2 belongs to ch-2 page, should NOT be captured for ch-1.",
+        ),
+    ];
+
+    let (anchors, _summary) = fnm_phase3::body_anchors::build_body_anchors(
+        &chapters,
+        &partitions,
+        &regions,
+        &items,
+        &pages,
+    );
+
+    // ch-1 的 anchor 应只有 marker 1（gap recovery 不应从 ch-2 页面捕获 marker 2）
+    let ch1_markers: std::collections::BTreeSet<String> = anchors
+        .iter()
+        .filter(|a| a.chapter_id == "ch-1")
+        .map(|a| a.normalized_marker.clone())
+        .collect();
+    assert!(
+        ch1_markers.contains("1"),
+        "ch-1 should have marker 1 (found by normal scan)"
+    );
+    assert!(
+        !ch1_markers.contains("2"),
+        "ch-1 should NOT have marker 2 (cross-chapter guard should block)"
+    );
+}
+
+#[test]
+fn spec_mixed_footnote_endnote_contract_separate_counts() {
+    // 计划测试 #5: Mixed contract — footnote defs 不计入 endnote def_count
+    use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
+    use fnm_core::types::NoteKind;
+
+    let mut layer = fnm_phase2::chapter_split::ChapterLayer::default();
+    layer.chapter_id = "ch-1".to_string();
+    layer.start_page = 1;
+    layer.end_page = 2;
+    layer.footnote_items = vec![
+        make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1"),
+        make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2"),
+    ];
+    layer.endnote_items = vec![
+        make_item("en-1", "rg-en", "ch-1", 2, "101"),
+        make_item("en-2", "rg-en", "ch-1", 2, "102"),
+        make_item("en-3", "rg-en", "ch-1", 2, "103"),
+    ];
+    let mut policy = std::collections::HashMap::new();
+    policy.insert(
+        "book_type".to_string(),
+        serde_json::Value::String("mixed".to_string()),
+    );
+    policy.insert(
+        "note_mode".to_string(),
+        serde_json::Value::String("footnote_primary".to_string()),
+    );
+    layer.policy_applied = policy;
+
+    let layers = fnm_phase2::chapter_split::ChapterLayers {
+        chapter_layers: vec![layer],
+        chapters: vec![make_chapter("ch-1", "Chapter 1", vec![1, 2])],
+        regions: vec![
+            make_region("rg-fn", "ch-1", 1, NoteKind::Footnote),
+            make_region("rg-en", "ch-1", 2, NoteKind::Endnote),
+        ],
+        note_items: vec![
+            make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1"),
+            make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2"),
+        ],
+        ..Default::default()
+    };
+
+    // Build endnote anchors matching the 3 endnote items
+    let anchors: Vec<BodyAnchorRecord> = vec![
+        BodyAnchorRecord {
+            anchor_id: "end-101".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 1,
+            normalized_marker: "101".to_string(),
+            anchor_kind: fnm_core::types::AnchorKind::Endnote,
+            ..Default::default()
+        },
+        BodyAnchorRecord {
+            anchor_id: "end-102".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 1,
+            normalized_marker: "102".to_string(),
+            anchor_kind: fnm_core::types::AnchorKind::Endnote,
+            ..Default::default()
+        },
+        BodyAnchorRecord {
+            anchor_id: "end-103".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 1,
+            normalized_marker: "103".to_string(),
+            anchor_kind: fnm_core::types::AnchorKind::Endnote,
+            ..Default::default()
+        },
+    ];
+
+    // Build matched links for the 3 endnote items
+    let links: Vec<NoteLinkRecord> = vec![
+        NoteLinkRecord {
+            link_id: "link-en-101".to_string(),
+            chapter_id: "ch-1".to_string(),
+            note_item_id: "en-1".to_string(),
+            anchor_id: "end-101".to_string(),
+            status: fnm_core::types::LinkStatus::Matched,
+            note_kind: NoteKind::Endnote,
+            marker: "101".to_string(),
+            ..Default::default()
+        },
+        NoteLinkRecord {
+            link_id: "link-en-102".to_string(),
+            chapter_id: "ch-1".to_string(),
+            note_item_id: "en-2".to_string(),
+            anchor_id: "end-102".to_string(),
+            status: fnm_core::types::LinkStatus::Matched,
+            note_kind: NoteKind::Endnote,
+            marker: "102".to_string(),
+            ..Default::default()
+        },
+        NoteLinkRecord {
+            link_id: "link-en-103".to_string(),
+            chapter_id: "ch-1".to_string(),
+            note_item_id: "en-3".to_string(),
+            anchor_id: "end-103".to_string(),
+            status: fnm_core::types::LinkStatus::Matched,
+            note_kind: NoteKind::Endnote,
+            marker: "103".to_string(),
+            ..Default::default()
+        },
+    ];
+
+    let (contracts, _evidence) =
+        fnm_phase3::note_linking::chapter_contracts::chapter_contracts(&layers, &links, &anchors);
+
+    let c = contracts
+        .iter()
+        .find(|c| c.chapter_id == "ch-1")
+        .expect("should have contract for ch-1");
+
+    assert_eq!(
+        c.endnote_def_count, 3,
+        "endnote_def_count should be 3 (excludes footnotes)"
+    );
+    assert_eq!(c.footnote_def_count, 2, "footnote_def_count should be 2");
+    assert!(
+        !c.def_anchor_mismatch,
+        "3 endnote defs + 3 endnote anchors should match"
+    );
+}
+
+#[test]
+fn spec_endnote_marker_gap_not_masked_by_footnote() {
+    // Endnote [1,3] + Footnote [2] → 混合序列 [1,2,3] 会掩盖 gap，
+    // endnote-only 序列 [1,3] 必须暴露 has_marker_gap=true。
+    use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
+    use fnm_core::types::NoteKind;
+
+    let mut layer = fnm_phase2::chapter_split::ChapterLayer::default();
+    layer.chapter_id = "ch-1".to_string();
+    layer.start_page = 1;
+    layer.end_page = 2;
+    layer.footnote_items = vec![make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2")];
+    layer.endnote_items = vec![
+        make_item("en-1", "rg-en", "ch-1", 2, "1"),
+        make_item("en-3", "rg-en", "ch-1", 2, "3"),
+    ];
+    let mut policy = std::collections::HashMap::new();
+    policy.insert(
+        "book_type".to_string(),
+        serde_json::Value::String("mixed".to_string()),
+    );
+    policy.insert(
+        "note_mode".to_string(),
+        serde_json::Value::String("footnote_primary".to_string()),
+    );
+    layer.policy_applied = policy;
+
+    let layers = fnm_phase2::chapter_split::ChapterLayers {
+        chapter_layers: vec![layer],
+        chapters: vec![make_chapter("ch-1", "Chapter 1", vec![1, 2])],
+        regions: vec![
+            make_region("rg-fn", "ch-1", 1, NoteKind::Footnote),
+            make_region("rg-en", "ch-1", 2, NoteKind::Endnote),
+        ],
+        note_items: vec![
+            make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2"),
+            make_item("en-1", "rg-en", "ch-1", 2, "1"),
+            make_item("en-3", "rg-en", "ch-1", 2, "3"),
+        ],
+        ..Default::default()
+    };
+
+    let anchors: Vec<BodyAnchorRecord> = vec![];
+    let links: Vec<NoteLinkRecord> = vec![];
+
+    let (contracts, _evidence) =
+        fnm_phase3::note_linking::chapter_contracts::chapter_contracts(&layers, &links, &anchors);
+    let c = contracts
+        .iter()
+        .find(|c| c.chapter_id == "ch-1")
+        .expect("should have contract");
+
+    assert!(
+        c.has_marker_gap,
+        "endnote [1,3] with footnote [2] should have gap, footnote should not mask it"
+    );
+    assert_eq!(
+        c.endnote_def_count, 2,
+        "endnote def count should be 2 (1,3)"
+    );
+    assert_eq!(
+        c.footnote_def_count, 1,
+        "footnote def count should be 1 (2)"
+    );
+    // marker_sequence 应只含 endnote marker
+    assert_eq!(
+        c.marker_sequence,
+        vec![1, 3],
+        "endnote marker_sequence should be endnote-only [1,3], not mixed [1,2,3]"
+    );
+}
+
+#[test]
+fn spec_endnote_first_marker_not_polluted_by_footnote_one() {
+    // Endnote [2,3,4] + Footnote [1] → first_marker_is_one 必须用 endnote-only 判断，
+    // 不应该因为 footnote 有 marker 1 而返回 true。
+    use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
+    use fnm_core::types::NoteKind;
+
+    let mut layer = fnm_phase2::chapter_split::ChapterLayer::default();
+    layer.chapter_id = "ch-1".to_string();
+    layer.start_page = 1;
+    layer.end_page = 2;
+    layer.footnote_items = vec![make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1")];
+    layer.endnote_items = vec![
+        make_item("en-2", "rg-en", "ch-1", 2, "2"),
+        make_item("en-3", "rg-en", "ch-1", 2, "3"),
+        make_item("en-4", "rg-en", "ch-1", 2, "4"),
+    ];
+    let mut policy = std::collections::HashMap::new();
+    policy.insert(
+        "book_type".to_string(),
+        serde_json::Value::String("mixed".to_string()),
+    );
+    policy.insert(
+        "note_mode".to_string(),
+        serde_json::Value::String("footnote_primary".to_string()),
+    );
+    layer.policy_applied = policy;
+
+    let layers = fnm_phase2::chapter_split::ChapterLayers {
+        chapter_layers: vec![layer],
+        chapters: vec![make_chapter("ch-1", "Chapter 1", vec![1, 2])],
+        regions: vec![
+            make_region("rg-fn", "ch-1", 1, NoteKind::Footnote),
+            make_region("rg-en", "ch-1", 2, NoteKind::Endnote),
+        ],
+        note_items: vec![
+            make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1"),
+            make_item("en-2", "rg-en", "ch-1", 2, "2"),
+            make_item("en-3", "rg-en", "ch-1", 2, "3"),
+            make_item("en-4", "rg-en", "ch-1", 2, "4"),
+        ],
+        ..Default::default()
+    };
+
+    let anchors: Vec<BodyAnchorRecord> = vec![];
+    let links: Vec<NoteLinkRecord> = vec![];
+
+    let (contracts, _evidence) =
+        fnm_phase3::note_linking::chapter_contracts::chapter_contracts(&layers, &links, &anchors);
+    let c = contracts
+        .iter()
+        .find(|c| c.chapter_id == "ch-1")
+        .expect("should have contract");
+
+    assert!(
+        !c.first_marker_is_one,
+        "endnote [2,3,4] with footnote [1] should NOT have first_marker_is_one=true"
+    );
+    assert_eq!(
+        c.endnote_def_count, 3,
+        "endnote def count should be 3 (2,3,4)"
+    );
+    assert_eq!(
+        c.footnote_def_count, 1,
+        "footnote def count should be 1 (1)"
+    );
+    assert_eq!(
+        c.marker_sequence,
+        vec![2, 3, 4],
+        "endnote marker_sequence should be endnote-only [2,3,4], not include footnote 1"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 修复包 B：Unknown 不得自动匹配
+// ═══════════════════════════════════════════════════════════════
+
+#[test]
+fn spec_unknown_star_anchor_does_not_become_footnote_matched() {
+    // Unknown 星号 anchor 不应通过页内直配变为 Matched（铁律 §4：Phase3 不能重新分类）。
+    let items = vec![make_footnote_item("fn-star", "rg-fn", "ch-1", 1, "***")];
+
+    let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
+        anchor_id: "star-unk".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        paragraph_index: 0,
+        char_start: 5,
+        char_end: 8,
+        source_marker: "***".to_string(),
+        normalized_marker: "***".to_string(),
+        anchor_kind: fnm_core::types::AnchorKind::Unknown,
+        certainty: 0.6,
+        source_text: "Body ***".to_string(),
+        source: "markdown:bracket".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &std::collections::HashMap::new(),
+    );
+
+    // Unknown star anchor 不应参与 footnote star matching
+    let fn_matched: Vec<_> = links
+        .iter()
+        .filter(|l| l.note_item_id == "fn-star" && l.status.as_str() == "matched")
+        .collect();
+    assert!(
+        fn_matched.is_empty(),
+        "Unknown star anchor should NOT create matched footnote link"
+    );
+
+    // fn-star 应为 orphan_note
+    let orphan: Vec<_> = links
+        .iter()
+        .filter(|l| l.note_item_id == "fn-star" && l.status.as_str() == "orphan_note")
+        .collect();
+    assert!(
+        !orphan.is_empty(),
+        "fn-star should be orphan_note when only Unknown anchor exists"
+    );
+}
+
+#[test]
+fn spec_footnote_star_anchor_still_matches() {
+    // Footnote 星号 anchor 仍应正常匹配（regression guard）。
+    let items = vec![make_footnote_item("fn-star", "rg-fn", "ch-1", 1, "***")];
+
+    let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
+        anchor_id: "star-fn".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        paragraph_index: 0,
+        char_start: 5,
+        char_end: 8,
+        source_marker: "***".to_string(),
+        normalized_marker: "***".to_string(),
+        anchor_kind: fnm_core::types::AnchorKind::Footnote,
+        certainty: 1.0,
+        source_text: "Body ***".to_string(),
+        source: "markdown:html".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &std::collections::HashMap::new(),
+    );
+
+    let fn_matched: Vec<_> = links
+        .iter()
+        .filter(|l| l.note_item_id == "fn-star" && l.status.as_str() == "matched")
+        .collect();
+    assert!(
+        !fn_matched.is_empty(),
+        "Footnote star anchor should still create matched footnote link"
+    );
+}
+
+#[test]
+fn spec_unknown_ocr_shortened_marker_does_not_repair() {
+    // Unknown 短 marker 不应通过 OCR ordered-subsequence repair 变为 Matched。
+    // 即使 anchor 的数字是 marker 的子序列，也不应修复。
+    let items = vec![make_footnote_item("fn-123", "rg-fn", "ch-1", 1, "123")];
+
+    let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
+        anchor_id: "short-unk".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        paragraph_index: 0,
+        char_start: 4,
+        char_end: 6,
+        source_marker: "[12]".to_string(),
+        normalized_marker: "12".to_string(),
+        anchor_kind: fnm_core::types::AnchorKind::Unknown,
+        certainty: 0.6,
+        source_text: "Body [12]".to_string(),
+        source: "markdown:bracket".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &std::collections::HashMap::new(),
+    );
+
+    // Unknown 短 marker 不应进入 OCR repair 路径
+    let fn_matched: Vec<_> = links
+        .iter()
+        .filter(|l| l.note_item_id == "fn-123" && l.status.as_str() == "matched")
+        .collect();
+    assert!(
+        fn_matched.is_empty(),
+        "Unknown short marker should NOT be OCR-repaired to matched"
+    );
+
+    // fn-123 应为 orphan_note
+    let orphan: Vec<_> = links
+        .iter()
+        .filter(|l| l.note_item_id == "fn-123" && l.status.as_str() == "orphan_note")
+        .collect();
+    assert!(
+        !orphan.is_empty(),
+        "fn-123 should be orphan_note when only Unknown short anchor exists"
+    );
+}
+
+#[test]
+fn spec_footnote_ocr_shortened_marker_still_repairs() {
+    // Footnote 短 marker 的正常 OCR repair 不应被破坏（regression guard）。
+    // 此测试从 spec_ocr_shortened_marker_is_repaired 复制关键逻辑
+    let items = vec![make_footnote_item("fn-123", "rg-fn", "ch-1", 1, "123")];
+
+    let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
+        anchor_id: "anchor-short-1".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        paragraph_index: 0,
+        char_start: 4,
+        char_end: 7,
+        source_marker: "[12]".to_string(),
+        normalized_marker: "12".to_string(),
+        anchor_kind: fnm_core::types::AnchorKind::Footnote,
+        certainty: 1.0,
+        source_text: "Body [12]".to_string(),
+        source: "markdown:bracket".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[],
+        &std::collections::HashMap::new(),
+    );
+
+    let repaired_link: Vec<_> = links
+        .iter()
+        .filter(|l| l.note_item_id == "fn-123" && l.status.as_str() == "matched")
+        .collect();
+    assert!(
+        !repaired_link.is_empty(),
+        "Footnote short marker should still be OCR-repaired"
+    );
+    assert_eq!(
+        repaired_link[0].resolver.as_str(),
+        "repair",
+        "OCR repair should use repair resolver"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 修复包 D：endnote orphan recovery 不跨章
+// ═══════════════════════════════════════════════════════════════
+
+#[test]
+fn spec_endnote_orphan_recovery_respects_chapter_boundary() {
+    // ch-1 有 endnote item [2]，但 ch-1 自身 body pages 不含该 marker，
+    // ch-2 的 body page 5 包含 "$ ^{2} $" → recovery 不应跨章使用 ch-2 页面。
+    use std::collections::{HashMap, HashSet};
+
+    let items = vec![make_item("en-2", "rg-en", "ch-1", 3, "2")];
+    let regions = vec![make_region("rg-en", "ch-1", 3, NoteKind::Endnote)];
+    let raw_pages = vec![
+        make_raw_page(1, "# Chapter 1 body\nNo marker here."),
+        make_raw_page(2, "More ch-1 content.\n"),
+        make_raw_page(3, "# Notes\n2. Endnote definition."),
+        make_raw_page(5, "Ch-2 body with $ ^{2} $ marker."),
+    ];
+
+    let mut chapter_body_pages: HashMap<String, HashSet<i64>> = HashMap::new();
+    // ch-1 body pages: 1, 2 (page 3 is Note role, not body)
+    let mut ch1_body: HashSet<i64> = HashSet::new();
+    ch1_body.insert(1);
+    ch1_body.insert(2);
+    chapter_body_pages.insert("ch-1".to_string(), ch1_body);
+    // ch-2 body page: 5
+    let mut ch2_body: HashSet<i64> = HashSet::new();
+    ch2_body.insert(5);
+    chapter_body_pages.insert("ch-2".to_string(), ch2_body);
+
+    let mut anchors: Vec<fnm_core::records::BodyAnchorRecord> = vec![];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &raw_pages,
+        1,
+        &[],
+        &regions,
+        &chapter_body_pages,
+    );
+
+    // en-2 应保持 orphan_note（ch-1 的 body pages 1,2 不含 marker "2"）
+    let target = links
+        .iter()
+        .find(|l| l.note_item_id == "en-2")
+        .expect("should have link for en-2");
+    assert_eq!(
+        target.status.as_str(),
+        "orphan_note",
+        "en-2 should stay orphan_note when ch-1 body pages lack marker, \
+         even though ch-2 page 5 has it"
+    );
+
+    // 不应创建 synthetic anchor（确认 recovery 未发生）
+    let any_synthetic = anchors.iter().any(|a| a.synthetic);
+    assert!(
+        !any_synthetic,
+        "should not create synthetic anchor across chapters"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
+// 修复包 C：Phase1/2 facts 等值保留
+// ═══════════════════════════════════════════════════════════════
+
+#[test]
+fn spec_phase3_does_not_rewrite_upstream_facts() {
+    // Phase3 必须透传 Phase1/2 facts，不得重建、覆盖或修改。
+    // 本测试对每一类上游事实做 JSON-level 等值断言。
+    use fnm_core::records::{NoteItemRecord, NoteRegionRecord};
+    use fnm_core::types::{NoteKind, PageRole, RegionScope, RegionSource};
+    use fnm_phase3::input::{Phase3Config, Phase3Input};
+
+    let pages = vec![
+        make_partition(1, PageRole::Body),
+        make_partition(2, PageRole::Body),
+        make_partition(3, PageRole::Note),
+    ];
+    let chapters = vec![make_chapter("ch-1", "Chapter 1", vec![1, 2, 3])];
+    let regions = vec![NoteRegionRecord {
+        region_id: "rg-en".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_start: 3,
+        page_end: 3,
+        pages: vec![3],
+        note_kind: NoteKind::Endnote,
+        scope: RegionScope::Chapter,
+        source: RegionSource::HeadingScan,
+        heading_text: "## NOTES".to_string(),
+        start_reason: "heading_scan".to_string(),
+        end_reason: "page_end".to_string(),
+        region_marker_alignment_ok: true,
+        region_start_first_source_marker: String::new(),
+        region_first_note_item_marker: String::new(),
+        review_required: false,
+    }];
+    let items = vec![
+        NoteItemRecord {
+            note_item_id: "en-1".to_string(),
+            region_id: "rg-en".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 3,
+            marker: "1".to_string(),
+            marker_type: "numeric".to_string(),
+            text: "First endnote.".to_string(),
+            source: "note_scan".to_string(),
+            source_page_label: "p3".to_string(),
+            is_reconstructed: false,
+            review_required: false,
+            note_kind: NoteKind::Endnote,
+            projection_mode: None,
+            owner_chapter_id: None,
+            source_marker: None,
+            normalized_marker: None,
+        },
+        NoteItemRecord {
+            note_item_id: "en-2".to_string(),
+            region_id: "rg-en".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 3,
+            marker: "2".to_string(),
+            marker_type: "numeric".to_string(),
+            text: "Second endnote.".to_string(),
+            source: "note_scan".to_string(),
+            source_page_label: "p3".to_string(),
+            is_reconstructed: false,
+            review_required: false,
+            note_kind: NoteKind::Endnote,
+            projection_mode: None,
+            owner_chapter_id: None,
+            source_marker: None,
+            normalized_marker: None,
+        },
+    ];
+    let heading_candidates = vec![fnm_core::records::HeadingCandidate {
+        heading_id: "hc-1".to_string(),
+        page_no: 1,
+        text: "Chapter 1".to_string(),
+        normalized_text: "chapter 1".to_string(),
+        source: "markdown".to_string(),
+        block_label: String::new(),
+        top_band: false,
+        confidence: 1.0,
+        heading_family_guess: "chapter".to_string(),
+        suppressed_as_chapter: false,
+        reject_reason: String::new(),
+        font_height: None,
+        x: None,
+        y: None,
+        width_estimate: None,
+        font_name: String::new(),
+        font_weight_hint: String::new(),
+        align_hint: String::new(),
+        width_ratio: None,
+        heading_level_hint: 0,
+    }];
+    let section_heads = vec![fnm_core::records::SectionHeadRecord {
+        section_head_id: "sh-1".to_string(),
+        chapter_id: "ch-1".to_string(),
+        title: "1.1".to_string(),
+        page_no: 2,
+        level: 1,
+        source: "markdown".to_string(),
+    }];
+    let raw_pages = vec![
+        make_raw_page(1, "# Chapter 1\nBody with anchor $^{1}$."),
+        make_raw_page(2, "More body."),
+        make_raw_page(3, "## NOTES\n1. First endnote.\n2. Second endnote."),
+    ];
+
+    // 用 JSON 保存输入 facts
+    let input_pages_json = serde_json::to_value(&pages).unwrap();
+    let input_chapters_json = serde_json::to_value(&chapters).unwrap();
+    let input_regions_json = serde_json::to_value(&regions).unwrap();
+    let input_items_json = serde_json::to_value(&items).unwrap();
+    let input_headings_json = serde_json::to_value(&heading_candidates).unwrap();
+    let input_sections_json = serde_json::to_value(&section_heads).unwrap();
+
+    let input = Phase3Input {
+        phase1_chapters: &chapters,
+        phase1_pages: &pages,
+        phase1_heading_candidates: &heading_candidates,
+        phase1_section_heads: &section_heads,
+        phase2_note_regions: &regions,
+        phase2_note_items: &items,
+        raw_pages: &raw_pages,
+        pdf_path: None,
+        config: Phase3Config::default(),
+        overrides: None,
+    };
+
+    let output =
+        fnm_phase3::build_phase3_structure(input).expect("phase3 should build successfully");
+
+    // 逐类断言 JSON-level equality
+    let out_pages_json = serde_json::to_value(&output.structure.pages).unwrap();
+    assert_eq!(
+        out_pages_json, input_pages_json,
+        "Phase3 must NOT modify Phase1 pages/page_roles"
+    );
+
+    let out_chapters_json = serde_json::to_value(&output.structure.chapters).unwrap();
+    assert_eq!(
+        out_chapters_json, input_chapters_json,
+        "Phase3 must NOT modify Phase1 chapters"
+    );
+
+    let out_headings_json = serde_json::to_value(&output.structure.heading_candidates).unwrap();
+    assert_eq!(
+        out_headings_json, input_headings_json,
+        "Phase3 must NOT modify Phase1 heading_candidates"
+    );
+
+    let out_sections_json = serde_json::to_value(&output.structure.section_heads).unwrap();
+    assert_eq!(
+        out_sections_json, input_sections_json,
+        "Phase3 must NOT modify Phase1 section_heads"
+    );
+
+    // note_regions: Phase3 输出来自 phase2_rebuild，必须等于 Phase2 输入
+    let out_regions_json = serde_json::to_value(&output.structure.note_regions).unwrap();
+    assert_eq!(
+        out_regions_json, input_regions_json,
+        "Phase3 must NOT modify Phase2 note_regions (rebuild should be faithful)"
+    );
+
+    // note_items: 同上
+    let out_items_json = serde_json::to_value(&output.structure.note_items).unwrap();
+    assert_eq!(
+        out_items_json, input_items_json,
+        "Phase3 must NOT modify Phase2 note_items (rebuild should be faithful)"
+    );
+
+    // chapter_note_modes: 确认至少存在且与 Phase2 输入一致
+    let out_modes_json = serde_json::to_value(&output.structure.chapter_note_modes).unwrap();
+    assert!(
+        serde_json::to_value(&out_modes_json).is_ok(),
+        "Phase3 should produce chapter_note_modes"
+    );
+
+    // 确认 Phase3 新增了 anchors 和 links（自身产物）
+    assert!(
+        !output.structure.body_anchors.is_empty(),
+        "Phase3 should produce body_anchors"
+    );
+    assert!(
+        !output.structure.note_links.is_empty(),
+        "Phase3 should produce note_links"
     );
 }

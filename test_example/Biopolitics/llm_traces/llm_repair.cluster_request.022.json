@@ -1,0 +1,113 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "confidence": 0.8,
+        "marker": "",
+        "note_item_id": "",
+        "note_text": "",
+        "reason": "截图中页脚注释部分被截断，无法获取 marker 2 对应的完整文本内容。"
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "chapter_title": "AVERTISSEMENT",
+      "cluster_id": "ch-fallback-0001:ch-fallback-0001:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        9,
+        9
+      ],
+      "rebind_candidates": [],
+      "request_mode": "ref_only_visual",
+      "unmatched_anchors": [
+        {
+          "anchor_id": "anchor-00002",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "chapter_id": "ch-fallback-0001",
+          "char_end": 715,
+          "char_start": 713,
+          "normalized_marker": "2",
+          "ocr_repaired_from_marker": "",
+          "page_no": 9,
+          "paragraph_index": 0,
+          "source": "",
+          "source_marker": "²",
+          "source_text": "# AVERTISSEMENT\n\nMichel Foucault a enseigné au Collège de France de janvier 1971 à sa mort en juin 1984 – à l'exception de l'année 1977 où il a pu bénéficier d'une année sabbatique. Le titre de sa chaire était : Histoire des systèmes de pensée.\n\nElle fut créée le 30 novembre 1969, sur proposition de Jules Vuillemin, par l'assemblée générale des professeurs du Collège de France en remplacement de la chaire d'Histoire de la pensée philosophique, tenue jusqu'à sa mort par Jean Hyppolite. La même assemblée élut Michel Foucault, le 12 avril 1970, comme titulaire de la nouvelle chaire¹. Il avait quarante-trois ans.\n\nMichel Foucault en prononça la leçon inaugurale le 2 décembre 1970².\n\nL’enseignement au Collège de France obéit à des règles particulières. Les professeurs ont l’obligation de délivrer vingt-six heures d’enseignement par an (la moitié au maximum pouvant être dispensée sous forme de séminaires³). Ils doivent exposer chaque année une recherche originale, les contraignant à renouveler chaque fois le contenu de leur enseignement. L’assistance aux cours et aux séminaires est entièrement libre; elle ne requiert ni inscription ni diplôme. Et le professeur n’en dispense aucun⁴. Dans le vocabulaire du Collège de France, on dit que les professeurs n’ont pas d’étudiants mais des auditeurs.\n\nLes cours de Michel Foucault se tenaient chaque mercredi de début janvier à fin mars. L'assistance, très nombreuse, composée d'étudiants, d'enseignants, de chercheurs, de curieux, dont beaucoup d'étrangers,",
+          "synthetic": false
+        }
+      ],
+      "unmatched_note_items": []
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 8,
+        "ocr_excerpt": "# AVERTISSEMENT Michel Foucault a enseigné au Collège de France de janvier 1971 à sa mort en juin 1984 – à l'exception de l'année 1977 où il a pu bénéficier d'une année sabbatique. Le titre de sa chaire était : Histoire des systèmes de pensée. Elle fut créée le 30 novembre 1969, sur proposition de Jules Vuillemin, par l'assemblée générale des professeurs du Collège de France en remplacement de la chaire d'Histoire de la pensée philosophique, tenue jusqu'à sa mort par Jean Hyppolite. La même assemblée élut Michel Foucault, le 12 avril 1970, comme titulaire de la nouvelle chaire¹. Il avait quarante-trois ans. Michel Foucault en prononça la leçon inaugurale le 2 décembre 1970². L’enseignement au Collège de France obéit à des règles particulières. Les professeurs ont l’obligation de délivrer vingt-six heures d’enseignement par an (la moitié au maximum pouvant être dispensée sous forme de séminaires³). Ils doivent exposer chaque année une recherche originale, les contraignant à renouveler chaque fois le contenu de leur enseignement. L’assistance aux cours et aux séminaires est entièrement libre; elle ne requiert ni inscription ni diplôme. Et le professeur n’en dispense aucun⁴. Dans le vocabulaire du Collège de France, on dit que les professeurs n’ont pas d’étudiants mais des auditeurs. Les cours de Michel Foucault se tenaient chaque mercredi de début janvier à fin mars. L'assistance ...",
+        "page_no": 9,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0001:ch-fallback-0001:footnote",
+    "image_refused": false,
+    "page_context_count": 1,
+    "request_mode": "ref_only_visual"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：ignore_ref、synthesize_note_item、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，优先用 synthesize_note_item；marker 必须是截图上可见的数字，note_text 只抄注释正文，不要自编，不要补全看不清的部分。\n\n{\n  \"allowed_actions\": [\n    \"ignore_ref\",\n    \"synthesize_note_item\",\n    \"needs_review\"\n  ],\n  \"chapter_title\": \"AVERTISSEMENT\",\n  \"cluster_id\": \"ch-fallback-0001:ch-fallback-0001:footnote\",\n  \"matched_examples\": [],\n  \"note_system\": \"footnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"# AVERTISSEMENT Michel Foucault a enseigné au Collège de France de janvier 1971 à sa mort en juin 1984 – à l'exception de l'année 1977 où il a pu bénéficier d'une année sabbatique. Le titre de sa chaire était : Histoire des systèmes de pensée. Elle fut créée le 30 novembre 1969, sur proposition de Jules Vuillemin, par l'assemblée générale des professeurs du Collège de France en remplacement de la chaire d'Histoire de la pensée philosophique, tenue jusqu'à sa mort par Jean Hyppolite. La même assemblée élut Michel Foucault, le 12 avril 1970, comme titulaire de la nouvelle chaire¹. Il avait quarante-trois ans. Michel Foucault en prononça la leçon inaugurale le 2 décembre 1970². L’enseignement a ...\",\n      \"page_no\": 9\n    }\n  ],\n  \"page_range\": [\n    9,\n    9\n  ],\n  \"rebind_candidates\": [],\n  \"request_mode\": \"ref_only_visual\",\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00002\",\n      \"marker\": \"2\",\n      \"page_no\": 9,\n      \"paragraph_index\": 0,\n      \"source_text\": \"# AVERTISSEMENT Michel Foucault a enseigné au Collège de France de janvier 1971 à sa mort en juin 1984 – à l'exception de l'année 1977 où il a pu bénéficier d'une année sabbatique. Le titre de sa chaire était : Histoire des systèmes de pens ...\"\n    }\n  ],\n  \"unmatched_note_items\": []\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "confidence": 0.8,
+      "marker": "",
+      "note_item_id": "",
+      "note_text": "",
+      "reason": "截图中页脚注释部分被截断，无法获取 marker 2 对应的完整文本内容。"
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"截图中页脚注释部分被截断，无法获取 marker 2 对应的完整文本内容。\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 998
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 1049,
+    "input_tokens": 1030,
+    "output_tokens": 46,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 1076
+  },
+  "usage": {
+    "completion_tokens": 46,
+    "prompt_tokens": 1030,
+    "request_count": 1,
+    "total_tokens": 1076
+  }
+}

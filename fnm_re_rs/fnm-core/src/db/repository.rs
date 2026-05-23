@@ -490,7 +490,7 @@ impl Repository for SqliteRepository {
                     .and_then(|s| serde_json::from_str(&s).ok())
                     .unwrap_or_default(),
                 note_kind: NoteKind::from_str(&row.get::<_, String>(5)?)
-                    .unwrap_or(NoteKind::Footnote),
+                    .unwrap_or(NoteKind::Unknown),
                 scope: RegionScope::Chapter,
                 source: RegionSource::HeadingScan,
                 heading_text: row.get::<_, Option<String>>(8)?.unwrap_or_default(),
@@ -530,7 +530,7 @@ impl Repository for SqliteRepository {
                 is_reconstructed: row.get::<_, Option<i64>>(9)?.unwrap_or(0) != 0,
                 review_required: row.get::<_, Option<i64>>(10)?.unwrap_or(0) != 0,
                 note_kind: NoteKind::from_str(&row.get::<_, String>(5)?)
-                    .unwrap_or(NoteKind::Footnote),
+                    .unwrap_or(NoteKind::Unknown),
                 projection_mode: None,
                 owner_chapter_id: None,
                 source_marker: None,
@@ -702,7 +702,7 @@ impl Repository for SqliteRepository {
                 note_kind: NoteKind::from_str(
                     &row.get::<_, Option<String>>(8)?.unwrap_or_default(),
                 )
-                .unwrap_or(NoteKind::Footnote),
+                .unwrap_or(NoteKind::Unknown),
                 marker: row.get::<_, Option<String>>(9)?.unwrap_or_default(),
                 page_no_start: row.get::<_, Option<i64>>(10)?.unwrap_or(0),
                 page_no_end: row.get::<_, Option<i64>>(11)?.unwrap_or(0),
@@ -1481,11 +1481,38 @@ impl Repository for SqliteRepository {
 
     fn upsert_document(&self, doc_id: &str, slug: &str) -> Result<()> {
         let conn = self.get_conn()?;
-        conn.execute(
-            "INSERT INTO documents (id, slug, state) VALUES (?1, ?2, 'idle')
-             ON CONFLICT(id) DO UPDATE SET slug = excluded.slug",
-            rusqlite::params![doc_id, slug],
-        )?;
+        let mut stmt = conn.prepare("PRAGMA table_info(documents)")?;
+        let columns = stmt
+            .query_map([], |row| row.get::<_, String>(1))?
+            .collect::<std::result::Result<std::collections::HashSet<_>, _>>()?;
+
+        let existing = conn.query_row(
+            "SELECT COUNT(1) FROM documents WHERE id = ?1",
+            [doc_id],
+            |row| row.get::<_, i64>(0),
+        )? > 0;
+        if existing {
+            if columns.contains("slug") {
+                conn.execute(
+                    "UPDATE documents SET slug = ?2 WHERE id = ?1",
+                    rusqlite::params![doc_id, slug],
+                )?;
+            }
+            return Ok(());
+        }
+
+        let now = Self::now_ts();
+        if columns.contains("slug") {
+            conn.execute(
+                "INSERT INTO documents (id, slug, state) VALUES (?1, ?2, 'idle')",
+                rusqlite::params![doc_id, slug],
+            )?;
+        } else {
+            conn.execute(
+                "INSERT INTO documents (id, name, created_at, updated_at) VALUES (?1, ?2, ?3, ?3)",
+                rusqlite::params![doc_id, slug, now],
+            )?;
+        }
         Ok(())
     }
 
@@ -1558,8 +1585,10 @@ impl Repository for SqliteRepository {
         })?;
         let mut pages = Vec::new();
         for row in rows {
-            if let Some(Some(page)) = row.ok() {
-                pages.push(page);
+            match row {
+                Ok(Some(page)) => pages.push(page),
+                Ok(None) => {} // 跳过非法 JSON / NULL payload
+                Err(e) => return Err(e.into()),
             }
         }
         Ok(pages)
@@ -1589,7 +1618,8 @@ impl Repository for SqliteRepository {
 
         let (_user, _visual, _pdf) = match rows.next() {
             Some(Ok(triple)) => triple,
-            _ => return Ok(vec![]),
+            Some(Err(e)) => return Err(e.into()),
+            None => return Ok(vec![]),
         };
 
         // 选第一个非空数据源（按优先级）
@@ -1851,6 +1881,135 @@ mod tests {
 
         let items = repo.load_toc_items_for_doc("doc-no-toc").unwrap();
         assert!(items.is_empty());
+    }
+
+    // ── documents schema 兼容性 ──────────────────────────────────────
+
+    fn setup_schema_custom(documents_ddl: &str) -> SqliteRepository {
+        let manager = r2d2_sqlite::SqliteConnectionManager::memory();
+        let pool = Pool::builder().build(manager).unwrap();
+        let conn = pool.get().unwrap();
+        conn.execute_batch("PRAGMA foreign_keys=ON;").unwrap();
+        conn.execute_batch(documents_ddl).unwrap();
+        // 跑 fnm_* 迁移（`schema::run_migrations` 会 CREATE TABLE IF NOT EXISTS documents，
+        // 但我们的 documents 已经定义好了，migrations 会因 IF NOT EXISTS 而跳过）
+        schema::run_migrations(&conn).unwrap();
+        SqliteRepository::new(pool)
+    }
+
+    #[test]
+    fn upsert_document_legacy_schema_insert() {
+        let repo = setup_schema_custom(
+            "CREATE TABLE documents (id TEXT PRIMARY KEY, slug TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT 'idle');",
+        );
+        repo.upsert_document("legacy-1", "legacy-book").unwrap();
+
+        let conn = repo.get_conn().unwrap();
+        let (id, slug, state): (String, String, String) = conn
+            .query_row(
+                "SELECT id, slug, state FROM documents WHERE id = ?1",
+                ["legacy-1"],
+                |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+            )
+            .unwrap();
+        assert_eq!(id, "legacy-1");
+        assert_eq!(slug, "legacy-book");
+        assert_eq!(state, "idle");
+    }
+
+    #[test]
+    fn upsert_document_legacy_schema_update() {
+        let repo = setup_schema_custom(
+            "CREATE TABLE documents (id TEXT PRIMARY KEY, slug TEXT NOT NULL DEFAULT '', state TEXT NOT NULL DEFAULT 'idle');",
+        );
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug, state) VALUES ('legacy-2', 'old-slug', 'done')",
+            [],
+        )
+        .unwrap();
+
+        repo.upsert_document("legacy-2", "new-slug").unwrap();
+
+        let slug: String = conn
+            .query_row(
+                "SELECT slug FROM documents WHERE id = ?1",
+                ["legacy-2"],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(slug, "new-slug");
+        // 原有 state 不应被覆盖
+        let state: String = conn
+            .query_row(
+                "SELECT state FROM documents WHERE id = ?1",
+                ["legacy-2"],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(state, "done");
+    }
+
+    #[test]
+    fn upsert_document_app_schema_insert() {
+        let repo = setup_schema_custom(
+            "CREATE TABLE documents (id TEXT PRIMARY KEY, name TEXT NOT NULL DEFAULT '', created_at TEXT, updated_at TEXT);",
+        );
+        repo.upsert_document("app-1", "app-book").unwrap();
+
+        let conn = repo.get_conn().unwrap();
+        let (id, name): (String, String) = conn
+            .query_row(
+                "SELECT id, name FROM documents WHERE id = ?1",
+                ["app-1"],
+                |r| Ok((r.get(0)?, r.get(1)?)),
+            )
+            .unwrap();
+        assert_eq!(id, "app-1");
+        assert_eq!(name, "app-book");
+        // created_at / updated_at 应该是同一个时间戳
+        let created: String = conn
+            .query_row(
+                "SELECT created_at FROM documents WHERE id = ?1",
+                ["app-1"],
+                |r| r.get(0),
+            )
+            .unwrap();
+        let updated: String = conn
+            .query_row(
+                "SELECT updated_at FROM documents WHERE id = ?1",
+                ["app-1"],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert!(!created.is_empty());
+        assert_eq!(created, updated);
+    }
+
+    #[test]
+    fn upsert_document_app_schema_update() {
+        let repo = setup_schema_custom(
+            "CREATE TABLE documents (id TEXT PRIMARY KEY, name TEXT NOT NULL DEFAULT '', created_at TEXT, updated_at TEXT);",
+        );
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, name) VALUES ('app-2', 'old-name')",
+            [],
+        )
+        .unwrap();
+
+        repo.upsert_document("app-2", "new-name").unwrap();
+
+        let name: String = conn
+            .query_row("SELECT name FROM documents WHERE id = ?1", ["app-2"], |r| {
+                r.get(0)
+            })
+            .unwrap();
+        // app schema 无 slug 列，upsert 不会覆盖 name
+        assert_eq!(
+            name, "old-name",
+            "app schema without slug column should not modify name"
+        );
     }
 
     // ── 3.3a: fnm_run CRUD ──

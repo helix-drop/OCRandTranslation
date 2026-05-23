@@ -258,6 +258,24 @@ pub fn build_chapter_layers(
             .map(|rs| rs.iter().map(|r| r.region_id.clone()).collect())
             .unwrap_or_default();
 
+        // 在 items/regions 被 move 之前计算事实字段
+        let actual_has_footnote = !footnote_items.is_empty()
+            || region_by_chapter
+                .get(chapter_id.as_str())
+                .map(|rs| {
+                    rs.iter()
+                        .any(|r| r.note_kind == fnm_core::types::NoteKind::Footnote)
+                })
+                .unwrap_or(false);
+        let actual_has_endnote = !endnote_items.is_empty()
+            || region_by_chapter
+                .get(chapter_id.as_str())
+                .map(|rs| {
+                    rs.iter()
+                        .any(|r| r.note_kind == fnm_core::types::NoteKind::Endnote)
+                })
+                .unwrap_or(false);
+
         let marker_count = endnote_items.len() as i64;
 
         let mut policy_applied = HashMap::new();
@@ -291,8 +309,8 @@ pub fn build_chapter_layers(
             note_mode: mode,
             region_ids,
             primary_region_scope: "chapter".into(),
-            has_footnote_band: mode == NoteMode::FootnotePrimary,
-            has_endnote_region: mode == NoteMode::ChapterEndnotePrimary,
+            has_footnote_band: actual_has_footnote,
+            has_endnote_region: actual_has_endnote,
         });
     }
 

@@ -1,56 +1,692 @@
 {
   "status": "done",
   "current_stage": "report_write",
-  "started_at": "2026-05-14T11:54:34",
-  "updated_at": "2026-05-14T12:03:56",
+  "started_at": "2026-05-23T15:27:24",
+  "updated_at": "2026-05-23T15:32:07",
   "stage_history": [
     {
       "stage": "reingest",
-      "status": "skipped",
-      "detail": "子进程已完成",
-      "at": "2026-05-14T11:54:34"
+      "status": "done",
+      "detail": "已从源 PDF/JSON/MD/目录文件重置输入",
+      "at": "2026-05-23T15:27:24"
     },
     {
       "stage": "visual_toc",
-      "status": "skipped",
-      "detail": "子进程已完成",
-      "at": "2026-05-14T11:54:34"
+      "status": "done",
+      "detail": "needs_offset",
+      "at": "2026-05-23T15:28:14"
     },
     {
       "stage": "fnm_pipeline",
       "status": "done",
-      "detail": "review_required",
-      "at": "2026-05-14T12:03:51"
+      "detail": "done",
+      "at": "2026-05-23T15:28:18"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:18"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:20"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0002:nr-fn-ch-0007-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:20"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0002:nr-fn-ch-0007-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:22"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0009:ch-fallback-0009:footnote | ref_only_visual",
+      "at": "2026-05-23T15:28:22"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0009:ch-fallback-0009:footnote | ref_only_visual",
+      "at": "2026-05-23T15:28:23"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0012:nr-en-bk-0077-ch-fallback-0012:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:23"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0012:nr-en-bk-0077-ch-fallback-0012:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:25"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0003:nr-fn-ch-0013-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:25"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0003:nr-fn-ch-0013-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:26"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0005:ch-fallback-0005:footnote | anchor_rebind",
+      "at": "2026-05-23T15:28:26"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0005:ch-fallback-0005:footnote | anchor_rebind",
+      "at": "2026-05-23T15:28:27"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0009:nr-en-ch-0054-ch-fallback-0009:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:27"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0009:nr-en-ch-0054-ch-fallback-0009:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:41"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0065-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:42"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0065-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:43"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0001:nr-fn-ch-0001-ch-fallback-0001:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:43"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0001:nr-fn-ch-0001-ch-fallback-0001:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:44"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0003:ch-fallback-0003:footnote | ref_only_visual",
+      "at": "2026-05-23T15:28:44"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0003:ch-fallback-0003:footnote | ref_only_visual",
+      "at": "2026-05-23T15:28:45"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0007:nr-fn-ch-0037-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:45"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0007:nr-fn-ch-0037-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:46"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0060-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:46"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0060-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:50"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:50"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:52"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0005:nr-fn-ch-0023-ch-fallback-0005:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:52"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0005:nr-fn-ch-0023-ch-fallback-0005:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:53"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0005:nr-en-ch-0024-ch-fallback-0005:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:53"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0005:nr-en-ch-0024-ch-fallback-0005:endnote | note_only_with_body",
+      "at": "2026-05-23T15:28:54"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0006:nr-fn-ch-0027-ch-fallback-0006:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:54"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0006:nr-fn-ch-0027-ch-fallback-0006:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:55"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0007:nr-fn-ch-0036-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:28:56"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0007:nr-fn-ch-0036-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:06"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0008:nr-fn-ch-0045-ch-fallback-0008:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:06"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0008:nr-fn-ch-0045-ch-fallback-0008:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:07"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0009:nr-fn-ch-0052-ch-fallback-0009:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:07"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0009:nr-fn-ch-0052-ch-fallback-0009:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:08"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0012:nr-fn-ch-0075-ch-fallback-0012:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:08"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0012:nr-fn-ch-0075-ch-fallback-0012:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:09"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0013:ch-fallback-0013:footnote | ref_only_visual",
+      "at": "2026-05-23T15:29:09"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0013:ch-fallback-0013:footnote | ref_only_visual",
+      "at": "2026-05-23T15:29:29"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0001:ch-fallback-0001:footnote | ref_only_visual",
+      "at": "2026-05-23T15:29:29"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0001:ch-fallback-0001:footnote | ref_only_visual",
+      "at": "2026-05-23T15:29:30"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0002:nr-fn-ch-0003-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:30"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0002:nr-fn-ch-0003-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:31"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0002:nr-fn-ch-0004-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:31"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0002:nr-fn-ch-0004-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:32"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0002:ch-fallback-0002:footnote | anchor_rebind",
+      "at": "2026-05-23T15:29:32"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0002:ch-fallback-0002:footnote | anchor_rebind",
+      "at": "2026-05-23T15:29:42"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0002:nr-fn-ch-0005-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:42"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0002:nr-fn-ch-0005-ch-fallback-0002:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:43"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote | note_only_with_body",
+      "at": "2026-05-23T15:29:43"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote | note_only_with_body",
+      "at": "2026-05-23T15:29:44"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0003:nr-fn-ch-0009-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:45"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0003:nr-fn-ch-0009-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:46"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0003:nr-fn-ch-0011-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:46"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0003:nr-fn-ch-0011-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:47"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0003:nr-fn-ch-0012-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:47"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0003:nr-fn-ch-0012-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:50"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0003:nr-fn-ch-0014-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:50"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0003:nr-fn-ch-0014-ch-fallback-0003:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:51"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0004:nr-fn-ch-0016-ch-fallback-0004:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:51"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0004:nr-fn-ch-0016-ch-fallback-0004:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:56"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0004:nr-fn-ch-0017-ch-fallback-0004:footnote | note_only_with_body",
+      "at": "2026-05-23T15:29:56"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0004:nr-fn-ch-0017-ch-fallback-0004:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:06"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0005:nr-fn-ch-0022-ch-fallback-0005:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:06"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0005:nr-fn-ch-0022-ch-fallback-0005:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:12"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0007:nr-fn-ch-0035-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:12"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0007:nr-fn-ch-0035-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:14"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0007:nr-fn-ch-0038-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:14"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0007:nr-fn-ch-0038-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:15"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0007:nr-fn-ch-0039-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:15"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0007:nr-fn-ch-0039-ch-fallback-0007:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:21"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0008:nr-fn-ch-0043-ch-fallback-0008:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:21"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0008:nr-fn-ch-0043-ch-fallback-0008:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:23"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0008:nr-fn-ch-0046-ch-fallback-0008:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:24"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0008:nr-fn-ch-0046-ch-fallback-0008:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:48"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0055-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:48"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0055-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:56"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0057-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:30:56"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0057-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:03"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:ch-fallback-0010:footnote | ref_only_visual",
+      "at": "2026-05-23T15:31:03"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:ch-fallback-0010:footnote | ref_only_visual",
+      "at": "2026-05-23T15:31:05"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0058-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:05"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0058-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:06"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-en-bk-0059-ch-fallback-0010:endnote | note_only_with_body",
+      "at": "2026-05-23T15:31:06"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-en-bk-0059-ch-fallback-0010:endnote | note_only_with_body",
+      "at": "2026-05-23T15:31:17"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0063-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:17"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0063-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:18"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0010:nr-fn-ch-0064-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:18"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0010:nr-fn-ch-0064-ch-fallback-0010:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:28"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0011:nr-fn-ch-0067-ch-fallback-0011:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:29"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0011:nr-fn-ch-0067-ch-fallback-0011:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:39"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:40"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:40"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0012:nr-fn-ch-0073-ch-fallback-0012:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:41"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0012:nr-fn-ch-0073-ch-fallback-0012:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:43"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0012:nr-fn-ch-0078-ch-fallback-0012:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:44"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0012:nr-fn-ch-0078-ch-fallback-0012:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:45"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0013:nr-fn-ch-0079-ch-fallback-0013:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:45"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0013:nr-fn-ch-0079-ch-fallback-0013:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:46"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request.started | ch-fallback-0013:nr-fn-ch-0080-ch-fallback-0013:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:46"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "running",
+      "detail": "llm_repair.cluster_request | ch-fallback-0013:nr-fn-ch-0080-ch-fallback-0013:footnote | note_only_with_body",
+      "at": "2026-05-23T15:31:47"
+    },
+    {
+      "stage": "llm_repair",
+      "status": "done",
+      "detail": "auto_applied=20",
+      "at": "2026-05-23T15:31:47"
+    },
+    {
+      "stage": "fnm_pipeline_rebuild",
+      "status": "blocked",
+      "detail": "pipeline: phase1 build failed: start_phase=NoteLinkTable 续跑未实现，仅支持 start_phase=Toc",
+      "at": "2026-05-23T15:31:47"
     },
     {
       "stage": "structure_verify",
-      "status": "skipped",
-      "detail": "管道内联已完成",
-      "at": "2026-05-14T12:03:51"
+      "status": "done",
+      "detail": "",
+      "at": "2026-05-23T15:31:48"
     },
     {
       "stage": "placeholder_translate",
       "status": "done",
-      "detail": "translated_paras=1179",
-      "at": "2026-05-14T12:03:53"
+      "detail": "translated_paras=495",
+      "at": "2026-05-23T15:32:06"
     },
     {
       "stage": "export_verify",
       "status": "done",
       "detail": "ok",
-      "at": "2026-05-14T12:03:56"
+      "at": "2026-05-23T15:32:06"
     },
     {
       "stage": "zip_finalize",
       "status": "done",
       "detail": "ok",
-      "at": "2026-05-14T12:03:56"
+      "at": "2026-05-23T15:32:06"
     },
     {
       "stage": "report_write",
       "status": "done",
       "detail": "单书结果、报告、进度均已写入",
-      "at": "2026-05-14T12:03:56"
+      "at": "2026-05-23T15:32:07"
     }
   ]
 }

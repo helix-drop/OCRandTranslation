@@ -14,7 +14,11 @@ use std::collections::HashMap;
 struct Phase4Golden {
     total_pages: i64,
     chapters_count: i64,
+    // body_anchors_count / effective_links_count 在 golden fixture 中存在但目前未参与断言
+    // —— 见审计报告 B4 项，应补 byte-equal 比对。
+    #[allow(dead_code)]
     body_anchors_count: i64,
+    #[allow(dead_code)]
     effective_links_count: i64,
     structure_reviews: Vec<serde_json::Value>,
     review_type_counts: HashMap<String, i64>,

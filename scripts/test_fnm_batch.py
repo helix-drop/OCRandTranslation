@@ -48,6 +48,7 @@ from FNM_RE import (
     sync_fnm_retry_state,
 )
 from persistence.sqlite_store import SQLiteRepository
+from persistence.sqlite_db_paths import get_document_db_path
 from persistence.storage import load_pages_from_disk
 from translation.translate_state import TASK_KIND_FNM, _build_translate_task_meta
 from translation.translate_store import _save_translate_state
@@ -505,8 +506,15 @@ def _format_reason_counts(reason_counts: Any) -> str:
     )
 
 
-def verify_fnm_structure(doc_id: str, *, snapshot: Any | None = None, start_phase: str = "toc") -> dict[str, Any]:
+def verify_fnm_structure(
+    doc_id: str,
+    *,
+    snapshot: Any | None = None,
+    start_phase: str = "toc",
+    db_path: str = "",
+) -> dict[str, Any]:
     repo = SQLiteRepository()
+    resolved_db_path = str(db_path or get_document_db_path(doc_id))
     latest_run = repo.get_latest_fnm_run(doc_id)
     if not latest_run:
         return {"ok": False, "error": "no_fnm_run"}
@@ -520,7 +528,12 @@ def verify_fnm_structure(doc_id: str, *, snapshot: Any | None = None, start_phas
     anchors = repo.list_fnm_body_anchors(doc_id)
     links = repo.list_fnm_note_links(doc_id)
     reviews = repo.list_fnm_structure_reviews(doc_id)
-    structure_status = build_fnm_structure_status(doc_id, repo=repo, snapshot=snapshot, start_phase=start_phase)
+    structure_status = build_fnm_structure_status(
+        doc_id,
+        db_path=resolved_db_path,
+        snapshot=snapshot,
+        start_phase=start_phase,
+    )
     footnote_items = [item for item in note_items if str(item.get("note_kind") or "") == "footnote"]
     endnote_items = [item for item in note_items if str(item.get("note_kind") or "") == "endnote"]
     linked_endnote_ids = {
@@ -701,8 +714,9 @@ def verify_fnm_structure(doc_id: str, *, snapshot: Any | None = None, start_phas
     }
 
 
-def materialize_test_placeholders(doc_id: str) -> dict[str, Any]:
+def materialize_test_placeholders(doc_id: str, *, db_path: str = "") -> dict[str, Any]:
     repo = SQLiteRepository()
+    resolved_db_path = str(db_path or get_document_db_path(doc_id))
     pages, _ = load_pages_from_disk(doc_id)
     units = repo.list_fnm_translation_units(doc_id)
     total_chars = 0
@@ -744,7 +758,7 @@ def materialize_test_placeholders(doc_id: str) -> dict[str, Any]:
             total_chars += len(translated_text)
             total_paragraphs += 1 if translated_text else 0
 
-    changed_pages = rebuild_fnm_diagnostic_page_entries(doc_id, pages=pages, repo=repo)
+    changed_pages = rebuild_fnm_diagnostic_page_entries(doc_id, pages=pages, db_path=resolved_db_path)
     task_meta = _build_translate_task_meta(
         kind=TASK_KIND_FNM,
         label="FNM 测试占位",
@@ -777,7 +791,7 @@ def materialize_test_placeholders(doc_id: str) -> dict[str, Any]:
         last_error="",
         task=task_meta,
     )
-    retry_summary = sync_fnm_retry_state(doc_id, repo=repo)
+    retry_summary = sync_fnm_retry_state(doc_id, db_path=resolved_db_path)
     return {
         "ok": True,
         "body_unit_count": body_unit_count,
@@ -991,7 +1005,9 @@ def verify_export(
     require_zip_persist: bool = False,
     doc_slug: str = "",
     doc_name: str = "",
+    db_path: str = "",
 ) -> dict[str, Any]:
+    resolved_db_path = str(db_path or get_document_db_path(doc_id))
     if bool(structure.get("manual_toc_required")):
         blocked_artifact = _handle_blocked_export_artifact(
             doc_id,
@@ -1088,7 +1104,7 @@ def verify_export(
             "biopolitics_export_contract_ok": True,
             "biopolitics_export_audit": {"applicable": False, "ok": True},
         }
-    bundle = build_fnm_obsidian_export_bundle(doc_id, snapshot=snapshot)
+    bundle = build_fnm_obsidian_export_bundle(doc_id, snapshot=snapshot, db_path=resolved_db_path)
     files = dict(bundle.get("files") or {})
     chapters = list(bundle.get("chapters") or [])
     chapter_files = dict(bundle.get("chapter_files") or {})
@@ -1097,7 +1113,7 @@ def verify_export(
     toc_residue_detected = bool(bundle.get("toc_residue_detected", False))
     mid_paragraph_heading_detected = bool(bundle.get("mid_paragraph_heading_detected", False))
     duplicate_paragraph_detected = bool(bundle.get("duplicate_paragraph_detected", False))
-    zip_bytes = build_fnm_obsidian_export_zip(doc_id, snapshot=snapshot)
+    zip_bytes = build_fnm_obsidian_export_zip(doc_id, snapshot=snapshot, db_path=resolved_db_path)
     zip_persist = _persist_latest_export_zip(doc_id, zip_bytes, example_folder=example_folder)
     latest_export_zip_saved = bool(zip_persist.get("saved"))
     latest_export_zip_path = str(zip_persist.get("path") or "")
@@ -1250,7 +1266,7 @@ def verify_export(
         slug=doc_slug,
         zip_path=latest_export_zip_path,
         zip_bytes=zip_bytes,
-        repo=SQLiteRepository(),
+        db_path=resolved_db_path,
     )
     full_audit_can_ship = bool(full_audit_report.get("can_ship"))
     full_audit_blocking_issue_count = int(full_audit_report.get("blocking_issue_count") or 0)

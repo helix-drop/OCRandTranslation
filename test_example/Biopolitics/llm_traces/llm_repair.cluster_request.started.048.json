@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 28 MARS 1979",
+      "cluster_id": "ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        296,
+        296
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0011",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0407",
+          "note_kind": "footnote",
+          "page_no": 296,
+          "region_id": "nr-fn-ch-0069-ch-fallback-0011",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p296",
+          "text": "M.F.: l’administration"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 295,
+        "ocr_excerpt": "n'est pas la peine d'y insister beaucoup, à savoir que, puisque la mécanique économique implique que chacun suive son propre intérêt, il faut donc laisser faire chacun. Il n'y a pas à intervenir, pour le pouvoir politique, dans cette dynamique que la nature a inscrite dans le cœur de l'homme. Il est donc interdit au gouvernement de faire obstacle à cet intérêt des individus. C'est ce que dit Adam Smith, lorsqu'il écrit : l'intérêt commun exige que chacun sache entendre le sien (d'intérêt) et puisse lui obéir sans obstacle $ ^{28} $. Autrement dit, le pouvoir, le gouvernement ne peut pas faire obstacle au jeu des intérêts individuels. Mais il faut aller plus loin. Non seulement le gouvernement ne doit pas faire obstacle à l'intérêt de chacun, mais il est impossible que le souverain puisse avoir sur le mécanisme économique un point de vue qui totalise chacun des éléments et permette de les combiner artificiellement ou volontairement. La main invisible qui combine spontanément les intérêts interdit, en même temps, toute forme d'intervention, bien mieux, toute forme de regard en surplomb qui permettrait de totaliser le processus économique. Sur ce point un texte de Ferguson est très clair. Il dit dans l'Histoire de la société civile $ ^{29} $ : « Plus l'individu gagne pour son propre compte, plus il augmente la masse de la richesse nationale. [...] Toutes les fois que l'administrat ...",
+        "page_no": 296,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5222,
+    "cluster_id": "ch-fallback-0011:nr-fn-ch-0069-ch-fallback-0011:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

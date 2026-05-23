@@ -8,74 +8,83 @@
       "fnm_pages.section_hint"
     ],
     "page_role_counts": {
-      "front_matter": 17,
-      "body": 330,
-      "note": 67,
-      "other": 17
+      "body": 337,
+      "front_matter": 12,
+      "other": 16,
+      "note": 66
     },
-    "first_body_page": 18,
-    "first_note_page": 348,
+    "first_body_page": 1,
+    "first_note_page": 349,
     "page_role_samples": [
       {
         "page_no": 1,
         "target_pdf_page": 1,
-        "page_role": "front_matter",
+        "page_role": "body",
         "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "role_confidence": 0.62,
         "has_note_heading": false,
         "section_hint": ""
       },
       {
         "page_no": 2,
         "target_pdf_page": 2,
-        "page_role": "front_matter",
+        "page_role": "body",
         "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "role_confidence": 0.62,
         "has_note_heading": false,
         "section_hint": ""
       },
       {
         "page_no": 3,
         "target_pdf_page": 3,
+        "page_role": "body",
+        "role_reason": "default_body",
+        "role_confidence": 0.62,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 5,
+        "target_pdf_page": 5,
         "page_role": "front_matter",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "role_reason": "copyright_front_matter",
+        "role_confidence": 0.95,
         "has_note_heading": false,
         "section_hint": ""
       },
       {
-        "page_no": 18,
-        "target_pdf_page": 18,
-        "page_role": "body",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "page_no": 6,
+        "target_pdf_page": 6,
+        "page_role": "front_matter",
+        "role_reason": "front_matter_continuation",
+        "role_confidence": 0.78,
         "has_note_heading": false,
         "section_hint": ""
       },
       {
-        "page_no": 19,
-        "target_pdf_page": 19,
-        "page_role": "body",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "page_no": 7,
+        "target_pdf_page": 7,
+        "page_role": "front_matter",
+        "role_reason": "front_matter_continuation",
+        "role_confidence": 0.78,
         "has_note_heading": false,
         "section_hint": ""
       },
       {
-        "page_no": 20,
-        "target_pdf_page": 20,
-        "page_role": "body",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "page_no": 8,
+        "target_pdf_page": 8,
+        "page_role": "other",
+        "role_reason": "early_other_list",
+        "role_confidence": 0.96,
         "has_note_heading": false,
         "section_hint": ""
       },
       {
-        "page_no": 348,
-        "target_pdf_page": 348,
-        "page_role": "note",
-        "role_reason": "endnotes_start_page_hint",
-        "role_confidence": 1.0,
+        "page_no": 10,
+        "target_pdf_page": 10,
+        "page_role": "other",
+        "role_reason": "early_other_list",
+        "role_confidence": 0.96,
         "has_note_heading": false,
         "section_hint": ""
       },
@@ -83,8 +92,8 @@
         "page_no": 349,
         "target_pdf_page": 349,
         "page_role": "note",
-        "role_reason": "endnotes_start_page_hint",
-        "role_confidence": 1.0,
+        "role_reason": "note_continuation",
+        "role_confidence": 0.9,
         "has_note_heading": false,
         "section_hint": ""
       },
@@ -92,8 +101,17 @@
         "page_no": 350,
         "target_pdf_page": 350,
         "page_role": "note",
-        "role_reason": "endnotes_start_page_hint",
-        "role_confidence": 1.0,
+        "role_reason": "note_continuation",
+        "role_confidence": 0.9,
+        "has_note_heading": false,
+        "section_hint": ""
+      },
+      {
+        "page_no": 351,
+        "target_pdf_page": 351,
+        "page_role": "note",
+        "role_reason": "note_continuation",
+        "role_confidence": 0.9,
         "has_note_heading": false,
         "section_hint": ""
       },
@@ -102,25 +120,7 @@
         "target_pdf_page": 415,
         "page_role": "other",
         "role_reason": "rear_sparse_other",
-        "role_confidence": 1.0,
-        "has_note_heading": false,
-        "section_hint": ""
-      },
-      {
-        "page_no": 416,
-        "target_pdf_page": 416,
-        "page_role": "other",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
-        "has_note_heading": false,
-        "section_hint": ""
-      },
-      {
-        "page_no": 417,
-        "target_pdf_page": 417,
-        "page_role": "other",
-        "role_reason": "default_body",
-        "role_confidence": 1.0,
+        "role_confidence": 0.9,
         "has_note_heading": false,
         "section_hint": ""
       }
@@ -141,116 +141,157 @@
     "chapter_endnote_region_alignment_summary": {},
     "region_rows": [
       {
-        "region_id": "nr-en-bk-0001-toc-ch-001-introductionpsychologica",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-001-introductionpsychologica",
-        "start_page": 348,
-        "end_page": 351,
+        "region_id": "nr-en-bk-0001-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 350,
+        "end_page": 350,
         "pages": [
-          348,
-          349,
-          350,
-          351
+          350
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "10.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 26,
-        "numeric_marker_count": 26,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 26,
+        "item_count": 10,
+        "numeric_marker_count": 10,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 19,
         "numeric_marker_contiguous": true,
         "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00001",
-            "page_no": 348,
-            "marker": "1",
-            "source_text_preview": "The idea that Greeks of the Homeric age had no coherent concept of the self was famously argued by Bruno Snell, The Discovery of Mind in Gre..."
+            "note_item_id": "en-0001",
+            "page_no": 350,
+            "marker": "10",
+            "source_text_preview": "10. Jean-Jacques Rousseau, Les Réveries du promeneur solitaire in Oeuvres complètes, ed. Bernard Gagnebin and Marcel Raymond, 4 vols. (Paris..."
           },
           {
-            "note_item_id": "en-00002",
-            "page_no": 348,
-            "marker": "2",
-            "source_text_preview": "The Stoic practice of askesis, sometimes translated as \"care of the self,\" has recently attracted attention, leading some commentators to lo..."
+            "note_item_id": "en-0002",
+            "page_no": 350,
+            "marker": "11",
+            "source_text_preview": "11. See George Chauncey, “Après Stonewall, le déplacement de la frontière entre le ‘soi’ public et le ‘soi’ privé,” Histoire et sociétés: Re..."
           },
           {
-            "note_item_id": "en-00003",
-            "page_no": 349,
-            "marker": "3",
-            "source_text_preview": "See, e.g., Colin Morris, The Discovery of the Individual, 1050–1200 (1972; repr. Toronto: University of Toronto Press, 1987) and Caroline Wa..."
+            "note_item_id": "en-0003",
+            "page_no": 350,
+            "marker": "12",
+            "source_text_preview": "12. Quoted in Martin Filler, “Ghosts in the House,” New York Review of Books, 21 October 1999, pp. 10–15, quotation on p. 10."
           }
         ]
       },
       {
-        "region_id": "nr-en-bk-0002-toc-ch-002-theperilsofimaginationat",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-002-theperilsofimaginationat",
-        "start_page": 351,
+        "region_id": "nr-en-bk-0002-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 352,
+        "end_page": 352,
+        "pages": [
+          352
+        ],
+        "region_start_first_source_marker": "6.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 11,
+        "numeric_marker_count": 11,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 16,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0011",
+            "page_no": 352,
+            "marker": "6",
+            "source_text_preview": "6. “Lettre de M. Fabre d’Eglantine à Monsieur De ***** relativement à la contestation survenue au sujet du Présomptueux ou l’heureux imagina..."
+          },
+          {
+            "note_item_id": "en-0012",
+            "page_no": 352,
+            "marker": "7",
+            "source_text_preview": "7. See Montaigne, Essais, 3 vols. (Paris: Garnier, 1952), 1: 28–30."
+          },
+          {
+            "note_item_id": "en-0013",
+            "page_no": 352,
+            "marker": "8",
+            "source_text_preview": "8. Lettre de M. Fabre d'Eglantine à Monsieur De *****, p. 9, italics in the original."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 355,
         "end_page": 359,
         "pages": [
-          351,
-          352,
-          353,
-          354,
           355,
           356,
           357,
           358,
           359
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "40.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 86,
-        "numeric_marker_count": 86,
+        "item_count": 54,
+        "numeric_marker_count": 54,
         "numeric_marker_start": 1,
         "numeric_marker_end": 86,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00027",
-            "page_no": 351,
-            "marker": "1",
-            "source_text_preview": "The Perils of Imagination at the End of the Old Regime For the source of the epigraph, see note 38"
+            "note_item_id": "en-0022",
+            "page_no": 355,
+            "marker": "40",
+            "source_text_preview": "40. “Observations des maîtres-gantiers,” B.N. Manuscripts, Collection Joly de Fleury (henceforth, BN MSS, Coll. Joly), vol. 596, fol. 114."
           },
           {
-            "note_item_id": "en-00028",
-            "page_no": 351,
-            "marker": "2",
-            "source_text_preview": "Etienne Bonnet de Condillac, Essai sur les origines des connoissances humaines, in Oeuvres philosophiques de Condillac, ed. Georges Le Roy,..."
+            "note_item_id": "en-0023",
+            "page_no": 355,
+            "marker": "41",
+            "source_text_preview": "41. The term “existence” may also have a material, economic meaning in this text; but that is not the meaning the glovemakers highlight. Ins..."
           },
           {
-            "note_item_id": "en-00029",
-            "page_no": 351,
-            "marker": "3",
-            "source_text_preview": "“Powerful cabal” is the phrase attributed to Fabre by L. Thiessé, “Notice sur Fabre d’Eglantine,” in Oeuvres choisies de Fabre d’Eglantine (..."
+            "note_item_id": "en-0024",
+            "page_no": 355,
+            "marker": "42",
+            "source_text_preview": "42. Réflexions des maîtres tailleurs de Paris, printed brochure dated 17 February 1776, p. 3, in BN MSS, Coll. Joly, vol. 462, fol. 173(1)."
           }
         ]
       },
       {
-        "region_id": "nr-en-bk-0003-toc-ch-003-therevolutionaryschoolin",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-003-therevolutionaryschoolin",
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0004",
         "start_page": 359,
         "end_page": 365,
         "pages": [
@@ -262,14 +303,14 @@
           364,
           365
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "40.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 95,
-        "numeric_marker_count": 95,
+        "item_count": 94,
+        "numeric_marker_count": 94,
         "numeric_marker_start": 1,
         "numeric_marker_end": 95,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "1",
           "2",
@@ -278,23 +319,23 @@
           "5",
           "6",
           "7",
-          "8"
+          "82"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00113",
+            "note_item_id": "en-0081",
             "page_no": 359,
             "marker": "1",
             "source_text_preview": "1. “De la fête de la raison,” Les Révolutions de Paris 17, no. 215 (23–30 brumaire Year II): 210–18, quotations on pp. 214–15."
           },
           {
-            "note_item_id": "en-00114",
+            "note_item_id": "en-0082",
             "page_no": 359,
             "marker": "2",
             "source_text_preview": "2. Ibid., p. 211, my italics."
           },
           {
-            "note_item_id": "en-00115",
+            "note_item_id": "en-0083",
             "page_no": 359,
             "marker": "3",
             "source_text_preview": "3. Ibid., pp. 211, 215."
@@ -302,11 +343,11 @@
         ]
       },
       {
-        "region_id": "nr-en-bk-0004-toc-ch-004-isthereaselfinthismental",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-004-isthereaselfinthismental",
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-03",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0005",
         "start_page": 365,
-        "end_page": 373,
+        "end_page": 383,
         "pages": [
           365,
           366,
@@ -316,54 +357,6 @@
           370,
           371,
           372,
-          373
-        ],
-        "region_start_first_source_marker": "",
-        "region_first_note_item_marker": "",
-        "region_marker_alignment_ok": true,
-        "item_count": 108,
-        "numeric_marker_count": 108,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 108,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "3",
-          "1",
-          "2",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
-        ],
-        "sample_note_items": [
-          {
-            "note_item_id": "en-00208",
-            "page_no": 365,
-            "marker": "3",
-            "source_text_preview": "Is There a Self in This Mental Apparatus? The epigraph is from AN: 284 AP 2/1, “Moi” (note on a loose sheet of paper, dated 1773). My thanks..."
-          },
-          {
-            "note_item_id": "en-00209",
-            "page_no": 366,
-            "marker": "1",
-            "source_text_preview": "Dieudonné Thiébault, Grammaire philosophique, ou la métaphysique, la logique et la grammaire, réunies en un seul corps de doctrine, 2 vols...."
-          },
-          {
-            "note_item_id": "en-00210",
-            "page_no": 366,
-            "marker": "2",
-            "source_text_preview": "Charles Taylor, Sources the Self: The Making of the Modern Identity (Cambridge, MA: Harvard University Press, 1989), p. x."
-          }
-        ]
-      },
-      {
-        "region_id": "nr-en-bk-0005-toc-ch-005-anaprioriselfforthebourg",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-005-anaprioriselfforthebourg",
-        "start_page": 373,
-        "end_page": 382,
-        "pages": [
           373,
           374,
           375,
@@ -373,9 +366,10 @@
           379,
           380,
           381,
-          382
+          382,
+          383
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "40.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
         "item_count": 142,
@@ -384,213 +378,342 @@
         "numeric_marker_end": 142,
         "numeric_marker_contiguous": true,
         "marker_preview": [
-          "4",
-          "1",
-          "2",
-          "3",
-          "5",
-          "6",
-          "7",
-          "8"
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00316",
-            "page_no": 373,
-            "marker": "4",
-            "source_text_preview": "An A Priori Self for the Bourgeois Male The epigraph is from Maine de Biran, Journal, ed. Henri Gouhier, 3 vols. (Neuchatel: La Baconnière,..."
+            "note_item_id": "en-0171",
+            "page_no": 365,
+            "marker": "84",
+            "source_text_preview": "84. Pinglin, Ami des campagnes, vol. 1, no. 9."
           },
           {
-            "note_item_id": "en-00317",
-            "page_no": 373,
-            "marker": "1",
-            "source_text_preview": "Maine de Biran, Journal, ed. Henri Gouhier, 3 vols. (Neuchatel: La Baconnière, 1954–57), 2: 303 (January 1821). The text cites Cousin's adhe..."
+            "note_item_id": "en-0172",
+            "page_no": 365,
+            "marker": "85",
+            "source_text_preview": "85. Laurent-Pierre Berenger, Esprit de Mably et de Condillac relativement à la morale et à la politique, vol. 2:, Esprit de Condillac (Greno..."
           },
           {
-            "note_item_id": "en-00318",
-            "page_no": 373,
-            "marker": "2",
-            "source_text_preview": "This theme was already developed in a work by one of Cousin's own disciples, Jules Simon, Victor Cousin (Paris: Hachette, 1887). For more re..."
+            "note_item_id": "en-0173",
+            "page_no": 365,
+            "marker": "86",
+            "source_text_preview": "86. Citoyen B***, L'Esprit de Condillac, ou principes de raison et de morale extraits des ouvrages de ce philosophe (Paris: Chez les marchan..."
           }
         ]
       },
       {
-        "region_id": "nr-en-bk-0006-toc-ch-006-cousinianhegemony",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-006-cousinianhegemony",
-        "start_page": 382,
-        "end_page": 393,
+        "region_id": "nr-en-bk-0004-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 385,
+        "end_page": 386,
         "pages": [
-          382,
-          383,
-          384,
           385,
-          386,
-          387,
-          388,
-          389,
-          390,
-          391,
-          392,
-          393
+          386
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "25.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 169,
-        "numeric_marker_count": 169,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 169,
+        "item_count": 20,
+        "numeric_marker_count": 20,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 44,
         "numeric_marker_contiguous": true,
         "marker_preview": [
-          "5",
-          "1",
-          "2",
-          "3",
-          "4",
-          "6",
-          "7",
-          "8"
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00458",
-            "page_no": 382,
-            "marker": "5",
-            "source_text_preview": "Cousinian Hegemony The epigraph is from Cousin to Francisque Bouillier, 14 January 1843, in C. ‘Latreille, Francisque Bouillier: Le dernier..."
+            "note_item_id": "en-0313",
+            "page_no": 385,
+            "marker": "25",
+            "source_text_preview": "25. Robert Gildea, Education in Provincial France, 1800–1914: A Study of Three Departments (Oxford: Clarendon Press, 1983), pp. 35, 42."
           },
           {
-            "note_item_id": "en-00459",
-            "page_no": 382,
-            "marker": "1",
-            "source_text_preview": "A.-Jacques Matter, “Moi,” in Dictionnaire de la conversation et de la lecture, 52 vols. (Paris: Belin-Mondar, 1832–39), 38: 259–61, esp. 259..."
+            "note_item_id": "en-0314",
+            "page_no": 385,
+            "marker": "26",
+            "source_text_preview": "26. AN: F17* 1795, “Procès-verbaux des délibérations du Conseil royal de l’instruction publique” (July–September 1832), session of 28 Septem..."
           },
           {
-            "note_item_id": "en-00460",
-            "page_no": 382,
-            "marker": "2",
-            "source_text_preview": "Matter appears in the “Liste générale des rédacteurs,” Dictionnaire des sciences philosophiques, 6 vols. (Paris: Hachette, 1844–52), 6: 1046..."
+            "note_item_id": "en-0315",
+            "page_no": 385,
+            "marker": "27",
+            "source_text_preview": "27. “Circulaire du 8 avril 1833, relative aux questions de philosophie sur lesquels doivent être interrogés les aspirants au grade de bachel..."
           }
         ]
       },
       {
-        "region_id": "nr-en-bk-0007-toc-ch-007-religiousandsecularacces",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-007-religiousandsecularacces",
-        "start_page": 393,
-        "end_page": 401,
+        "region_id": "nr-en-bk-0005-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 390,
+        "end_page": 390,
         "pages": [
+          390
+        ],
+        "region_start_first_source_marker": "97.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 25,
+        "numeric_marker_count": 25,
+        "numeric_marker_start": 97,
+        "numeric_marker_end": 121,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0333",
+            "page_no": 390,
+            "marker": "97",
+            "source_text_preview": "97. Michel Foucault, ed., I, Pierre Rivière, having slaughtered my mother, my sister, and my brother ... : A Case of Parricide in the Ninete..."
+          },
+          {
+            "note_item_id": "en-0334",
+            "page_no": 390,
+            "marker": "98",
+            "source_text_preview": "98. Charma to Cousin, 26 August 1837, Cousin MSS, vol. 222, #1226."
+          },
+          {
+            "note_item_id": "en-0335",
+            "page_no": 390,
+            "marker": "99",
+            "source_text_preview": "99. Charma to Cousin, 17 April 1832, Cousin MSS, vol. 222, #1223."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0006-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 392,
+        "end_page": 399,
+        "pages": [
+          392,
           393,
           394,
           395,
           396,
           397,
           398,
-          399,
-          400,
-          401
+          399
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "139.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 112,
-        "numeric_marker_count": 112,
+        "item_count": 122,
+        "numeric_marker_count": 122,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 112,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_end": 169,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
+          "139",
+          "140",
+          "141",
+          "142",
+          "143",
+          "144",
+          "145",
+          "146"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00627",
-            "page_no": 393,
-            "marker": "1",
-            "source_text_preview": "1. For recent treatments of Renan, see Maurice Olender, The Languages of Paradise: Race, Religion and Philology in the Nineteenth Century, t..."
+            "note_item_id": "en-0358",
+            "page_no": 392,
+            "marker": "139",
+            "source_text_preview": "139. Angebert to Cousin, 12 November 1829, Cousin MSS, vol. 214, #82."
           },
           {
-            "note_item_id": "en-00628",
-            "page_no": 393,
-            "marker": "2",
-            "source_text_preview": "2. Ernest Renan to Henriette Renan, 17 January 1843, in Ernest and Henriette Renan, Lettres intimes, 1842–1845 (Paris: Calmann-Lévy, 1896),..."
+            "note_item_id": "en-0359",
+            "page_no": 392,
+            "marker": "140",
+            "source_text_preview": "140. Angebert to Cousin, 21 January 1830, Cousin MSS, vol. 214, #83."
           },
           {
-            "note_item_id": "en-00629",
-            "page_no": 393,
-            "marker": "3",
-            "source_text_preview": "3. Ernest Renan to Henriette Renan, 11 July 1844, in ibid., p. 184."
+            "note_item_id": "en-0360",
+            "page_no": 392,
+            "marker": "141",
+            "source_text_preview": "141. Angebert to Cousin, 26 April 1830, Cousin MSS, vol. 214, #84."
           }
         ]
       },
       {
-        "region_id": "nr-en-bk-0008-toc-ch-008-apalpableselfforthesocia",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-008-apalpableselfforthesocia",
+        "region_id": "nr-en-bk-0007-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0006",
         "start_page": 401,
-        "end_page": 411,
+        "end_page": 405,
         "pages": [
           401,
           402,
           403,
           404,
-          405,
-          406,
-          407,
-          408,
-          409,
-          410,
-          411
+          405
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "103.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 152,
-        "numeric_marker_count": 152,
+        "item_count": 67,
+        "numeric_marker_count": 67,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 152,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_end": 112,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "7",
           "1",
           "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "8"
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00739",
-            "page_no": 401,
-            "marker": "7",
-            "source_text_preview": "A Palpable Self for the Socially Marginal For the source of the epigraph, see note 143."
-          },
-          {
-            "note_item_id": "en-00740",
+            "note_item_id": "en-0490",
             "page_no": 401,
             "marker": "1",
-            "source_text_preview": "Gazette des tribunaux, 29 November, 4 December, 5 December 1839."
+            "source_text_preview": "1. Gazette des tribunaux, 29 November, 4 December, 5 December 1839."
           },
           {
-            "note_item_id": "en-00741",
+            "note_item_id": "en-0491",
             "page_no": 401,
             "marker": "2",
-            "source_text_preview": "AN: F17 6649, Dossier: Allier, Director of General Police to Minister of the Interior, 27 April 1843; University of France to Minister of th..."
+            "source_text_preview": "2. AN: F17 6649, Dossier: Allier, Director of General Police to Minister of the Interior, 27 April 1843; University of France to Minister of..."
+          },
+          {
+            "note_item_id": "en-0480",
+            "page_no": 401,
+            "marker": "103",
+            "source_text_preview": "103. Renan, \"Observations et faits psychologiques,\" LXXXIX, p. 56."
           }
         ]
       },
       {
-        "region_id": "nr-en-bk-0009-toc-ch-009-epilogue",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-009-epilogue",
+        "region_id": "nr-en-bk-0008-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 407,
+        "end_page": 407,
+        "pages": [
+          407
+        ],
+        "region_start_first_source_marker": "78.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 17,
+        "numeric_marker_count": 17,
+        "numeric_marker_start": 78,
+        "numeric_marker_end": 94,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0548",
+            "page_no": 407,
+            "marker": "78",
+            "source_text_preview": "78. Mary Pickering, Auguste Comte: An Intellectual Biography, vol. 1 (Cambridge: Cambridge University Press, 1993), pp. 303–5, 349, 420, 600..."
+          },
+          {
+            "note_item_id": "en-0549",
+            "page_no": 407,
+            "marker": "79",
+            "source_text_preview": "79. Bernadette Bensaude-Vincent, “Auguste Comte, la science populaire d’un philosophe,” Corpus, revue de philosophie 4 (1987): 143–67, esp...."
+          },
+          {
+            "note_item_id": "en-0550",
+            "page_no": 407,
+            "marker": "80",
+            "source_text_preview": "80. Ibid., pp. 143–47; and Annie Petit, “La diffusion des savoirs comme devoir positiviste,” Romantisme 19 (1989): 7–25, esp. 10–11. Comte p..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 409,
+        "end_page": 411,
+        "pages": [
+          409,
+          410,
+          411
+        ],
+        "region_start_first_source_marker": "109.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 51,
+        "numeric_marker_count": 51,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0565",
+            "page_no": 409,
+            "marker": "109",
+            "source_text_preview": "109. A. Guépin, Philosophie du socialisme, ou étude sur les transformations dans le monde et l'humanité (Paris: G. Sandré, 1850), p. 627."
+          },
+          {
+            "note_item_id": "en-0566",
+            "page_no": 409,
+            "marker": "110",
+            "source_text_preview": "110. Charles Pellarin, Souvenirs anecdotiques: médecine navale, saint-simonisme, chouannerie (Paris: Librairie des sciences sociales, 1868),..."
+          },
+          {
+            "note_item_id": "en-0567",
+            "page_no": 409,
+            "marker": "111",
+            "source_text_preview": "111. Dumont to Combe, 3 November 1832, NLS, Combe MSS 7228, fols. 86–87."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0007",
         "start_page": 411,
         "end_page": 414,
         "pages": [
@@ -599,14 +722,14 @@
           413,
           414
         ],
-        "region_start_first_source_marker": "",
+        "region_start_first_source_marker": "109.",
         "region_first_note_item_marker": "",
         "region_marker_alignment_ok": true,
-        "item_count": 31,
-        "numeric_marker_count": 31,
+        "item_count": 41,
+        "numeric_marker_count": 41,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 31,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "1",
           "2",
@@ -615,31 +738,653 @@
           "5",
           "6",
           "7",
-          "8"
+          "143"
         ],
         "sample_note_items": [
           {
-            "note_item_id": "en-00891",
+            "note_item_id": "en-0626",
             "page_no": 411,
             "marker": "1",
-            "source_text_preview": "See AN: F17 4180, unpaginated brochure entitled “Etat des candidats présentés par les recteurs pour le concours de l’Ecole normale en 1832.”"
+            "source_text_preview": "1. See AN: F17 4180, unpaginated brochure entitled “Etat des candidats présentés par les recteurs pour le concours de l’Ecole normale en 183..."
           },
           {
-            "note_item_id": "en-00892",
+            "note_item_id": "en-0627",
             "page_no": 411,
             "marker": "2",
-            "source_text_preview": "Rapport de M. Cousin suivi des dissertations de MM. Emile Saisset et Amédée Jacques (Paris: Paul Dupont, 1843), pp. 5–6."
+            "source_text_preview": "2. Rapport de M. Cousin suivi des dissertations de MM. Emile Saisset et Amédée Jacques (Paris: Paul Dupont, 1843), pp. 5–6."
           },
           {
-            "note_item_id": "en-00893",
+            "note_item_id": "en-0628",
             "page_no": 411,
             "marker": "3",
-            "source_text_preview": "See AN: F17 7647, Dossier: Lycée Louis-le-Grand, “Observations générales sur l’enseignement de la philosophie,” 24 March 1850. The comments..."
+            "source_text_preview": "3. See AN: F17 7647, Dossier: Lycée Louis-le-Grand, “Observations générales sur l’enseignement de la philosophie,” 24 March 1850. The commen..."
           }
         ]
       }
     ],
-    "endnote_region_rows": []
+    "endnote_region_rows": [
+      {
+        "region_id": "nr-en-bk-0001-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 350,
+        "end_page": 350,
+        "pages": [
+          350
+        ],
+        "region_start_first_source_marker": "10.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 10,
+        "numeric_marker_count": 10,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 19,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0001",
+            "page_no": 350,
+            "marker": "10",
+            "source_text_preview": "10. Jean-Jacques Rousseau, Les Réveries du promeneur solitaire in Oeuvres complètes, ed. Bernard Gagnebin and Marcel Raymond, 4 vols. (Paris..."
+          },
+          {
+            "note_item_id": "en-0002",
+            "page_no": 350,
+            "marker": "11",
+            "source_text_preview": "11. See George Chauncey, “Après Stonewall, le déplacement de la frontière entre le ‘soi’ public et le ‘soi’ privé,” Histoire et sociétés: Re..."
+          },
+          {
+            "note_item_id": "en-0003",
+            "page_no": 350,
+            "marker": "12",
+            "source_text_preview": "12. Quoted in Martin Filler, “Ghosts in the House,” New York Review of Books, 21 October 1999, pp. 10–15, quotation on p. 10."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0002-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 352,
+        "end_page": 352,
+        "pages": [
+          352
+        ],
+        "region_start_first_source_marker": "6.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 11,
+        "numeric_marker_count": 11,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 16,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0011",
+            "page_no": 352,
+            "marker": "6",
+            "source_text_preview": "6. “Lettre de M. Fabre d’Eglantine à Monsieur De ***** relativement à la contestation survenue au sujet du Présomptueux ou l’heureux imagina..."
+          },
+          {
+            "note_item_id": "en-0012",
+            "page_no": 352,
+            "marker": "7",
+            "source_text_preview": "7. See Montaigne, Essais, 3 vols. (Paris: Garnier, 1952), 1: 28–30."
+          },
+          {
+            "note_item_id": "en-0013",
+            "page_no": 352,
+            "marker": "8",
+            "source_text_preview": "8. Lettre de M. Fabre d'Eglantine à Monsieur De *****, p. 9, italics in the original."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 355,
+        "end_page": 359,
+        "pages": [
+          355,
+          356,
+          357,
+          358,
+          359
+        ],
+        "region_start_first_source_marker": "40.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 54,
+        "numeric_marker_count": 54,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 86,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0022",
+            "page_no": 355,
+            "marker": "40",
+            "source_text_preview": "40. “Observations des maîtres-gantiers,” B.N. Manuscripts, Collection Joly de Fleury (henceforth, BN MSS, Coll. Joly), vol. 596, fol. 114."
+          },
+          {
+            "note_item_id": "en-0023",
+            "page_no": 355,
+            "marker": "41",
+            "source_text_preview": "41. The term “existence” may also have a material, economic meaning in this text; but that is not the meaning the glovemakers highlight. Ins..."
+          },
+          {
+            "note_item_id": "en-0024",
+            "page_no": 355,
+            "marker": "42",
+            "source_text_preview": "42. Réflexions des maîtres tailleurs de Paris, printed brochure dated 17 February 1776, p. 3, in BN MSS, Coll. Joly, vol. 462, fol. 173(1)."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0004",
+        "start_page": 359,
+        "end_page": 365,
+        "pages": [
+          359,
+          360,
+          361,
+          362,
+          363,
+          364,
+          365
+        ],
+        "region_start_first_source_marker": "40.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 94,
+        "numeric_marker_count": 94,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 95,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "82"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0081",
+            "page_no": 359,
+            "marker": "1",
+            "source_text_preview": "1. “De la fête de la raison,” Les Révolutions de Paris 17, no. 215 (23–30 brumaire Year II): 210–18, quotations on pp. 214–15."
+          },
+          {
+            "note_item_id": "en-0082",
+            "page_no": 359,
+            "marker": "2",
+            "source_text_preview": "2. Ibid., p. 211, my italics."
+          },
+          {
+            "note_item_id": "en-0083",
+            "page_no": 359,
+            "marker": "3",
+            "source_text_preview": "3. Ibid., pp. 211, 215."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-03",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0005",
+        "start_page": 365,
+        "end_page": 383,
+        "pages": [
+          365,
+          366,
+          367,
+          368,
+          369,
+          370,
+          371,
+          372,
+          373,
+          374,
+          375,
+          376,
+          377,
+          378,
+          379,
+          380,
+          381,
+          382,
+          383
+        ],
+        "region_start_first_source_marker": "40.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 142,
+        "numeric_marker_count": 142,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 142,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0171",
+            "page_no": 365,
+            "marker": "84",
+            "source_text_preview": "84. Pinglin, Ami des campagnes, vol. 1, no. 9."
+          },
+          {
+            "note_item_id": "en-0172",
+            "page_no": 365,
+            "marker": "85",
+            "source_text_preview": "85. Laurent-Pierre Berenger, Esprit de Mably et de Condillac relativement à la morale et à la politique, vol. 2:, Esprit de Condillac (Greno..."
+          },
+          {
+            "note_item_id": "en-0173",
+            "page_no": 365,
+            "marker": "86",
+            "source_text_preview": "86. Citoyen B***, L'Esprit de Condillac, ou principes de raison et de morale extraits des ouvrages de ce philosophe (Paris: Chez les marchan..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0004-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 385,
+        "end_page": 386,
+        "pages": [
+          385,
+          386
+        ],
+        "region_start_first_source_marker": "25.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 20,
+        "numeric_marker_count": 20,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 44,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0313",
+            "page_no": 385,
+            "marker": "25",
+            "source_text_preview": "25. Robert Gildea, Education in Provincial France, 1800–1914: A Study of Three Departments (Oxford: Clarendon Press, 1983), pp. 35, 42."
+          },
+          {
+            "note_item_id": "en-0314",
+            "page_no": 385,
+            "marker": "26",
+            "source_text_preview": "26. AN: F17* 1795, “Procès-verbaux des délibérations du Conseil royal de l’instruction publique” (July–September 1832), session of 28 Septem..."
+          },
+          {
+            "note_item_id": "en-0315",
+            "page_no": 385,
+            "marker": "27",
+            "source_text_preview": "27. “Circulaire du 8 avril 1833, relative aux questions de philosophie sur lesquels doivent être interrogés les aspirants au grade de bachel..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0005-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 390,
+        "end_page": 390,
+        "pages": [
+          390
+        ],
+        "region_start_first_source_marker": "97.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 25,
+        "numeric_marker_count": 25,
+        "numeric_marker_start": 97,
+        "numeric_marker_end": 121,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0333",
+            "page_no": 390,
+            "marker": "97",
+            "source_text_preview": "97. Michel Foucault, ed., I, Pierre Rivière, having slaughtered my mother, my sister, and my brother ... : A Case of Parricide in the Ninete..."
+          },
+          {
+            "note_item_id": "en-0334",
+            "page_no": 390,
+            "marker": "98",
+            "source_text_preview": "98. Charma to Cousin, 26 August 1837, Cousin MSS, vol. 222, #1226."
+          },
+          {
+            "note_item_id": "en-0335",
+            "page_no": 390,
+            "marker": "99",
+            "source_text_preview": "99. Charma to Cousin, 17 April 1832, Cousin MSS, vol. 222, #1223."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0006-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 392,
+        "end_page": 399,
+        "pages": [
+          392,
+          393,
+          394,
+          395,
+          396,
+          397,
+          398,
+          399
+        ],
+        "region_start_first_source_marker": "139.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 122,
+        "numeric_marker_count": 122,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 169,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "139",
+          "140",
+          "141",
+          "142",
+          "143",
+          "144",
+          "145",
+          "146"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0358",
+            "page_no": 392,
+            "marker": "139",
+            "source_text_preview": "139. Angebert to Cousin, 12 November 1829, Cousin MSS, vol. 214, #82."
+          },
+          {
+            "note_item_id": "en-0359",
+            "page_no": 392,
+            "marker": "140",
+            "source_text_preview": "140. Angebert to Cousin, 21 January 1830, Cousin MSS, vol. 214, #83."
+          },
+          {
+            "note_item_id": "en-0360",
+            "page_no": 392,
+            "marker": "141",
+            "source_text_preview": "141. Angebert to Cousin, 26 April 1830, Cousin MSS, vol. 214, #84."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0007-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0006",
+        "start_page": 401,
+        "end_page": 405,
+        "pages": [
+          401,
+          402,
+          403,
+          404,
+          405
+        ],
+        "region_start_first_source_marker": "103.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 67,
+        "numeric_marker_count": 67,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 112,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0490",
+            "page_no": 401,
+            "marker": "1",
+            "source_text_preview": "1. Gazette des tribunaux, 29 November, 4 December, 5 December 1839."
+          },
+          {
+            "note_item_id": "en-0491",
+            "page_no": 401,
+            "marker": "2",
+            "source_text_preview": "2. AN: F17 6649, Dossier: Allier, Director of General Police to Minister of the Interior, 27 April 1843; University of France to Minister of..."
+          },
+          {
+            "note_item_id": "en-0480",
+            "page_no": 401,
+            "marker": "103",
+            "source_text_preview": "103. Renan, \"Observations et faits psychologiques,\" LXXXIX, p. 56."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0008-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 407,
+        "end_page": 407,
+        "pages": [
+          407
+        ],
+        "region_start_first_source_marker": "78.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 17,
+        "numeric_marker_count": 17,
+        "numeric_marker_start": 78,
+        "numeric_marker_end": 94,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0548",
+            "page_no": 407,
+            "marker": "78",
+            "source_text_preview": "78. Mary Pickering, Auguste Comte: An Intellectual Biography, vol. 1 (Cambridge: Cambridge University Press, 1993), pp. 303–5, 349, 420, 600..."
+          },
+          {
+            "note_item_id": "en-0549",
+            "page_no": 407,
+            "marker": "79",
+            "source_text_preview": "79. Bernadette Bensaude-Vincent, “Auguste Comte, la science populaire d’un philosophe,” Corpus, revue de philosophie 4 (1987): 143–67, esp...."
+          },
+          {
+            "note_item_id": "en-0550",
+            "page_no": 407,
+            "marker": "80",
+            "source_text_preview": "80. Ibid., pp. 143–47; and Annie Petit, “La diffusion des savoirs comme devoir positiviste,” Romantisme 19 (1989): 7–25, esp. 10–11. Comte p..."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "start_page": 409,
+        "end_page": 411,
+        "pages": [
+          409,
+          410,
+          411
+        ],
+        "region_start_first_source_marker": "109.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 51,
+        "numeric_marker_count": 51,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0565",
+            "page_no": 409,
+            "marker": "109",
+            "source_text_preview": "109. A. Guépin, Philosophie du socialisme, ou étude sur les transformations dans le monde et l'humanité (Paris: G. Sandré, 1850), p. 627."
+          },
+          {
+            "note_item_id": "en-0566",
+            "page_no": 409,
+            "marker": "110",
+            "source_text_preview": "110. Charles Pellarin, Souvenirs anecdotiques: médecine navale, saint-simonisme, chouannerie (Paris: Librairie des sciences sociales, 1868),..."
+          },
+          {
+            "note_item_id": "en-0567",
+            "page_no": 409,
+            "marker": "111",
+            "source_text_preview": "111. Dumont to Combe, 3 November 1832, NLS, Combe MSS 7228, fols. 86–87."
+          }
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0007",
+        "start_page": 411,
+        "end_page": 414,
+        "pages": [
+          411,
+          412,
+          413,
+          414
+        ],
+        "region_start_first_source_marker": "109.",
+        "region_first_note_item_marker": "",
+        "region_marker_alignment_ok": true,
+        "item_count": 41,
+        "numeric_marker_count": 41,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "143"
+        ],
+        "sample_note_items": [
+          {
+            "note_item_id": "en-0626",
+            "page_no": 411,
+            "marker": "1",
+            "source_text_preview": "1. See AN: F17 4180, unpaginated brochure entitled “Etat des candidats présentés par les recteurs pour le concours de l’Ecole normale en 183..."
+          },
+          {
+            "note_item_id": "en-0627",
+            "page_no": 411,
+            "marker": "2",
+            "source_text_preview": "2. Rapport de M. Cousin suivi des dissertations de MM. Emile Saisset et Amédée Jacques (Paris: Paul Dupont, 1843), pp. 5–6."
+          },
+          {
+            "note_item_id": "en-0628",
+            "page_no": 411,
+            "marker": "3",
+            "source_text_preview": "3. See AN: F17 7647, Dossier: Lycée Louis-le-Grand, “Observations générales sur l’enseignement de la philosophie,” 24 March 1850. The commen..."
+          }
+        ]
+      }
+    ]
   },
   "endnote_array_building": {
     "decision_basis": [
@@ -651,51 +1396,70 @@
     "book_endnote_stream_summary": {},
     "array_rows": [
       {
-        "region_id": "nr-en-bk-0001-toc-ch-001-introductionpsychologica",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-001-introductionpsychologica",
-        "item_count": 26,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 26,
+        "region_id": "nr-en-bk-0001-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 10,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 19,
         "numeric_marker_contiguous": true,
         "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
         ]
       },
       {
-        "region_id": "nr-en-bk-0002-toc-ch-002-theperilsofimaginationat",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-002-theperilsofimaginationat",
-        "item_count": 86,
+        "region_id": "nr-en-bk-0002-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 11,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 16,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 54,
         "numeric_marker_start": 1,
         "numeric_marker_end": 86,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47"
         ]
       },
       {
-        "region_id": "nr-en-bk-0003-toc-ch-003-therevolutionaryschoolin",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-003-therevolutionaryschoolin",
-        "item_count": 95,
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0004",
+        "item_count": 94,
         "numeric_marker_start": 1,
         "numeric_marker_end": 95,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "1",
           "2",
@@ -704,112 +1468,150 @@
           "5",
           "6",
           "7",
-          "8"
+          "82"
         ]
       },
       {
-        "region_id": "nr-en-bk-0004-toc-ch-004-isthereaselfinthismental",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-004-isthereaselfinthismental",
-        "item_count": 108,
-        "numeric_marker_start": 1,
-        "numeric_marker_end": 108,
-        "numeric_marker_contiguous": true,
-        "marker_preview": [
-          "3",
-          "1",
-          "2",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
-        ]
-      },
-      {
-        "region_id": "nr-en-bk-0005-toc-ch-005-anaprioriselfforthebourg",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-005-anaprioriselfforthebourg",
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-03",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0005",
         "item_count": 142,
         "numeric_marker_start": 1,
         "numeric_marker_end": 142,
         "numeric_marker_contiguous": true,
         "marker_preview": [
-          "4",
-          "1",
-          "2",
-          "3",
-          "5",
-          "6",
-          "7",
-          "8"
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91"
         ]
       },
       {
-        "region_id": "nr-en-bk-0006-toc-ch-006-cousinianhegemony",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-006-cousinianhegemony",
-        "item_count": 169,
+        "region_id": "nr-en-bk-0004-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 20,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 44,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0005-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 25,
+        "numeric_marker_start": 97,
+        "numeric_marker_end": 121,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0006-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 122,
         "numeric_marker_start": 1,
         "numeric_marker_end": 169,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "5",
-          "1",
-          "2",
-          "3",
-          "4",
-          "6",
-          "7",
-          "8"
+          "139",
+          "140",
+          "141",
+          "142",
+          "143",
+          "144",
+          "145",
+          "146"
         ]
       },
       {
-        "region_id": "nr-en-bk-0007-toc-ch-007-religiousandsecularacces",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-007-religiousandsecularacces",
-        "item_count": 112,
+        "region_id": "nr-en-bk-0007-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0006",
+        "item_count": 67,
         "numeric_marker_start": 1,
         "numeric_marker_end": 112,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "1",
           "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "7",
-          "8"
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108"
         ]
       },
       {
-        "region_id": "nr-en-bk-0008-toc-ch-008-apalpableselfforthesocia",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-008-apalpableselfforthesocia",
-        "item_count": 152,
+        "region_id": "nr-en-bk-0008-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 17,
+        "numeric_marker_start": 78,
+        "numeric_marker_end": 94,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 51,
         "numeric_marker_start": 1,
         "numeric_marker_end": 152,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
-          "7",
-          "1",
-          "2",
-          "3",
-          "4",
-          "5",
-          "6",
-          "8"
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116"
         ]
       },
       {
-        "region_id": "nr-en-bk-0009-toc-ch-009-epilogue",
-        "region_kind": "book_endnotes",
-        "bound_chapter_id": "toc-ch-009-epilogue",
-        "item_count": 31,
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0007",
+        "item_count": 41,
         "numeric_marker_start": 1,
-        "numeric_marker_end": 31,
-        "numeric_marker_contiguous": true,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
         "marker_preview": [
           "1",
           "2",
@@ -818,11 +1620,240 @@
           "5",
           "6",
           "7",
-          "8"
+          "143"
         ]
       }
     ],
-    "endnote_array_rows": []
+    "endnote_array_rows": [
+      {
+        "region_id": "nr-en-bk-0001-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 10,
+        "numeric_marker_start": 10,
+        "numeric_marker_end": 19,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "10",
+          "11",
+          "12",
+          "13",
+          "14",
+          "15",
+          "16",
+          "17"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0002-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 11,
+        "numeric_marker_start": 6,
+        "numeric_marker_end": 16,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "6",
+          "7",
+          "8",
+          "9",
+          "10",
+          "11",
+          "12",
+          "13"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 54,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 86,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "40",
+          "41",
+          "42",
+          "43",
+          "44",
+          "45",
+          "46",
+          "47"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0004",
+        "item_count": 94,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 95,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "82"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0003-ch-fallback-0008-explore-03",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0005",
+        "item_count": 142,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 142,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0004-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 20,
+        "numeric_marker_start": 25,
+        "numeric_marker_end": 44,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "25",
+          "26",
+          "27",
+          "28",
+          "29",
+          "30",
+          "31",
+          "32"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0005-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 25,
+        "numeric_marker_start": 97,
+        "numeric_marker_end": 121,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0006-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 122,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 169,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "139",
+          "140",
+          "141",
+          "142",
+          "143",
+          "144",
+          "145",
+          "146"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0007-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0006",
+        "item_count": 67,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 112,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0008-ch-fallback-0008",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 17,
+        "numeric_marker_start": 78,
+        "numeric_marker_end": 94,
+        "numeric_marker_contiguous": true,
+        "marker_preview": [
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-01",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0008",
+        "item_count": 51,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116"
+        ]
+      },
+      {
+        "region_id": "nr-en-bk-0009-ch-fallback-0008-explore-02",
+        "region_kind": "endnote",
+        "bound_chapter_id": "ch-fallback-0007",
+        "item_count": 41,
+        "numeric_marker_start": 1,
+        "numeric_marker_end": 152,
+        "numeric_marker_contiguous": false,
+        "marker_preview": [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "143"
+        ]
+      }
+    ]
   },
   "endnote_merging": {
     "decision_basis": [
@@ -831,284 +1862,11 @@
       "structure.freeze_note_unit_summary"
     ],
     "freeze_note_unit_summary": {},
-    "note_unit_rows": [
-      {
-        "section_id": "toc-ch-001-introductionpsychologica",
-        "section_title": "Introduction: Psychological Interiority versus Self-Talk",
-        "note_unit_count": 26,
-        "note_unit_kind_counts": {
-          "endnote": 26
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00001}}",
-          "{{NOTE_REF:en-00002}}",
-          "{{NOTE_REF:en-00003}}",
-          "{{NOTE_REF:en-00004}}",
-          "{{NOTE_REF:en-00005}}"
-        ],
-        "page_span": [
-          348,
-          351
-        ]
-      },
-      {
-        "section_id": "toc-ch-002-theperilsofimaginationat",
-        "section_title": "The Perils of Imagination at the End of the Old Regime",
-        "note_unit_count": 86,
-        "note_unit_kind_counts": {
-          "endnote": 86
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00027}}",
-          "{{NOTE_REF:en-00028}}",
-          "{{NOTE_REF:en-00029}}",
-          "{{NOTE_REF:en-00030}}",
-          "{{NOTE_REF:en-00031}}"
-        ],
-        "page_span": [
-          351,
-          359
-        ]
-      },
-      {
-        "section_id": "toc-ch-003-therevolutionaryschoolin",
-        "section_title": "The Revolutionary Schooling of Imagination",
-        "note_unit_count": 95,
-        "note_unit_kind_counts": {
-          "endnote": 95
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00113}}",
-          "{{NOTE_REF:en-00114}}",
-          "{{NOTE_REF:en-00115}}",
-          "{{NOTE_REF:en-00116}}",
-          "{{NOTE_REF:en-00117}}"
-        ],
-        "page_span": [
-          359,
-          365
-        ]
-      },
-      {
-        "section_id": "toc-ch-004-isthereaselfinthismental",
-        "section_title": "Is There a Self in This Mental Apparatus?",
-        "note_unit_count": 108,
-        "note_unit_kind_counts": {
-          "endnote": 108
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00208}}",
-          "{{NOTE_REF:en-00209}}",
-          "{{NOTE_REF:en-00210}}",
-          "{{NOTE_REF:en-00211}}",
-          "{{NOTE_REF:en-00212}}"
-        ],
-        "page_span": [
-          365,
-          373
-        ]
-      },
-      {
-        "section_id": "toc-ch-005-anaprioriselfforthebourg",
-        "section_title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
-        "note_unit_count": 142,
-        "note_unit_kind_counts": {
-          "endnote": 142
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00316}}",
-          "{{NOTE_REF:en-00317}}",
-          "{{NOTE_REF:en-00318}}",
-          "{{NOTE_REF:en-00319}}",
-          "{{NOTE_REF:en-00320}}"
-        ],
-        "page_span": [
-          373,
-          382
-        ]
-      },
-      {
-        "section_id": "toc-ch-006-cousinianhegemony",
-        "section_title": "Cousinian Hegemony",
-        "note_unit_count": 169,
-        "note_unit_kind_counts": {
-          "endnote": 169
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00458}}",
-          "{{NOTE_REF:en-00459}}",
-          "{{NOTE_REF:en-00460}}",
-          "{{NOTE_REF:en-00461}}",
-          "{{NOTE_REF:en-00462}}"
-        ],
-        "page_span": [
-          382,
-          393
-        ]
-      },
-      {
-        "section_id": "toc-ch-007-religiousandsecularacces",
-        "section_title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
-        "note_unit_count": 112,
-        "note_unit_kind_counts": {
-          "endnote": 112
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00627}}",
-          "{{NOTE_REF:en-00628}}",
-          "{{NOTE_REF:en-00629}}",
-          "{{NOTE_REF:en-00630}}",
-          "{{NOTE_REF:en-00631}}"
-        ],
-        "page_span": [
-          393,
-          401
-        ]
-      },
-      {
-        "section_id": "toc-ch-008-apalpableselfforthesocia",
-        "section_title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
-        "note_unit_count": 152,
-        "note_unit_kind_counts": {
-          "endnote": 152
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00739}}",
-          "{{NOTE_REF:en-00740}}",
-          "{{NOTE_REF:en-00741}}",
-          "{{NOTE_REF:en-00742}}",
-          "{{NOTE_REF:en-00743}}"
-        ],
-        "page_span": [
-          401,
-          411
-        ]
-      },
-      {
-        "section_id": "toc-ch-009-epilogue",
-        "section_title": "Epilogue",
-        "note_unit_count": 31,
-        "note_unit_kind_counts": {
-          "endnote": 31
-        },
-        "target_ref_preview": [
-          "{{NOTE_REF:en-00891}}",
-          "{{NOTE_REF:en-00892}}",
-          "{{NOTE_REF:en-00893}}",
-          "{{NOTE_REF:en-00894}}",
-          "{{NOTE_REF:en-00895}}"
-        ],
-        "page_span": [
-          411,
-          414
-        ]
-      }
-    ],
+    "note_unit_rows": [],
     "export_merge_rows": [
       {
-        "title": "Introduction: Psychological Interiority versus Self-Talk",
-        "path": "chapters/001-Introduction Psychological Interiority versus Self-Talk.md",
-        "note_unit_count": 26,
-        "local_ref_total": 28,
-        "local_def_total": 26,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "The Perils of Imagination at the End of the Old Regime",
-        "path": "chapters/002-The Perils of Imagination at the End of the Old Regime.md",
-        "note_unit_count": 86,
-        "local_ref_total": 100,
-        "local_def_total": 85,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": false,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": [
-          "7"
-        ]
-      },
-      {
-        "title": "The Revolutionary Schooling of Imagination",
-        "path": "chapters/003-The Revolutionary Schooling of Imagination.md",
-        "note_unit_count": 95,
-        "local_ref_total": 111,
-        "local_def_total": 94,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": false,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "Is There a Self in This Mental Apparatus?",
-        "path": "chapters/004-Is There a Self in This Mental Apparatus.md",
-        "note_unit_count": 108,
-        "local_ref_total": 114,
-        "local_def_total": 108,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
-        "path": "chapters/005-An A Priori Self for the Bourgeois Male Victor Cousin's Project.md",
-        "note_unit_count": 142,
-        "local_ref_total": 157,
-        "local_def_total": 141,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": false,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "Cousinian Hegemony",
-        "path": "chapters/006-Cousinian Hegemony.md",
-        "note_unit_count": 169,
-        "local_ref_total": 198,
-        "local_def_total": 169,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
-        "path": "chapters/007-Religious and Secular Access to the Vie Intérieure Renan at the Crossroads.md",
-        "note_unit_count": 112,
-        "local_ref_total": 120,
-        "local_def_total": 112,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
-        "path": "chapters/008-A Palpable Self for the Socially Marginal The Phrenological Alternative.md",
-        "note_unit_count": 152,
-        "local_ref_total": 200,
-        "local_def_total": 152,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "Epilogue",
-        "path": "chapters/009-Epilogue.md",
-        "note_unit_count": 31,
-        "local_ref_total": 40,
-        "local_def_total": 31,
-        "first_local_def_marker": "1",
-        "chapter_local_contract_ok": true,
-        "orphan_local_definitions": [],
-        "orphan_local_refs": []
-      },
-      {
-        "title": "Note on Sources",
-        "path": "chapters/010-Note on Sources.md",
+        "title": "The Post- Revolutionary Self",
+        "path": "chapters/001-The Post- Revolutionary Self.md",
         "note_unit_count": 0,
         "local_ref_total": 0,
         "local_def_total": 0,
@@ -1118,8 +1876,74 @@
         "orphan_local_refs": []
       },
       {
-        "title": "Index",
-        "path": "chapters/011-Index.md",
+        "title": "Introduction: Psychological Interiority versus Self-Talk",
+        "path": "chapters/002-Introduction Psychological Interiority versus Self-Talk.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "The Perils of Imagination at the End of the Old Regime",
+        "path": "chapters/003-The Perils of Imagination at the End of the Old Regime.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "The Revolutionary Schooling of Imagination",
+        "path": "chapters/004-The Revolutionary Schooling of Imagination.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Is There a Self in This Mental Apparatus?",
+        "path": "chapters/005-Is There a Self in This Mental Apparatus.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": true,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "path": "chapters/006-A Palpable Self for the Socially Marginal The Phrenological Alternative.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Epilogue",
+        "path": "chapters/007-Epilogue.md",
+        "note_unit_count": 0,
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "first_local_def_marker": "",
+        "chapter_local_contract_ok": false,
+        "orphan_local_definitions": [],
+        "orphan_local_refs": []
+      },
+      {
+        "title": "Introduction",
+        "path": "chapters/008-Introduction.md",
         "note_unit_count": 0,
         "local_ref_total": 0,
         "local_def_total": 0,
@@ -1139,275 +1963,284 @@
     "link_summary": {},
     "chapter_link_contract_summary": {},
     "anchor_kind_counts": {
-      "unknown": 902
+      "unknown": 220,
+      "endnote": 773
     },
     "link_status_counts": {
-      "orphan_anchor": 902
+      "matched": 588,
+      "ignored": 66
     },
     "link_resolver_counts": {
-      "rule": 902
+      "repair": 396,
+      "rule": 98,
+      "fallback": 69,
+      "orphan_recovery": 91
     },
     "anchor_samples": [
       {
-        "anchor_id": "anchor-00001",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00006",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "1",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
       {
-        "anchor_id": "anchor-00002",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00007",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "2",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
       {
-        "anchor_id": "anchor-00003",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00008",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "3",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
       {
-        "anchor_id": "anchor-00004",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00009",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "4",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
       {
-        "anchor_id": "anchor-00005",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00010",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "5",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
       {
-        "anchor_id": "anchor-00006",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00011",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 19,
         "paragraph_index": 0,
         "marker": "6",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for exampl..."
       },
       {
-        "anchor_id": "anchor-00007",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00012",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 20,
         "paragraph_index": 0,
         "marker": "7",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "three different types of fragmentation have provided cause for worry. The type with which we are most familiar today was well evoked by Jean..."
       },
       {
-        "anchor_id": "anchor-00008",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00013",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 21,
         "paragraph_index": 0,
         "marker": "8",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor's social function. According to Mauss, an important evol..."
       },
       {
-        "anchor_id": "anchor-00009",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00014",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 21,
         "paragraph_index": 0,
         "marker": "9",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor's social function. According to Mauss, an important evol..."
       },
       {
-        "anchor_id": "anchor-00010",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "anchor_id": "anchor-00015",
+        "chapter_id": "ch-fallback-0002",
         "page_no": 21,
         "paragraph_index": 0,
         "marker": "10",
         "anchor_kind": "unknown",
         "certainty": 1.0,
-        "source_text_preview": ""
+        "source_text_preview": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor's social function. According to Mauss, an important evol..."
       }
     ],
     "link_samples": [
       {
         "link_id": "link-00001",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00001",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "1",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0001",
+        "anchor_id": "anchor-00915",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "10",
         "page_span": [
-          19,
-          19
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00002",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00002",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "2",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0002",
+        "anchor_id": "anchor-00916",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "11",
         "page_span": [
-          19,
-          19
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00003",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00003",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "3",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0003",
+        "anchor_id": "anchor-00917",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "12",
         "page_span": [
-          19,
-          19
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00004",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00004",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "4",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0004",
+        "anchor_id": "anchor-00918",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "13",
         "page_span": [
-          19,
-          19
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00005",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00005",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "5",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0005",
+        "anchor_id": "anchor-00919",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "14",
         "page_span": [
-          19,
-          19
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00006",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00006",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "6",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0006",
+        "anchor_id": "anchor-00920",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "15",
         "page_span": [
-          19,
-          19
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00007",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00007",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "7",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0007",
+        "anchor_id": "anchor-00921",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "16",
         "page_span": [
-          20,
-          20
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00008",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00008",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "8",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0007-inferred-1",
+        "anchor_id": "anchor-00922",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "17",
         "page_span": [
-          21,
-          21
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00009",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00009",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "9",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0009",
+        "anchor_id": "anchor-00923",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "18",
         "page_span": [
-          21,
-          21
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00010",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00010",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "10",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0010",
+        "anchor_id": "anchor-00924",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "19",
         "page_span": [
-          21,
-          21
+          350,
+          350
         ]
       },
       {
         "link_id": "link-00011",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00011",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "11",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0011",
+        "anchor_id": "anchor-00911",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "6",
         "page_span": [
-          22,
-          22
+          352,
+          352
         ]
       },
       {
         "link_id": "link-00012",
-        "chapter_id": "toc-ch-001-introductionpsychologica",
-        "note_item_id": "",
-        "anchor_id": "anchor-00012",
-        "status": "orphan_anchor",
-        "resolver": "rule",
-        "marker": "12",
+        "chapter_id": "ch-fallback-0008",
+        "note_item_id": "en-0012",
+        "anchor_id": "anchor-00912",
+        "status": "matched",
+        "resolver": "repair",
+        "marker": "7",
         "page_span": [
-          22,
-          22
+          352,
+          352
         ]
       }
     ],
     "llm_repair_trace_refs": [],
-    "visual_toc_trace_refs": []
+    "visual_toc_trace_refs": [
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.preflight.001.json",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.001.json",
+      "/Users/hao/OCRandTranslation/test_example/post-revolutionary/llm_traces/visual_toc.manual_input_extract.002.json"
+    ]
   }
 }

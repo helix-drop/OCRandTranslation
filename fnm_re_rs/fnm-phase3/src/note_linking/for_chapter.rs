@@ -3,6 +3,7 @@
 use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
 use fnm_phase1::input::RawPage;
 use fnm_phase2::chapter_split::ChapterLayers;
+use std::collections::HashMap;
 
 /// 从完整 Phase2Structure 筛单章 → build_body_anchors → build_note_links。
 ///
@@ -89,8 +90,15 @@ pub fn build_note_links_for_chapter(
         .collect();
 
     let mut anchors_mut = anchors.clone();
-    let (links, _link_summary) =
-        crate::note_links::build_note_links(&mut anchors_mut, &ch_items, &ch_pp, 1, &ch_modes, &[]);
+    let (links, _link_summary) = crate::note_links::build_note_links(
+        &mut anchors_mut,
+        &ch_items,
+        &ch_pp,
+        1,
+        &ch_modes,
+        &[],
+        &HashMap::new(),
+    );
 
     (anchors_mut, links)
 }

@@ -13,13 +13,24 @@ pub fn infer_note_kind_from_anchor(anchor: &BodyAnchorRecord) -> &'static str {
     }
 }
 
-/// 判断两个 kind 是否兼容（相等或任一 unknown）。
+/// 宽松的 kind 兼容性检查（用于 review/grouping）。
+/// unknown 通配任意类型。
 ///
 /// ←→ Python `_anchor_kind_compatible`
 pub fn anchor_kind_compatible(left: &str, right: &str) -> bool {
     let left = left.trim();
     let right = right.trim();
     left == right || left == "unknown" || right == "unknown"
+}
+
+/// 严格的 kind 兼容性检查（用于 link matching / override 应用）。
+/// unknown 只与 unknown 兼容，不自动匹配 footnote/endnote。
+///
+/// 铁律 §3：禁止广播——unknown 不应被默认当作 endnote 参与 link 匹配。
+pub fn anchor_kind_compatible_for_link(left: &str, right: &str) -> bool {
+    let left = left.trim();
+    let right = right.trim();
+    left == right
 }
 
 #[cfg(test)]
@@ -49,9 +60,16 @@ mod tests {
 
     #[test]
     fn test_anchor_kind_compatible() {
+        // review/grouping：宽松
         assert!(anchor_kind_compatible("footnote", "footnote"));
         assert!(anchor_kind_compatible("endnote", "unknown"));
         assert!(anchor_kind_compatible("unknown", "footnote"));
         assert!(!anchor_kind_compatible("footnote", "endnote"));
+        // link matching：严格
+        assert!(anchor_kind_compatible_for_link("footnote", "footnote"));
+        assert!(anchor_kind_compatible_for_link("endnote", "endnote"));
+        assert!(anchor_kind_compatible_for_link("unknown", "unknown"));
+        assert!(!anchor_kind_compatible_for_link("endnote", "unknown"));
+        assert!(!anchor_kind_compatible_for_link("footnote", "endnote"));
     }
 }

@@ -1,0 +1,96 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "ignore_ref",
+        "synthesize_note_item",
+        "needs_review"
+      ],
+      "chapter_title": "AVERTISSEMENT",
+      "cluster_id": "ch-fallback-0001:ch-fallback-0001:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        9,
+        9
+      ],
+      "rebind_candidates": [],
+      "request_mode": "ref_only_visual",
+      "unmatched_anchors": [
+        {
+          "anchor_id": "anchor-00002",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "chapter_id": "ch-fallback-0001",
+          "char_end": 715,
+          "char_start": 713,
+          "normalized_marker": "2",
+          "ocr_repaired_from_marker": "",
+          "page_no": 9,
+          "paragraph_index": 0,
+          "source": "",
+          "source_marker": "²",
+          "source_text": "# AVERTISSEMENT\n\nMichel Foucault a enseigné au Collège de France de janvier 1971 à sa mort en juin 1984 – à l'exception de l'année 1977 où il a pu bénéficier d'une année sabbatique. Le titre de sa chaire était : Histoire des systèmes de pensée.\n\nElle fut créée le 30 novembre 1969, sur proposition de Jules Vuillemin, par l'assemblée générale des professeurs du Collège de France en remplacement de la chaire d'Histoire de la pensée philosophique, tenue jusqu'à sa mort par Jean Hyppolite. La même assemblée élut Michel Foucault, le 12 avril 1970, comme titulaire de la nouvelle chaire¹. Il avait quarante-trois ans.\n\nMichel Foucault en prononça la leçon inaugurale le 2 décembre 1970².\n\nL’enseignement au Collège de France obéit à des règles particulières. Les professeurs ont l’obligation de délivrer vingt-six heures d’enseignement par an (la moitié au maximum pouvant être dispensée sous forme de séminaires³). Ils doivent exposer chaque année une recherche originale, les contraignant à renouveler chaque fois le contenu de leur enseignement. L’assistance aux cours et aux séminaires est entièrement libre; elle ne requiert ni inscription ni diplôme. Et le professeur n’en dispense aucun⁴. Dans le vocabulaire du Collège de France, on dit que les professeurs n’ont pas d’étudiants mais des auditeurs.\n\nLes cours de Michel Foucault se tenaient chaque mercredi de début janvier à fin mars. L'assistance, très nombreuse, composée d'étudiants, d'enseignants, de chercheurs, de curieux, dont beaucoup d'étrangers,",
+          "synthetic": false
+        }
+      ],
+      "unmatched_note_items": []
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 8,
+        "ocr_excerpt": "# AVERTISSEMENT Michel Foucault a enseigné au Collège de France de janvier 1971 à sa mort en juin 1984 – à l'exception de l'année 1977 où il a pu bénéficier d'une année sabbatique. Le titre de sa chaire était : Histoire des systèmes de pensée. Elle fut créée le 30 novembre 1969, sur proposition de Jules Vuillemin, par l'assemblée générale des professeurs du Collège de France en remplacement de la chaire d'Histoire de la pensée philosophique, tenue jusqu'à sa mort par Jean Hyppolite. La même assemblée élut Michel Foucault, le 12 avril 1970, comme titulaire de la nouvelle chaire¹. Il avait quarante-trois ans. Michel Foucault en prononça la leçon inaugurale le 2 décembre 1970². L’enseignement au Collège de France obéit à des règles particulières. Les professeurs ont l’obligation de délivrer vingt-six heures d’enseignement par an (la moitié au maximum pouvant être dispensée sous forme de séminaires³). Ils doivent exposer chaque année une recherche originale, les contraignant à renouveler chaque fois le contenu de leur enseignement. L’assistance aux cours et aux séminaires est entièrement libre; elle ne requiert ni inscription ni diplôme. Et le professeur n’en dispense aucun⁴. Dans le vocabulaire du Collège de France, on dit que les professeurs n’ont pas d’étudiants mais des auditeurs. Les cours de Michel Foucault se tenaient chaque mercredi de début janvier à fin mars. L'assistance ...",
+        "page_no": 9,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0001:ch-fallback-0001:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "ref_only_visual"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "ignore_ref",
+      "synthesize_note_item",
+      "needs_review"
+    ],
+    "chars": 3567,
+    "cluster_id": "ch-fallback-0001:ch-fallback-0001:footnote",
+    "estimated_prompt_tokens": 1049,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "ref_only_visual",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 1,
+    "unmatched_note_items": 0
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1049,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

@@ -71,11 +71,11 @@ pub fn build_raw_marker_note_sequences(
             continue;
         }
         let anchor = body_anchors_by_id.get(&link.anchor_id);
-        if anchor.map_or(false, |a| a.synthetic) {
+        if anchor.is_some_and(|a| a.synthetic) {
             continue;
         }
         // 跳过 ocr_repaired_from_marker 锚点
-        if anchor.map_or(false, |a| !a.ocr_repaired_from_marker.is_empty()) {
+        if anchor.is_some_and(|a| !a.ocr_repaired_from_marker.is_empty()) {
             continue;
         }
         let note_item = note_items_by_id.get(note_item_id);
@@ -156,8 +156,8 @@ pub fn build_raw_marker_note_sequences(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::records::{BodyAnchorRecord, NoteItemRecord, NoteLinkRecord};
-    use crate::types::{LinkStatus, NoteKind};
+    use crate::records::{BodyAnchorRecord, NoteLinkRecord};
+    use crate::types::LinkStatus;
 
     #[test]
     fn empty_input() {

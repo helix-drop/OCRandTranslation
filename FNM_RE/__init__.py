@@ -69,6 +69,7 @@ def run_llm_repair(*args, **kwargs):
     auto_apply = kwargs.get("auto_apply", True)
     confidence_threshold = kwargs.get("confidence_threshold", 0.9)
     cluster_limit = kwargs.get("cluster_limit")
+    trace_callback = kwargs.get("trace_callback")
     result_json = fnm_re_rs.run_llm_repair_json(
         _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
         doc_id,
@@ -78,6 +79,7 @@ def run_llm_repair(*args, **kwargs):
         auto_apply,
         confidence_threshold,
         cluster_limit,
+        trace_callback,
     )
     import json as _json
     return _json.loads(result_json)

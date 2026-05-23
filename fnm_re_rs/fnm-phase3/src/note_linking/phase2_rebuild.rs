@@ -1,62 +1,58 @@
 //! ←→ Python `note_linking.py:_phase2_from_chapter_layers`
+//!
+//! internal materialization helper：只返回 link matching 所需的最小数据，
+//! 不输出退化的 Phase1/2 facts（pages / chapters / heading_candidates / section_heads）。
 
-use fnm_core::records::{
-    ChapterNoteModeRecord, ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord,
-    Phase2Structure, Phase2Summary,
-};
-use fnm_core::types::{BoundaryState, ChapterSource, NoteKind, NoteMode, RegionScope};
+use fnm_core::records::{ChapterNoteModeRecord, NoteItemRecord, NoteRegionRecord};
+use fnm_core::types::{NoteKind, NoteMode, RegionScope};
 use fnm_phase2::chapter_split::ChapterLayers;
 use std::collections::{HashMap, HashSet};
 
-/// 将 ChapterLayers 重建为 Phase2Structure。
+/// phase2_rebuild 的最小输出——仅包含 link matching 所需数据。
+#[derive(Debug, Clone, Default)]
+pub struct Phase2BuildOutput {
+    pub note_regions: Vec<NoteRegionRecord>,
+    pub note_items: Vec<NoteItemRecord>,
+    pub chapter_note_modes: Vec<ChapterNoteModeRecord>,
+    pub note_mode_by_chapter: HashMap<String, String>,
+    pub book_type: String,
+}
+
+/// 将 ChapterLayers 重建为 Phase2 的 note 数据。
 ///
 /// ←→ Python `_phase2_from_chapter_layers`
 ///
-/// 注意:Python 的 ChapterLayers.chapters 等价于 Rust 的 `chapter_layers.chapter_layers`
-/// (Vec<ChapterLayer>),里面才有 policy_applied / body_pages / footnote_items / endnote_items /
+/// 注意：Python 的 ChapterLayers.chapters 等价于 Rust 的 `chapter_layers.chapter_layers`
+/// (Vec<ChapterLayer>)，里面才有 policy_applied / body_pages / footnote_items / endnote_items /
 /// endnote_regions。`chapter_layers.chapters` 在 Rust 端只保存薄 ChapterRecord (7 字段)。
-pub fn phase2_from_chapter_layers(
-    chapter_layers: &ChapterLayers,
-) -> (Phase2Structure, HashMap<String, String>, String) {
+///
+/// 本函数只返回 note_regions / note_items / chapter_note_modes。Phase1/2 的 pages /
+/// chapters / heading_candidates / section_heads 必须由 caller 透传原始版本，不使用本函数输出。
+pub fn phase2_from_chapter_layers(chapter_layers: &ChapterLayers) -> Phase2BuildOutput {
     // 注：原 `chapter_policy_by_id` 索引已删——仅供 hot loop 内 `let _chapter_mode`
     // 读取后丢弃用，是 hot loop 内每 region/item ×2 次无意义 HashMap 查询。
     // 章级 note_mode 直接来自 chapter_layers.chapter_layers[].policy_applied，
     // 在下方装配 ChapterNoteModeRecord 时直接读，不需要预索引。
 
-    let mut region_note_kind_by_id: HashMap<String, String> = HashMap::new();
+    // CLAUDE.md §12 第 3、4 条：
+    //   - 禁止广播：章级 note_mode 不参与个体 entity 的 note_kind 决定。
+    //   - 上下游隔离：直接消费上游已枚举化的 row.note_kind（Footnote/Endnote），不再走
+    //     String 中转 + if/else 重新解释——后者会把未来新增变体静默降级为 Footnote。
     let mut region_records: Vec<NoteRegionRecord> = Vec::new();
     for row in &chapter_layers.regions {
-        let chapter_id = row.chapter_id.clone();
-        // CLAUDE.md §12 第 3 条「禁止广播」：章级 note_mode 绝不参与个体 entity 的
-        // note_kind 决定——意图通过本注释表达即可，不在 hot loop 内做 HashMap 查询。
-        // （Python 端 `_ = chapter_mode` 是 lint 抑制；Rust 无 unused 警告，注释足够。）
-        let note_kind_str = row.note_kind.as_str();
-        let note_kind = if note_kind_str == "footnote" || note_kind_str == "endnote" {
-            note_kind_str.to_string()
-        } else {
-            // note_kind 为空时保持空——不可用章级 chapter_mode 推断个体类型
-            String::new()
-        };
-        region_note_kind_by_id.insert(row.region_id.clone(), note_kind.clone());
         region_records.push(NoteRegionRecord {
             region_id: row.region_id.clone(),
-            chapter_id: chapter_id.clone(),
+            chapter_id: row.chapter_id.clone(),
             page_start: row.page_start,
             page_end: row.page_end,
             pages: row.pages.clone(),
-            note_kind: if note_kind == "footnote" {
-                NoteKind::Footnote
-            } else if note_kind == "endnote" {
-                NoteKind::Endnote
-            } else {
-                NoteKind::Footnote
-            },
+            note_kind: row.note_kind,
             scope: row.scope,
             source: row.source,
             heading_text: row.heading_text.clone(),
-            start_reason: "module_projection".to_string(),
-            end_reason: "module_projection".to_string(),
-            region_marker_alignment_ok: true,
+            start_reason: row.start_reason.clone(),
+            end_reason: row.end_reason.clone(),
+            region_marker_alignment_ok: row.region_marker_alignment_ok,
             region_start_first_source_marker: String::new(),
             region_first_note_item_marker: String::new(),
             review_required: row.review_required,
@@ -70,47 +66,28 @@ pub fn phase2_from_chapter_layers(
             .as_ref()
             .unwrap_or(&row.chapter_id)
             .clone();
-        // CLAUDE.md §12 第 3 条「禁止广播」：章级 note_mode 绝不参与个体 entity 的
-        // note_kind 决定——见 region loop 上方注释，不在 hot loop 内做无用 HashMap 查询。
-        let region_id = row.region_id.clone();
-        let region_note_kind = region_note_kind_by_id
-            .get(&region_id)
-            .cloned()
-            .unwrap_or_default();
-        let raw_note_kind = row.note_kind.as_str();
-        let note_kind_str = if raw_note_kind == "footnote" || raw_note_kind == "endnote" {
-            raw_note_kind.to_string()
-        } else if !region_note_kind.is_empty() {
-            region_note_kind
-        } else {
-            String::new()
-        };
-        let marker_type = if row.marker_type.is_empty() && note_kind_str == "footnote" {
-            "footnote_marker".to_string()
-        } else if row.marker_type.is_empty() && note_kind_str == "endnote" {
-            "numeric".to_string()
+        let marker_type = if row.marker_type.is_empty() {
+            match row.note_kind {
+                NoteKind::Footnote => "footnote_marker".to_string(),
+                NoteKind::Endnote => "numeric".to_string(),
+                NoteKind::Unknown => "unknown".to_string(),
+            }
         } else {
             row.marker_type.clone()
         };
         note_items.push(NoteItemRecord {
             note_item_id: row.note_item_id.clone(),
-            region_id,
+            region_id: row.region_id.clone(),
             chapter_id,
             page_no: row.page_no,
             marker: row.marker.clone(),
             marker_type,
             text: row.text.clone(),
             source: row.source.clone(),
-            source_page_label: row.page_no.to_string(),
+            source_page_label: row.source_page_label.clone(),
             is_reconstructed: row.is_reconstructed,
             review_required: row.review_required,
-            note_kind: if note_kind_str == "footnote" {
-                NoteKind::Footnote
-            } else if note_kind_str == "endnote" {
-                NoteKind::Endnote
-            } else {
-                NoteKind::Footnote
-            },
+            note_kind: row.note_kind,
             projection_mode: row.projection_mode.clone(),
             owner_chapter_id: row.owner_chapter_id.clone(),
             source_marker: row.source_marker.clone(),
@@ -127,56 +104,11 @@ pub fn phase2_from_chapter_layers(
     }
 
     let mut note_mode_by_chapter: HashMap<String, String> = HashMap::new();
-    let mut chapter_records: Vec<ChapterRecord> = Vec::new();
     let mut chapter_note_modes: Vec<ChapterNoteModeRecord> = Vec::new();
-    let mut body_page_records: Vec<PagePartitionRecord> = Vec::new();
-    let mut body_seen_pages: HashSet<i64> = HashSet::new();
     let mut book_type = "no_notes".to_string();
 
     for cl in &chapter_layers.chapter_layers {
         let chapter_id = cl.chapter_id.clone();
-        let mut page_nos: HashSet<i64> = HashSet::new();
-        for row in &cl.body_pages {
-            if row.page_no > 0 {
-                page_nos.insert(row.page_no);
-            }
-        }
-        for row in &cl.footnote_items {
-            if row.page_no > 0 {
-                page_nos.insert(row.page_no);
-            }
-        }
-        for row in &cl.endnote_items {
-            if row.page_no > 0 {
-                page_nos.insert(row.page_no);
-            }
-        }
-        for region in &cl.endnote_regions {
-            for page_no in &region.pages {
-                if *page_no > 0 {
-                    page_nos.insert(*page_no);
-                }
-            }
-            if region.page_start > 0 {
-                page_nos.insert(region.page_start);
-            }
-            if region.page_end > 0 {
-                page_nos.insert(region.page_end);
-            }
-        }
-        let mut sorted_pages: Vec<i64> = page_nos.iter().copied().collect();
-        sorted_pages.sort_unstable();
-        let start_page = sorted_pages.first().copied().unwrap_or(0);
-        let end_page = sorted_pages.last().copied().unwrap_or(0);
-        chapter_records.push(ChapterRecord {
-            chapter_id: chapter_id.clone(),
-            title: cl.title.clone(),
-            start_page,
-            end_page,
-            pages: sorted_pages,
-            source: ChapterSource::Fallback,
-            boundary_state: BoundaryState::Ready,
-        });
 
         let chapter_regions: Vec<&NoteRegionRecord> = region_records
             .iter()
@@ -235,39 +167,8 @@ pub fn phase2_from_chapter_layers(
         if !chapter_book_type.is_empty() {
             book_type = chapter_book_type.to_string();
         }
-
-        for page in &cl.body_pages {
-            let page_no = page.page_no;
-            if page_no <= 0 || body_seen_pages.contains(&page_no) {
-                continue;
-            }
-            body_seen_pages.insert(page_no);
-            body_page_records.push(PagePartitionRecord {
-                page_no,
-                target_pdf_page: page_no,
-                page_role: fnm_core::types::PageRole::Body,
-                confidence: 1.0,
-                reason: if page.split_reason.is_empty() {
-                    "module_projection".to_string()
-                } else {
-                    page.split_reason.clone()
-                },
-                section_hint: String::new(),
-                has_note_heading: false,
-                note_scan_summary: serde_json::Value::Null,
-            });
-        }
     }
 
-    body_page_records.sort_by_key(|r| r.page_no);
-    chapter_records.sort_by(|a, b| {
-        let cmp = a.start_page.cmp(&b.start_page);
-        if cmp == std::cmp::Ordering::Equal {
-            a.chapter_id.cmp(&b.chapter_id)
-        } else {
-            cmp
-        }
-    });
     chapter_note_modes.sort_by(|a, b| a.chapter_id.cmp(&b.chapter_id));
     note_items.sort_by(|a, b| {
         let cmp = a.page_no.cmp(&b.page_no);
@@ -286,22 +187,13 @@ pub fn phase2_from_chapter_layers(
         }
     });
 
-    // chapter_layers 当前没暴露 region_summary / item_summary 聚合字段——
-    // 这些在 Python 端由 build_chapter_layers 顶层产出,Rust 端目前留空。
-    let summary = Phase2Summary::default();
-
-    let phase2 = Phase2Structure {
-        pages: body_page_records,
-        heading_candidates: Vec::new(),
-        chapters: chapter_records,
-        section_heads: Vec::new(),
+    Phase2BuildOutput {
         note_regions: region_records,
         note_items,
         chapter_note_modes,
-        summary,
-    };
-
-    (phase2, note_mode_by_chapter, book_type)
+        note_mode_by_chapter,
+        book_type,
+    }
 }
 
 #[cfg(test)]
@@ -311,9 +203,11 @@ mod tests {
     #[test]
     fn test_empty_layers() {
         let layers = ChapterLayers::default();
-        let (phase2, note_mode_by_id, book_type) = phase2_from_chapter_layers(&layers);
-        assert!(phase2.chapters.is_empty());
-        assert!(note_mode_by_id.is_empty());
-        assert_eq!(book_type, "no_notes");
+        let output = phase2_from_chapter_layers(&layers);
+        assert!(output.note_regions.is_empty());
+        assert!(output.note_items.is_empty());
+        assert!(output.chapter_note_modes.is_empty());
+        assert!(output.note_mode_by_chapter.is_empty());
+        assert_eq!(output.book_type, "no_notes");
     }
 }

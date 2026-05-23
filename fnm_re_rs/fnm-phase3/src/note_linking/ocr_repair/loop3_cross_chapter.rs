@@ -1,11 +1,14 @@
-//! Loop 3: 跨章同页重绑定。
+//! Loop 3: 同章同页重绑定（原跨章，现加入章守卫）。
 //!
 //! ←→ Python `_repair_explicit_footnote_anchor_ocr_variants` 行 931-967
 //!
-//! 对每个已匹配但锚点仍为 synthetic 的脚注 link，寻找同页同 marker 的
+//! 对每个已匹配但锚点仍为 synthetic 的脚注 link，寻找同章同页同 marker 的
 //! orphan_anchor link，其背后有一个非 synthetic 显式锚点。精确匹配时
 //! （1 个候选），将 synthetic link 重绑定到该显式锚点，并将孤儿 link
-//! 标记为 ignored。注意：此循环不限同 chapter——即允许跨章。
+//! 标记为 ignored。
+//!
+//! 根据 AGENTS.md 设计原则 §3.4（上下游隔离）+ §3.3（禁止广播），
+//! Phase 3 不应跨章操作。残余跨章 case 留给 LLM repair (Phase 3.5) 处理。
 
 use fnm_core::note_marker::normalize_note_marker;
 use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
@@ -40,6 +43,10 @@ pub(super) fn run(
         let row_marker = normalize_note_marker(&row.marker);
         for (orphan_index, orphan_link) in repaired_links.iter().enumerate() {
             if orphan_link.status.as_str() != "orphan_anchor" {
+                continue;
+            }
+            // 章守卫：只修同章（AGENTS.md §3.4 上下游隔离）
+            if orphan_link.chapter_id != row.chapter_id {
                 continue;
             }
             if normalize_note_marker(&orphan_link.marker) != row_marker {

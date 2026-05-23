@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 28 MARS 1979",
+      "cluster_id": "ch-fallback-0011:nr-fn-ch-0067-ch-fallback-0011:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        292,
+        292
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0011",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0405",
+          "note_kind": "footnote",
+          "page_no": 292,
+          "region_id": "nr-fn-ch-0067-ch-fallback-0011",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p292",
+          "text": "Le manuscrit ajoute, p.9: «a) D'abord par un radicalisme empirique à la manière de Hume, b) ensuite par une analyse des mécanismes du marché. »"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 291,
+        "ocr_excerpt": "Pour résumer ceci, on pourrait dire que toute l'analyse de l'intérêt au XVIII<sup>e</sup> siècle, qui au premier regard peut apparaître comme pouvant en somme se lier sans trop de mal à la théorie du contrat, cette analyse, quand on la suit d'un peu près, dégage en fait une problématique qui est, je crois, tout à fait nouvelle, tout à fait hétérogène aux éléments caractéristiques de la doctrine du contrat et de la doctrine du sujet de droit.* C'est en quelque sorte au point de croisement entre cette conception empirique du sujet d'intérêt et les analyses des économistes que l'on va pouvoir définir un sujet, un sujet qui est sujet d'intérêt et dont l'action aura valeur à la fois multiplicatrice et bénéfique par l'intensification même de l'intérêt, et c'est cela qui caractérise l'homo œconomicus. L'homo œconomicus, il est, je crois, au XVIII<sup>e</sup> siècle, une figure absolument hétérogène et non superposable à ce qu'on pourrait appeler l'homo juridicus ou l'homo legalis, si vous voulez. Cette hétérogénéité étant établie, je crois qu'il faut aller plus loin, et d'abord dire ceci : non seulement il y a une hétérogénéité formelle entre le sujet économique et le sujet de droit, pour les raisons que je viens de vous dire, mais il me semble, jusqu'à un certain point par voie de conséquence, qu'entre le sujet de droit et le sujet économique il y a une différence essentielle dans le ...",
+        "page_no": 292,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0011:nr-fn-ch-0067-ch-fallback-0011:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5229,
+    "cluster_id": "ch-fallback-0011:nr-fn-ch-0067-ch-fallback-0011:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

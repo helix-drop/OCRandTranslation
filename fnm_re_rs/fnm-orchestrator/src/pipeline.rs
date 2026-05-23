@@ -70,7 +70,6 @@ pub fn run_pipeline(
     );
     let phase4 = run_phase4(
         &phase1,
-        &phase2,
         &phase3,
         &chapter_layers,
         &pages,
@@ -200,7 +199,14 @@ pub(crate) fn run_phase2(
         note_regions: output.note_regions.clone(),
         note_items: output.note_items.clone(),
         chapter_note_modes: output.chapter_note_modes.clone(),
-        summary: Default::default(),
+        summary: fnm_core::records::Phase2Summary {
+            chapter_endnote_region_alignment_ok: output
+                .note_regions
+                .iter()
+                .filter(|r| r.note_kind == fnm_core::types::NoteKind::Endnote)
+                .all(|r| r.region_marker_alignment_ok),
+            ..Default::default()
+        },
     };
 
     Ok(Phase2Snapshot {
@@ -227,6 +233,8 @@ pub(crate) fn run_phase3(
     let input = fnm_phase3::input::Phase3Input {
         phase1_chapters: &phase1.structure.chapters,
         phase1_pages: &phase1.structure.pages,
+        phase1_heading_candidates: &phase1.structure.heading_candidates,
+        phase1_section_heads: &phase1.structure.section_heads,
         phase2_note_regions: &phase2.note_regions,
         phase2_note_items: &phase2.note_items,
         raw_pages: pages,
@@ -252,14 +260,13 @@ pub(crate) fn run_phase3(
 
 pub(crate) fn run_phase4(
     phase1: &Phase1Snapshot,
-    phase2: &Phase2Snapshot,
     phase3: &Phase3Snapshot,
     chapter_layers: &ChapterLayers,
     pages: &[RawPage],
     pipeline_run_id: &str,
     config: &PipelineConfig,
 ) -> Result<Phase4Snapshot> {
-    let _ = phase2; // phase2 数据已通过 chapter_layers 传递
+    // phase2 数据已通过 chapter_layers 传递，无需作为独立参数。
     let max_body_chars = if config.max_body_chars > 0 {
         config.max_body_chars
     } else {

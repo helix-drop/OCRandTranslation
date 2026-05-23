@@ -112,9 +112,16 @@ pub struct ChapterStatus {
 
 // ── 内部辅助 ────────────────────────────────────────────────────
 
+/// 按章分组 body anchor 标记（仅 endnote anchor，排除 footnote/unknown）。
+/// 铁律 §3：禁止广播——脚注锚点不应出现在尾注对齐序列中。
+///
+/// ←→ Python `_body_markers_by_chapter`（但 Python 端也无此过滤——这是 Rust 端的独立修复）
 fn body_markers_by_chapter(body_anchors: &[BodyAnchorRecord]) -> HashMap<String, Vec<String>> {
     let mut result: HashMap<String, Vec<String>> = HashMap::new();
     for anchor in body_anchors {
+        if anchor.anchor_kind.as_str() != "endnote" {
+            continue;
+        }
         result
             .entry(anchor.chapter_id.clone())
             .or_default()

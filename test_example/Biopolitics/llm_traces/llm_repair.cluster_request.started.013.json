@@ -1,0 +1,228 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LECON DU 24 JANVIER 1979",
+      "cluster_id": "ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote",
+      "matched_examples": [
+        {
+          "anchor_excerpt": "la balance européenne, dont le principe est celui-ci : faire en sorte qu'il n'y ait aucun État qui l'emporte suffisamment sur les autres pour pouvoir reconstituer en Europe l'unité impériale ; faire en sorte, par conséquent, qu'il n'y ait pas un État dominant tous les autres, qu'aucun État ne l'emporte suffisamment sur l'ensemble de ses voisins pour pouvoir faire régner sur eux sa domination, etc. Le lien entre ces deux mécanismes, celui à objectifs illimités, l'État de police, celui à objectifs limités, la balance européenne, on le voit, on le comprend très facilement dans la mesure en effet où, s'il est vrai que l'État de police, ou si vous voulez les mécanismes intérieurs qui organisent et développent à l'infini l'État de police ont pour raison d'être, finalité et objectif le renforcement de l'État lui-même, chaque État a donc pour cible son renforcement à l'infini, c'est-à-dire une majoration de puissance illimitée par rapport aux autres. En termes clairs, la concurrence chez celui qui est le meilleur dans le jeu de la concurrence va introduire en Europe un certain nombre d'inégalités, inégalités qui iront s'accroissant, qui seront sanctionnées par un déséquilibre dans la population, par conséquent dans les forces militaires, et on en arrivera donc à cette fameuse situation impériale dont l'équilibre européens, depuis le traité de Westphalie, a voulu affranchir l'Europe. C'est pour éviter cela qu'on établit la balance.\n\nD'une façon plus précise, dans le calcul mercantiliste et dans la manière dont le mercantilisme organise le calcul économique-politique des forces, on voit bien comment en effet on ne peut pas éviter, si du moins on veut empêcher que se réalise à nouveau une configuration impériale, un équilibre européen. En effet, pour le mercantilisme, la concurrence entre États suppose que tout ce par quoi l'un des États s'enrichit, peut, et à dire vrai doit, être prélevé sur la richesse des autres États. Ce qui est acquis par l'un, il faut l'enlever à l'autre; on ne peut s'enrichir qu'aux dépens des autres. Autrement dit, pour les mercantilistes – et c'est, je crois, un point important –, le jeu économique est un jeu à somme nulle. Et c'est un jeu à somme nulle tout simplement à cause de la conception et de la pratique, d'ailleurs monétariste, du mercantilisme. Il existe une certaine quantité d'or dans le monde. Puisque c'est l'or qui définit, mesure et constitue la richesse de chaque État, il est bien entendu que chaque fois que l'un des États s'enrichira, il prélèvera sur le stock commun d'or et par conséquent appauvrira les autres. Le caractère monétariste de la politique et du calcul mercantilistes implique, par conséquent, qu'on ne puisse concevoir la concurrence qu'en forme de jeu à somme nulle et, par conséquent, d'enrichissement des uns aux dépens des autres². Et c'est précisément pour éviter que, dans ce jeu à somme nulle, il y ait un gagnant et",
+          "anchor_id": "anchor-00050",
+          "link_id": "link-00037",
+          "marker": "2",
+          "note_excerpt": "",
+          "note_item_id": "en-0067"
+        },
+        {
+          "anchor_excerpt": "un seul, qu'il va falloir, en stricte logique économique, – pour éviter ce phénomène, cette conséquence politique de la concurrence ainsi définie –, que s'établisse quelque chose comme un équilibre qui permettra d'interrompre en quelque sorte le jeu à un moment donné. C'est-à-dire : lorsque les écarts entre les joueurs risqueront d'être trop importants, on arrêtera la partie, et c'est cela précisément en quoi consiste l'équilibre européen. C'est exactement, enfin jusqu'à un certain point, le problème pascalien³ : qu'est-ce qui arrive lorsque dans un jeu à somme nulle, on interrompt le jeu et on répartit les gains entre les partenaires ? Interrompre le jeu de la concurrence par la diplomatie de l'équilibre européen, c'est cela qui est nécessairement impliqué par la conception et la pratique monétariste des mercantilistes. Voilà le point de départ.\n\nOr, qu'est-ce qui va se passer en ce milieu du XVIII<sup>e</sup> siècle dont je vous parle et où j'essaie de repérer la formation d'une nouvelle raison gouvernementale ? Dans cette nouvelle raison d'État ou cette raison du moindre État qui trouve donc dans le marché sa véridiction de base et dans l'utilité sa juridiction de fait, il est bien entendu que les choses vont être tout à fait différentes. En effet, pour les physiocrates mais, d'ailleurs, également pour Adam Smith, la liberté du marché peut et doit fonctionner d'une telle manière que s'établira, à travers et grâce à cette liberté de marché, ce qu'ils appellent le prix naturel ou les bons prix, etc. En tout cas ce prix naturel, ou ce bon prix, est toujours tel qu'il sera profitable à qui ? Au vendeur, mais aussi bien à l'acheteur ; à l'acheteur et au vendeur à la fois. C'est-à-dire que les effets bénéfiques de la concurrence ne seront pas inégalement et nécessairement répartis entre l'un et l'autre, au profit de l'un aux dépens de l'autre. Mais le jeu légitime de la concurrence naturelle, c'est-à-dire de la concurrence à l'état libre, ne peut amener qu'un profit double. L'oscillation du prix autour de la valeur, cette oscillation dont je vous montrais la dernière fois qu'elle était assurée selon les physiocrates, selon Adam Smith, par la liberté du marché, eh bien cette oscillation fait fonctionner un mécanisme d'enrichissement mutuel. Maximum de profit du côté du vendeur, minimum de dépenses pour les acheteurs. On trouve donc cette idée, qui va être maintenant au centre du jeu économique tel qu'il est défini par les libéraux, qu'en fait l'enrichissement d'un pays, comme l'enrichissement d'un individu, ne peut effectivement s'établir à long terme et se maintenir que par un enrichissement mutuel. La richesse de mon voisin m'importe pour mon enrichissement même, et non pas au sens où les mercantilistes disaient qu'il faut bien que le voisin ait de l'or pour m'acheter mes produits, ce qui me permettra de l'appauvrir lui en m'enrichissant moi. Il faut que mon voisin soit riche, et",
+          "anchor_id": "anchor-00051",
+          "link_id": "link-00038",
+          "marker": "3",
+          "note_excerpt": "",
+          "note_item_id": "en-0068"
+        }
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        86,
+        89
+      ],
+      "rebind_candidates": [
+        {
+          "anchor_excerpt": "la balance européenne, dont le principe est celui-ci : faire en sorte qu'il n'y ait aucun État qui l'emporte suffisamment sur les autres pour pouvoir reconstituer en Europe l'unité impériale ; faire en sorte, par conséquent, qu'il n'y ait pas un État dominant tous les autres, qu'aucun État ne l'emporte suffisamment sur l'ensemble de ses voisins pour pouvoir faire régner sur eux sa domination, etc. Le lien entre ces deux mécanismes, celui à objectifs illimités, l'État de police, celui à objectifs limités, la balance européenne, on le voit, on le comprend très facilement dans la mesure en effet où, s'il est vrai que l'État de police, ou si vous voulez les mécanismes intérieurs qui organisent et développent à l'infini l'État de police ont pour raison d'être, finalité et objectif le renforcement de l'État lui-même, chaque État a donc pour cible son renforcement à l'infini, c'est-à-dire une majoration de puissance illimitée par rapport aux autres. En termes clairs, la concurrence chez celui qui est le meilleur dans le jeu de la concurrence va introduire en Europe un certain nombre d'inégalités, inégalités qui iront s'accroissant, qui seront sanctionnées par un déséquilibre dans la population, par conséquent dans les forces militaires, et on en arrivera donc à cette fameuse situation impériale dont l'équilibre européens, depuis le traité de Westphalie, a voulu affranchir l'Europe. C'est pour éviter cela qu'on établit la balance.\n\nD'une façon plus précise, dans le calcul mercantiliste et dans la manière dont le mercantilisme organise le calcul économique-politique des forces, on voit bien comment en effet on ne peut pas éviter, si du moins on veut empêcher que se réalise à nouveau une configuration impériale, un équilibre européen. En effet, pour le mercantilisme, la concurrence entre États suppose que tout ce par quoi l'un des États s'enrichit, peut, et à dire vrai doit, être prélevé sur la richesse des autres États. Ce qui est acquis par l'un, il faut l'enlever à l'autre; on ne peut s'enrichir qu'aux dépens des autres. Autrement dit, pour les mercantilistes – et c'est, je crois, un point important –, le jeu économique est un jeu à somme nulle. Et c'est un jeu à somme nulle tout simplement à cause de la conception et de la pratique, d'ailleurs monétariste, du mercantilisme. Il existe une certaine quantité d'or dans le monde. Puisque c'est l'or qui définit, mesure et constitue la richesse de chaque État, il est bien entendu que chaque fois que l'un des États s'enrichira, il prélèvera sur le stock commun d'or et par conséquent appauvrira les autres. Le caractère monétariste de la politique et du calcul mercantilistes implique, par conséquent, qu'on ne puisse concevoir la concurrence qu'en forme de jeu à somme nulle et, par conséquent, d'enrichissement des uns aux dépens des autres². Et c'est précisément pour éviter que, dans ce jeu à somme nulle, il y ait un gagnant et",
+          "anchor_page_no": 68,
+          "current_anchor_id": "anchor-00050",
+          "current_anchor_marker": "2",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00037",
+          "marker": "2",
+          "note_excerpt": "",
+          "note_item_id": "en-0067",
+          "note_page_no": 86
+        },
+        {
+          "anchor_excerpt": "un seul, qu'il va falloir, en stricte logique économique, – pour éviter ce phénomène, cette conséquence politique de la concurrence ainsi définie –, que s'établisse quelque chose comme un équilibre qui permettra d'interrompre en quelque sorte le jeu à un moment donné. C'est-à-dire : lorsque les écarts entre les joueurs risqueront d'être trop importants, on arrêtera la partie, et c'est cela précisément en quoi consiste l'équilibre européen. C'est exactement, enfin jusqu'à un certain point, le problème pascalien³ : qu'est-ce qui arrive lorsque dans un jeu à somme nulle, on interrompt le jeu et on répartit les gains entre les partenaires ? Interrompre le jeu de la concurrence par la diplomatie de l'équilibre européen, c'est cela qui est nécessairement impliqué par la conception et la pratique monétariste des mercantilistes. Voilà le point de départ.\n\nOr, qu'est-ce qui va se passer en ce milieu du XVIII<sup>e</sup> siècle dont je vous parle et où j'essaie de repérer la formation d'une nouvelle raison gouvernementale ? Dans cette nouvelle raison d'État ou cette raison du moindre État qui trouve donc dans le marché sa véridiction de base et dans l'utilité sa juridiction de fait, il est bien entendu que les choses vont être tout à fait différentes. En effet, pour les physiocrates mais, d'ailleurs, également pour Adam Smith, la liberté du marché peut et doit fonctionner d'une telle manière que s'établira, à travers et grâce à cette liberté de marché, ce qu'ils appellent le prix naturel ou les bons prix, etc. En tout cas ce prix naturel, ou ce bon prix, est toujours tel qu'il sera profitable à qui ? Au vendeur, mais aussi bien à l'acheteur ; à l'acheteur et au vendeur à la fois. C'est-à-dire que les effets bénéfiques de la concurrence ne seront pas inégalement et nécessairement répartis entre l'un et l'autre, au profit de l'un aux dépens de l'autre. Mais le jeu légitime de la concurrence naturelle, c'est-à-dire de la concurrence à l'état libre, ne peut amener qu'un profit double. L'oscillation du prix autour de la valeur, cette oscillation dont je vous montrais la dernière fois qu'elle était assurée selon les physiocrates, selon Adam Smith, par la liberté du marché, eh bien cette oscillation fait fonctionner un mécanisme d'enrichissement mutuel. Maximum de profit du côté du vendeur, minimum de dépenses pour les acheteurs. On trouve donc cette idée, qui va être maintenant au centre du jeu économique tel qu'il est défini par les libéraux, qu'en fait l'enrichissement d'un pays, comme l'enrichissement d'un individu, ne peut effectivement s'établir à long terme et se maintenir que par un enrichissement mutuel. La richesse de mon voisin m'importe pour mon enrichissement même, et non pas au sens où les mercantilistes disaient qu'il faut bien que le voisin ait de l'or pour m'acheter mes produits, ce qui me permettra de l'appauvrir lui en m'enrichissant moi. Il faut que mon voisin soit riche, et",
+          "anchor_page_no": 69,
+          "current_anchor_id": "anchor-00051",
+          "current_anchor_marker": "3",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00038",
+          "marker": "3",
+          "note_excerpt": "",
+          "note_item_id": "en-0068",
+          "note_page_no": 86
+        },
+        {
+          "anchor_excerpt": "Cette apparition d'une nouvelle forme de rationalité planétaire, cette apparition d'un nouveau calcul aux dimensions du monde, je pense qu'on pourrait en trouver bien des signes. J'en cite simplement quelques-uns.\n\nPrenez, par exemple, l'histoire du droit de la mer au xvi\\textsuperscript{e} siècle, la manière dont, en termes de droit international, on a essayé de penser le monde ou du moins la mer comme un espace de libre concurrence, de libre circulation maritime, par conséquent comme une des conditions nécessaires à l'organisation d'un marché mondial. Toute l'histoire de la piraterie, la manière dont elle a été à la fois utilisée, encouragée, combattue, supprimée, etc., pourrait apparaître également comme un des aspects de cette élaboration d'un espace planétaire en fonction d'un certain nombre de principes de droit. Disons qu'il y a eu une juridification du monde qui est à penser en termes d'organisation d'un marché.\n\nAutre exemple encore de cette apparition d'une rationalité gouvernementale qui a pour horizon la planète toute entière, eh bien les projets de paix et d'organisation internationale au XVIII<sup>e</sup> siècle. Si vous prenez ceux qui existaient, car il en a existé dès le XVIII<sup>e</sup> siècle, vous vous apercevez que tous ces projets de paix sont articulés essentiellement sur, justement, l'équilibre européens, c'est-à-dire la balance exacte des forces réciproques entre les différents États, entre les différents États importants ou entre les différentes coalitions d'États importants ou entre les États importants et une coalition de petits États, etc. À partir du XVIII<sup>e</sup> siècle, l'idée de paix perpétuelle et l'idée d'organisation internationale s'articulent, je crois, tout autrement. Ce n'est plus tellement la limitation des forces internes de chaque État qui est appelée comme garantie et fondement d'une paix perpétuelle, c'est plutôt l'illimitation du marché extérieur. Plus le marché extérieur sera large, moins il aura de frontières et de limites, plus on aura là la garantie de la paix perpétuelle.\n\nSi vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la paix perpétuelle, comment est-ce que Kant la conçoit ? Eh bien, il dit : au fond, cette paix perpétuelle, ce qui la garantit à travers l'histoire et ce qui nous promet qu'elle pourra effectivement un jour prendre figure et forme à l'intérieur de l'histoire, qu'est-ce que c'est ? La volonté des hommes, leur entente entre eux, les combinaisons politiques et diplomatiques qu'ils auront pu échafauder, l'organisation de droits qu'ils auront mis sur place entre eux ? Pas du tout. C'est la nature⁶, tout comme chez les physiocrates c'était la nature qui garantissait la bonne régulation du marché. Et comment est-ce que la nature garantit la paix",
+          "anchor_page_no": 72,
+          "current_anchor_id": "anchor-00052",
+          "current_anchor_marker": "4",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00039",
+          "marker": "4",
+          "note_excerpt": "",
+          "note_item_id": "en-0069",
+          "note_page_no": 86
+        },
+        {
+          "anchor_excerpt": "Cette apparition d'une nouvelle forme de rationalité planétaire, cette apparition d'un nouveau calcul aux dimensions du monde, je pense qu'on pourrait en trouver bien des signes. J'en cite simplement quelques-uns.\n\nPrenez, par exemple, l'histoire du droit de la mer au xvi\\textsuperscript{e} siècle, la manière dont, en termes de droit international, on a essayé de penser le monde ou du moins la mer comme un espace de libre concurrence, de libre circulation maritime, par conséquent comme une des conditions nécessaires à l'organisation d'un marché mondial. Toute l'histoire de la piraterie, la manière dont elle a été à la fois utilisée, encouragée, combattue, supprimée, etc., pourrait apparaître également comme un des aspects de cette élaboration d'un espace planétaire en fonction d'un certain nombre de principes de droit. Disons qu'il y a eu une juridification du monde qui est à penser en termes d'organisation d'un marché.\n\nAutre exemple encore de cette apparition d'une rationalité gouvernementale qui a pour horizon la planète toute entière, eh bien les projets de paix et d'organisation internationale au XVIII<sup>e</sup> siècle. Si vous prenez ceux qui existaient, car il en a existé dès le XVIII<sup>e</sup> siècle, vous vous apercevez que tous ces projets de paix sont articulés essentiellement sur, justement, l'équilibre européens, c'est-à-dire la balance exacte des forces réciproques entre les différents États, entre les différents États importants ou entre les différentes coalitions d'États importants ou entre les États importants et une coalition de petits États, etc. À partir du XVIII<sup>e</sup> siècle, l'idée de paix perpétuelle et l'idée d'organisation internationale s'articulent, je crois, tout autrement. Ce n'est plus tellement la limitation des forces internes de chaque État qui est appelée comme garantie et fondement d'une paix perpétuelle, c'est plutôt l'illimitation du marché extérieur. Plus le marché extérieur sera large, moins il aura de frontières et de limites, plus on aura là la garantie de la paix perpétuelle.\n\nSi vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la paix perpétuelle, comment est-ce que Kant la conçoit ? Eh bien, il dit : au fond, cette paix perpétuelle, ce qui la garantit à travers l'histoire et ce qui nous promet qu'elle pourra effectivement un jour prendre figure et forme à l'intérieur de l'histoire, qu'est-ce que c'est ? La volonté des hommes, leur entente entre eux, les combinaisons politiques et diplomatiques qu'ils auront pu échafauder, l'organisation de droits qu'ils auront mis sur place entre eux ? Pas du tout. C'est la nature⁶, tout comme chez les physiocrates c'était la nature qui garantissait la bonne régulation du marché. Et comment est-ce que la nature garantit la paix",
+          "anchor_page_no": 72,
+          "current_anchor_id": "anchor-00054",
+          "current_anchor_marker": "5",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00040",
+          "marker": "5",
+          "note_excerpt": "",
+          "note_item_id": "en-0070",
+          "note_page_no": 86
+        },
+        {
+          "anchor_excerpt": "Cette apparition d'une nouvelle forme de rationalité planétaire, cette apparition d'un nouveau calcul aux dimensions du monde, je pense qu'on pourrait en trouver bien des signes. J'en cite simplement quelques-uns.\n\nPrenez, par exemple, l'histoire du droit de la mer au xvi\\textsuperscript{e} siècle, la manière dont, en termes de droit international, on a essayé de penser le monde ou du moins la mer comme un espace de libre concurrence, de libre circulation maritime, par conséquent comme une des conditions nécessaires à l'organisation d'un marché mondial. Toute l'histoire de la piraterie, la manière dont elle a été à la fois utilisée, encouragée, combattue, supprimée, etc., pourrait apparaître également comme un des aspects de cette élaboration d'un espace planétaire en fonction d'un certain nombre de principes de droit. Disons qu'il y a eu une juridification du monde qui est à penser en termes d'organisation d'un marché.\n\nAutre exemple encore de cette apparition d'une rationalité gouvernementale qui a pour horizon la planète toute entière, eh bien les projets de paix et d'organisation internationale au XVIII<sup>e</sup> siècle. Si vous prenez ceux qui existaient, car il en a existé dès le XVIII<sup>e</sup> siècle, vous vous apercevez que tous ces projets de paix sont articulés essentiellement sur, justement, l'équilibre européens, c'est-à-dire la balance exacte des forces réciproques entre les différents États, entre les différents États importants ou entre les différentes coalitions d'États importants ou entre les États importants et une coalition de petits États, etc. À partir du XVIII<sup>e</sup> siècle, l'idée de paix perpétuelle et l'idée d'organisation internationale s'articulent, je crois, tout autrement. Ce n'est plus tellement la limitation des forces internes de chaque État qui est appelée comme garantie et fondement d'une paix perpétuelle, c'est plutôt l'illimitation du marché extérieur. Plus le marché extérieur sera large, moins il aura de frontières et de limites, plus on aura là la garantie de la paix perpétuelle.\n\nSi vous prenez, par exemple, le texte de Kant sur le projet de paix perpétuelle qui date donc de 1795⁴, à l'extrême fin du XVIII⁶ siècle, vous avez un chapitre qui s'appelle « la garantie de la paix perpétuelle⁵ ». Et cette garantie de la paix perpétuelle, comment est-ce que Kant la conçoit ? Eh bien, il dit : au fond, cette paix perpétuelle, ce qui la garantit à travers l'histoire et ce qui nous promet qu'elle pourra effectivement un jour prendre figure et forme à l'intérieur de l'histoire, qu'est-ce que c'est ? La volonté des hommes, leur entente entre eux, les combinaisons politiques et diplomatiques qu'ils auront pu échafauder, l'organisation de droits qu'ils auront mis sur place entre eux ? Pas du tout. C'est la nature⁶, tout comme chez les physiocrates c'était la nature qui garantissait la bonne régulation du marché. Et comment est-ce que la nature garantit la paix",
+          "anchor_page_no": 72,
+          "current_anchor_id": "anchor-00053",
+          "current_anchor_marker": "6",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00041",
+          "marker": "6",
+          "note_excerpt": "",
+          "note_item_id": "en-0071",
+          "note_page_no": 86
+        },
+        {
+          "anchor_excerpt": "perpétuelle ? Eh bien, dit Kant, c'est très simple. La nature a tout de même fait des choses absolument merveilleuses, puisqu'elle est arrivée, par exemple, à faire vivre non seulement des animaux, mais même des gens dans des pays pas possibles, complètement brûlés par le soleil ou gelés par des glaces éternelles 7. Eh bien, il y a des gens qui y vivent malgré tout, ce qui prouve qu'il n'y a pas une seule partie du monde où les hommes ne puissent vivre 8. Mais pour que les hommes puissent vivre, encore faut-il qu'ils puissent se nourrir, qu'ils puissent produire leur nourriture, qu'ils aient entre eux une organisation sociale [et] qu'ils puissent échanger entre eux ou avec les hommes d'autres régions leurs produits. La nature a voulu que le monde tout entier et sur toute sa surface soit livré à l'activité économique qui est celle de la production et de l'échange. Et à partir de là, la nature a prescrit à l'homme un certain nombre d'obligations qui sont à la fois pour l'homme des obligations juridiques 9, mais que la nature [lui] a en quelque sorte dictées en sous-main, qu'elle a en quelque sorte marquées en creux dans la disposition même des choses, de la géographie, du climat, etc. Et ces dispositions sont lesquelles ?\n\nPremièrement, que les hommes individuellement puissent avoir, les uns avec les autres, des relations d'échange appuyées sur la propriété, etc., et c'est cela, cette prescription de la nature, ce précepte de la nature, que les hommes vont reprendre en obligations juridiques, et ce sera le droit civil $ ^{10} $.\n\nDeuxièmement, la nature a voulu que les hommes soient répartis à travers le monde en régions distinctes et qu'ils aient entre eux, dans cha-cune de ces régions, des relations privilégiées qu'ils n'auront pas avec les habitants des autres régions, et c'est ce précepte de la nature que les hommes ont repris en termes de droit en constituant des États, des États séparés les uns des autres et qui entretiennent entre eux un certain nombre de relations juridiques. Ce sera le droit international $ ^{11} $. Mais en plus, la nature a voulu qu'entre ces États existent non seulement des relations juridiques qui garantissent l'indépendance, mais également des relations commerciales qui traversent les frontières des États et qui, par consé-quent, rendent poreuses en quelque sorte les indépendances juridiques de chaque État $ ^{12} $. Ces relations commerciales parcourent le monde, tout comme la nature a voulu et dans la mesure même où la nature a voulu que le monde tout entier soit peuplé, et c'est cela qui va constituer le droit cosmopolite ou le droit commercial. Et cet édifice : droit civil, droit international, droit cosmopolite n'est rien autre chose que la reprise par l'homme, sous forme d'obligations, de ce qui avait été un précepte de la nature $ ^{13} $. On peut [donc] dire que le droit, dans la mesure où il reprend",
+          "anchor_page_no": 73,
+          "current_anchor_id": "anchor-00056",
+          "current_anchor_marker": "7",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00042",
+          "marker": "7",
+          "note_excerpt": "",
+          "note_item_id": "en-0072",
+          "note_page_no": 86
+        },
+        {
+          "anchor_excerpt": "de sa vie, dans son projet de codification générale de la législation anglaise $ ^{26} $, Bentham le présentera comme devant être la formule du gouvernement tout entier en disant : le panoptique, c'est la formule même d'un gouvernement libéral $ ^{27} $, parce qu'au fond, que doit faire un gouvernement ? Il doit bien entendu laisser place à tout ce qui peut être la mécanique naturelle et des comportements et de la production. Il doit laisser la place à ces mécanismes et il ne doit avoir sur eux aucune autre forme d'intervention, du moins en première instance, que celle de la surveillance. Et c'est uniquement lorsque le gouvernement, limité d'abord à sa fonction de surveillance, verra que quelque chose ne se passe pas comme le veut la mécanique générale des comportements, des échanges, de la vie économique, qu'il aura à intervenir. Le panoptisme n'est pas une mécanique régionale et limitée à des institutions. Le panoptisme, pour Bentham, c'est bien une formule politique générale qui caractérise un type de gouvernement.\n\nTroisième conséquence (la seconde étant la conjonction entre les disciplines et le libéralisme), c'est l'apparition aussi, dans ce nouvel art de gouverner, de mécanismes qui ont pour fonction de produire, d'insuffler, de majorer des libertés, d'introduire un plus de liberté par un plus de contrôle et d'intervention. C'est-à-dire que là, le contrôle n'est plus simplement, comme dans le cas du panoptisme, le contrepoids nécessaire à la liberté. C'en est le principe moteur. Et là, on en trouverait aussi bien des exemples, ne serait-ce que ce qui s'est passé par exemple en Angleterre et aux États-Unis au cours du XXe siècle, disons au cours des années trente, lorsque, la crise économique se développait, on a immédiatement perçu non seulement les conséquences économiques, mais les conséquences politiques de cette crise économique, et on y a vu un danger pour un certain nombre de libertés considérées comme fondamentales. Et la politique du Welfare mise en place par Roosevelt, par exemple, à partir de 1932 $ ^{28} $ était une manière de garantir et de produire, dans une situation périlleuse de chômage, plus de liberté : liberté du travail, liberté de consommation, liberté politique, etc. À quel prix ? Au prix, précisément, de toute une série d'interventions, d'interventions artificielles, d'interventions volontaristes, d'interventions économiques directes dans le marché qui ont constitué les mesures fondamentales du Welfare [et] qui seront, à partir de 1946 – qui seront même d'ailleurs dès le départ –, caractérisées comme étant en elles-mêmes des menaces d'un nouveau despotisme. On ne garantit les libertés démocratiques dans ce cas-là que par un interventionnisme économique qui est dénoncé comme étant une menace pour les libertés. De sorte qu'on arrive, si vous voulez, – et c'est",
+          "anchor_page_no": 83,
+          "current_anchor_id": "anchor-00085",
+          "current_anchor_marker": "27",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00062",
+          "marker": "27",
+          "note_excerpt": "",
+          "note_item_id": "en-0092",
+          "note_page_no": 89
+        },
+        {
+          "anchor_excerpt": "de sa vie, dans son projet de codification générale de la législation anglaise $ ^{26} $, Bentham le présentera comme devant être la formule du gouvernement tout entier en disant : le panoptique, c'est la formule même d'un gouvernement libéral $ ^{27} $, parce qu'au fond, que doit faire un gouvernement ? Il doit bien entendu laisser place à tout ce qui peut être la mécanique naturelle et des comportements et de la production. Il doit laisser la place à ces mécanismes et il ne doit avoir sur eux aucune autre forme d'intervention, du moins en première instance, que celle de la surveillance. Et c'est uniquement lorsque le gouvernement, limité d'abord à sa fonction de surveillance, verra que quelque chose ne se passe pas comme le veut la mécanique générale des comportements, des échanges, de la vie économique, qu'il aura à intervenir. Le panoptisme n'est pas une mécanique régionale et limitée à des institutions. Le panoptisme, pour Bentham, c'est bien une formule politique générale qui caractérise un type de gouvernement.\n\nTroisième conséquence (la seconde étant la conjonction entre les disciplines et le libéralisme), c'est l'apparition aussi, dans ce nouvel art de gouverner, de mécanismes qui ont pour fonction de produire, d'insuffler, de majorer des libertés, d'introduire un plus de liberté par un plus de contrôle et d'intervention. C'est-à-dire que là, le contrôle n'est plus simplement, comme dans le cas du panoptisme, le contrepoids nécessaire à la liberté. C'en est le principe moteur. Et là, on en trouverait aussi bien des exemples, ne serait-ce que ce qui s'est passé par exemple en Angleterre et aux États-Unis au cours du XXe siècle, disons au cours des années trente, lorsque, la crise économique se développait, on a immédiatement perçu non seulement les conséquences économiques, mais les conséquences politiques de cette crise économique, et on y a vu un danger pour un certain nombre de libertés considérées comme fondamentales. Et la politique du Welfare mise en place par Roosevelt, par exemple, à partir de 1932 $ ^{28} $ était une manière de garantir et de produire, dans une situation périlleuse de chômage, plus de liberté : liberté du travail, liberté de consommation, liberté politique, etc. À quel prix ? Au prix, précisément, de toute une série d'interventions, d'interventions artificielles, d'interventions volontaristes, d'interventions économiques directes dans le marché qui ont constitué les mesures fondamentales du Welfare [et] qui seront, à partir de 1946 – qui seront même d'ailleurs dès le départ –, caractérisées comme étant en elles-mêmes des menaces d'un nouveau despotisme. On ne garantit les libertés démocratiques dans ce cas-là que par un interventionnisme économique qui est dénoncé comme étant une menace pour les libertés. De sorte qu'on arrive, si vous voulez, – et c'est",
+          "anchor_page_no": 83,
+          "current_anchor_id": "anchor-00086",
+          "current_anchor_marker": "28",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00063",
+          "marker": "28",
+          "note_excerpt": "",
+          "note_item_id": "en-0093",
+          "note_page_no": 89
+        }
+      ],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0004",
+          "is_reconstructed": false,
+          "marker": "1",
+          "marker_type": "",
+          "note_item_id": "en-0066",
+          "note_kind": "endnote",
+          "page_no": 86,
+          "region_id": "nr-en-ch-0021-ch-fallback-0004",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p86",
+          "text": "1. Cf. Sécurité, Territoire, Population, op. cit., leçon du 22 mars 1978, p. 295 sq."
+        },
+        {
+          "chapter_id": "ch-fallback-0004",
+          "is_reconstructed": false,
+          "marker": "30",
+          "marker_type": "",
+          "note_item_id": "en-0095",
+          "note_kind": "endnote",
+          "page_no": 89,
+          "region_id": "nr-en-ch-0021-ch-fallback-0004",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p89",
+          "text": "30. Cf. infra, leçons des 31 janvier, 7 février, 14 février et 21 février 1979."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 64,
+        "ocr_excerpt": "S. M. impériale pour le commerce et l'administration publique, prononcé à son installation dans les écoles Palatines, trad. J.-A. Comparet, Lausanne, F. Grasset, 1769 (éd. orig. : Prolusione letta dal regio professore Marchese Cesare Beccaria Bone-sana nell'apertura della nuova cattedra di scienze camerali ultimamente comendata da S. M. I. R. A., Florence. G. Allegrini e comp., 1769) et les Principes d'économie politique appliqués à l'agriculture par l'auteur du « Traité des délits et des peines », trad. de l'italien par ***, Paris, V° Bouchard-Huzard, 1852. « L'essentiel de ses écrits économiques consista en ses rapports gouvernementaux » (J.A. Schumpeter, Histoire de l'analyse économique, t. I, p. 255; il qualifie Beccaria d'« Adam Smith italien », ibid., p. 256). Cf. Atti di governo de Beccaria, en cours de publication dans les dix-sept volumes prévus de l'Edizione nazionale (5 volumes parus : vol. VI-X, 1987-2000). Ces écrits portent sur des questions très diverses : monnaies, mines, poids et mesures, manufactures et commerce, foires et marchés, etc. Je dois ces précisions à la thèse récente de Ph. Audegean, « Philosophie réformatrice. Cesare Beccaria et la critique des savoirs de son temps : droit, rhétorique, économie » (Université de Paris I-Sorbonne, 2003). 11. Adam Smith (1723-1790), An Inquiry into the Nature and Causes of the Wealth of Nations, Londres, W. Straham & ...",
+        "page_no": 65,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 65,
+        "ocr_excerpt": "Ann matos és de lon le ne à A Up di à PA DUR DM pes 29 ri es + y \"y hp : v Dern 47 r DRM ETICNE À + qui cpefiltsé pt né n l'ons gésenhoyte, £'e Peru habits vel et Most bonnet homes sa Hçnaalt a'uf -déÿs me er LUE. » ré, Tetebie, Fopilation, reed” LE shared see bg à RAR EN PE EX veus F2 lé ÆSRIGTE + À 7 Mr unique? w lin lp ALASS $ Pnne-oe (fre . dde niet rap] parie) -rabhhesr ado st beetle DRCP TETE Po ùs, pe iles phEvtbeliX Du l'umévicain (épis. mie 1ORPLITE, ps p° QE nattuis htrucryallime »; ouretiét- sé be Roakt (FR ” d L LA É ss dAG 44: An A : | 1 Aitmir do SERIE traité brtisttét a À Léunwrie om F764, Cergte Banengn, marquis € 709 is chenrt 0e velonss, rirall à art Gene HD: mg Va LE CE AE, pur où emploi (Macs ET a pat pourda prensièce fais £a 1 par P.C d re, Te’: , Pins ui Ends ce ‘N rétiter À tt di d Pur tué. L ce PP e- a Re Mid, EG Loestbfaere, Cr | a! 24 Le L | : Ai RE adees. Bert ! « LULE TS UT l'onfeserdr On Éa (œ: EE L « tn ! ! poi .",
+        "page_no": 66,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote",
+    "image_count": 0,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 11533,
+    "cluster_id": "ch-fallback-0004:nr-en-ch-0021-ch-fallback-0004:endnote",
+    "estimated_prompt_tokens": 3288,
+    "image_refused": false,
+    "matched_examples": 2,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": true,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 2
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 3288,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

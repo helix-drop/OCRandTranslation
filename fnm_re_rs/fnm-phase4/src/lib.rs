@@ -140,19 +140,6 @@ pub fn persist_phase4(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use fnm_core::types::{BoundaryState, ChapterSource};
-
-    fn make_chapter(chapter_id: &str, title: &str, start: i64, end: i64) -> ChapterRecord {
-        ChapterRecord {
-            chapter_id: chapter_id.to_string(),
-            title: title.to_string(),
-            start_page: start,
-            end_page: end,
-            pages: (start..=end).collect(),
-            boundary_state: BoundaryState::Ready,
-            source: ChapterSource::Fallback,
-        }
-    }
 
     #[test]
     fn test_build_phase4_structure_empty() {

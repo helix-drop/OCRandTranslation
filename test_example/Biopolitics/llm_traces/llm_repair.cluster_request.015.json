@@ -1,0 +1,266 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "anchor_id": "",
+        "anchor_phrase": "histoire politique de l'exil ou toute une histoire de l'exil",
+        "confidence": 0.9,
+        "marker": "",
+        "note_item_id": "en-0110",
+        "note_text": "",
+        "reason": "Note 4 contextually follows discussion of the history of exile on page 92."
+      },
+      {
+        "action": "needs_review",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "confidence": 0.8,
+        "marker": "",
+        "note_item_id": "",
+        "note_text": "",
+        "reason": "Note 14 (en-0119) lacks clear textual anchor context in the provided excerpt to safely synthesize."
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 31 JANVIER 1979",
+      "cluster_id": "ch-fallback-0005:nr-en-ch-0024-ch-fallback-0005:endnote",
+      "matched_examples": [
+        {
+          "anchor_excerpt": "# LEÇON DU 31 JANVIER 1979\n\nLa phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste.\n\nVous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "anchor_id": "anchor-00095",
+          "link_id": "link-00068",
+          "marker": "1",
+          "note_excerpt": "",
+          "note_item_id": "en-0107"
+        },
+        {
+          "anchor_excerpt": "# LEÇON DU 31 JANVIER 1979\n\nLa phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste.\n\nVous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "anchor_id": "anchor-00096",
+          "link_id": "link-00069",
+          "marker": "2",
+          "note_excerpt": "",
+          "note_item_id": "en-0108"
+        }
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        111,
+        112
+      ],
+      "rebind_candidates": [
+        {
+          "anchor_excerpt": "# LEÇON DU 31 JANVIER 1979\n\nLa phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste.\n\nVous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "anchor_page_no": 91,
+          "current_anchor_id": "anchor-00095",
+          "current_anchor_marker": "1",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00068",
+          "marker": "1",
+          "note_excerpt": "",
+          "note_item_id": "en-0107",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "# LEÇON DU 31 JANVIER 1979\n\nLa phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste.\n\nVous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L'État et l'atomique, plutôt encore l'atomique que l'État ou l'État qui ne vaut pas mieux que l'atomique ou l'État qui implique l'atomique ou l'atomique qui implique et appelle nécessairement l'État, on a là toute une thématique que vous connaissez bien et qui, vous le voyez, ne date pas d'aujourd'hui, puisque Berenson la formulait vers les années 1950-[19]52. Phobie d'État, donc, qui traverse bien des thèmes contemporains et qui",
+          "anchor_page_no": 91,
+          "current_anchor_id": "anchor-00096",
+          "current_anchor_marker": "2",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00069",
+          "marker": "2",
+          "note_excerpt": "",
+          "note_item_id": "en-0108",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "s'est alimentée, à coup sûr, à bien des sources depuis fort longtemps, que ce soit l'expérience soviétique dès les années 1920, l'expérience allemande du nazisme, la planification anglaise d'après-guerre, etc. Phobie d'État dont les agents porteurs aussi ont été très nombreux, puisqu'ils vont des professeurs d'économie politique inspirés du néomarginalisme autrichien $ ^{3} $ jusqu'aux exilés politiques qui, depuis les années 1920, 1925, ont joué certainement dans la formation de la conscience politique du monde contemporain un rôle considérable et qui n'a peut-être jamais été étudié de bien près. Il y aurait à faire toute une histoire politique de l'exil ou toute une histoire de l'exil politique, avec les effets idéologiques, les effets théoriques et les effets pratiques que cela a eu. L'exil politique de la fin du XIX $ ^{e} $ siècle a certainement été un des grands agents de diffusion, disons, du socialisme. Eh bien, je crois que l'exil politique, la dissidence politique du XX $ ^{e} $ siècle a été de son côté un agent de diffusion considérable de ce qu'on pourrait appeler l'anti-étatisme ou la phobie d'État.\n\nÀ vrai dire, cette phobie d'État, je ne voudrais pas en parler de façon directe et frontale car, pour moi, elle me paraît surtout être un des signes majeurs de ces crises de gouvernementalité dont je vous parlais la dernière fois, ces crises de gouvernementalité dont on a vu des exemples au XVI<sup>e</sup> siècle (je vous en parlais l'an dernier<sup>4)</sup>, des exemples au XVIII<sup>e</sup>, toute cette immense, difficile et embrouillée critique du despotisme, de la tyrannie, de l'arbitraire – tout cela manifestait, dans cette seconde moitié du XVIII<sup>e</sup> siècle, une crise de gouvernementalité. Eh bien, tout comme il y a eu critique du despotisme et phobie du despotisme – enfin, phobie ambiguë du despotisme à la fin du XVIII<sup>e</sup> siècle –, il y a à l'égard de l'État aussi, aujourd'hui, une phobie peut-être aussi ambiguë. En tout cas, je voudrais reprendre ce problème de l'État, ou de la question de l'État ou de la phobie d'État, à partir de l'analyse de cette gouvernementalité dont je vous ai déjà parlé.\n\nEt, bien sûr, vous me poserez la question, vous me ferez l'objection : alors, encore une fois vous faites l'économie d'une théorie de l'État. Eh bien, je vous répondrai oui, je fais, je veux faire et je dois faire l'économie d'une théorie de l'État comme on peut et on doit faire l'économie d'un repas indigeste. Je veux dire ceci : faire l'économie d'une théorie de l'État, ça veut dire quoi ? Si on me dit : vous gommez en réalité, dans les analyses que vous faites, la présence et l'effet des mécanismes étatiques, alors là je réponds : erreur, vous vous trompez ou vous voulez vous tromper, car à dire vrai je n'ai pas fait autre chose que le contraire de ce gommeage. Et qu'il s'agisse de la folie, qu'il s'agisse de la constitution de cette catégorie, de ce quasi-objet naturel qu'est la maladie mentale, qu'il",
+          "anchor_page_no": 92,
+          "current_anchor_id": "anchor-00097",
+          "current_anchor_marker": "3",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00070",
+          "marker": "3",
+          "note_excerpt": "",
+          "note_item_id": "en-0109",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-même; bref, comment elle se programme à l'heure actuelle. Je vous avais indiqué quelques-uns de ce qui me paraît être les caractères en quelque sorte premiers de la gouvernementalité libérale telle qu'elle apparaît au milieu du XVIII<sup>e</sup> siècle. Je vais donc faire un saut de deux siècles, car je n'ai pas la prétention de vous faire bien sûr l'histoire globale, générale et continue du libéralisme du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Je voudrais simplement, à partir même de la manière dont se programme la gouvernementalité libérale actuellement, essayer de repérer et d'éclairer un certain nombre de problèmes qui ont été récurrents du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Si vous voulez et sous réserve de changements – parce que, vous le savez, je suis comme l'écrevisse, je me déplace latéralement –, je pense, j'espère, il se peut que j'étudie successivement le problème de la loi et l'ordre, law and order, le problème de l'État dans son opposition à la société civile ou plutôt l'analyse de la manière dont a joué et dont on a fait jouer cette opposition. Et alors, enfin, si la chance me sourit, on arrivera au problème de la biopolitique et au problème de la vie. Loi et ordre, État et société civile et politique de la vie : voilà les trois thèmes que je voudrais essayer de repérer dans cette histoire large et longue, enfin dans cette histoire biséculaire du libéralisme<sup>5</sup>.\n\nAlors, prenons, si vous voulez, les choses dans l'étape actuelle. Comment se présente la programmation libérale ou, comme on dit, néolibérale à notre époque ? Vous savez qu'on la repère sous deux formes principales, avec un point d'ancrage et un point historique différents, disons : l'ancrage allemand qui s'accroche à la République de Weimar, à la crise de 29, au développement du nazisme, à la critique du nazisme et, enfin, à la reconstruction d'après-guerre. L'autre point d'ancrage, c'est l'ancrage américain, c'est-à-dire un néolibéralisme qui, lui, se réfère à la politique du New Deal, à la critique de la politique Roosevelt $ ^{6} $ et qui va se développer et s'organiser, surtout après la guerre, contre l'interventionnisme fédéral, et puis les programmes d'assistance et autres programmes qui ont été mis en place par les administrations, surtout démocrates, Truman $ ^{7} $, Kennedy $ ^{8} $, Johnson $ ^{9} $, etc. Entre ces deux formes de néolibéralisme que je découpe un peu par charcutage arbitraire, bien sûr, tout un tas de passe-relles, ne serait-ce d'abord que l'ennemi commun, l'adversaire doctrinal majeur qui est bien sûr Keynes $ ^{10} $, et qui va faire que la critique de Keynes va circuler de l'un à l'autre de ces deux néolibéralismes ; deuxièmement,",
+          "anchor_page_no": 94,
+          "current_anchor_id": "anchor-00098",
+          "current_anchor_marker": "5",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00072",
+          "marker": "5",
+          "note_excerpt": "",
+          "note_item_id": "en-0111",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizone, c'est-à-dire la zone anglo-américaine, dépose en avril 1948 un rapport, et dans ce rapport le principe suivant est posé. Il est ainsi formulé : « Le Conseil est d'avis que la fonction de direction du processus économique doit être assuree le plus largement possible par le mécanisme des prix¹⁷. » Resolution ou principe qui avait été admis, on l'a su par la suite, à l'unanimité. Et c'est simplement à la majorité des voix de ce Conseil que de ce principe on tire la conséquence suivante : en demande la libération immédiate des prix afin [de se rapprocher des prix] prix mondiaux. En gros, si vous voulez, principe de la liberté des prix et demande de libération immédiate. On est dans un ordre de décisions, ou de revendications en tout cas, puisque ce Conseil scientifique n'a bien suir de voix que consultative, on est dans un ordre de propositions qui fait tout à fait penser, dans sa simplicité élémentaire, à ce que les physiocrates avaient pu demander ou à ce que Turgot avait pu décider en 1774⁶. Ceci se passait le 18 avril 1948. Dix jours après, le 28, Ludwig Erhard — qui était le responsable non pas de ce Conseil scientifique, car il l'avait reunit autour de lui, mais de l'administration économique de la bizone, ou en tout cas de la part allemande de l'administration économique de la bizone — fait, à l'assemblée de Francfort²⁷, un discours dans lequel il reprend les conclusions de ce rapport³¹. C'est-à-dire qu'il va poser le principe de la liberté des prix et demander la libération en fait progressive des prix, mais il assortit ce principe et la conclusion qu'il en tire d'un certain nombre de considérations qui sont importantes. Il dit ceci « Il faut libérer l'économie des contraintes étratiques ». » Il faut éviter », dit-il encore, « et l'anarchie et l'État-termité », car, dit-il, « seul un État établisseant à la fois la liberté et la responsabilité des citoyens peut légitimement parler au nom du peuple²¹». Vous voyez que là, ce libéralisme économique, ce principe d'un respect de l'économie de marché qui avait été formulé par le Conseil scientifique, ce principe s'inscrit à l'intérieur de quelque chose qui est beaucoup plus général et qui est un principe selon lequel on devrait limiter d'une façon générale les interventions de l'État. On devrait fixer précisément les frontières et les bornes de l'établissement et régler les rapports entre individus et État. Ce discours de Ludwig Erhard différencie de façon très nette ces choix libénux, qu'il se disposait à proposer à l'assemblée de Francfort, d'un certain nombre d'autres expe",
+          "anchor_page_no": 96,
+          "current_anchor_id": "anchor-00111",
+          "current_anchor_marker": "6",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00073",
+          "marker": "6",
+          "note_excerpt": "",
+          "note_item_id": "en-0112",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-même; bref, comment elle se programme à l'heure actuelle. Je vous avais indiqué quelques-uns de ce qui me paraît être les caractères en quelque sorte premiers de la gouvernementalité libérale telle qu'elle apparaît au milieu du XVIII<sup>e</sup> siècle. Je vais donc faire un saut de deux siècles, car je n'ai pas la prétention de vous faire bien sûr l'histoire globale, générale et continue du libéralisme du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Je voudrais simplement, à partir même de la manière dont se programme la gouvernementalité libérale actuellement, essayer de repérer et d'éclairer un certain nombre de problèmes qui ont été récurrents du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Si vous voulez et sous réserve de changements – parce que, vous le savez, je suis comme l'écrevisse, je me déplace latéralement –, je pense, j'espère, il se peut que j'étudie successivement le problème de la loi et l'ordre, law and order, le problème de l'État dans son opposition à la société civile ou plutôt l'analyse de la manière dont a joué et dont on a fait jouer cette opposition. Et alors, enfin, si la chance me sourit, on arrivera au problème de la biopolitique et au problème de la vie. Loi et ordre, État et société civile et politique de la vie : voilà les trois thèmes que je voudrais essayer de repérer dans cette histoire large et longue, enfin dans cette histoire biséculaire du libéralisme<sup>5</sup>.\n\nAlors, prenons, si vous voulez, les choses dans l'étape actuelle. Comment se présente la programmation libérale ou, comme on dit, néolibérale à notre époque ? Vous savez qu'on la repère sous deux formes principales, avec un point d'ancrage et un point historique différents, disons : l'ancrage allemand qui s'accroche à la République de Weimar, à la crise de 29, au développement du nazisme, à la critique du nazisme et, enfin, à la reconstruction d'après-guerre. L'autre point d'ancrage, c'est l'ancrage américain, c'est-à-dire un néolibéralisme qui, lui, se réfère à la politique du New Deal, à la critique de la politique Roosevelt $ ^{6} $ et qui va se développer et s'organiser, surtout après la guerre, contre l'interventionnisme fédéral, et puis les programmes d'assistance et autres programmes qui ont été mis en place par les administrations, surtout démocrates, Truman $ ^{7} $, Kennedy $ ^{8} $, Johnson $ ^{9} $, etc. Entre ces deux formes de néolibéralisme que je découpe un peu par charcutage arbitraire, bien sûr, tout un tas de passe-relles, ne serait-ce d'abord que l'ennemi commun, l'adversaire doctrinal majeur qui est bien sûr Keynes $ ^{10} $, et qui va faire que la critique de Keynes va circuler de l'un à l'autre de ces deux néolibéralismes ; deuxièmement,",
+          "anchor_page_no": 94,
+          "current_anchor_id": "anchor-00100",
+          "current_anchor_marker": "7",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00074",
+          "marker": "7",
+          "note_excerpt": "",
+          "note_item_id": "en-0113",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-même; bref, comment elle se programme à l'heure actuelle. Je vous avais indiqué quelques-uns de ce qui me paraît être les caractères en quelque sorte premiers de la gouvernementalité libérale telle qu'elle apparaît au milieu du XVIII<sup>e</sup> siècle. Je vais donc faire un saut de deux siècles, car je n'ai pas la prétention de vous faire bien sûr l'histoire globale, générale et continue du libéralisme du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Je voudrais simplement, à partir même de la manière dont se programme la gouvernementalité libérale actuellement, essayer de repérer et d'éclairer un certain nombre de problèmes qui ont été récurrents du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Si vous voulez et sous réserve de changements – parce que, vous le savez, je suis comme l'écrevisse, je me déplace latéralement –, je pense, j'espère, il se peut que j'étudie successivement le problème de la loi et l'ordre, law and order, le problème de l'État dans son opposition à la société civile ou plutôt l'analyse de la manière dont a joué et dont on a fait jouer cette opposition. Et alors, enfin, si la chance me sourit, on arrivera au problème de la biopolitique et au problème de la vie. Loi et ordre, État et société civile et politique de la vie : voilà les trois thèmes que je voudrais essayer de repérer dans cette histoire large et longue, enfin dans cette histoire biséculaire du libéralisme<sup>5</sup>.\n\nAlors, prenons, si vous voulez, les choses dans l'étape actuelle. Comment se présente la programmation libérale ou, comme on dit, néolibérale à notre époque ? Vous savez qu'on la repère sous deux formes principales, avec un point d'ancrage et un point historique différents, disons : l'ancrage allemand qui s'accroche à la République de Weimar, à la crise de 29, au développement du nazisme, à la critique du nazisme et, enfin, à la reconstruction d'après-guerre. L'autre point d'ancrage, c'est l'ancrage américain, c'est-à-dire un néolibéralisme qui, lui, se réfère à la politique du New Deal, à la critique de la politique Roosevelt $ ^{6} $ et qui va se développer et s'organiser, surtout après la guerre, contre l'interventionnisme fédéral, et puis les programmes d'assistance et autres programmes qui ont été mis en place par les administrations, surtout démocrates, Truman $ ^{7} $, Kennedy $ ^{8} $, Johnson $ ^{9} $, etc. Entre ces deux formes de néolibéralisme que je découpe un peu par charcutage arbitraire, bien sûr, tout un tas de passe-relles, ne serait-ce d'abord que l'ennemi commun, l'adversaire doctrinal majeur qui est bien sûr Keynes $ ^{10} $, et qui va faire que la critique de Keynes va circuler de l'un à l'autre de ces deux néolibéralismes ; deuxièmement,",
+          "anchor_page_no": 94,
+          "current_anchor_id": "anchor-00101",
+          "current_anchor_marker": "8",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00075",
+          "marker": "8",
+          "note_excerpt": "",
+          "note_item_id": "en-0114",
+          "note_page_no": 111
+        },
+        {
+          "anchor_excerpt": "Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-même; bref, comment elle se programme à l'heure actuelle. Je vous avais indiqué quelques-uns de ce qui me paraît être les caractères en quelque sorte premiers de la gouvernementalité libérale telle qu'elle apparaît au milieu du XVIII<sup>e</sup> siècle. Je vais donc faire un saut de deux siècles, car je n'ai pas la prétention de vous faire bien sûr l'histoire globale, générale et continue du libéralisme du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Je voudrais simplement, à partir même de la manière dont se programme la gouvernementalité libérale actuellement, essayer de repérer et d'éclairer un certain nombre de problèmes qui ont été récurrents du XVIII<sup>e</sup> au XX<sup>e</sup> siècle. Si vous voulez et sous réserve de changements – parce que, vous le savez, je suis comme l'écrevisse, je me déplace latéralement –, je pense, j'espère, il se peut que j'étudie successivement le problème de la loi et l'ordre, law and order, le problème de l'État dans son opposition à la société civile ou plutôt l'analyse de la manière dont a joué et dont on a fait jouer cette opposition. Et alors, enfin, si la chance me sourit, on arrivera au problème de la biopolitique et au problème de la vie. Loi et ordre, État et société civile et politique de la vie : voilà les trois thèmes que je voudrais essayer de repérer dans cette histoire large et longue, enfin dans cette histoire biséculaire du libéralisme<sup>5</sup>.\n\nAlors, prenons, si vous voulez, les choses dans l'étape actuelle. Comment se présente la programmation libérale ou, comme on dit, néolibérale à notre époque ? Vous savez qu'on la repère sous deux formes principales, avec un point d'ancrage et un point historique différents, disons : l'ancrage allemand qui s'accroche à la République de Weimar, à la crise de 29, au développement du nazisme, à la critique du nazisme et, enfin, à la reconstruction d'après-guerre. L'autre point d'ancrage, c'est l'ancrage américain, c'est-à-dire un néolibéralisme qui, lui, se réfère à la politique du New Deal, à la critique de la politique Roosevelt $ ^{6} $ et qui va se développer et s'organiser, surtout après la guerre, contre l'interventionnisme fédéral, et puis les programmes d'assistance et autres programmes qui ont été mis en place par les administrations, surtout démocrates, Truman $ ^{7} $, Kennedy $ ^{8} $, Johnson $ ^{9} $, etc. Entre ces deux formes de néolibéralisme que je découpe un peu par charcutage arbitraire, bien sûr, tout un tas de passe-relles, ne serait-ce d'abord que l'ennemi commun, l'adversaire doctrinal majeur qui est bien sûr Keynes $ ^{10} $, et qui va faire que la critique de Keynes va circuler de l'un à l'autre de ces deux néolibéralismes ; deuxièmement,",
+          "anchor_page_no": 94,
+          "current_anchor_id": "anchor-00102",
+          "current_anchor_marker": "9",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00076",
+          "marker": "9",
+          "note_excerpt": "",
+          "note_item_id": "en-0115",
+          "note_page_no": 111
+        }
+      ],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0005",
+          "is_reconstructed": false,
+          "marker": "4",
+          "marker_type": "",
+          "note_item_id": "en-0110",
+          "note_kind": "endnote",
+          "page_no": 111,
+          "region_id": "nr-en-ch-0024-ch-fallback-0005",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p111",
+          "text": "4. Cf. Sécurité, Territoire, Population, leçon du 1er février 1978, p. 105."
+        },
+        {
+          "chapter_id": "ch-fallback-0005",
+          "is_reconstructed": false,
+          "marker": "14",
+          "marker_type": "",
+          "note_item_id": "en-0119",
+          "note_kind": "endnote",
+          "page_no": 112,
+          "region_id": "nr-en-ch-0024-ch-fallback-0005",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p112",
+          "text": "14. Programme de reconstruction européenne (European Recovery Program) proposé en 1947 par le secrétaire d'État américain G. Marshall, adopté en 1948 par 16 pays d'Europe de l'Ouest. 15. Le Conseil national de la Résistance (CNR) avait été constitué au printemps 1943 pour unifier les divers mouvements de Résistance, politiquement divisés. Il fut présidé par Jean Moulin, puis par Georges Bidault. « Tous, lors de leur réunion plémière du 15 mars 1944, tombèrent d'accord pour rester unis après la Libération. La Charte de la Résistance, qui résulta de ces délibérations, discutée et approuvée par les divers groupements qui composaient le CNR, contenait un programme social et économique hardi. Entre autres réformes, elle réclamait “un plan complet de sécurité sociale, visant à assurer à tous les citoyens des moyens d'existence, dans les cas où ils sont incapables de se les procurer par le travail avec gestion appartenant aux représentants des intéressés et de l'État” » (H.G. Galant, Histoire politique de la sécurité sociale française, 1945-1952, Paris, Librairie A. Colin, « Cahiers de la Fondation nationale des sciences politiques », 1955, p. 24). Cf. infra, leçon du 7 mars 1979, p. 216-217, note 25 sur le plan français de sécurité sociale en 1945."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 90,
+        "ocr_excerpt": "# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste. Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mou ...",
+        "page_no": 91,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 91,
+        "ocr_excerpt": "s'est alimentée, à coup sûr, à bien des sources depuis fort longtemps, que ce soit l'expérience soviétique dès les années 1920, l'expérience allemande du nazisme, la planification anglaise d'après-guerre, etc. Phobie d'État dont les agents porteurs aussi ont été très nombreux, puisqu'ils vont des professeurs d'économie politique inspirés du néomarginalisme autrichien $ ^{3} $ jusqu'aux exilés politiques qui, depuis les années 1920, 1925, ont joué certainement dans la formation de la conscience politique du monde contemporain un rôle considérable et qui n'a peut-être jamais été étudié de bien près. Il y aurait à faire toute une histoire politique de l'exil ou toute une histoire de l'exil politique, avec les effets idéologiques, les effets théoriques et les effets pratiques que cela a eu. L'exil politique de la fin du XIX $ ^{e} $ siècle a certainement été un des grands agents de diffusion, disons, du socialisme. Eh bien, je crois que l'exil politique, la dissidence politique du XX $ ^{e} $ siècle a été de son côté un agent de diffusion considérable de ce qu'on pourrait appeler l'anti-étatisme ou la phobie d'État. À vrai dire, cette phobie d'État, je ne voudrais pas en parler de façon directe et frontale car, pour moi, elle me paraît surtout être un des signes majeurs de ces crises de gouvernementalité dont je vous parlais la dernière fois, ces crises de gouvernementalité dont on ...",
+        "page_no": 92,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0005:nr-en-ch-0024-ch-fallback-0005:endnote",
+    "image_refused": false,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"chapter_body_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les principes de gouvernement libéraux et l'absence de rationalité gouvernementale socialiste. Vous connaissez tous, bien sûr, Berenson, l'historien de l'art¹. Il était déjà à peu près centenaire, c'est-à-dire pas trop loin de mourir, quand il a dit quelque chose comme : « Dieu sait si je crains la destruction du monde par la bombe atomique, mais il y a au moins une chose que je crains autant, qui est l'invasion de l'humanité par l'État². » Je crois qu'on a là, à l'état le plus pur, le plus décanté, l'expression d'une phobie d'État dont le couplage avec la peur atomique est certainement un des traits les plus constants. L' ...\",\n  \"chapter_title\": \"LEÇON DU 31 JANVIER 1979\",\n  \"cluster_id\": \"ch-fallback-0005:nr-en-ch-0024-ch-fallback-0005:endnote\",\n  \"matched_examples\": [\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralis ...\",\n      \"anchor_id\": \"anchor-00095\",\n      \"marker\": \"1\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0107\"\n    },\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralis ...\",\n      \"anchor_id\": \"anchor-00096\",\n      \"marker\": \"2\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0108\"\n    }\n  ],\n  \"note_system\": \"endnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativit ...\",\n      \"page_no\": 91\n    },\n    {\n      \"ocr_excerpt\": \"s'est alimentée, à coup sûr, à bien des sources depuis fort longtemps, que ce soit l'expérience soviétique dès les années 1920, l'expérience allemande du nazisme, la planification anglaise d'après-guerre, etc. Phobie d'État dont les agents porteurs aussi ont été très nombreux, puisqu'ils vont des professeurs d'économie politique inspirés du néomarginalisme autrichien $ ^{3} $ jusqu'aux exilés politiques qui, depuis les années 1920, 1925, ont joué certainement dans la formation de la conscience politique du monde contemporain un rôle considérable et qui n'a peut-être jamais été étudié de bien près. Il y aurait à faire toute une histoire politique de l'exil ou toute une histoire de l'exil poli ...\",\n      \"page_no\": 92\n    }\n  ],\n  \"page_range\": [\n    111,\n    112\n  ],\n  \"rebind_candidates\": [\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralis ...\",\n      \"anchor_page_no\": 91,\n      \"current_anchor_id\": \"anchor-00095\",\n      \"current_anchor_marker\": \"1\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00068\",\n      \"marker\": \"1\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0107\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 31 JANVIER 1979 La phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralis ...\",\n      \"anchor_page_no\": 91,\n      \"current_anchor_id\": \"anchor-00096\",\n      \"current_anchor_marker\": \"2\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00069\",\n      \"marker\": \"2\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0108\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"s'est alimentée, à coup sûr, à bien des sources depuis fort longtemps, que ce soit l'expérience soviétique dès les années 1920, l'expérience allemande du nazisme, la planification anglaise d'après-guerre, etc. Phobie d'État dont les agents ...\",\n      \"anchor_page_no\": 92,\n      \"current_anchor_id\": \"anchor-00097\",\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00070\",\n      \"marker\": \"3\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0109\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-m ...\",\n      \"anchor_page_no\": 94,\n      \"current_anchor_id\": \"anchor-00098\",\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00072\",\n      \"marker\": \"5\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0111\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"ces banalités —, on est en pleine politique keynesienne. Or un Conseil scientifique qui avait été formé auprès de l'administration allemande de l'économie¹⁶, administration allemande de l'économie qui existait dans ce qu'on appelait la bizo ...\",\n      \"anchor_page_no\": 96,\n      \"current_anchor_id\": \"anchor-00111\",\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00073\",\n      \"marker\": \"6\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0112\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-m ...\",\n      \"anchor_page_no\": 94,\n      \"current_anchor_id\": \"anchor-00100\",\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00074\",\n      \"marker\": \"7\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0113\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-m ...\",\n      \"anchor_page_no\": 94,\n      \"current_anchor_id\": \"anchor-00101\",\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00075\",\n      \"marker\": \"8\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0114\",\n      \"note_page_no\": 111\n    },\n    {\n      \"anchor_excerpt\": \"Ceci étant dit, je voudrais dans cette perspective, continuant le fil de l'analyse de la gouvernementalité libérale, voir un peu comment elle se présente, comment elle se réfléchit, comment à la fois elle se met en œuvre et s'analyse elle-m ...\",\n      \"anchor_page_no\": 94,\n      \"current_anchor_id\": \"anchor-00102\",\n      \"current_anchor_marker\": \"9\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00076\",\n      \"marker\": \"9\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0115\",\n      \"note_page_no\": 111\n    }\n  ],\n  \"request_mode\": \"note_only_with_body\",\n  \"unmatched_anchors\": [],\n  \"unmatched_note_items\": [\n    {\n      \"marker\": \"4\",\n      \"note_item_id\": \"en-0110\",\n      \"page_no\": 111,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"14\",\n      \"note_item_id\": \"en-0119\",\n      \"page_no\": 112,\n      \"source_text\": \"\"\n    }\n  ]\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "anchor_id": "",
+      "anchor_phrase": "histoire politique de l'exil ou toute une histoire de l'exil",
+      "confidence": 0.9,
+      "marker": "",
+      "note_item_id": "en-0110",
+      "note_text": "",
+      "reason": "Note 4 contextually follows discussion of the history of exile on page 92."
+    },
+    {
+      "action": "needs_review",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "confidence": 0.8,
+      "marker": "",
+      "note_item_id": "",
+      "note_text": "",
+      "reason": "Note 14 (en-0119) lacks clear textual anchor context in the provided excerpt to safely synthesize."
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"en-0110\",\n    \"anchor_phrase\": \"histoire politique de l'exil ou toute une histoire de l'exil\",\n    \"confidence\": 0.9,\n    \"reason\": \"Note 4 contextually follows discussion of the history of exile on page 92.\"\n  },\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"Note 14 (en-0119) lacks clear textual anchor context in the provided excerpt to safely synthesize.\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 1230
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 3290,
+    "input_tokens": 3504,
+    "output_tokens": 143,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 3647
+  },
+  "usage": {
+    "completion_tokens": 143,
+    "prompt_tokens": 3504,
+    "request_count": 1,
+    "total_tokens": 3647
+  }
+}

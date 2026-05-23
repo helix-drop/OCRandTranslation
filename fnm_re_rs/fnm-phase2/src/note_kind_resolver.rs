@@ -102,11 +102,11 @@ pub fn resolve_note_kind(ctx: &NoteRegionContext) -> NoteKindResolution {
         };
     }
 
-    // 6. 兜底 — 不要默认 footnote
+    // 6. 兜底 — 标记为 Unknown，不默认 footnote/endnote
     NoteKindResolution {
-        note_kind: NoteKind::Footnote,
+        note_kind: NoteKind::Unknown,
         confidence: 0.40,
-        reason: "fallback_review_required".into(),
+        reason: "fallback_unknown".into(),
         review_required: true,
     }
 }
@@ -213,5 +213,6 @@ mod tests {
         };
         let r = resolve_note_kind(&ctx);
         assert!(r.review_required);
+        assert_eq!(r.note_kind, NoteKind::Unknown);
     }
 }

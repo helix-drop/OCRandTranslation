@@ -171,6 +171,7 @@ fn test_loop2_ambiguous_followup() {
 
 #[test]
 fn test_loop3_cross_chapter_same_page_rebind() {
+    // 测试：跨章 case 不应被修（章守卫），即使同页同 marker
     let anchors = vec![
         make_anchor("anc-explicit", "ch-2", 10, "1", false),
         make_anchor("synthetic-footnote-1", "ch-1", 10, "1", true),
@@ -189,6 +190,51 @@ fn test_loop3_cross_chapter_same_page_rebind() {
         make_link(LinkArgs {
             id: "link-orphan",
             chapter: "ch-2",
+            status: LinkStatus::OrphanAnchor,
+            resolver: LinkResolver::Rule,
+            note_kind: NoteKind::Footnote,
+            anchor_id: "anc-explicit",
+            marker: "1",
+            page: 10,
+        }),
+    ];
+    let items: Vec<NoteItemRecord> = Vec::new();
+    let (_ra, rl, summary) = repair_explicit_footnote_anchor_ocr_variants(&anchors, &links, &items);
+    // 跨章守卫阻止重绑定
+    assert_eq!(
+        summary.get("cross_chapter_same_page_rebind_count"),
+        Some(&0)
+    );
+    // synthetic link 保持原状
+    let matched_link = rl.iter().find(|l| l.link_id == "link-matched").unwrap();
+    assert_eq!(matched_link.anchor_id, "synthetic-footnote-1");
+    assert_eq!(matched_link.resolver, LinkResolver::Rule);
+    // orphan link 保持原状
+    let orphan_link = rl.iter().find(|l| l.link_id == "link-orphan").unwrap();
+    assert_eq!(orphan_link.status, LinkStatus::OrphanAnchor);
+}
+
+#[test]
+fn test_loop3_same_chapter_rebind() {
+    // 测试：同章同页同 marker 的重绑定仍正常工作
+    let anchors = vec![
+        make_anchor("anc-explicit", "ch-1", 10, "1", false),
+        make_anchor("synthetic-footnote-1", "ch-1", 10, "1", true),
+    ];
+    let links = vec![
+        make_link(LinkArgs {
+            id: "link-matched",
+            chapter: "ch-1",
+            status: LinkStatus::Matched,
+            resolver: LinkResolver::Rule,
+            note_kind: NoteKind::Footnote,
+            anchor_id: "synthetic-footnote-1",
+            marker: "1",
+            page: 10,
+        }),
+        make_link(LinkArgs {
+            id: "link-orphan",
+            chapter: "ch-1",
             status: LinkStatus::OrphanAnchor,
             resolver: LinkResolver::Rule,
             note_kind: NoteKind::Footnote,

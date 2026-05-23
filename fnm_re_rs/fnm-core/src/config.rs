@@ -265,7 +265,7 @@ mod tests {
         invalidate_config_cache();
         // 不依赖磁盘文件
         let pool = get_fnm_model_pool();
-        assert!(pool.len() >= 1);
+        assert!(!pool.is_empty());
     }
 
     #[test]

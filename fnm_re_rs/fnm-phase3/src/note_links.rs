@@ -22,6 +22,7 @@ pub fn build_note_links(
     link_serial_start: usize,
     chapter_note_modes: &[ChapterNoteModeRecord],
     note_regions: &[NoteRegionRecord],
+    chapter_body_pages: &HashMap<String, HashSet<i64>>,
 ) -> (Vec<NoteLinkRecord>, NoteLinkSummary) {
     let page_text_by_no: HashMap<i64, String> = raw_pages
         .iter()
@@ -64,6 +65,7 @@ pub fn build_note_links(
         link_serial_start,
         &regions_by_id,
         &anchor_count_by_chapter,
+        chapter_body_pages,
     );
 
     // ── 脚注匹配 ──
@@ -196,10 +198,10 @@ fn build_orphan_anchor_links(
                 status: LinkStatus::OrphanAnchor,
                 resolver: fnm_core::types::LinkResolver::Rule,
                 confidence: 0.0,
-                note_kind: if inferred_kind == "footnote" {
-                    fnm_core::types::NoteKind::Footnote
-                } else {
-                    fnm_core::types::NoteKind::Endnote
+                note_kind: match inferred_kind {
+                    "footnote" => fnm_core::types::NoteKind::Footnote,
+                    "endnote" => fnm_core::types::NoteKind::Endnote,
+                    _ => fnm_core::types::NoteKind::Unknown,
                 },
                 marker: normalized_marker,
                 page_no_start: anchor.page_no,

@@ -141,6 +141,9 @@ impl std::str::FromStr for EndnoteMode {
 
 /// 把文本中的 NOTE_REF/FN_REF/EN_REF token 改写为 markdown 脚注 `[^id]`。
 /// 与 Python `replace_frozen_refs` 一致。
+///
+/// 注：`endnote_mode` 参数当前为兼容占位，`Legacy` 和 `Standard` 行为一致。
+/// 详见 FNM_CORE_AUDIT.md P2。
 pub fn replace_frozen_refs(text: &str, _mode: EndnoteMode) -> String {
     let mut payload = text.to_string();
 

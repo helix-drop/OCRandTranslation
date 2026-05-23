@@ -23,20 +23,21 @@ pub mod ocr_repair;
 pub mod phase2_rebuild;
 
 use fnm_core::records::{
-    BodyAnchorRecord, ChapterLinkContract, NoteItemRecord, NoteLinkRecord, NoteRegionRecord,
-    PagePartitionRecord, Phase2Structure,
+    BodyAnchorRecord, ChapterLinkContract, ChapterRecord, NoteItemRecord, NoteLinkRecord,
+    NoteRegionRecord, PagePartitionRecord,
 };
 use fnm_phase1::input::RawPage;
 use fnm_phase2::chapter_split::ChapterLayers;
+use serde::Serialize;
 use serde_json::Value;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 // ── 输出类型 ────────────────────────────────────────────────────
 
 /// Phase 3 模块级产物。
 ///
 /// ←→ Python `NoteLinkTable`（modules/types.py）
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct NoteLinkTable {
     pub anchors: Vec<BodyAnchorRecord>,
     pub links: Vec<NoteLinkRecord>,
@@ -47,7 +48,7 @@ pub struct NoteLinkTable {
 }
 
 /// ←→ Python `GateReport`（modules/contracts.py）
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize)]
 pub struct GateReport {
     pub module: String,
     pub hard: HashMap<String, bool>,
@@ -67,9 +68,9 @@ pub struct NoteLinkTableResult {
     pub evidence: HashMap<String, Value>,
     pub overrides_used: Vec<Value>,
     pub diagnostics: HashMap<String, Value>,
-    /// Phase 2 重建产物，供 caller（如 lib.rs）复用以避免重复执行
-    /// `phase2_from_chapter_layers`——它在 Biopolitics 370 页规模约 100ms。
-    pub phase2: Phase2Structure,
+    /// Phase 2 note 数据（含 override 后的 note_items / note_regions），
+    /// 供 caller 组装 Phase3Structure 用的 note 部分。
+    pub phase2_build: phase2_rebuild::Phase2BuildOutput,
 }
 
 /// 构建 note link table——完整编排。
@@ -82,10 +83,13 @@ pub fn build_note_link_table(
     pages: &[RawPage],
     overrides: Option<&Value>,
     pdf_path: &str,
+    phase1_chapters: &[ChapterRecord],
+    phase1_pages: &[PagePartitionRecord],
 ) -> NoteLinkTableResult {
     // Python 行 1437：_phase2_from_chapter_layers
-    let (phase2, _chapter_mode_by_id, book_type) =
-        phase2_rebuild::phase2_from_chapter_layers(chapter_layers);
+    // 本函数只返回 note 数据，不输出退化的 Phase1/2 facts。
+    let phase2_build = phase2_rebuild::phase2_from_chapter_layers(chapter_layers);
+    let book_type = &phase2_build.book_type;
 
     // Python 行 1438：_group_review_overrides
     let overrides_value = overrides.cloned().unwrap_or(Value::Null);
@@ -101,18 +105,18 @@ pub fn build_note_link_table(
         note_item_override_summary,
         note_item_override_logs,
     ) = note_item_overrides::materialize_note_item_overrides(
-        &phase2.note_items,
-        &phase2.note_regions,
+        &phase2_build.note_items,
+        &phase2_build.note_regions,
         note_item_overrides_group,
     );
 
-    // 组装 phase2 with overrides
+    // 组装 phase2 with overrides：chapters/pages 来自原始 Phase1 输入
     let phase2_with_overrides = Phase2WithOverrides {
         note_items: phase2_note_items,
         note_regions: phase2_note_regions,
-        chapters: phase2.chapters.clone(),
-        chapter_note_modes: phase2.chapter_note_modes.clone(),
-        pages: phase2.pages.clone(),
+        chapters: phase1_chapters.to_vec(),
+        chapter_note_modes: phase2_build.chapter_note_modes.clone(),
+        pages: phase1_pages.to_vec(),
     };
 
     // Python 行 1443-1453：_build_note_item_meta_by_id
@@ -151,6 +155,16 @@ pub fn build_note_link_table(
         serde_json::to_value(&base_anchor_summary).unwrap_or(Value::Null);
 
     // Python 行 1462：build_note_links
+    // 从 chapter_layers 构建每章 body page 集合（用于端末 orphan recovery，
+    // 不依赖已有 anchor 的位置——使无 anchor 的章也能做正文搜索恢复）。
+    let chapter_body_pages: HashMap<String, HashSet<i64>> = chapter_layers
+        .chapter_layers
+        .iter()
+        .map(|cl| {
+            let pages: HashSet<i64> = cl.body_pages.iter().map(|bp| bp.page_no).collect();
+            (cl.chapter_id.clone(), pages)
+        })
+        .collect();
     let mut enhanced_anchors = body_anchors;
     let (note_links, note_link_meta) = crate::note_links::build_note_links(
         &mut enhanced_anchors,
@@ -159,6 +173,7 @@ pub fn build_note_link_table(
         1,
         &phase2_with_overrides.chapter_note_modes,
         &phase2_with_overrides.note_regions,
+        &chapter_body_pages,
     );
     // 注：build_note_links 返回的 links 包含 synthetic anchor 修改，对应
     // Python 行 1462 把它赋值给 note_links 并在行 1463 传给 repair。
@@ -235,7 +250,7 @@ pub fn build_note_link_table(
     // Python 行 1498-1582：硬门/软门 + blockers/warnings 装配
     let gate_outputs = gate_compute::compute_gates(gate_compute::GateInputs {
         contracts: &contracts,
-        book_type: &book_type,
+        book_type,
         anchor_summary: &anchor_summary,
         effective_link_summary: &effective_link_summary,
         link_quality: &link_quality,
@@ -253,7 +268,7 @@ pub fn build_note_link_table(
 
     // Python 行 1584-1620：evidence 装配（拆到 evidence_assemble.rs）
     let evidence = evidence_assemble::build_evidence(evidence_assemble::EvidenceInputs {
-        book_type: &book_type,
+        book_type,
         anchor_summary_value,
         raw_link_summary: &raw_link_summary,
         effective_link_summary: &effective_link_summary,
@@ -308,19 +323,14 @@ pub fn build_note_link_table(
         link_summary: evidence_assemble::link_summary_to_value(&effective_link_summary),
     };
 
-    // 复用本函数已经构建过的 phase2——避免 caller 再调一次
-    // `phase2_from_chapter_layers`（Biopolitics 370 页约 100ms）。
     // note_items / note_regions 用 materialize 后版本，与下游 effective_links
     // 一致（CLAUDE.md §12 分类源头唯一：override 已生效）。
-    let final_phase2 = Phase2Structure {
-        pages: phase2.pages,
-        heading_candidates: phase2.heading_candidates,
-        chapters: phase2.chapters,
-        section_heads: phase2.section_heads,
+    let final_build = phase2_rebuild::Phase2BuildOutput {
         note_regions: phase2_with_overrides.note_regions,
         note_items: phase2_with_overrides.note_items,
-        chapter_note_modes: phase2.chapter_note_modes,
-        summary: phase2.summary,
+        chapter_note_modes: phase2_build.chapter_note_modes,
+        note_mode_by_chapter: phase2_build.note_mode_by_chapter,
+        book_type: phase2_build.book_type,
     };
 
     NoteLinkTableResult {
@@ -329,7 +339,7 @@ pub fn build_note_link_table(
         evidence,
         overrides_used: all_override_logs,
         diagnostics,
-        phase2: final_phase2,
+        phase2_build: final_build,
     }
 }
 
@@ -339,7 +349,6 @@ struct Phase2WithOverrides {
     note_items: Vec<NoteItemRecord>,
     note_regions: Vec<NoteRegionRecord>,
     chapters: Vec<fnm_core::records::ChapterRecord>,
-    #[allow(dead_code)]
     chapter_note_modes: Vec<fnm_core::records::ChapterNoteModeRecord>,
     pages: Vec<PagePartitionRecord>,
 }

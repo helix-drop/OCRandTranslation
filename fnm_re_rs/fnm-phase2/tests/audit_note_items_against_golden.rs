@@ -136,13 +136,16 @@ fn audit_note_items_rust_vs_golden() {
     let rust_count = rust_items.len();
     let py_count = golden.note_items.len();
     eprintln!("=== Phase 2 note_items 审计 ===");
-    eprintln!("Rust: {rust_count} items, Golden: {py_count} items, Diff: {}", {
-        if rust_count >= py_count {
-            format!("+{}", rust_count - py_count)
-        } else {
-            format!("-{}", py_count - rust_count)
+    eprintln!(
+        "Rust: {rust_count} items, Golden: {py_count} items, Diff: {}",
+        {
+            if rust_count >= py_count {
+                format!("+{}", rust_count - py_count)
+            } else {
+                format!("-{}", py_count - rust_count)
+            }
         }
-    });
+    );
 
     // 按 note_kind 分类
     let rust_by_kind = count_by_kind(&rust_items);

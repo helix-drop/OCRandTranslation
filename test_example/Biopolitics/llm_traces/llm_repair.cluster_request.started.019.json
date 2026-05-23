@@ -1,0 +1,106 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 7 MARS 1979",
+      "cluster_id": "ch-fallback-0009:nr-fn-ch-0052-ch-fallback-0009:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        220,
+        220
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0009",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0261",
+          "note_kind": "footnote",
+          "page_no": 220,
+          "region_id": "nr-fn-ch-0052-ch-fallback-0009",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p220",
+          "text": "M. Foucault laisse ici de côté les pages 20 et 21 du manuscrit :"
+        },
+        {
+          "chapter_id": "ch-fallback-0009",
+          "is_reconstructed": false,
+          "marker": "2",
+          "marker_type": "",
+          "note_item_id": "fn-0262",
+          "note_kind": "footnote",
+          "page_no": 220,
+          "region_id": "nr-fn-ch-0052-ch-fallback-0009",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p220",
+          "text": "L’autre volet comprend lui-même deux ensembles de mesures : a. reconstitution du “capital humain” {...], b. l'impôt négatif (Chicago). »"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 219,
+        "ocr_excerpt": "je crois, suffisamment claire, quand il dit dans ce texte de [19]72 : « Ce qui caractérise l’économie de marché, c’est qu’il existe des règles du jeu qui permettent des prises de décision décentralisées et ces règles sont les mêmes pour tous 44. » Entre la règle de la concurrence de la production et celle de la protection de l’individu, il faut instaurer « un jeu particulier » pour qu’aucun joueur ne puisse risquer de tout perdre 45 — il dit « jeu particulier », il faudrait sans doute mieux dire « règle particulière ». Or, cette idée qu’il doit y avoir une règle de non-exclusion et que la fonction de la règle sociale, de la réglementation sociale, de la sécurité sociale au sens très large du terme, ce soit d’assurer purement et simplement la non-exclusion à l’égard d’un jeu économique qui, en dehors de cela, doit se dérouler par lui-même, c’est cette idée qui se trouve mise en œuvre, esquissée en tout cas, dans toute une série de mesures plus ou moins claires. Je voudrais simplement (à la fois parce que le temps presse et que je ne veux pas trop vous ennuyer avec ça) vous montrer ce que cela veut dire, non pas [à partir des] mesures qui ont été effectivement prises et qui, à cause de la crise et de l'intensité de la crise, n'ont pas pu être poussées jusqu'au bout, n'ont pas pu constituer un ensemble cohérent, [mais en prenant] l'exemple d'un projet revenu plusieurs fois depuis ...",
+        "page_no": 220,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0009:nr-fn-ch-0052-ch-fallback-0009:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5362,
+    "cluster_id": "ch-fallback-0009:nr-fn-ch-0052-ch-fallback-0009:footnote",
+    "estimated_prompt_tokens": 1540,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 2
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1540,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

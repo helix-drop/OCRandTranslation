@@ -1,0 +1,171 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 10 JANVIER 1979",
+      "cluster_id": "ch-fallback-0002:nr-fn-ch-0007-ch-fallback-0002:footnote",
+      "matched_examples": [
+        {
+          "anchor_excerpt": "rationalité dans l'art de gouverner, ce nouveau type de calcul qui consiste à dire et à faire dire au gouvernement : à tout cela j'accepte, je veux, je projette, je calcule qu'il ne faut pas toucher ? Eh bien, je pense que c'est cela en gros que l'on appelle le « libéralisme »*.\n\nJ'avais pensé pouvoir vous faire cette année un cours sur la biopolitique. J'essaierai de vous montrer comment tous les problèmes que j'essaie de repérer là actuellement, comment tous ces problèmes ont pour",
+          "anchor_id": "anchor-00029",
+          "link_id": "link-00366",
+          "marker": "*",
+          "note_excerpt": "",
+          "note_item_id": "fn-0017"
+        }
+      ],
+      "note_system": "footnote",
+      "page_range": [
+        37,
+        37
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "2532",
+          "marker_type": "",
+          "note_item_id": "fn-0018",
+          "note_kind": "footnote",
+          "page_no": 37,
+          "region_id": "nr-fn-ch-0007-ch-fallback-0002",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p37",
+          "text": ". Un certain nombre d’éléments de cette conclusion sont repris et développés dans la leçon suivante."
+        },
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "2",
+          "marker_type": "",
+          "note_item_id": "fn-0020",
+          "note_kind": "footnote",
+          "page_no": 37,
+          "region_id": "nr-fn-ch-0007-ch-fallback-0002",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p37",
+          "text": "Le libéralisme, c’est aussi une pratique : où trouver exactement le principe de limitation du gouvernement et comment calculer les effets de cette limitation ?"
+        },
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "3",
+          "marker_type": "",
+          "note_item_id": "fn-0021",
+          "note_kind": "footnote",
+          "page_no": 37,
+          "region_id": "nr-fn-ch-0007-ch-fallback-0002",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p37",
+          "text": "Le libéralisme, c’est en un sens plus étroit la solution qui consiste à limiter au maximum les formes et domaines d’action du gouvernement. Enfin, le libéralisme, c’est l’organisation des méthodes de transaction propres à définir la limitation des pratiques de gouvernement :"
+        },
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "27",
+          "marker_type": "",
+          "note_item_id": "fn-0023",
+          "note_kind": "footnote",
+          "page_no": 37,
+          "region_id": "nr-fn-ch-0007-ch-fallback-0002",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p37",
+          "text": "Une des formes de la gouvernementalité moderne. Elle se caractérise par le fait que, au lieu de se heurter à des limites formalisées par des juridictions, elle se [donne ?] à elle-même des limites intrinsèques formulées en termes de véridiction."
+        },
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "28",
+          "marker_type": "",
+          "note_item_id": "fn-0024",
+          "note_kind": "footnote",
+          "page_no": 37,
+          "region_id": "nr-fn-ch-0007-ch-fallback-0002",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p37",
+          "text": "Cette tâche va prendre deux formes depuis le xvinf [siècle] jusqu’à nos jours :"
+        },
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "29",
+          "marker_type": "",
+          "note_item_id": "fn-0025",
+          "note_kind": "footnote",
+          "page_no": 37,
+          "region_id": "nr-fn-ch-0007-ch-fallback-0002",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p37",
+          "text": "La méthode du résidu juridique nécessaire et suffisant, c’est la pratique libérale. La méthode du conditionnement gouvernemental exhaustif, c’est la procédure révolutionnaire."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 36,
+        "ocr_excerpt": "rationalité dans l'art de gouverner, ce nouveau type de calcul qui consiste à dire et à faire dire au gouvernement : à tout cela j'accepte, je veux, je projette, je calcule qu'il ne faut pas toucher ? Eh bien, je pense que c'est cela en gros que l'on appelle le « libéralisme »*. J'avais pensé pouvoir vous faire cette année un cours sur la biopolitique. J'essaierai de vous montrer comment tous les problèmes que j'essaie de repérer là actuellement, comment tous ces problèmes ont pour",
+        "page_no": 37,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0002:nr-fn-ch-0007-ch-fallback-0002:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5955,
+    "cluster_id": "ch-fallback-0002:nr-fn-ch-0007-ch-fallback-0002:footnote",
+    "estimated_prompt_tokens": 1722,
+    "image_refused": false,
+    "matched_examples": 1,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 6
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1722,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

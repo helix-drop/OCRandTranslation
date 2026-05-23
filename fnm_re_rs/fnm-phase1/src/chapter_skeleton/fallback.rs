@@ -329,9 +329,8 @@ pub fn classify_fallback_sections(
         }) {
             first.keep_as_chapter = true;
             first.reject_reason = String::new();
-            first.classification_score = first
-                .classification_score
-                .max(SCORE_FORCE_KEEP_FIRST_FLOOR);
+            first.classification_score =
+                first.classification_score.max(SCORE_FORCE_KEEP_FIRST_FLOOR);
         }
     }
 
@@ -340,7 +339,6 @@ pub fn classify_fallback_sections(
 
 // ── 标记被抑制的候选 ─────────────────────────────────────────────
 
-#[allow(dead_code)]
 pub fn mark_suppressed_candidates(
     classified: &[ClassifiedSection],
     heading_candidates: &mut Vec<HeadingCandidate>,
@@ -553,7 +551,6 @@ pub fn normalize_chapters(chapters: Vec<ChapterRecord>) -> Vec<ChapterRecord> {
     normalized
 }
 
-#[allow(dead_code)]
 pub fn normalize_sections(sections: Vec<SectionHeadRecord>) -> Vec<SectionHeadRecord> {
     let mut normalized: Vec<SectionHeadRecord> = sections
         .into_iter()
@@ -605,8 +602,7 @@ fn chapter_keyword_strength(title: &str) -> f64 {
         || fnm_core::title::matches_front_matter_force_export(title)
     {
         2.0
-    } else if crate::chapter_skeleton::toc_semantics::title_utils::LECTURE_TITLE_RE
-        .is_match(title)
+    } else if crate::chapter_skeleton::toc_semantics::title_utils::LECTURE_TITLE_RE.is_match(title)
     {
         1.5
     } else {

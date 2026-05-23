@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 14 MARS 1979",
+      "cluster_id": "ch-fallback-0010:nr-fn-ch-0064-ch-fallback-0010:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        270,
+        270
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0010",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0369",
+          "note_kind": "footnote",
+          "page_no": 270,
+          "region_id": "nr-fn-ch-0064-ch-fallback-0010",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p270",
+          "text": "M. Foucault bute un peu sur ce mot, ajoutant : ou gouvernement…, enfin oui, gouvernementalisable Entre guillemets dans le manuscrit."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 269,
+        "ocr_excerpt": "en compte du sujet comme homo œconomicus n'implique pas une assimilation anthropologique de tout comportement quel qu'il soit avec un comportement économique. Cela veut dire, simplement, que la grille d'intelligibilité que l'on va se donner sur le comportement d'un nouvel individu est celle-là. Ce qui veut dire, aussi, que ce par quoi l'individu va devenir gouvernementalisable*, ce par quoi on va pouvoir avoir prise sur lui, c'est dans la mesure, et dans la mesure seulement, où il est homo œconomicus. C'est-à-dire que la surface de contact entre l'individu et le pouvoir qui s'exerce sur lui, le principe par conséquent de régulation du pouvoir sur l'individu, ne va être que cette espèce de grille de l'homo œconomicus. L'homo œconomicus, c'est l'interface du gouvernement et de l'individu. Et ça ne veut pas dire du tout que tout individu, tout sujet est un homme économique. On va donc passer du côté du sujet individuel en le considérant comme homo œconomicus, avec ceci pour conséquence, que si on définit ainsi le crime comme l'action que commet un individu en prenant le risque d'être puni par la loi, vous voyez qu'il n'y a alors aucune différence entre une infraction au code de la route et un meurtre prémédité. Ça veut dire également que le criminel n'est aucunement, dans cette perspective, marqué ou interrogé à partir de traits moraux ou anthropologiques. Le criminel n'est rien d ...",
+        "page_no": 270,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0010:nr-fn-ch-0064-ch-fallback-0010:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5232,
+    "cluster_id": "ch-fallback-0010:nr-fn-ch-0064-ch-fallback-0010:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

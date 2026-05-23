@@ -558,7 +558,7 @@ fn run_doc_pipeline_json(
 /// ←→ Python `FNM_RE/__init__.py::run_llm_repair`
 #[pyfunction]
 #[pyo3(signature = (db_path, doc_id, pdf_path, renderer=None, slug="",
-                   auto_apply=true, confidence_threshold=0.9, cluster_limit=None))]
+                   auto_apply=true, confidence_threshold=0.9, cluster_limit=None, trace_callback=None))]
 fn run_llm_repair_json(
     py: Python<'_>,
     db_path: &str,
@@ -569,6 +569,7 @@ fn run_llm_repair_json(
     auto_apply: bool,
     confidence_threshold: f64,
     cluster_limit: Option<usize>,
+    trace_callback: Option<Py<PyAny>>,
 ) -> PyResult<String> {
     let pool = open_pool(Path::new(db_path))
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
@@ -577,28 +578,51 @@ fn run_llm_repair_json(
         .load_raw_pages_for_doc(doc_id)
         .map_err(|e| PyRuntimeError::new_err(format!("load pages: {}", e)))?;
 
-    let report = py.allow_threads(|| {
-        let py_renderer = renderer.map(PyRepairRenderer::new);
-        let noop = NoopRenderer;
-        let renderer_ref: &dyn RepairImageRenderer = match &py_renderer {
-            Some(r) => r,
-            None => &noop,
-        };
+    let report = py
+        .allow_threads(|| -> Result<_, String> {
+            let py_renderer = renderer.map(PyRepairRenderer::new);
+            let noop = NoopRenderer;
+            let renderer_ref: &dyn RepairImageRenderer = match &py_renderer {
+                Some(r) => r,
+                None => &noop,
+            };
+            let trace_bridge = |trace: serde_json::Value| {
+                let Some(callback) = &trace_callback else {
+                    return;
+                };
+                Python::with_gil(|py| {
+                    let Ok(trace_json) = serde_json::to_string(&trace) else {
+                        return;
+                    };
+                    let Ok(json_mod) = py.import_bound("json") else {
+                        return;
+                    };
+                    let Ok(trace_obj) = json_mod.call_method1("loads", (trace_json,)) else {
+                        return;
+                    };
+                    let _ = callback.call1(py, (trace_obj,));
+                });
+            };
 
-        let mut params = RunLlmRepairParams::new(doc_id, &repo, &raw_pages, pdf_path, renderer_ref);
-        params.slug = slug;
-        params.auto_apply = auto_apply;
-        params.confidence_threshold = confidence_threshold;
-        params.cluster_limit = cluster_limit;
+            let mut params =
+                RunLlmRepairParams::new(doc_id, &repo, &raw_pages, pdf_path, renderer_ref);
+            params.slug = slug;
+            params.auto_apply = auto_apply;
+            params.confidence_threshold = confidence_threshold;
+            params.cluster_limit = cluster_limit;
+            if trace_callback.is_some() {
+                params.trace_callback = Some(&trace_bridge);
+            }
 
-        let runtime = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .expect("tokio runtime");
-        runtime
-            .block_on(run_llm_repair(params))
-            .expect("llm repair")
-    });
+            let runtime = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .map_err(|e| format!("tokio runtime: {e}"))?;
+            runtime
+                .block_on(run_llm_repair(params))
+                .map_err(|e| format!("llm repair: {e}"))
+        })
+        .map_err(PyRuntimeError::new_err)?;
 
     serde_json::to_string(&report).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
@@ -808,7 +832,9 @@ fn prepare_page_translate_jobs_json(
     doc_id: &str,
     db_path: &str,
 ) -> PyResult<String> {
-    let _ = t_args_json; // 透传，当前暂不解析 model args
+    // t_args_json 当前暂不解析 model args，但保留在签名中供 Python 端透传。
+    // 用 `_t_args_json` 前缀（而非 `let _ = …`）确保 PyO3 仍按 signature 接收实参。
+    let _t_args_json = t_args_json;
     let pages: Vec<RawPage> = serde_json::from_str(pages_json)
         .map_err(|e| PyRuntimeError::new_err(format!("parse pages_json: {}", e)))?;
 

@@ -69,9 +69,11 @@ enum_with_str! {
 
 enum_with_str! {
     /// 与 Python `Literal["footnote", "endnote"]` 对应。
+    /// `Unknown` 为 Rust 增设，用于 DB 读回非法值或未初始化的安全兜底。
     pub enum NoteKind {
         Footnote => "footnote",
         Endnote => "endnote",
+        Unknown => "unknown",
     }
 }
 
@@ -192,7 +194,7 @@ mod tests {
         assert_eq!(PageRole::ALL.len(), 5);
         assert_eq!(ChapterSource::ALL.len(), 2);
         assert_eq!(BoundaryState::ALL.len(), 2);
-        assert_eq!(NoteKind::ALL.len(), 2);
+        assert_eq!(NoteKind::ALL.len(), 3);
         assert_eq!(RegionScope::ALL.len(), 2);
         assert_eq!(RegionSource::ALL.len(), 9);
         assert_eq!(NoteMode::ALL.len(), 5);

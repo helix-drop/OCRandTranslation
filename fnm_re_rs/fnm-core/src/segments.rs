@@ -295,7 +295,6 @@ pub fn normalize_unit_page_segment(
         source_text: final_source,
         display_text: final_display,
         paragraphs,
-        ..Default::default()
     };
 
     let changed = segment.paragraph_count != normalized.paragraph_count

@@ -1,0 +1,208 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "anchor_id": "",
+        "anchor_phrase": "le gouvernement de la raison d'État (politique extérieure)",
+        "confidence": 0.9,
+        "marker": "",
+        "note_item_id": "en-0032",
+        "note_text": "",
+        "reason": "该短语在文本中唯一且位于注释7引用的上下文附近。"
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 10 JANVIER 1979",
+      "cluster_id": "ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote",
+      "matched_examples": [
+        {
+          "anchor_excerpt": "# LEÇON DU 10 JANVIER 1979\n\nQuestions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ?\n\n[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « gouverner », je l'avais utilisé en laissant de côté toutes les mille manières, modalités et possibilités qui existent de guider les hommes, de diriger leur conduite, de contraindre leurs actions et leurs réactions, etc. J'avais donc laissé de côté tout ce qu'on entend d'ordinaire et tout ce qui a été entendu longtemps comme le gouvernement des enfants, le gouvernement des familles, le gouvernement d'une maison, le gouvernement des âmes, le gouvernement des communautés, etc. Et je n'avais pris, et cette année encore je ne prendrai en considération que le gouvernement des hommes dans la mesure, et dans la mesure seulement, où il se donne comme exercice de la souveraineté politique.",
+          "anchor_id": "anchor-00008",
+          "link_id": "link-00001",
+          "marker": "1",
+          "note_excerpt": "",
+          "note_item_id": "en-0026"
+        },
+        {
+          "anchor_excerpt": "# LEÇON DU 10 JANVIER 1979\n\nQuestions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ?\n\n[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « gouverner », je l'avais utilisé en laissant de côté toutes les mille manières, modalités et possibilités qui existent de guider les hommes, de diriger leur conduite, de contraindre leurs actions et leurs réactions, etc. J'avais donc laissé de côté tout ce qu'on entend d'ordinaire et tout ce qui a été entendu longtemps comme le gouvernement des enfants, le gouvernement des familles, le gouvernement d'une maison, le gouvernement des âmes, le gouvernement des communautés, etc. Et je n'avais pris, et cette année encore je ne prendrai en considération que le gouvernement des hommes dans la mesure, et dans la mesure seulement, où il se donne comme exercice de la souveraineté politique.",
+          "anchor_id": "anchor-00009",
+          "link_id": "link-00003",
+          "marker": "2",
+          "note_excerpt": "",
+          "note_item_id": "en-0026-inferred-1"
+        }
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        40,
+        40
+      ],
+      "rebind_candidates": [
+        {
+          "anchor_excerpt": "# LEÇON DU 10 JANVIER 1979\n\nQuestions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ?\n\n[Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « gouverner », je l'avais utilisé en laissant de côté toutes les mille manières, modalités et possibilités qui existent de guider les hommes, de diriger leur conduite, de contraindre leurs actions et leurs réactions, etc. J'avais donc laissé de côté tout ce qu'on entend d'ordinaire et tout ce qui a été entendu longtemps comme le gouvernement des enfants, le gouvernement des familles, le gouvernement d'une maison, le gouvernement des âmes, le gouvernement des communautés, etc. Et je n'avais pris, et cette année encore je ne prendrai en considération que le gouvernement des hommes dans la mesure, et dans la mesure seulement, où il se donne comme exercice de la souveraineté politique.",
+          "anchor_page_no": 17,
+          "current_anchor_id": "anchor-00010",
+          "current_anchor_marker": "3",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00005",
+          "marker": "3",
+          "note_excerpt": "",
+          "note_item_id": "en-0028",
+          "note_page_no": 40
+        },
+        {
+          "anchor_excerpt": "grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on pourrait appeler une réduction historiciste, laquelle réduction historiciste consisterait en quoi ? Eh bien, précisément, à partir de ces universaux tels qu'ils sont donnés et à voir comment l'histoire ou les module, ou les modifie, ou établit finalement leur non-validité. L'historicisme part de l'universel et le passe en quelque sorte à la râpe de l'histoire. Mon problème est tout inverse. Je pars de la décision, à la fois théorique et méthodologique, qui consiste à dire : supposons que les universaux n'existent pas, et je pose à ce moment-là la question à l'histoire et aux historiens : comment pouvez-vous écrire l'histoire si vous n'admettez pas à priori que quelque chose comme l'État, la société, le souverain, les sujets existe ? C'était la même question que je posais, lorsque je disais, non pas : la folie existe-t-elle ? Je vais examiner si l'histoire me donne, me renvoie quelque chose comme la folie. Non, elle ne me renvoie pas quelque chose comme la folie, donc la folie n'existe pas. Ce n'était pas ça le raisonnement, ce n'était pas ça la méthode de fait. La méthode consistait à dire : supposons que la folie n'existe pas. Dès lors, quelle est donc l'histoire que l'on peut faire de ces différents événements, de ces différentes pratiques qui, apparemment, s'ordonnent à ce quelque chose supposé qui est la folie ?⁴ C'est donc exactement l'inverse de l'historicisme que je voudrais ici mettre en place. Non pas donc interroger les universaux en utilisant comme méthode critique l'histoire, mais partir de la décision de l'inexistence des universaux pour demander quelle histoire on peut faire. Je reviendrai là-dessus plus longuement ensuite⁵.\n\nL'an dernier, vous vous souvenez, j'avais essayé de faire l'étude de l'un de ces épisodes importants, je crois, dans l'histoire du gouvernement. Cet épisode, c'était celui, en gros, de l'apparition et de la mise en place de ce qu'on appelait à l'époque la raison d'État, dans un sens infiniment plus fort, plus strict, plus rigoureux, plus ample aussi que le sens qui a été donné ensuite à cette notion $ ^{6} $. Ce que j'avais essayé de repérer, c'était l'émergence d'un certain type de rationalité dans la pratique gouvernementale, un certain type de rationalité qui permettrait de régler la manière de gouverner sur quelque chose qui s'appelle l'État et qui, par rapport à cette pratique gouvernementale, par rapport à ce calcul de la pratique gouvernementale, joue le rôle à la fois d'un donné, puisqu'on ne gouvernera qu'un État qui se donne comme étant déjà là, on ne gouvernera que dans le cadre d'un État, c'est vrai, mais l'État sera en même temps un objectif à construire. L'État, c'est à la fois ce qui existe, mais ce qui",
+          "anchor_page_no": 19,
+          "current_anchor_id": "anchor-00011",
+          "current_anchor_marker": "4",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00007",
+          "marker": "4",
+          "note_excerpt": "",
+          "note_item_id": "en-0028-inferred-1",
+          "note_page_no": 40
+        },
+        {
+          "anchor_excerpt": "grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on pourrait appeler une réduction historiciste, laquelle réduction historiciste consisterait en quoi ? Eh bien, précisément, à partir de ces universaux tels qu'ils sont donnés et à voir comment l'histoire ou les module, ou les modifie, ou établit finalement leur non-validité. L'historicisme part de l'universel et le passe en quelque sorte à la râpe de l'histoire. Mon problème est tout inverse. Je pars de la décision, à la fois théorique et méthodologique, qui consiste à dire : supposons que les universaux n'existent pas, et je pose à ce moment-là la question à l'histoire et aux historiens : comment pouvez-vous écrire l'histoire si vous n'admettez pas à priori que quelque chose comme l'État, la société, le souverain, les sujets existe ? C'était la même question que je posais, lorsque je disais, non pas : la folie existe-t-elle ? Je vais examiner si l'histoire me donne, me renvoie quelque chose comme la folie. Non, elle ne me renvoie pas quelque chose comme la folie, donc la folie n'existe pas. Ce n'était pas ça le raisonnement, ce n'était pas ça la méthode de fait. La méthode consistait à dire : supposons que la folie n'existe pas. Dès lors, quelle est donc l'histoire que l'on peut faire de ces différents événements, de ces différentes pratiques qui, apparemment, s'ordonnent à ce quelque chose supposé qui est la folie ?⁴ C'est donc exactement l'inverse de l'historicisme que je voudrais ici mettre en place. Non pas donc interroger les universaux en utilisant comme méthode critique l'histoire, mais partir de la décision de l'inexistence des universaux pour demander quelle histoire on peut faire. Je reviendrai là-dessus plus longuement ensuite⁵.\n\nL'an dernier, vous vous souvenez, j'avais essayé de faire l'étude de l'un de ces épisodes importants, je crois, dans l'histoire du gouvernement. Cet épisode, c'était celui, en gros, de l'apparition et de la mise en place de ce qu'on appelait à l'époque la raison d'État, dans un sens infiniment plus fort, plus strict, plus rigoureux, plus ample aussi que le sens qui a été donné ensuite à cette notion $ ^{6} $. Ce que j'avais essayé de repérer, c'était l'émergence d'un certain type de rationalité dans la pratique gouvernementale, un certain type de rationalité qui permettrait de régler la manière de gouverner sur quelque chose qui s'appelle l'État et qui, par rapport à cette pratique gouvernementale, par rapport à ce calcul de la pratique gouvernementale, joue le rôle à la fois d'un donné, puisqu'on ne gouvernera qu'un État qui se donne comme étant déjà là, on ne gouvernera que dans le cadre d'un État, c'est vrai, mais l'État sera en même temps un objectif à construire. L'État, c'est à la fois ce qui existe, mais ce qui",
+          "anchor_page_no": 19,
+          "current_anchor_id": "anchor-00012",
+          "current_anchor_marker": "5",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00009",
+          "marker": "5",
+          "note_excerpt": "",
+          "note_item_id": "en-0030",
+          "note_page_no": 40
+        },
+        {
+          "anchor_excerpt": "grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on pourrait appeler une réduction historiciste, laquelle réduction historiciste consisterait en quoi ? Eh bien, précisément, à partir de ces universaux tels qu'ils sont donnés et à voir comment l'histoire ou les module, ou les modifie, ou établit finalement leur non-validité. L'historicisme part de l'universel et le passe en quelque sorte à la râpe de l'histoire. Mon problème est tout inverse. Je pars de la décision, à la fois théorique et méthodologique, qui consiste à dire : supposons que les universaux n'existent pas, et je pose à ce moment-là la question à l'histoire et aux historiens : comment pouvez-vous écrire l'histoire si vous n'admettez pas à priori que quelque chose comme l'État, la société, le souverain, les sujets existe ? C'était la même question que je posais, lorsque je disais, non pas : la folie existe-t-elle ? Je vais examiner si l'histoire me donne, me renvoie quelque chose comme la folie. Non, elle ne me renvoie pas quelque chose comme la folie, donc la folie n'existe pas. Ce n'était pas ça le raisonnement, ce n'était pas ça la méthode de fait. La méthode consistait à dire : supposons que la folie n'existe pas. Dès lors, quelle est donc l'histoire que l'on peut faire de ces différents événements, de ces différentes pratiques qui, apparemment, s'ordonnent à ce quelque chose supposé qui est la folie ?⁴ C'est donc exactement l'inverse de l'historicisme que je voudrais ici mettre en place. Non pas donc interroger les universaux en utilisant comme méthode critique l'histoire, mais partir de la décision de l'inexistence des universaux pour demander quelle histoire on peut faire. Je reviendrai là-dessus plus longuement ensuite⁵.\n\nL'an dernier, vous vous souvenez, j'avais essayé de faire l'étude de l'un de ces épisodes importants, je crois, dans l'histoire du gouvernement. Cet épisode, c'était celui, en gros, de l'apparition et de la mise en place de ce qu'on appelait à l'époque la raison d'État, dans un sens infiniment plus fort, plus strict, plus rigoureux, plus ample aussi que le sens qui a été donné ensuite à cette notion $ ^{6} $. Ce que j'avais essayé de repérer, c'était l'émergence d'un certain type de rationalité dans la pratique gouvernementale, un certain type de rationalité qui permettrait de régler la manière de gouverner sur quelque chose qui s'appelle l'État et qui, par rapport à cette pratique gouvernementale, par rapport à ce calcul de la pratique gouvernementale, joue le rôle à la fois d'un donné, puisqu'on ne gouvernera qu'un État qui se donne comme étant déjà là, on ne gouvernera que dans le cadre d'un État, c'est vrai, mais l'État sera en même temps un objectif à construire. L'État, c'est à la fois ce qui existe, mais ce qui",
+          "anchor_page_no": 19,
+          "current_anchor_id": "anchor-00013",
+          "current_anchor_marker": "6",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00011",
+          "marker": "6",
+          "note_excerpt": "",
+          "note_item_id": "en-0031",
+          "note_page_no": 40
+        },
+        {
+          "anchor_excerpt": "le droit va servir au contraire de point d'appui à toute personne qui voudra d'une manière ou d'une autre limiter cette extension indéfinie d'une raison d'État prenant corps dans un État de police. La théorie du droit et les institutions judiciaires vont servir maintenant, non plus de multiplica-teur, mais au contraire de soustracteur au pouvoir royal. Et c'est ainsi qu'on va voir, à partir du xvi<sup>e</sup> siècle et pendant tout le xv<sup>i</sup><sup>e</sup>, se développer toute une série de problèmes, de polémiques, de batailles politiques, autour par exemple des lois fondamentales du royaume, ces lois fondamentales du royaume que les juristes vont objecter à la raison d'État en disant qu'aucune pratique gouvernementale, aucune raison d'État ne peut justifier qu'on les remette en question. Elles sont là, en quelque sorte avant l'État, puisqu'elles sont constitutives de l'État et, par conséquent, aussi absolu que soit le pouvoir du roi, il ne doit pas, disent un certain nombre de juristes, toucher à ces lois fondamentales. Le droit constitué par ces lois fondamentales apparaît ainsi hors de la raison d'État et comme principe de cette limitation.\n\nVous avez aussi la théorie du droit naturel et des droits naturels que l'on fait valoir comme droits imprescriptibles et qu'aucun souverain, en tout état de cause, ne peut transgresser. Vous avez encore la théorie du contrat passé entre les individus pour constituer un souverain, contrat qui comporte un certain nombre de clauses auxquelles le souverain devrait bien se plier puisque, précisément, c'est au terme de ce contrat, et des clauses formulées dans ce contrat, que le souverain devient le souverain. Vous avez encore, en Angleterre d'ailleurs plus qu'en France, la théorie de l'accord qui se passe entre le souverain et les sujets pour constituer précisément un État et au terme duquel le souverain s'est engagé à faire et à ne pas faire un certain nombre de choses. Vous avez aussi tout le pan de cette réflexion historico-juridique dont je vous parlais il y a deux ou trois ans, je ne me souviens plus $ ^{8} $, et dans laquelle on essayait de faire valoir que, historiquement, le pouvoir royal avait longtemps été loin d'être un gouvernement absolu, que la raison qui régnait et qui s'était établie entre le souverain et ses sujets n'était pas du tout la raison d'État, mais beaucoup plutôt une sorte de transaction entre par exemple la noblesse et le chef militaire qu'elle avait chargé d'assumer, pendant le temps de guerre et peut-être un peu après, les fonctions de chef. Et ce serait de cela, de cette espèce de situation de droit primitive que le roi serait sorti, abusant ensuite de la situation pour renverser ces lois historiquement originaires qu'il faudrait maintenant retrouver.\n\nBref, de toute façon, ces discussions autour du droit, la vivacité de ces discussions, le développement intense d'ailleurs de tous les problèmes et",
+          "anchor_page_no": 24,
+          "current_anchor_id": "anchor-00015",
+          "current_anchor_marker": "8",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00015",
+          "marker": "8",
+          "note_excerpt": "",
+          "note_item_id": "en-0033",
+          "note_page_no": 40
+        },
+        {
+          "anchor_excerpt": "le peuvent pas, autrement dit, entre les choses à faire et les moyens à employer pour les faire d'une part, et les choses à ne pas faire. Le problème n'est donc pas : où sont les droits fondamentaux et comment est-ce que les droits fondamentaux partagent le domaine de la gouvernementalité possible et le domaine de la liberté fondamentale ? La ligne de partage va s'établir entre deux séries de choses [dont] Bentham, dans un de ses textes les plus importants sur lesquels j'essaierai de revenir, a établi la liste $ ^{9} $, le partage se fait entre agenda et non agenda, les choses à faire et les choses à ne pas faire.\n\nCinquièmement, cette limitation qui est donc une limitation de fait, une limitation générale, une limitation en fonction des objectifs du gouvernement, une limitation qui ne partage pas les sujets, mais les choses à faire, cette limitation interne, il est bien évident que ce ne sont pas ceux qui gouvernent qui, en toute souveraineté et en toute raison, vont [en] décider eux-mêmes*. Et dans la mesure où le gouvernement des hommes est une pratique qui n'est pas imposée par ceux qui gouvernent à ceux qui sont gouvernés, mais une pratique qui fixe la définition et la position respective des gouvernés et des gouvernants les uns en face des autres et par rapport aux autres, « régulation interne » voudra dire que cette limitation n'est imposée exactement ni par un côté ni par l'autre, ou en tout cas n'est pas imposée globalement, définitivement et totalement par, je dirai, transaction, au sens très large du mot « transaction », c'est-à-dire « action entre », c'est-à-dire par toute une série de conflits, d'accords, de discussions, de concessions réciproques : toutes péripéties qui ont pour effet d'établir finalement dans la pratique de gouverner un partage de fait, un partage général, un partage rationnel entre ce qui est à faire et ce qui est à ne pas faire.\n\nD'un mot, disons que le principe de droit, qu'il soit historiquement ou théoriquement défini, peu importe, le principe de droit posait autrefois en face du souverain et de ce qu'il pouvait faire, une certaine limite : tu ne franchiras pas cette ligne, tu ne franchiras pas ce droit, tu ne violeras pas cette liberté fondamentale. Le principe de droit balançait à cette époque-là la raison d'État par un principe externe. Disons qu'on entre là, vous le voyez très bien, dans un âge qui est celui de la raison gouvernementale critique. Cette raison gouvernementale critique ou cette critique interne de la raison gouvernementale, vous voyez bien qu'elle ne va plus tourner autour de la question du droit, qu'elle ne va plus tourner autour de la question de l'usurpation et de la légitimité du souverain. Elle ne va plus avoir cette espèce d'allure pénale qu'avait encore le droit public au",
+          "anchor_page_no": 28,
+          "current_anchor_id": "anchor-00016",
+          "current_anchor_marker": "9",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00017",
+          "marker": "9",
+          "note_excerpt": "",
+          "note_item_id": "en-0034",
+          "note_page_no": 40
+        }
+      ],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0002",
+          "is_reconstructed": false,
+          "marker": "7",
+          "marker_type": "",
+          "note_item_id": "en-0032",
+          "note_kind": "endnote",
+          "page_no": 40,
+          "region_id": "nr-en-ch-0008-ch-fallback-0002",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p40",
+          "text": "7. Cf. ibid., leçon du l $ ^{er} $ février 1978, p. 112 et 118 n."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 17,
+        "ocr_excerpt": "Alors donc « gouvernement » au sens étroit, mais « art » également, « art de gouverner » au sens étroit, puisque par « art de gouverner » je n'entendais pas la manière dont effectivement les gouvernants ont gouverné. Je n'ai pas étudié, je ne veux pas étudier la pratique gouvernem- tale réelle, telle qu'elle s'est développée en déterminant ici et là la situation qu'on traite, les problèmes posés, les tactiques choisies, les instruments utilisés, forgés ou remodelés, etc. J'ai voulu étudier l'art de gouverner, c'est-à-dire la manière réfléchie de gouverner au mieux et aussi et en même temps la réflexion sur la meilleure manière possible de gouverner. C'est-à-dire que j'ai essayé de saisir l'instance de la réflexion dans la pratique de gouvernement et sur la pratique de gouvernement. En un sens, si vous voulez, c'est la conscience de soi du gouvernement que j'ai voulu étudier, et encore ce mot de « conscience de soi » me gêne et je ne l'emploierai pas, parce que j'aimerais mieux dire que ce que j'ai essayé et ce que je voudrais encore cette année essayer de ressaisir, c'est la manière dont à l'intérieur et à l'extérieur du gouvernement et au plus près en tout cas de la pratique gouvernementale, on a tenté de conceptualiser cette pratique qui consiste à gouverner. Je voudrais essayer de déterminer la manière dont on a établi le domaine de la pratique du gouvernement, ses différent ...",
+        "page_no": 18,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 18,
+        "ocr_excerpt": "grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on pourrait appeler une réduction historiciste, laquelle réduction historiciste consisterait en quoi ? Eh bien, précisément, à partir de ces universaux tels qu'ils sont donnés et à voir comment l'histoire ou les module, ou les modifie, ou établit finalement leur non-validité. L'historicisme part de l'universel et le passe en quelque sorte à la râpe de l'histoire. Mon problème est tout inverse. Je pars de la décision, à la fois théorique et méthodologique, qui consiste à dire : supposons que les universaux n'existent pas, et je pose à ce moment-là la question à l'histoire et aux historiens : comment pouvez-vous écrire l'histoire si vous n'admettez pas à priori que quelque chose comme l'État, la société, le souverain, les sujets existe ? C'était la même question que je posais, lorsque je disais, non pas : la folie existe-t-elle ? Je vais examiner si l'histoire me donne, me renvoie quelque chose comme la folie. Non, elle ne me renvoie pas quelque chose comme la folie, donc la folie n'existe pas. Ce n'était pas ça le raisonnement, ce n'était pas ça la méthode de fait. La méthode consistait à dire : supposons que la folie n'existe pas. Dès lors, quel ...",
+        "page_no": 19,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote",
+    "image_refused": false,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"chapter_body_excerpt\": \"# LEÇON DU 10 JANVIER 1979 Questions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ? [Vous connaissez] la citation de Freud : « Acheronta movebo¹. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole² qui disait, à propos de sa propre manière de gouverner : « Quieta non movere³ », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais commencé à vous dire l'année dernière, c'est-à-dire retracer l'histoire de ce qu'on pourrait appeler l'art de gouverner. « Art de gouverner », vous vous souvenez dans quel sens très étroit je l'avais entendu, puisque le mot même de « gouverner », je l'avais utilisé en laissant de côté toutes les mille manières, modalités et possibilités qui existent de guider les hommes, de diriger leur conduite, de contraindre leurs actions et leurs réactions, etc. J'avais donc laissé de côté tout ce qu'on entend d'ordinaire et tout ce qui a été entendu longtemps comme le gouvernement des enfants, le gouvernement des familles, le gouvernement ...\",\n  \"chapter_title\": \"LEÇON DU 10 JANVIER 1979\",\n  \"cluster_id\": \"ch-fallback-0002:nr-en-ch-0008-ch-fallback-0002:endnote\",\n  \"matched_examples\": [\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 10 JANVIER 1979 Questions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de ...\",\n      \"anchor_id\": \"anchor-00008\",\n      \"marker\": \"1\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0026\"\n    },\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 10 JANVIER 1979 Questions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de ...\",\n      \"anchor_id\": \"anchor-00009\",\n      \"marker\": \"2\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0026-inferred-1\"\n    }\n  ],\n  \"note_system\": \"endnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"Alors donc « gouvernement » au sens étroit, mais « art » également, « art de gouverner » au sens étroit, puisque par « art de gouverner » je n'entendais pas la manière dont effectivement les gouvernants ont gouverné. Je n'ai pas étudié, je ne veux pas étudier la pratique gouvernem- tale réelle, telle qu'elle s'est développée en déterminant ici et là la situation qu'on traite, les problèmes posés, les tactiques choisies, les instruments utilisés, forgés ou remodelés, etc. J'ai voulu étudier l'art de gouverner, c'est-à-dire la manière réfléchie de gouverner au mieux et aussi et en même temps la réflexion sur la meilleure manière possible de gouverner. C'est-à-dire que j'ai essayé de saisir l'i ...\",\n      \"page_no\": 18\n    },\n    {\n      \"ocr_excerpt\": \"grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on pourrait appeler une réduction historiciste, laquelle réduction historiciste consisterait en quoi ? Eh bien, précisément, à partir de ces universaux tels qu'ils sont donnés et à voir comment l'histoire ou les module, ou les modifie, ou établit finalement leur non-validité. L'historicisme part de l'universel et le passe en quelque sorte à la râpe de l'histoire. Mon problème est tout inverse. Je pars de la décision, à la fois théorique et méthodologique, qui ...\",\n      \"page_no\": 19\n    }\n  ],\n  \"page_range\": [\n    40,\n    40\n  ],\n  \"rebind_candidates\": [\n    {\n      \"anchor_excerpt\": \"# LEÇON DU 10 JANVIER 1979 Questions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de ...\",\n      \"anchor_page_no\": 17,\n      \"current_anchor_id\": \"anchor-00010\",\n      \"current_anchor_marker\": \"3\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00005\",\n      \"marker\": \"3\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0028\",\n      \"note_page_no\": 40\n    },\n    {\n      \"anchor_excerpt\": \"grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on ...\",\n      \"anchor_page_no\": 19,\n      \"current_anchor_id\": \"anchor-00011\",\n      \"current_anchor_marker\": \"4\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00007\",\n      \"marker\": \"4\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0028-inferred-1\",\n      \"note_page_no\": 40\n    },\n    {\n      \"anchor_excerpt\": \"grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on ...\",\n      \"anchor_page_no\": 19,\n      \"current_anchor_id\": \"anchor-00012\",\n      \"current_anchor_marker\": \"5\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00009\",\n      \"marker\": \"5\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0030\",\n      \"note_page_no\": 40\n    },\n    {\n      \"anchor_excerpt\": \"grille d'intelligibilité obligatoire pour un certain nombre de pratiques concrètes, je voudrais partir de ces pratiques concrètes et passer en quelque sorte les universaux à la grille de ces pratiques. Non pas qu'il s'agisse là de ce qu'on ...\",\n      \"anchor_page_no\": 19,\n      \"current_anchor_id\": \"anchor-00013\",\n      \"current_anchor_marker\": \"6\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00011\",\n      \"marker\": \"6\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0031\",\n      \"note_page_no\": 40\n    },\n    {\n      \"anchor_excerpt\": \"le droit va servir au contraire de point d'appui à toute personne qui voudra d'une manière ou d'une autre limiter cette extension indéfinie d'une raison d'État prenant corps dans un État de police. La théorie du droit et les institutions ju ...\",\n      \"anchor_page_no\": 24,\n      \"current_anchor_id\": \"anchor-00015\",\n      \"current_anchor_marker\": \"8\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00015\",\n      \"marker\": \"8\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0033\",\n      \"note_page_no\": 40\n    },\n    {\n      \"anchor_excerpt\": \"le peuvent pas, autrement dit, entre les choses à faire et les moyens à employer pour les faire d'une part, et les choses à ne pas faire. Le problème n'est donc pas : où sont les droits fondamentaux et comment est-ce que les droits fondamen ...\",\n      \"anchor_page_no\": 28,\n      \"current_anchor_id\": \"anchor-00016\",\n      \"current_anchor_marker\": \"9\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00017\",\n      \"marker\": \"9\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0034\",\n      \"note_page_no\": 40\n    }\n  ],\n  \"request_mode\": \"note_only_with_body\",\n  \"unmatched_anchors\": [],\n  \"unmatched_note_items\": [\n    {\n      \"marker\": \"7\",\n      \"note_item_id\": \"en-0032\",\n      \"page_no\": 40,\n      \"source_text\": \"\"\n    }\n  ]\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "anchor_id": "",
+      "anchor_phrase": "le gouvernement de la raison d'État (politique extérieure)",
+      "confidence": 0.9,
+      "marker": "",
+      "note_item_id": "en-0032",
+      "note_text": "",
+      "reason": "该短语在文本中唯一且位于注释7引用的上下文附近。"
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"en-0032\",\n    \"anchor_phrase\": \"le gouvernement de la raison d'État (politique extérieure)\",\n    \"confidence\": 0.9,\n    \"reason\": \"该短语在文本中唯一且位于注释7引用的上下文附近。\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 1274
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 2934,
+    "input_tokens": 3027,
+    "output_tokens": 90,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 3117
+  },
+  "usage": {
+    "completion_tokens": 90,
+    "prompt_tokens": 3027,
+    "request_count": 1,
+    "total_tokens": 3117
+  }
+}

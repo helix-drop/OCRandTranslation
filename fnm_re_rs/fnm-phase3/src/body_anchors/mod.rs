@@ -34,6 +34,8 @@ pub struct BodyAnchorSummary {
     pub uncertain_count: usize,
     pub ocr_repaired_count: usize,
     pub year_like_filtered_count: usize,
+    /// 需 LLM 二次验证的 bare_digit 候选数（原丢弃，现记录）。
+    pub llm_candidate_count: usize,
 }
 
 /// 构建 body anchors。
@@ -187,10 +189,18 @@ pub fn build_body_anchors(
     }
 
     // bare_digit 正向门
-    let (mut anchors, _llm_candidates) =
+    let (mut anchors, llm_candidates) =
         context_guard::positive_gate_bare_digit(&anchors, &chapter_note_items);
+    let llm_candidate_count = llm_candidates.len();
 
-    // gap recovery
+    // gap recovery：传入每章的页面范围，确保 recovery 不跨章（铁律 §4）。
+    let chapter_pages: HashMap<String, HashSet<i64>> = chapters
+        .iter()
+        .map(|ch| {
+            let pages: HashSet<i64> = ch.pages.iter().copied().collect();
+            (ch.chapter_id.clone(), pages)
+        })
+        .collect();
     let mut seen_gap: HashSet<(String, String, i64)> = HashSet::new();
     gap_recovery::recover_expected_gap_bare_digit_anchors(
         &mut anchors,
@@ -199,6 +209,7 @@ pub fn build_body_anchors(
         &chapter_endnote_markers,
         &mut seen_gap,
         &mut anchor_counter,
+        &chapter_pages,
     );
     gap_recovery::recover_expected_gap_symbol_anchors(
         &mut anchors,
@@ -206,9 +217,10 @@ pub fn build_body_anchors(
         &page_text_by_no,
         &mut seen_gap,
         &mut anchor_counter,
+        &chapter_pages,
     );
 
-    let summary = build_summary(&anchors, year_like_filtered_total);
+    let summary = build_summary(&anchors, year_like_filtered_total, llm_candidate_count);
     (anchors, summary)
 }
 
@@ -265,7 +277,11 @@ fn filter_note_definition_lines(text: &str) -> String {
         .join("\n")
 }
 
-fn build_summary(anchors: &[BodyAnchorRecord], year_like_filtered: usize) -> BodyAnchorSummary {
+fn build_summary(
+    anchors: &[BodyAnchorRecord],
+    year_like_filtered: usize,
+    llm_candidate_count: usize,
+) -> BodyAnchorSummary {
     let mut kind_counts: HashMap<String, usize> = HashMap::new();
     let mut explicit_count = 0usize;
     let mut synthetic_count = 0usize;
@@ -296,5 +312,6 @@ fn build_summary(anchors: &[BodyAnchorRecord], year_like_filtered: usize) -> Bod
         uncertain_count,
         ocr_repaired_count,
         year_like_filtered_count: year_like_filtered,
+        llm_candidate_count,
     }
 }

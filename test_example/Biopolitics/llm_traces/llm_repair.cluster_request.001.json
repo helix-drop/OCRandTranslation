@@ -1,0 +1,330 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "confidence": 0.8,
+        "marker": "",
+        "note_item_id": "",
+        "note_text": "",
+        "reason": "缺乏包含尾注内容的页面截图，无法定位 marker 8, 18, 22, 31-35 的文本以合成锚点。"
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 21 FÉVRIER 1979",
+      "cluster_id": "ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote",
+      "matched_examples": [
+        {
+          "anchor_excerpt": "titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qui seraient dus à l'absence de concurrence. La Gesellschaftpolitik doit donc annuler non pas les effets anti-sociaux de la concurrence, mais les mécanismes anti-concurrentiels que pourrait susciter la société, qui pourraient naître en tout cas dans la société.\n\nC'était ça que j'avais essayé de souligner la dernière fois et, pour donner un contenu à cette Gesellschaftspolitik, je crois qu'il y a deux grands axes sur lesquels les ordolibéraux ont insisté : d'une part, la formalisation de la société sur le modèle de l'entreprise, et je vous avais indiqué l'importance, sur laquelle on reviendra ensuite¹, de cette notion d'entreprise – il y aurait à faire toute une histoire de la notion à la fois économique, historique, sociale de l'entrepreneur et de l'entreprise avec toute la dérivation de l'un à l'autre depuis la fin du XIXe siècle jusqu'au milieu du XXe –, formalisation donc de la société sur le modèle de l'entreprise ; et le deuxième aspect, c'est celui dont je voudrais vous parler aujourd'hui, c'est la redéfinition de l'institution juridique et des règles de droit qui sont nécessaires dans une société régulée à partir et en fonction de l'économie concurrentielle de marché : le problème, en gros, du droit.\n\nPour le situer un peu, je voudrais revenir à ce colloque Walter Lippmann dont je vous avais parlé il y a huit ou quinze jours, je ne me souviens plus², ce colloque Walter Lippmann qui est donc, dans l'histoire du néolibéralisme moderne contemporain, un événement relativement important puisqu'on y voit se croiser, à la veille exactement de la guerre de 1939, le vieux libéralisme traditionnel, les gens de l'ordolibéralisme allemand comme Röpke, Rüstow, etc., et puis les gens comme Hayek et von Mises qui vont être les intermédiaires entre l'ordolibéralisme allemand et le néolibéralisme américain qui donnera l'anarcho-libéralisme de l'École de Chicago³, Milton Friedman⁴, etc. Tous ces gens-là donc sont réunis – pas Milton Friedman, mais Hayek, Mises, qui vont être les agents de transmission en quelque sorte –, tout ce monde-là est donc réuni en 1939 et le présentateur, l'organisateur de ce colloque était cet homme, vous savez, qui s'appelait Louis Rougier⁵ qui a été un des rares et très bons épistémologues français de l'après-guerre et qui est surtout connu, dans l'histoire, pour avoir été l'intermédiaire entre Pétain et Churchill dans l'été [19]40⁶. Et alors Louis Rougier est donc l'organisateur en l'été [19]39, au mois de mai, je crois, ou de juin [19]39⁷, de ce colloque Walter Lippmann. Il présente l'ensemble du colloque et des différentes interventions qui vont se dérouler et sa présentation est, je dois dire, assez remar-",
+          "anchor_id": "anchor-00280",
+          "link_id": "link-00142",
+          "marker": "1",
+          "note_excerpt": "",
+          "note_item_id": "en-0215"
+        },
+        {
+          "anchor_excerpt": "titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qui seraient dus à l'absence de concurrence. La Gesellschaftpolitik doit donc annuler non pas les effets anti-sociaux de la concurrence, mais les mécanismes anti-concurrentiels que pourrait susciter la société, qui pourraient naître en tout cas dans la société.\n\nC'était ça que j'avais essayé de souligner la dernière fois et, pour donner un contenu à cette Gesellschaftspolitik, je crois qu'il y a deux grands axes sur lesquels les ordolibéraux ont insisté : d'une part, la formalisation de la société sur le modèle de l'entreprise, et je vous avais indiqué l'importance, sur laquelle on reviendra ensuite¹, de cette notion d'entreprise – il y aurait à faire toute une histoire de la notion à la fois économique, historique, sociale de l'entrepreneur et de l'entreprise avec toute la dérivation de l'un à l'autre depuis la fin du XIXe siècle jusqu'au milieu du XXe –, formalisation donc de la société sur le modèle de l'entreprise ; et le deuxième aspect, c'est celui dont je voudrais vous parler aujourd'hui, c'est la redéfinition de l'institution juridique et des règles de droit qui sont nécessaires dans une société régulée à partir et en fonction de l'économie concurrentielle de marché : le problème, en gros, du droit.\n\nPour le situer un peu, je voudrais revenir à ce colloque Walter Lippmann dont je vous avais parlé il y a huit ou quinze jours, je ne me souviens plus², ce colloque Walter Lippmann qui est donc, dans l'histoire du néolibéralisme moderne contemporain, un événement relativement important puisqu'on y voit se croiser, à la veille exactement de la guerre de 1939, le vieux libéralisme traditionnel, les gens de l'ordolibéralisme allemand comme Röpke, Rüstow, etc., et puis les gens comme Hayek et von Mises qui vont être les intermédiaires entre l'ordolibéralisme allemand et le néolibéralisme américain qui donnera l'anarcho-libéralisme de l'École de Chicago³, Milton Friedman⁴, etc. Tous ces gens-là donc sont réunis – pas Milton Friedman, mais Hayek, Mises, qui vont être les agents de transmission en quelque sorte –, tout ce monde-là est donc réuni en 1939 et le présentateur, l'organisateur de ce colloque était cet homme, vous savez, qui s'appelait Louis Rougier⁵ qui a été un des rares et très bons épistémologues français de l'après-guerre et qui est surtout connu, dans l'histoire, pour avoir été l'intermédiaire entre Pétain et Churchill dans l'été [19]40⁶. Et alors Louis Rougier est donc l'organisateur en l'été [19]39, au mois de mai, je crois, ou de juin [19]39⁷, de ce colloque Walter Lippmann. Il présente l'ensemble du colloque et des différentes interventions qui vont se dérouler et sa présentation est, je dois dire, assez remar-",
+          "anchor_id": "anchor-00281",
+          "link_id": "link-00143",
+          "marker": "2",
+          "note_excerpt": "",
+          "note_item_id": "en-0216"
+        }
+      ],
+      "note_system": "endnote",
+      "page_range": [
+        198,
+        201
+      ],
+      "rebind_candidates": [
+        {
+          "anchor_excerpt": "titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qui seraient dus à l'absence de concurrence. La Gesellschaftpolitik doit donc annuler non pas les effets anti-sociaux de la concurrence, mais les mécanismes anti-concurrentiels que pourrait susciter la société, qui pourraient naître en tout cas dans la société.\n\nC'était ça que j'avais essayé de souligner la dernière fois et, pour donner un contenu à cette Gesellschaftspolitik, je crois qu'il y a deux grands axes sur lesquels les ordolibéraux ont insisté : d'une part, la formalisation de la société sur le modèle de l'entreprise, et je vous avais indiqué l'importance, sur laquelle on reviendra ensuite¹, de cette notion d'entreprise – il y aurait à faire toute une histoire de la notion à la fois économique, historique, sociale de l'entrepreneur et de l'entreprise avec toute la dérivation de l'un à l'autre depuis la fin du XIXe siècle jusqu'au milieu du XXe –, formalisation donc de la société sur le modèle de l'entreprise ; et le deuxième aspect, c'est celui dont je voudrais vous parler aujourd'hui, c'est la redéfinition de l'institution juridique et des règles de droit qui sont nécessaires dans une société régulée à partir et en fonction de l'économie concurrentielle de marché : le problème, en gros, du droit.\n\nPour le situer un peu, je voudrais revenir à ce colloque Walter Lippmann dont je vous avais parlé il y a huit ou quinze jours, je ne me souviens plus², ce colloque Walter Lippmann qui est donc, dans l'histoire du néolibéralisme moderne contemporain, un événement relativement important puisqu'on y voit se croiser, à la veille exactement de la guerre de 1939, le vieux libéralisme traditionnel, les gens de l'ordolibéralisme allemand comme Röpke, Rüstow, etc., et puis les gens comme Hayek et von Mises qui vont être les intermédiaires entre l'ordolibéralisme allemand et le néolibéralisme américain qui donnera l'anarcho-libéralisme de l'École de Chicago³, Milton Friedman⁴, etc. Tous ces gens-là donc sont réunis – pas Milton Friedman, mais Hayek, Mises, qui vont être les agents de transmission en quelque sorte –, tout ce monde-là est donc réuni en 1939 et le présentateur, l'organisateur de ce colloque était cet homme, vous savez, qui s'appelait Louis Rougier⁵ qui a été un des rares et très bons épistémologues français de l'après-guerre et qui est surtout connu, dans l'histoire, pour avoir été l'intermédiaire entre Pétain et Churchill dans l'été [19]40⁶. Et alors Louis Rougier est donc l'organisateur en l'été [19]39, au mois de mai, je crois, ou de juin [19]39⁷, de ce colloque Walter Lippmann. Il présente l'ensemble du colloque et des différentes interventions qui vont se dérouler et sa présentation est, je dois dire, assez remar-",
+          "anchor_page_no": 180,
+          "current_anchor_id": "anchor-00286",
+          "current_anchor_marker": "7",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00148",
+          "marker": "7",
+          "note_excerpt": "",
+          "note_item_id": "en-0221",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "règles, ça peut être un habitus social, ça peut être une prescription religieuse, ça peut être une éthique, ça peut être un règlement corporatif, ça peut être également une loi. De toute façon l'économique, ce n'est pas un processus mécanique ou naturel, ce n'est pas un processus que l'on puisse détacher, sauf par abstraction à posteriori, par abstraction formalisante 9. L'économique ne peut être jamais considéré que comme un ensemble d'activités, et qui dit activités dit forcément activités réglées. C'est cet ensemble économico-juridique, c'est cet ensemble d'activités réglées que Eucken appelle – alors là, dans une perspective plus phénoménologique que wébérienne – le « système 10 ». Le système, qu'est-ce que c'est ? Eh bien, c'est un ensemble complexe qui comprend des processus économiques dont l'analyse proprement économique relève bien, en effet, d'une théorie pure et d'une formalisation qui peut être, par exemple, la formalisation des mécanismes de concurrence, mais ces processus économiques n'existent réellement, dans l'histoire, que dans la mesure où un cadre institutionnel et des règles positives lui ont donné ses conditions de possibilité 11. Voilà ce que, historiquement, veut dire cette analyse commune, enfin cette analyse d'ensemble des rapports de production.\n\nHistoriquement, cela veut dire quoi? Eh bien, cela veut dire qu'il faudrait se garder d'imaginer qu'il y a eu, à un moment donné, la réalité proprement et simplement économique du capitalisme, ou du capital et de l'accumulation du capital, qui, avec sa nécessité propre, aurait bousculé les anciennes règles de droit, comme par exemple le droit d'aînesse, le droit féodal, etc., et puis qui aurait créé par sa logique et ses exigences propres et en quelque sorte sa poussée d'en dessous, de nouvelles règles de droit plus favorables, que ce soit le droit de propriété, la législation des sociétés par actions, le droit des brevets, etc. En fait, ce n'est pas comme ça qu'il faut voir les choses. Il faut considérer qu'historiquement on a affaire à une figure, et une figure singulière, dans laquelle les processus économiques et le cadre institutionnel se sont appelés l'un l'autre, appuyés l'un l'autre, modifiés l'un l'autre, modelés dans une réciprocité incessante. Après tout, le capitalisme n'a pas été un processus d'en dessous qui a bousculé, par exemple, le droit d'aînesse. En fait, on ne peut comprendre la figure historique du capitalisme que si on tient compte du rôle qu'a joué effectivement, par exemple, le droit d'aînesse dans sa formation et dans sa genèse. L'histoire du capitalisme ne peut être qu'une histoire économique-institutionnelle. Et de là a dérivé toute une série d'études d'histoire économique, d'histoire juridico-économique qui ont été très importantes dans tout un débat théorique, mais aussi, et c'est là où je veux en venir, importantes d'un point de vue politique, parce qu'il",
+          "anchor_page_no": 183,
+          "current_anchor_id": "anchor-00287",
+          "current_anchor_marker": "9",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00150",
+          "marker": "9",
+          "note_excerpt": "",
+          "note_item_id": "en-0223",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "bérienne – le « système 10 ». Le système, qu'est-ce qu",
+          "anchor_page_no": 183,
+          "current_anchor_id": "gap-bare-00555",
+          "current_anchor_marker": "10",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00151",
+          "marker": "10",
+          "note_excerpt": "",
+          "note_item_id": "en-0224",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "règles, ça peut être un habitus social, ça peut être une prescription religieuse, ça peut être une éthique, ça peut être un règlement corporatif, ça peut être également une loi. De toute façon l'économique, ce n'est pas un processus mécanique ou naturel, ce n'est pas un processus que l'on puisse détacher, sauf par abstraction à posteriori, par abstraction formalisante 9. L'économique ne peut être jamais considéré que comme un ensemble d'activités, et qui dit activités dit forcément activités réglées. C'est cet ensemble économico-juridique, c'est cet ensemble d'activités réglées que Eucken appelle – alors là, dans une perspective plus phénoménologique que wébérienne – le « système 10 ». Le système, qu'est-ce que c'est ? Eh bien, c'est un ensemble complexe qui comprend des processus économiques dont l'analyse proprement économique relève bien, en effet, d'une théorie pure et d'une formalisation qui peut être, par exemple, la formalisation des mécanismes de concurrence, mais ces processus économiques n'existent réellement, dans l'histoire, que dans la mesure où un cadre institutionnel et des règles positives lui ont donné ses conditions de possibilité 11. Voilà ce que, historiquement, veut dire cette analyse commune, enfin cette analyse d'ensemble des rapports de production.\n\nHistoriquement, cela veut dire quoi? Eh bien, cela veut dire qu'il faudrait se garder d'imaginer qu'il y a eu, à un moment donné, la réalité proprement et simplement économique du capitalisme, ou du capital et de l'accumulation du capital, qui, avec sa nécessité propre, aurait bousculé les anciennes règles de droit, comme par exemple le droit d'aînesse, le droit féodal, etc., et puis qui aurait créé par sa logique et ses exigences propres et en quelque sorte sa poussée d'en dessous, de nouvelles règles de droit plus favorables, que ce soit le droit de propriété, la législation des sociétés par actions, le droit des brevets, etc. En fait, ce n'est pas comme ça qu'il faut voir les choses. Il faut considérer qu'historiquement on a affaire à une figure, et une figure singulière, dans laquelle les processus économiques et le cadre institutionnel se sont appelés l'un l'autre, appuyés l'un l'autre, modifiés l'un l'autre, modelés dans une réciprocité incessante. Après tout, le capitalisme n'a pas été un processus d'en dessous qui a bousculé, par exemple, le droit d'aînesse. En fait, on ne peut comprendre la figure historique du capitalisme que si on tient compte du rôle qu'a joué effectivement, par exemple, le droit d'aînesse dans sa formation et dans sa genèse. L'histoire du capitalisme ne peut être qu'une histoire économique-institutionnelle. Et de là a dérivé toute une série d'études d'histoire économique, d'histoire juridico-économique qui ont été très importantes dans tout un débat théorique, mais aussi, et c'est là où je veux en venir, importantes d'un point de vue politique, parce qu'il",
+          "anchor_page_no": 183,
+          "current_anchor_id": "anchor-00289",
+          "current_anchor_marker": "11",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00152",
+          "marker": "11",
+          "note_excerpt": "",
+          "note_item_id": "en-0225",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "et par conséquent, bientôt, plus de capitalisme du tout. Dans l'autre possibilité, vous avez la singularité historique d'une figure économique-institutionnelle devant laquelle, par conséquent, s'ouvre, si du moins on se donne un peu de recul historique et un peu d'imagination économique, politique et institutionnelle, un champ de possibilités. C'est-à-dire que, dans cette bataille autour de l'histoire du capitalisme, de l'histoire du rôle de l'institution du droit, de la règle dans le capitalisme, on a là en fait tout un enjeu politique.\n\nPour reprendre les choses autrement, si vous voulez, pour les ordolibéraux comment se présentaient les choses ? Si on fait une analyse un peu grossière et en se disant que leur problème à eux c'était de démontrer que du capitalisme était encore possible, que le capitalisme pouvait survivre à condition qu'on lui invente une nouvelle forme, si on admet que c'est ça l'objectif final des ordolibéraux, on peut dire qu'ils avaient, au fond, deux choses à démontrer. Ils avaient, premièrement, à démontrer que la logique proprement économique du capitalisme, que cette logique du marché concurrentiel était possible et non contradictoire. C'est ce qu'ils ont essayé de faire, ce sont les choses que je vous racontais la dernière fois. Et puis il leur fallait montrer que, cette logique étant en elle-même non contradictoire et par conséquent fiable, il y avait dans les formes concrètes, réelles, historiques du capitalisme, un ensemble de relations juridico-économiques qui étaient telles que l'on pouvait, en inventant un nouveau fonctionnement institutionnel, dépasser des effets — des contradictions, des impasses, des irrationalités —, caractéristiques de la société capitaliste et qui n'étaient pas dus à la logique du capitalisme, mais simplement à une figure précise et particulière de ce complexe économico-juridique.\n\nVous voyez, par conséquent, que ces deux grands problèmes qui ont dominé la théorie économique, d'une part, et l'histoire économique de l'autre, ou la sociologie économique de l'autre, en Allemagne étaient complètement liés. Un problème : c'était la théorie de la concurrence. Si les économistes de cette époque-là, Walras $ ^{12} $, Marshall $ ^{13} $ en Angleterre, Wicksell $ ^{14} $ en Suède et tous ceux qui les ont suivis, ont attaché tant d'importance à cette théorie de la concurrence, c'était parce qu'il s'agissait de déterminer si oui ou non le mécanisme formel du marché concurrentiel était contradictoire ou pas, et il s'agissait également de voir dans quelle mesure ce marché concurrentiel conduisait ou non à des phénomènes susceptibles de l'annuler, à savoir le monopole. Vous avez ce paquet-là de problèmes, qui est le paquet, si vous voulez, de la théorie économique. Et puis vous avez tout le paquet de problèmes, disons",
+          "anchor_page_no": 185,
+          "current_anchor_id": "anchor-00291",
+          "current_anchor_marker": "12",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00153",
+          "marker": "12",
+          "note_excerpt": "",
+          "note_item_id": "en-0226",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "et par conséquent, bientôt, plus de capitalisme du tout. Dans l'autre possibilité, vous avez la singularité historique d'une figure économique-institutionnelle devant laquelle, par conséquent, s'ouvre, si du moins on se donne un peu de recul historique et un peu d'imagination économique, politique et institutionnelle, un champ de possibilités. C'est-à-dire que, dans cette bataille autour de l'histoire du capitalisme, de l'histoire du rôle de l'institution du droit, de la règle dans le capitalisme, on a là en fait tout un enjeu politique.\n\nPour reprendre les choses autrement, si vous voulez, pour les ordolibéraux comment se présentaient les choses ? Si on fait une analyse un peu grossière et en se disant que leur problème à eux c'était de démontrer que du capitalisme était encore possible, que le capitalisme pouvait survivre à condition qu'on lui invente une nouvelle forme, si on admet que c'est ça l'objectif final des ordolibéraux, on peut dire qu'ils avaient, au fond, deux choses à démontrer. Ils avaient, premièrement, à démontrer que la logique proprement économique du capitalisme, que cette logique du marché concurrentiel était possible et non contradictoire. C'est ce qu'ils ont essayé de faire, ce sont les choses que je vous racontais la dernière fois. Et puis il leur fallait montrer que, cette logique étant en elle-même non contradictoire et par conséquent fiable, il y avait dans les formes concrètes, réelles, historiques du capitalisme, un ensemble de relations juridico-économiques qui étaient telles que l'on pouvait, en inventant un nouveau fonctionnement institutionnel, dépasser des effets — des contradictions, des impasses, des irrationalités —, caractéristiques de la société capitaliste et qui n'étaient pas dus à la logique du capitalisme, mais simplement à une figure précise et particulière de ce complexe économico-juridique.\n\nVous voyez, par conséquent, que ces deux grands problèmes qui ont dominé la théorie économique, d'une part, et l'histoire économique de l'autre, ou la sociologie économique de l'autre, en Allemagne étaient complètement liés. Un problème : c'était la théorie de la concurrence. Si les économistes de cette époque-là, Walras $ ^{12} $, Marshall $ ^{13} $ en Angleterre, Wicksell $ ^{14} $ en Suède et tous ceux qui les ont suivis, ont attaché tant d'importance à cette théorie de la concurrence, c'était parce qu'il s'agissait de déterminer si oui ou non le mécanisme formel du marché concurrentiel était contradictoire ou pas, et il s'agissait également de voir dans quelle mesure ce marché concurrentiel conduisait ou non à des phénomènes susceptibles de l'annuler, à savoir le monopole. Vous avez ce paquet-là de problèmes, qui est le paquet, si vous voulez, de la théorie économique. Et puis vous avez tout le paquet de problèmes, disons",
+          "anchor_page_no": 185,
+          "current_anchor_id": "anchor-00292",
+          "current_anchor_marker": "13",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00154",
+          "marker": "13",
+          "note_excerpt": "",
+          "note_item_id": "en-0227",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "et par conséquent, bientôt, plus de capitalisme du tout. Dans l'autre possibilité, vous avez la singularité historique d'une figure économique-institutionnelle devant laquelle, par conséquent, s'ouvre, si du moins on se donne un peu de recul historique et un peu d'imagination économique, politique et institutionnelle, un champ de possibilités. C'est-à-dire que, dans cette bataille autour de l'histoire du capitalisme, de l'histoire du rôle de l'institution du droit, de la règle dans le capitalisme, on a là en fait tout un enjeu politique.\n\nPour reprendre les choses autrement, si vous voulez, pour les ordolibéraux comment se présentaient les choses ? Si on fait une analyse un peu grossière et en se disant que leur problème à eux c'était de démontrer que du capitalisme était encore possible, que le capitalisme pouvait survivre à condition qu'on lui invente une nouvelle forme, si on admet que c'est ça l'objectif final des ordolibéraux, on peut dire qu'ils avaient, au fond, deux choses à démontrer. Ils avaient, premièrement, à démontrer que la logique proprement économique du capitalisme, que cette logique du marché concurrentiel était possible et non contradictoire. C'est ce qu'ils ont essayé de faire, ce sont les choses que je vous racontais la dernière fois. Et puis il leur fallait montrer que, cette logique étant en elle-même non contradictoire et par conséquent fiable, il y avait dans les formes concrètes, réelles, historiques du capitalisme, un ensemble de relations juridico-économiques qui étaient telles que l'on pouvait, en inventant un nouveau fonctionnement institutionnel, dépasser des effets — des contradictions, des impasses, des irrationalités —, caractéristiques de la société capitaliste et qui n'étaient pas dus à la logique du capitalisme, mais simplement à une figure précise et particulière de ce complexe économico-juridique.\n\nVous voyez, par conséquent, que ces deux grands problèmes qui ont dominé la théorie économique, d'une part, et l'histoire économique de l'autre, ou la sociologie économique de l'autre, en Allemagne étaient complètement liés. Un problème : c'était la théorie de la concurrence. Si les économistes de cette époque-là, Walras $ ^{12} $, Marshall $ ^{13} $ en Angleterre, Wicksell $ ^{14} $ en Suède et tous ceux qui les ont suivis, ont attaché tant d'importance à cette théorie de la concurrence, c'était parce qu'il s'agissait de déterminer si oui ou non le mécanisme formel du marché concurrentiel était contradictoire ou pas, et il s'agissait également de voir dans quelle mesure ce marché concurrentiel conduisait ou non à des phénomènes susceptibles de l'annuler, à savoir le monopole. Vous avez ce paquet-là de problèmes, qui est le paquet, si vous voulez, de la théorie économique. Et puis vous avez tout le paquet de problèmes, disons",
+          "anchor_page_no": 185,
+          "current_anchor_id": "anchor-00293",
+          "current_anchor_marker": "14",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00155",
+          "marker": "14",
+          "note_excerpt": "",
+          "note_item_id": "en-0228",
+          "note_page_no": 198
+        },
+        {
+          "anchor_excerpt": "wébérien, de l'histoire et de la sociologie économiques, qui n'est en fait que l'autre aspect, ou la contrepartie, de la première question et qui est de savoir si effectivement on peut repérer dans l'histoire du capitalisme un ensemble économico-institutionnel qui peut rendre compte et de la singuilarité du capitalisme et des impasses, contradictions, difficultés, mélange de rationalité et d'irrationalité que l'on constate maintenant. Faire donc l'histoire du rôle, par exemple, de l'éthique protestante et des prescriptions religieuses qui lui étaient liées, faire l'histoire de l'éthique protestante $ ^{15} $, d'une part, et faire la théorie pure de la concurrence, c'étaient deux aspects différents, ou deux manières complémentaires l'une de l'autre, de poser et d'essayer de résoudre d'une certaine façon le problème de savoir si le capitalisme pouvait ou non survivre. Voilà un aspect, je crois, des choses et de ce texte de Rougier, [toutes ces propositions par lesquelles il essaie de montrer que le processus économique ne peut pas être dissocié d'un ensemble institutionnel, d'un ensemble juridique qui n'en est pas simplement l'effet, qui n'en est pas simplement l'expression plus ou moins différée ou plus ou moins ajustée, et qui fait corps véritablement avec lui à l'intérieur d'un système économique, c'est-à-dire, en gros, d'un ensemble de pratiques économiques réglées.\n\nL’autre aspect du texte que je vous ai lu tout à l’heure, c’est l’aspect que l’on pourrait appeler « interventionnisme juridique » et qui est la conséquence du premier. Si en effet on admet que ce à quoi on a affaire, ce n’est pas le capitalisme dérivant de la logique du capital, mais un capitalisme singulier constitué par un ensemble économico-institutionnel, eh bien on doit pouvoir intervenir dans cet ensemble et intervenir de manière à s’inventer un autre capitalisme. Nous avons non pas tellement à poursuivre le capitalisme qu’à inventer un nouveau capitalisme. Mais où et par où va pouvoir se faire cette irruption de l’innovation à l’intérieur du capitalisme ? Évidemment pas du côté des lois du marché, pas sur le marché lui-même puisque par définition, comme le montre la théorie économique, le marché doit jouer de telle manière que ses mécanismes purs soient en eux-mêmes régulateurs de l’ensemble. Par conséquent, ne touchons pas à ces lois de marché, mais faisons en sorte que les institutions soient telles que ce soit bien ces lois de marché, et elles seules, qui soient le principe de la régulation économique générale et, par voie de conséquence, le principe de la régulation sociale. Par conséquent, aucun interventionnisme économique ou le minimum d’interventionnisme économique et le maximum d’interventionnisme juridique. Il faut, dit Eucken dans une formule qui est, je crois, significative, « passer à un droit économique conscient ¹⁶ ». Et je pense que cette formule, il faut l’opposer",
+          "anchor_page_no": 186,
+          "current_anchor_id": "anchor-00294",
+          "current_anchor_marker": "15",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00156",
+          "marker": "15",
+          "note_excerpt": "",
+          "note_item_id": "en-0229",
+          "note_page_no": 199
+        }
+      ],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "8",
+          "marker_type": "",
+          "note_item_id": "en-0222",
+          "note_kind": "endnote",
+          "page_no": 198,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p198",
+          "text": "8. Colloque W. Lippmann, op. cit., p. 16-17."
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "18",
+          "marker_type": "",
+          "note_item_id": "en-0231-inferred-1",
+          "note_kind": "endnote",
+          "page_no": 199,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p199",
+          "text": ""
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "22",
+          "marker_type": "",
+          "note_item_id": "en-0236",
+          "note_kind": "endnote",
+          "page_no": 200,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p200",
+          "text": "22. Otto Bähr, Der Rechtsstaat. Eine publizistische Skizze, Cassel, Wigand, 1864; réd. Aalen, Scientia Verlag, 1961. Cf. F.A. Hayek, loc. cit. / trad. citée, p. 200, sur cette conception « justicialiste » du Rechtsstaat. Sur ce point, cf. M. Stolleis, Geschichte des öffentlichen Rechts in Deutschland, t. 23. F.A. Hayek, The Constitution of Liberty, p. 203-204 / trad. citée, p. 203, renvoie ici à l'ouvrage classique de A.V. Dicey, Lectures Introductory to the Study of the Law of the Constitution, Londres, Macmillan & Co., 1886, auquel il reproche « sa totale incompréhension de l'usage du terme [Rule of law / Staatsrecht] sur le Continent » (ibid., p. 484 n.35 / trad. citée, p. 477)."
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "31",
+          "marker_type": "",
+          "note_item_id": "en-0245",
+          "note_kind": "endnote",
+          "page_no": 201,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p201",
+          "text": "31. Ibid., p. 58 : « [...] le gouvernement est lié dans tous ses actes par des règles immuables et préétablies, règles qui permettent de prévoir avec certitude que, dans des circonstances déterminées, l'autorité exécutive s'exercera d'une façon déterminée » ; et p. 59 : « [...] le gouvernement soumis à la règle de la loi est dans l'impossibilité de contrecarrer des efforts individuelles par des mesures improvisées.»"
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "32",
+          "marker_type": "",
+          "note_item_id": "en-0246",
+          "note_kind": "endnote",
+          "page_no": 201,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p201",
+          "text": "32. Ibid., p. 42 (l'impossibilité « d'avoir une vue synoptique » de l'ensemble du processus économique) : « La décentralisation étant devenue nécessaire parce que personne ne peut consciemment équilibrer toutes les considérations relatives aux décisions d'un si grand nombre d'individus, il est clair que la coordination ne saurait être atteinte par un \"contrôle conscient\", mais uniquement par des dispositifs qui transmettent à chaque agent d'exécution les renseignements dont il a besoin pour adapter efficacement ses décisions à celles des autres. » Sur cet aveuglement nécessaire de l'État par rapport au processus économique, cf. la lecture que fait Foucault de la « main invisible » d'Adam Smith, infra, leçon du 28 mars, p. 283-284."
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "33",
+          "marker_type": "",
+          "note_item_id": "en-0247",
+          "note_kind": "endnote",
+          "page_no": 201,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p201",
+          "text": "33. Le manuscrit renvoie ici à Road of Serfdom [sic], mais la citation est sans doute une adaptation assez libre du texte. Cf. trad. citée, p. 59 : « Dans le premier cas [le Rule of law], le gouvernement se borne à fixer les conditions dans lesquelles les ressources existantes peuvent être exploitées. C'est aux individus de décider à quelle fin ils veulent les employer. Dans le second cas [le planisme centralisé], c'est le gouvernement qui ordonne l'emploi des moyens de production à des fins déterminées. »"
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "34",
+          "marker_type": "",
+          "note_item_id": "en-0248",
+          "note_kind": "endnote",
+          "page_no": 201,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p201",
+          "text": "34. Michael Polanyi (1891-1976), chimiste, économiste et philosophe d'origine hongroise (frère de l'historien Karl Polanyi). Il fut professeur de chimie à l'Université de Manchester de 1933 à 1948, puis professeur en sciences sociales, dans la même université, de 1948 à 1958. La citation est extraite de The Logic of Liberty : Reflections and rejoinders, Londres, Chicago University Press, 1951, p. 185 / La Logique de la liberté, trad. citée [supra, p. 98, note 11], p. 229 : « [...] la fonction principale de l'ordre spontané existant du droit est de réguler l'ordre spontané de la vie économique. Un système consultatif de droit développe et garantit les règles sous lesquelles le système compétitif de production et de distribution opère. Aucun système de marche ne peut fonctionner sans un cadre juridique qui garantisse des pouvoirs adéquats à la propriété et fasse respecter les contrats. »"
+        },
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "35",
+          "marker_type": "",
+          "note_item_id": "en-0249",
+          "note_kind": "endnote",
+          "page_no": 201,
+          "region_id": "nr-en-ch-0047-ch-fallback-0008",
+          "review_required": false,
+          "source": "note_scan",
+          "source_page_label": "p201",
+          "text": "35. Cf. « Le citron et le lait » (octobre 1978), DE, III, n° 246, p. 698 : « Law and Order : ce n'est pas simplement la devise du conservatisme américain, c'est un monstre par hybridation. [...] Comme on dit lait ou citron, il faut dire la loi ou l'ordre. À nous de tirer de cette incompatibilité les leçons pour l'avenir. »"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 178,
+        "ocr_excerpt": "# LEÇON DU 21 FÉVRIER 1979 Second aspect de la « politique de société », selon les ordolibéraux : le problème du droit dans une société régulée selon le modèle de l'économie concurrentielle de marché. - Retour au colloque Walter Lippmann. - Réflexions à partir d'un texte de Louis Rougier. - (1) L'idée d'un ordre juridico-économique. Réciprocité des rapports entre les processus économiques et le cadre institutionnel. - Enjeu politique : le problème de la survie du capitalisme. - Deux problèmes complémentaires : la théorie de la concurrence et l'analyse historique et sociologique du capitalisme. - (2) La question de l'interventionnisme juridique. - Rappel historique : l'État de droit au XVIIIe siècle, par opposition au despotisme et à l'État de police. Réélaboration de la notion au XIXe siècle : la question des arbitrages entre citoyens et puissance publique. Le problème des tribunaux administratifs. - Le projet néolibéral : introduire les principes de l'État de droit dans l'ordre économique. - État de droit et planification selon Hayek. - (3) La croissance de la demande judiciaire. - Conclusion générale : la spécificité de l'art néolibéral de gouverner en Allemagne. L'ordolibéralisme face au pessimisme de Schumpeter. La dernière fois, j'avais essayé de vous montrer comment, dans l'ordolibéralisme, se trouvait impliquée la nécessité d'une Gesellschaftspolitik, comme ils disent, d ...",
+        "page_no": 179,
+        "sha256": "",
+        "source_pdf_path": ""
+      },
+      {
+        "byte_size": 0,
+        "file_idx": 179,
+        "ocr_excerpt": "titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qui seraient dus à l'absence de concurrence. La Gesellschaftpolitik doit donc annuler non pas les effets anti-sociaux de la concurrence, mais les mécanismes anti-concurrentiels que pourrait susciter la société, qui pourraient naître en tout cas dans la société. C'était ça que j'avais essayé de souligner la dernière fois et, pour donner un contenu à cette Gesellschaftspolitik, je crois qu'il y a deux grands axes sur lesquels les ordolibéraux ont insisté : d'une part, la formalisation de la société sur le modèle de l'entreprise, et je vous avais indiqué l'importance, sur laquelle on reviendra ensuite¹, de cette notion d'entreprise – il y aurait à faire toute une histoire de la notion à la fois économique, historique, sociale de l'entrepreneur et de l'entreprise avec toute la dérivation de l'un à l'autre depuis la fin du XIXe siècle jusqu'au milieu du XXe –, formalisation donc de la société sur le modèle de l'entreprise ; et le deuxième aspect, c'est celui dont je voudrais vous parler aujourd'hui, c'est la redéfinition de l'institution juridique et des règles de droit qui sont nécessaires dans une société régulée à partir et en fonction de l'écono ...",
+        "page_no": 180,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote",
+    "image_refused": false,
+    "page_context_count": 2,
+    "request_mode": "note_only_with_body"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"chapter_body_excerpt\": \"# LEÇON DU 21 FÉVRIER 1979 Second aspect de la « politique de société », selon les ordolibéraux : le problème du droit dans une société régulée selon le modèle de l'économie concurrentielle de marché. - Retour au colloque Walter Lippmann. - Réflexions à partir d'un texte de Louis Rougier. - (1) L'idée d'un ordre juridico-économique. Réciprocité des rapports entre les processus économiques et le cadre institutionnel. - Enjeu politique : le problème de la survie du capitalisme. - Deux problèmes complémentaires : la théorie de la concurrence et l'analyse historique et sociologique du capitalisme. - (2) La question de l'interventionnisme juridique. - Rappel historique : l'État de droit au XVIIIe siècle, par opposition au despotisme et à l'État de police. Réélaboration de la notion au XIXe siècle : la question des arbitrages entre citoyens et puissance publique. Le problème des tribunaux administratifs. - Le projet néolibéral : introduire les principes de l'État de droit dans l'ordre économique. - État de droit et planification selon Hayek. - (3) La croissance de la demande judiciaire. - Conclusion générale : la spécificité de l'art néolibéral de gouverner en Allemagne. L'ordolibéralisme face au pessimisme de Schumpeter. La dernière fois, j'avais essayé de vous montrer comment, dans l'ordolibéralisme, se trouvait impliquée la nécessité d'une Gesellschaftspolitik, comme ils disent, d'une politique de société et d'un interventionnisme social à la fois actif, multiple, vigilant et omniprésent. Donc, économie de marché, d'une part, et politique sociale active, intense, interventionniste. Mais faut-il encore souligner avec soin que cette politique sociale, dans l'ordolibéralisme, n'a pas pour fonction d'être comme un mécanisme compensatoire destiné à éponger ou annuler les effets ...\",\n  \"chapter_title\": \"LEÇON DU 21 FÉVRIER 1979\",\n  \"cluster_id\": \"ch-fallback-0008:nr-en-ch-0047-ch-fallback-0008:endnote\",\n  \"matched_examples\": [\n    {\n      \"anchor_excerpt\": \"titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qu ...\",\n      \"anchor_id\": \"anchor-00280\",\n      \"marker\": \"1\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0215\"\n    },\n    {\n      \"anchor_excerpt\": \"titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qu ...\",\n      \"anchor_id\": \"anchor-00281\",\n      \"marker\": \"2\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0216\"\n    }\n  ],\n  \"note_system\": \"endnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"# LEÇON DU 21 FÉVRIER 1979 Second aspect de la « politique de société », selon les ordolibéraux : le problème du droit dans une société régulée selon le modèle de l'économie concurrentielle de marché. - Retour au colloque Walter Lippmann. - Réflexions à partir d'un texte de Louis Rougier. - (1) L'idée d'un ordre juridico-économique. Réciprocité des rapports entre les processus économiques et le cadre institutionnel. - Enjeu politique : le problème de la survie du capitalisme. - Deux problèmes complémentaires : la théorie de la concurrence et l'analyse historique et sociologique du capitalisme. - (2) La question de l'interventionnisme juridique. - Rappel historique : l'État de droit au XVIIIe ...\",\n      \"page_no\": 179\n    },\n    {\n      \"ocr_excerpt\": \"titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qui seraient dus à l'absence de concurrence. La Gesellschaftpolitik doit donc annuler non pas les effets anti-sociaux de la concurrence, mais les mécanismes anti-concurrentiels que pourrait susciter la société, qui pourraient naître en tout cas dans la société. C'était ça que j'avais essayé de souligner la dernière fois et, pour donner un contenu à cette Gesellschaftspolitik, je crois qu'il y a deux grands axes sur lesquels les ordolibéraux ont insisté : d'u ...\",\n      \"page_no\": 180\n    }\n  ],\n  \"page_range\": [\n    198,\n    201\n  ],\n  \"rebind_candidates\": [\n    {\n      \"anchor_excerpt\": \"titre de condition pour que joue le mécanisme formel de la concurrence, pour que, par conséquent, la régulation que le marché concurrentiel doit assurer puisse se faire correctement et que ne se produisent pas les effets sociaux négatifs qu ...\",\n      \"anchor_page_no\": 180,\n      \"current_anchor_id\": \"anchor-00286\",\n      \"current_anchor_marker\": \"7\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00148\",\n      \"marker\": \"7\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0221\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"règles, ça peut être un habitus social, ça peut être une prescription religieuse, ça peut être une éthique, ça peut être un règlement corporatif, ça peut être également une loi. De toute façon l'économique, ce n'est pas un processus mécaniq ...\",\n      \"anchor_page_no\": 183,\n      \"current_anchor_id\": \"anchor-00287\",\n      \"current_anchor_marker\": \"9\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00150\",\n      \"marker\": \"9\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0223\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"bérienne – le « système 10 ». Le système, qu'est-ce qu\",\n      \"anchor_page_no\": 183,\n      \"current_anchor_id\": \"gap-bare-00555\",\n      \"current_anchor_marker\": \"10\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00151\",\n      \"marker\": \"10\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0224\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"règles, ça peut être un habitus social, ça peut être une prescription religieuse, ça peut être une éthique, ça peut être un règlement corporatif, ça peut être également une loi. De toute façon l'économique, ce n'est pas un processus mécaniq ...\",\n      \"anchor_page_no\": 183,\n      \"current_anchor_id\": \"anchor-00289\",\n      \"current_anchor_marker\": \"11\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00152\",\n      \"marker\": \"11\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0225\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"et par conséquent, bientôt, plus de capitalisme du tout. Dans l'autre possibilité, vous avez la singularité historique d'une figure économique-institutionnelle devant laquelle, par conséquent, s'ouvre, si du moins on se donne un peu de recu ...\",\n      \"anchor_page_no\": 185,\n      \"current_anchor_id\": \"anchor-00291\",\n      \"current_anchor_marker\": \"12\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00153\",\n      \"marker\": \"12\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0226\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"et par conséquent, bientôt, plus de capitalisme du tout. Dans l'autre possibilité, vous avez la singularité historique d'une figure économique-institutionnelle devant laquelle, par conséquent, s'ouvre, si du moins on se donne un peu de recu ...\",\n      \"anchor_page_no\": 185,\n      \"current_anchor_id\": \"anchor-00292\",\n      \"current_anchor_marker\": \"13\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00154\",\n      \"marker\": \"13\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0227\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"et par conséquent, bientôt, plus de capitalisme du tout. Dans l'autre possibilité, vous avez la singularité historique d'une figure économique-institutionnelle devant laquelle, par conséquent, s'ouvre, si du moins on se donne un peu de recu ...\",\n      \"anchor_page_no\": 185,\n      \"current_anchor_id\": \"anchor-00293\",\n      \"current_anchor_marker\": \"14\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00155\",\n      \"marker\": \"14\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0228\",\n      \"note_page_no\": 198\n    },\n    {\n      \"anchor_excerpt\": \"wébérien, de l'histoire et de la sociologie économiques, qui n'est en fait que l'autre aspect, ou la contrepartie, de la première question et qui est de savoir si effectivement on peut repérer dans l'histoire du capitalisme un ensemble écon ...\",\n      \"anchor_page_no\": 186,\n      \"current_anchor_id\": \"anchor-00294\",\n      \"current_anchor_marker\": \"15\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00156\",\n      \"marker\": \"15\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"en-0229\",\n      \"note_page_no\": 199\n    }\n  ],\n  \"request_mode\": \"note_only_with_body\",\n  \"unmatched_anchors\": [],\n  \"unmatched_note_items\": [\n    {\n      \"marker\": \"8\",\n      \"note_item_id\": \"en-0222\",\n      \"page_no\": 198,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"18\",\n      \"note_item_id\": \"en-0231-inferred-1\",\n      \"page_no\": 199,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"22\",\n      \"note_item_id\": \"en-0236\",\n      \"page_no\": 200,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"31\",\n      \"note_item_id\": \"en-0245\",\n      \"page_no\": 201,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"32\",\n      \"note_item_id\": \"en-0246\",\n      \"page_no\": 201,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"33\",\n      \"note_item_id\": \"en-0247\",\n      \"page_no\": 201,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"34\",\n      \"note_item_id\": \"en-0248\",\n      \"page_no\": 201,\n      \"source_text\": \"\"\n    },\n    {\n      \"marker\": \"35\",\n      \"note_item_id\": \"en-0249\",\n      \"page_no\": 201,\n      \"source_text\": \"\"\n    }\n  ]\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "confidence": 0.8,
+      "marker": "",
+      "note_item_id": "",
+      "note_text": "",
+      "reason": "缺乏包含尾注内容的页面截图，无法定位 marker 8, 18, 22, 31-35 的文本以合成锚点。"
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"缺乏包含尾注内容的页面截图，无法定位 marker 8, 18, 22, 31-35 的文本以合成锚点。\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 1831
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 3441,
+    "input_tokens": 3677,
+    "output_tokens": 60,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 3737
+  },
+  "usage": {
+    "completion_tokens": 60,
+    "prompt_tokens": 3677,
+    "request_count": 1,
+    "total_tokens": 3737
+  }
+}

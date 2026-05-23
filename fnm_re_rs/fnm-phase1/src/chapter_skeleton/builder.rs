@@ -6,7 +6,7 @@ use crate::chapter_skeleton::fallback;
 use crate::input::{RawPage, TocItem};
 use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord};
 use fnm_core::title::chapter_title_match_key;
-use fnm_core::types::{ChapterSource, PageRole};
+use fnm_core::types::ChapterSource;
 use serde_json::{json, Value};
 use std::collections::{HashMap, HashSet};
 
@@ -72,10 +72,6 @@ pub fn build_chapter_skeleton(
         .iter()
         .map(|p| (p.page_no, p.page_role.as_str().to_string()))
         .collect();
-    let page_roles_enum: HashMap<i64, PageRole> = page_partitions
-        .iter()
-        .map(|p| (p.page_no, p.page_role))
-        .collect();
     let all_pages = fallback::all_page_numbers(page_partitions);
 
     // ── Step 1: 跑 fallback section/chapter（Python 端总是先跑 fallback，再决定）─
@@ -126,89 +122,90 @@ pub fn build_chapter_skeleton(
 
     // ── Step 3: 选择 visual / fallback / empty ──────────────────
 
-    let (mut chapters_raw, merged_section_fallbacks, chapter_source_summary, source_hint) =
-        if !visual_chapters_raw.is_empty() {
-            let mut summary = visual_meta
-                .get("chapter_source_summary")
-                .cloned()
-                .and_then(|v| v.as_object().cloned())
-                .unwrap_or_default();
-            summary
-                .entry("source".to_string())
-                .or_insert_with(|| json!("visual_toc"));
-            summary
-                .entry("chapter_level".to_string())
-                .or_insert(Value::Null);
-            summary
-                .entry("visual_toc_chapter_count".to_string())
-                .or_insert(json!(visual_chapters_raw.len()));
-            summary
-                .entry("legacy_chapter_count".to_string())
-                .or_insert(json!(fallback_chapters_raw.len()));
-            summary
-                .entry("fallback_used".to_string())
-                .or_insert(json!(false));
-            summary
-                .entry("body_section_fallback_suppressed".to_string())
-                .or_insert(json!(fallback_section_heads_raw.len() as i64));
-            (
-                visual_chapters_raw.clone(),
-                visual_section_heads_raw.clone(),
-                Value::Object(summary),
-                ChapterSource::VisualToc,
-            )
-        } else if !fallback_chapters_raw.is_empty() {
+    // 解构返回元组：merged_section_fallbacks 在下方独立暴露（见 fallback_sections），
+    // source_hint 已由 visual / fallback 路径自身设置 ChapterSource，不再需要。
+    let (mut chapters_raw, _, chapter_source_summary, _) = if !visual_chapters_raw.is_empty() {
+        let mut summary = visual_meta
+            .get("chapter_source_summary")
+            .cloned()
+            .and_then(|v| v.as_object().cloned())
+            .unwrap_or_default();
+        summary
+            .entry("source".to_string())
+            .or_insert_with(|| json!("visual_toc"));
+        summary
+            .entry("chapter_level".to_string())
+            .or_insert(Value::Null);
+        summary
+            .entry("visual_toc_chapter_count".to_string())
+            .or_insert(json!(visual_chapters_raw.len()));
+        summary
+            .entry("legacy_chapter_count".to_string())
+            .or_insert(json!(fallback_chapters_raw.len()));
+        summary
+            .entry("fallback_used".to_string())
+            .or_insert(json!(false));
+        summary
+            .entry("body_section_fallback_suppressed".to_string())
+            .or_insert(json!(fallback_section_heads_raw.len() as i64));
+        (
+            visual_chapters_raw.clone(),
+            visual_section_heads_raw.clone(),
+            Value::Object(summary),
+            ChapterSource::VisualToc,
+        )
+    } else if !fallback_chapters_raw.is_empty() {
+        let summary = json!({
+            "source": "fallback",
+            "chapter_level": Value::Null,
+            "visual_toc_chapter_count": 0,
+            "legacy_chapter_count": fallback_chapters_raw.len(),
+            "fallback_used": true,
+            "body_section_fallback_suppressed": 0,
+        });
+        (
+            fallback_chapters_raw.clone(),
+            fallback_section_heads_raw.clone(),
+            summary,
+            ChapterSource::Fallback,
+        )
+    } else {
+        // 兜底：连续 body 页打包为单章（←→ Python `simple_fallback`）。
+        let simple = fallback::simple_fallback(page_partitions);
+        if !simple.is_empty() {
             let summary = json!({
                 "source": "fallback",
                 "chapter_level": Value::Null,
                 "visual_toc_chapter_count": 0,
-                "legacy_chapter_count": fallback_chapters_raw.len(),
+                "legacy_chapter_count": simple.len(),
                 "fallback_used": true,
                 "body_section_fallback_suppressed": 0,
+                "simple_fallback": true,
             });
             (
-                fallback_chapters_raw.clone(),
-                fallback_section_heads_raw.clone(),
+                simple,
+                Vec::<SectionHeadRecord>::new(),
                 summary,
                 ChapterSource::Fallback,
             )
         } else {
-            // 兜底：连续 body 页打包为单章（←→ Python `simple_fallback`）。
-            let simple = fallback::simple_fallback(page_partitions);
-            if !simple.is_empty() {
-                let summary = json!({
-                    "source": "fallback",
-                    "chapter_level": Value::Null,
-                    "visual_toc_chapter_count": 0,
-                    "legacy_chapter_count": simple.len(),
-                    "fallback_used": true,
-                    "body_section_fallback_suppressed": 0,
-                    "simple_fallback": true,
-                });
-                (
-                    simple,
-                    Vec::<SectionHeadRecord>::new(),
-                    summary,
-                    ChapterSource::Fallback,
-                )
-            } else {
-                let summary = json!({
-                    "source": "fallback",
-                    "chapter_level": Value::Null,
-                    "visual_toc_chapter_count": 0,
-                    "legacy_chapter_count": 0,
-                    "fallback_used": false,
-                    "body_section_fallback_suppressed": 0,
-                    "no_chapter_candidate": true,
-                });
-                (
-                    Vec::<ChapterRecord>::new(),
-                    Vec::<SectionHeadRecord>::new(),
-                    summary,
-                    ChapterSource::Fallback,
-                )
-            }
-        };
+            let summary = json!({
+                "source": "fallback",
+                "chapter_level": Value::Null,
+                "visual_toc_chapter_count": 0,
+                "legacy_chapter_count": 0,
+                "fallback_used": false,
+                "body_section_fallback_suppressed": 0,
+                "no_chapter_candidate": true,
+            });
+            (
+                Vec::<ChapterRecord>::new(),
+                Vec::<SectionHeadRecord>::new(),
+                summary,
+                ChapterSource::Fallback,
+            )
+        }
+    };
 
     // ── Step 4: back matter trim ───────────────────────────────
 
@@ -446,8 +443,6 @@ pub fn build_chapter_skeleton(
     // ── Step 6: normalize chapters + sections ───────────────────
 
     let chapters = fallback::normalize_chapters(chapters_raw);
-    let _ = source_hint; // ChapterSource set by upstream visual or fallback paths
-    let _ = merged_section_fallbacks; // fallback_sections 在下方独立暴露
     let heading_candidates_normalized = normalize_heading_candidates(heading_candidates.clone());
     let fallback_sections = fallback::normalize_sections(fallback_section_heads_raw.clone());
 
@@ -527,8 +522,6 @@ pub fn build_chapter_skeleton(
             toc_role_summary_map.insert(role.clone(), json!(std::cmp::max(existing, computed)));
         }
     }
-
-    let _ = page_roles_enum; // unused but preserved for future stricter typing
 
     let diagnostics = json!({
         "chapter_source_summary": chapter_source_summary,

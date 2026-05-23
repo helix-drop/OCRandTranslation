@@ -59,8 +59,16 @@ pub fn matches_front_matter_force_export(title: &str) -> bool {
 /// 注意：family 在不同语言中可能有多条记录（如 "contents" 同时有 en + fr）。
 const FAMILY_PATTERNS_BY_LANGUAGE: &[(&str, &str, &[&str])] = &[
     // ── contents (TOC / 目录) ──
-    ("en", "contents", &[r"^contents\b", r"^table of contents$", r"^table$"]),
-    ("fr", "contents", &[r"^table des mati[eè]res$", r"^sommaire$"]),
+    (
+        "en",
+        "contents",
+        &[r"^contents\b", r"^table of contents$", r"^table$"],
+    ),
+    (
+        "fr",
+        "contents",
+        &[r"^table des mati[eè]res$", r"^sommaire$"],
+    ),
     // ── illustrations (插图列表) ──
     (
         "en",
@@ -116,7 +124,11 @@ const FAMILY_PATTERNS_BY_LANGUAGE: &[(&str, &str, &[&str])] = &[
             r"^introduction$",
         ],
     ),
-    ("fr", "front_matter", &[r"^remerciement", r"^avant-propos$", r"^avertissement$"]),
+    (
+        "fr",
+        "front_matter",
+        &[r"^remerciement", r"^avant-propos$", r"^avertissement$"],
+    ),
 ];
 
 /// 按 family 聚合的预编译 Regex 列表（语言信息在编译期合并，避免运行时按语言过滤）。
@@ -145,11 +157,7 @@ static OTHER_TITLE_PATTERNS: Lazy<Vec<(&'static str, Vec<Regex>)>> = Lazy::new(|
     ];
     family_order
         .iter()
-        .filter_map(|family| {
-            by_family
-                .remove(family)
-                .map(|patterns| (*family, patterns))
-        })
+        .filter_map(|family| by_family.remove(family).map(|patterns| (*family, patterns)))
         .collect()
 });
 

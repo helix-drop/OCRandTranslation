@@ -179,10 +179,12 @@ pub fn build_structure_reviews(
             LinkStatus::OrphanNote => match link.note_kind {
                 NoteKind::Footnote => "footnote_orphan_note",
                 NoteKind::Endnote => "endnote_orphan_note",
+                NoteKind::Unknown => "unknown_orphan_note",
             },
             LinkStatus::OrphanAnchor => match link.note_kind {
                 NoteKind::Footnote => "footnote_orphan_anchor",
                 NoteKind::Endnote => "endnote_orphan_anchor",
+                NoteKind::Unknown => "unknown_orphan_anchor",
             },
             LinkStatus::Ambiguous => "ambiguous",
             _ => continue,

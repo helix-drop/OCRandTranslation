@@ -113,8 +113,13 @@ pub fn build_note_items(
             rows = repair_parsed_row_sequence_markers(rows);
         }
 
-        // Phase C: 按 marker 去重
-        rows = dedupe_region_items(rows);
+        // Phase C: 按 marker 去重（footnote 加 page_no key，endnote 仅 marker）
+        rows = dedupe_region_items(rows, region.note_kind);
+
+        // Phase C.5: endnote marker 序列验证（拒绝年份/页码等可疑数字）
+        if region.note_kind == NoteKind::Endnote {
+            rows = self::sequence_repair::filter_suspicious_endnote_markers(rows);
+        }
 
         // Phase D: 转换 ParsedNoteRow → NoteItemRecord
         let kind_tag = if region.note_kind == NoteKind::Footnote {
@@ -143,17 +148,33 @@ pub fn build_note_items(
 // ── 内部工具 ──────────────────────────────────────────────────
 
 /// 按 marker 去重（同一 region 内保留第一个出现的 marker）。
-fn dedupe_region_items(rows: Vec<ParsedNoteRow>) -> Vec<ParsedNoteRow> {
+/// footnote：去重 key 至少包含 `(page_no, marker)`，避免连续页的脚注都从 1 开始被误删。
+/// endnote：仅用 marker key（尾注 marker 在全 region 内唯一）。
+fn dedupe_region_items(rows: Vec<ParsedNoteRow>, note_kind: NoteKind) -> Vec<ParsedNoteRow> {
     let mut result = Vec::with_capacity(rows.len());
-    let mut seen: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut seen_global: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut seen_per_page: std::collections::HashSet<(i64, String)> =
+        std::collections::HashSet::new();
 
     for row in rows {
         let marker = normalize_note_marker(&row.marker);
-        if !marker.is_empty() && seen.contains(&marker) {
+        if marker.is_empty() {
+            result.push(row);
             continue;
         }
-        if !marker.is_empty() {
-            seen.insert(marker);
+        if note_kind == NoteKind::Footnote {
+            // footnote: key = (page_no, marker)
+            let key = (row.page_no, marker.clone());
+            if seen_per_page.contains(&key) {
+                continue;
+            }
+            seen_per_page.insert(key);
+        } else {
+            // endnote: key = marker only
+            if seen_global.contains(&marker) {
+                continue;
+            }
+            seen_global.insert(marker);
         }
         result.push(row);
     }
@@ -170,7 +191,15 @@ fn merge_continuation_notes(mut items: Vec<NoteItemRecord>) -> Vec<NoteItemRecor
         a.region_id
             .cmp(&b.region_id)
             .then_with(|| a.page_no.cmp(&b.page_no))
-            .then_with(|| a.marker.cmp(&b.marker))
+            .then_with(|| {
+                // numeric sort for markers: "2" < "10"
+                let a_num = a.marker.parse::<i64>();
+                let b_num = b.marker.parse::<i64>();
+                match (a_num, b_num) {
+                    (Ok(an), Ok(bn)) => an.cmp(&bn),
+                    _ => a.marker.cmp(&b.marker),
+                }
+            })
     });
 
     for i in 0..items.len() {

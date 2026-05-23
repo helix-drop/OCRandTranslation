@@ -258,6 +258,13 @@ pub struct GapHit {
 /// 恢复缺失的 bare digit endnote anchors。
 ///
 /// ←→ Python `_recover_expected_gap_bare_digit_anchors`
+/// 恢复缺失的 bare digit endnote anchors。
+/// 只搜索指定章节内的页面，不跨章。
+///
+/// `chapter_pages`: chapter_id → 该章包含的页面号集合。用于限制搜索范围，
+/// 确保 gap recovery 不跨越章节边界（铁律 §4：上下游隔离）。
+///
+/// ←→ Python `_recover_expected_gap_bare_digit_anchors`
 pub fn recover_expected_gap_bare_digit_anchors(
     anchors: &mut Vec<BodyAnchorRecord>,
     note_items: &[NoteItemRecord],
@@ -265,6 +272,7 @@ pub fn recover_expected_gap_bare_digit_anchors(
     chapter_endnote_markers: &HashMap<String, HashSet<i64>>,
     seen: &mut HashSet<(String, String, i64)>,
     anchor_counter: &mut usize,
+    chapter_pages: &HashMap<String, HashSet<i64>>,
 ) {
     let mut confirmed_markers: HashMap<String, HashSet<i64>> = HashMap::new();
     for anchor in anchors.iter() {
@@ -301,9 +309,16 @@ pub fn recover_expected_gap_bare_digit_anchors(
         }
 
         let known = known_pages.get(chapter_id);
+        let allowed: Option<&HashSet<i64>> = chapter_pages.get(chapter_id);
         let mut found_any = false;
 
         for (page_no, text) in page_text_by_no {
+            // 章级页面守卫：只搜索属于当前章的页面，不跨章。
+            if let Some(allowed_set) = allowed {
+                if !allowed_set.contains(page_no) {
+                    continue;
+                }
+            }
             if !within_sequence_page_window(*page_no, marker, known.unwrap_or(&HashMap::new())) {
                 continue;
             }
@@ -355,12 +370,20 @@ pub fn recover_expected_gap_bare_digit_anchors(
 /// 恢复缺失的 symbol endnote anchors。
 ///
 /// ←→ Python `_recover_expected_gap_symbol_anchors`
+/// 恢复缺失的 symbol endnote anchors。
+/// 只搜索指定章节内的页面，不跨章。
+///
+/// `chapter_pages`: chapter_id → 该章包含的页面号集合。用于限制搜索范围，
+/// 确保 gap recovery 不跨越章节边界（铁律 §4：上下游隔离）。
+///
+/// ←→ Python `_recover_expected_gap_symbol_anchors`
 pub fn recover_expected_gap_symbol_anchors(
     anchors: &mut Vec<BodyAnchorRecord>,
     note_items: &[NoteItemRecord],
     page_text_by_no: &HashMap<i64, String>,
     seen: &mut HashSet<(String, String, i64)>,
     anchor_counter: &mut usize,
+    chapter_pages: &HashMap<String, HashSet<i64>>,
 ) {
     let mut confirmed_markers: HashMap<String, HashSet<String>> = HashMap::new();
     for anchor in anchors.iter() {
@@ -396,7 +419,14 @@ pub fn recover_expected_gap_symbol_anchors(
             continue;
         }
 
+        let allowed: Option<&HashSet<i64>> = chapter_pages.get(chapter_id);
         for (page_no, text) in page_text_by_no {
+            // 章级页面守卫：只搜索属于当前章的页面，不跨章。
+            if let Some(allowed_set) = allowed {
+                if !allowed_set.contains(page_no) {
+                    continue;
+                }
+            }
             if text.trim().is_empty() {
                 continue;
             }

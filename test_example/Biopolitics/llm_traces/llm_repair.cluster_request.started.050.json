@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 4 AVRIL 1979",
+      "cluster_id": "ch-fallback-0012:nr-fn-ch-0078-ch-fallback-0012:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        337,
+        337
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0012",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0485",
+          "note_kind": "footnote",
+          "page_no": 337,
+          "region_id": "nr-fn-ch-0078-ch-fallback-0012",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p337",
+          "text": "Éd. Gallimard : « d’attendre »."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 336,
+        "ocr_excerpt": "tement l'exercice du gouvernement. La réflexion libérale ne part pas de l'existence de l'État, trouvant dans le gouvernement le moyen d'atteindre* cette fin qu'il serait pour lui-même ; mais de la société qui se trouve être dans un rapport complexe d'extériorité et d'intériorité vis-à-vis de l'État. C'est elle – à la fois à titre de condition et de fin dernière – qui permet de ne plus poser la question : comment gouverner le plus possible et au moindre coût possible ? Mais, plutôt celle-ci : pourquoi faut-il gouverner ? C'est-à-dire : qu'est-ce qui rend nécessaire qu'il y ait un gouvernement et quelles fins doit-il poursuivre, à l'égard de la société, pour se justifier d'exister. L'idée de société, c'est ce qui permet de développer une technologie de gouvernement à partir du principe qu'il est*** déjà en lui-même « de trop », « en excès » – ou du moins qu'il vient s'ajouter comme un supplément auquel on peut et on doit toujours demander s'il est nécessaire et à quoi il est utile. Plutôt que de faire de la distinction État - société civile un universel historique et politique qui peut permettre d'interroger tous les systèmes concrets, on peut essayer d'y voir une forme de schématisation propre à une technologie particulière de gouvernement. On ne peut donc pas dire que le libéralisme soit une utopie jamais réalisée – sauf si on prend pour le noyau du libéralisme les projections ...",
+        "page_no": 337,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0012:nr-fn-ch-0078-ch-fallback-0012:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5239,
+    "cluster_id": "ch-fallback-0012:nr-fn-ch-0078-ch-fallback-0012:footnote",
+    "estimated_prompt_tokens": 1508,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1508,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

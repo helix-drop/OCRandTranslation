@@ -84,9 +84,9 @@ pub fn build_structured_body_pages_for_chapter(
 
     // 辅助闭包：添加页面
     let append_page = |page_no: i64,
-                           text: &str,
-                           body_pages: &mut Vec<StructuredBodyPage>,
-                           appended: &mut HashSet<i64>| {
+                       text: &str,
+                       body_pages: &mut Vec<StructuredBodyPage>,
+                       appended: &mut HashSet<i64>| {
         let normalized = text.trim().to_string();
         if normalized.is_empty() || appended.contains(&page_no) {
             return;
@@ -335,7 +335,6 @@ mod tests {
     #[test]
     fn test_build_structured_body_pages_empty() {
         let chapter = make_chapter("ch1", "Chapter 1", 1, 1);
-        let raw_pages: Vec<RawPage> = vec![];
         let raw_page_by_no: HashMap<i64, &RawPage> = HashMap::new();
         let page_role_by_no: HashMap<i64, String> = HashMap::new();
 

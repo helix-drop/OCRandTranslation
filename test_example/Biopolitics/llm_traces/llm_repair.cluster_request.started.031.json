@@ -1,0 +1,92 @@
+{
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "开始请求 LLM 修补 unresolved cluster",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 17 JANVIER 1979",
+      "cluster_id": "ch-fallback-0003:nr-fn-ch-0014-ch-fallback-0003:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        62,
+        62
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0003",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0048",
+          "note_kind": "footnote",
+          "page_no": 62,
+          "region_id": "nr-fn-ch-0014-ch-fallback-0003",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p62",
+          "text": "M. Foucault ajoute : Valeur d'utilité du gouvernement en face d'un système où # l'échange qui détermine la vraie valeur des choses. Comment est-ce que c'est RS ' 2 . \"2 . , possible ?"
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 61,
+        "ocr_excerpt": "coup, la punition apparaît comme devant être calculée en fonction, bien sûr, des intérêts de la personne lésée, de la réparation des dommages, etc. Mais la punition ne doit plus s'enraciner que dans le jeu des intérêts des autres, de l'entourage, de la société, etc. Est-ce que c'est intéressant de punir, quel intérêt ça a, quelle forme la punition doit-elle avoir pour que ça soit intéressant pour la société ? Est-ce que c'est intéressant de supplicier, ou est-ce que c'est intéressant de rééduquer et de rééduquer comment et jusqu'à quel point, etc., et combien ça coûtera ? L'insertion de cette pellicule phénoménale de l'intérêt comme constituant la seule sphère ou plutôt la seule surface d'intervention possible du gouvernement, c'est cela qui explique ces mutations qui toutes doivent être, vous le voyez, réfrérées à ce réaménagement de la raison gouvernementale. Le gouvernement dans son nouveau régime, c'est au fond quelque chose qui n'a plus à s'exercer sur des sujets et sur des choses assujetties à travers ces sujets. Le gouvernement va s'exercer maintenant sur ce qu'on pourrait appeler la république phénoménale des intérêts. Question fondamentalement du libéralisme : quelle est la valeur d'utilité du gouvernement et de toutes les actions du gouvernement dans une société où c'est l'échange qui détermine la vraie valeur des choses?* Eh bien, je crois que c'est là que se posent ...",
+        "page_no": 62,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0003:nr-fn-ch-0014-ch-fallback-0003:footnote",
+    "image_count": 0,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_metrics": {
+    "allowed_actions": [
+      "synthesize_anchor",
+      "needs_review"
+    ],
+    "chars": 5216,
+    "cluster_id": "ch-fallback-0003:nr-fn-ch-0014-ch-fallback-0003:footnote",
+    "estimated_prompt_tokens": 1507,
+    "image_refused": false,
+    "matched_examples": 0,
+    "model_max_input_tokens_no_think": 991808,
+    "model_max_input_tokens_thinking": 983616,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body",
+    "skip_reason": "",
+    "skipped": false,
+    "soft_input_token_budget": 2048,
+    "truncated": false,
+    "unmatched_anchors": 0,
+    "unmatched_note_items": 1
+  },
+  "stage": "llm_repair.cluster_request.started",
+  "token_accounting": {
+    "estimated_input_tokens": 1507,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "request_count": 0,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "local_estimate",
+    "total_tokens": 0
+  },
+  "usage": {}
+}

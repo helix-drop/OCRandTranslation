@@ -1,0 +1,110 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "synthesize_anchor",
+        "anchor_id": "",
+        "anchor_phrase": "le résultat d'un ordre légal qui suppose un interventionnisme juridique",
+        "confidence": 0.95,
+        "marker": "",
+        "note_item_id": "fn-0208",
+        "note_text": "",
+        "reason": "该短语在正文第181页唯一出现，准确对应注释星号标记。"
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "synthesize_anchor",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 21 FÉVRIER 1979",
+      "cluster_id": "ch-fallback-0008:nr-fn-ch-0043-ch-fallback-0008:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        181,
+        181
+      ],
+      "rebind_candidates": [],
+      "request_mode": "note_only_with_body",
+      "unmatched_anchors": [],
+      "unmatched_note_items": [
+        {
+          "chapter_id": "ch-fallback-0008",
+          "is_reconstructed": false,
+          "marker": "*",
+          "marker_type": "",
+          "note_item_id": "fn-0208",
+          "note_kind": "footnote",
+          "page_no": 181,
+          "region_id": "nr-fn-ch-0043-ch-fallback-0008",
+          "review_required": false,
+          "source": "markdown",
+          "source_page_label": "p181",
+          "text": "Mots ajoutés par M. Foucault. Mots ajoutés par M. Foucault."
+        }
+      ]
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 180,
+        "ocr_excerpt": "quable en ce qui concerne les principes généraux de ce néolibéralisme. Et voici ce qu'il dit à propos, justement, du problème juridique : « Le régime libéral n'est pas seulement le résultat d'un ordre naturel spontané comme le déclaraient, au XVIIIe siècle, les nombreux auteurs des Codes de la nature ; il est aussi le résultat d'un ordre légal qui suppose un interventionnisme juridique de l'État. La vie économique se déroule [en effet] dans un cadre juridique qui fixe le régime de la propriété, des contrats, des brevets d'invention, de la faillite, le statut des associations professionnelles et des sociétés commerciales, la monnaie et la banque, toutes choses qui ne sont pas des données de la nature, comme les lois de l'équilibre économique, mais des créations contingentes du législateur. Il n'y a dès lors aucune raison de supposer que les institutions légales, historiquement existantes à l'heure actuelle, soient d'une façon définitive et permanente les mieux appropriées à la sauvegarde de la liberté des transactions. La question du cadre légal le mieux approprié au fonctionnement le plus souple, le plus efficace, le plus loyal du marché a été négligée par les économistes classiques et mériterait de faire l'objet d'un Centre International d'Études pour la Rénovation du Libéralisme. Être libéral, ce n'est donc nullement être conservateur, dans le sens du maintien des privilèges ...",
+        "page_no": 181,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0008:nr-fn-ch-0043-ch-fallback-0008:footnote",
+    "image_refused": false,
+    "page_context_count": 1,
+    "request_mode": "note_only_with_body"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：synthesize_anchor、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n若正文里确实能找到某条孤儿尾注对应的独一无二短语，且该短语没有对应的结构化 anchor 记录，才用 synthesize_anchor；anchor_phrase 必须逐字摘自 chapter_body_excerpt，长度 3~12 词，禁止自编、禁止填章节其他地方或通用短语。\n\n{\n  \"allowed_actions\": [\n    \"synthesize_anchor\",\n    \"needs_review\"\n  ],\n  \"chapter_body_excerpt\": \"# LEÇON DU 21 FÉVRIER 1979 Second aspect de la « politique de société », selon les ordolibéraux : le problème du droit dans une société régulée selon le modèle de l'économie concurrentielle de marché. - Retour au colloque Walter Lippmann. - Réflexions à partir d'un texte de Louis Rougier. - (1) L'idée d'un ordre juridico-économique. Réciprocité des rapports entre les processus économiques et le cadre institutionnel. - Enjeu politique : le problème de la survie du capitalisme. - Deux problèmes complémentaires : la théorie de la concurrence et l'analyse historique et sociologique du capitalisme. - (2) La question de l'interventionnisme juridique. - Rappel historique : l'État de droit au XVIIIe siècle, par opposition au despotisme et à l'État de police. Réélaboration de la notion au XIXe siècle : la question des arbitrages entre citoyens et puissance publique. Le problème des tribunaux administratifs. - Le projet néolibéral : introduire les principes de l'État de droit dans l'ordre économique. - État de droit et planification selon Hayek. - (3) La croissance de la demande judiciaire. - Conclusion générale : la spécificité de l'art néolibéral de gouverner en Allemagne. L'ordolibéralisme face au pessimisme de Schumpeter. La dernière fois, j'avais essayé de vous montrer comment, dans l'ordolibéralisme, se trouvait impliquée la nécessité d'une Gesellschaftspolitik, comme ils disent, d'une politique de société et d'un interventionnisme social à la fois actif, multiple, vigilant et omniprésent. Donc, économie de marché, d'une part, et politique sociale active, intense, interventionniste. Mais faut-il encore souligner avec soin que cette politique sociale, dans l'ordolibéralisme, n'a pas pour fonction d'être comme un mécanisme compensatoire destiné à éponger ou annuler les effets ...\",\n  \"chapter_title\": \"LEÇON DU 21 FÉVRIER 1979\",\n  \"cluster_id\": \"ch-fallback-0008:nr-fn-ch-0043-ch-fallback-0008:footnote\",\n  \"matched_examples\": [],\n  \"note_system\": \"footnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"quable en ce qui concerne les principes généraux de ce néolibéralisme. Et voici ce qu'il dit à propos, justement, du problème juridique : « Le régime libéral n'est pas seulement le résultat d'un ordre naturel spontané comme le déclaraient, au XVIIIe siècle, les nombreux auteurs des Codes de la nature ; il est aussi le résultat d'un ordre légal qui suppose un interventionnisme juridique de l'État. La vie économique se déroule [en effet] dans un cadre juridique qui fixe le régime de la propriété, des contrats, des brevets d'invention, de la faillite, le statut des associations professionnelles et des sociétés commerciales, la monnaie et la banque, toutes choses qui ne sont pas des données de l ...\",\n      \"page_no\": 181\n    }\n  ],\n  \"page_range\": [\n    181,\n    181\n  ],\n  \"rebind_candidates\": [],\n  \"request_mode\": \"note_only_with_body\",\n  \"unmatched_anchors\": [],\n  \"unmatched_note_items\": [\n    {\n      \"marker\": \"*\",\n      \"note_item_id\": \"fn-0208\",\n      \"page_no\": 181,\n      \"source_text\": \"\"\n    }\n  ]\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "synthesize_anchor",
+      "anchor_id": "",
+      "anchor_phrase": "le résultat d'un ordre légal qui suppose un interventionnisme juridique",
+      "confidence": 0.95,
+      "marker": "",
+      "note_item_id": "fn-0208",
+      "note_text": "",
+      "reason": "该短语在正文第181页唯一出现，准确对应注释星号标记。"
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"synthesize_anchor\",\n    \"note_item_id\": \"fn-0208\",\n    \"anchor_phrase\": \"le résultat d'un ordre légal qui suppose un interventionnisme juridique\",\n    \"confidence\": 0.95,\n    \"reason\": \"该短语在正文第181页唯一出现，准确对应注释星号标记。\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 1717
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 1509,
+    "input_tokens": 1390,
+    "output_tokens": 99,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 1489
+  },
+  "usage": {
+    "completion_tokens": 99,
+    "prompt_tokens": 1390,
+    "request_count": 1,
+    "total_tokens": 1489
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "derived_truth": {
+    "parsed_actions": [
+      {
+        "action": "needs_review",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "confidence": 0.8,
+        "marker": "",
+        "note_item_id": "",
+        "note_text": "",
+        "reason": "缺少 note_item 供匹配，且 OCR 内容不足以确认 anchor 1 是否指向特定脚注。"
+      },
+      {
+        "action": "ignore_ref",
+        "anchor_id": "anchor-00022",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "marker": "",
+        "note_item_id": "",
+        "note_text": "",
+        "reason": "该锚点在第 32 页，与其对应的注释 fn-0013 在第 31 页，跨页锚定不符合 footnote 规范。"
+      }
+    ]
+  },
+  "model": {
+    "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+    "model_id": "gemini-3.1-flash-lite",
+    "provider": "gemini"
+  },
+  "reason_for_request": "根据 unresolved cluster 请求 LLM 给出注释链接修补建议",
+  "request_content": {
+    "cluster": {
+      "allowed_actions": [
+        "match",
+        "ignore_ref",
+        "needs_review"
+      ],
+      "chapter_title": "LEÇON DU 10 JANVIER 1979",
+      "cluster_id": "ch-fallback-0002:ch-fallback-0002:footnote",
+      "matched_examples": [],
+      "note_system": "footnote",
+      "page_range": [
+        31,
+        31
+      ],
+      "rebind_candidates": [
+        {
+          "anchor_excerpt": "ne les évitera pas, on ne pourra pas les suspendre totalement et définitivement. De toute façon, ils feront retour sur la pratique gouvernementale. Autrement dit, ce que l'économie politique découvre, ce n'est pas des droits naturels antérieurs à l'exercice de la gouvernementalité, ce qu'elle découvre c'est une certaine naturalité propre à la pratique même du gouvernement. Il y a une nature propre aux objets de l'action gouvernementale. Il y a une nature propre à cette action gouvernementale elle-même et c'est cela que va étudier l'économie politique. Cette notion* de la nature va donc entièrement basculer autour de l'apparition de l'économie politique. La nature n'est pas pour l'économie politique une région réservée et originaire sur laquelle l'exercice du pouvoir ne devrait pas avoir prise, sauf à être illégitime. La nature, c'est quelque chose qui court sous, à travers, dans l'exercice même de la gouvernementalité. C'en est, si vous voulez, l'hypodermie indispensable. C'est l'autre face de quelque chose dont la face visible, visible pour les gouvernants, eh bien, c'est leur propre action. Leur propre action a un dessous ou plutôt elle a une autre face et cette autre face de la gouvernementalité, eh bien, c'est cela précisément qu'étudie dans sa nécessité propre l'économie politique. Non pas arrière-fond, mais corrélatif perpétuel. C'est ainsi, par exemple, que c'est une loi de nature, expliqueront les économistes, que la population, par exemple, se déplace vers les salaires les plus élevés; c'est une loi de nature que tel tarif douanier protecteur des hauts prix de subsistance, entraîne fatalement quelque chose comme une disette.\n\nEnfin, dernier point qui explique comment et pourquoi l'économie politique a pu se présenter comme forme première de cette nouvelle ratio gouvernementale autolimitative, c'est que, s'il y a une nature qui est propre à la gouvernementalité, à ses objets et à ses opérations, cela a pour conséquence que la pratique gouvernementale ne pourra faire ce qu'elle a à faire qu'en respectant cette nature. Si elle vient à bousculer cette nature, si elle vient à n'en pas tenir compte ou à aller à l'encontre des lois qui ont été fixées par cette naturalité propre aux objets qu'elle manipule, il va y avoir immédiatement des conséquences négatives pour elle-même, autrement dit, il va y avoir réussite ou échec, réussite ou échec qui sont maintenant le critère de l'action gouvernementale, et non plus légitimité ou illégitimité. Substitution donc de la réussite à [la légitimité]*. Nous touchons là alors à tout le problème de la philosophie utilitariste dont on aura à parler. Vous voyez là comment une philosophie utilitariste va pouvoir",
+          "anchor_page_no": 32,
+          "current_anchor_id": "anchor-00022",
+          "current_anchor_marker": "*",
+          "current_anchor_synthetic": false,
+          "link_id": "link-00363",
+          "marker": "*",
+          "note_excerpt": "",
+          "note_item_id": "fn-0013",
+          "note_page_no": 31
+        }
+      ],
+      "request_mode": "anchor_rebind",
+      "unmatched_anchors": [
+        {
+          "anchor_id": "anchor-00021",
+          "anchor_kind": "footnote",
+          "certainty": 1.0,
+          "chapter_id": "ch-fallback-0002",
+          "char_end": 768,
+          "char_start": 765,
+          "normalized_marker": "1",
+          "ocr_repaired_from_marker": "",
+          "page_no": 31,
+          "paragraph_index": 0,
+          "source": "",
+          "source_marker": "[1]",
+          "source_text": "définie et qu'il contrôle lui-même totalement. Despotisme absolu, et par conséquent, dans cette mesure-là, vous voyez là aussi que la ligne de pente qui avait été dessinée par la raison d'État n'est pas inversée par l'économie politique, au moins en première instance ou au moins à ce niveau-là, et que l'économie politique peut apparaître comme étant dans la droite ligne d'une raison d'État qui donnait au monarque un pouvoir total et absolu.\n\nTroisièmement, l'économie politique, eh bien précisément, elle réfléchit sur quoi? Elle analyse quoi? Non pas quelque chose comme des droits antérieurs qui auraient été inscrits soit dans la nature humaine, soit dans l'histoire d'une société donnée. L'économie politique réfléchit sur [1]es pratiques gouvernementales elles-mêmes, et ces pratiques gouvernementales, elle ne les interroge pas en droit pour savoir si elles sont légitimes ou pas. Elle les envisage non pas du côté de leur origine mais du côté de leurs effets, en se demandant par exemple non pas : qu'est-ce qui autorise un souverain à lever des impôts ? mais tout simplement : quand on lève un impôt, quand on lève cet impôt à ce moment déterminé, sur telle catégorie de personnes ou sur telle catégorie de marchandises, qu'est-ce qui va arriver? Peu importe que ce droit soit légitime ou pas*, le problème est de savoir quels effets il a et si ces effets sont négatifs. C'est à ce moment-là que l'on dira que l'impôt en question est illégitime ou, en tout cas, qu'il n'a pas de raison d'être. Mais c'est toujours à l'intérieur même de ce champ de la pratique gouvernementale et en fonction de ses effets, non en fonction de ce qui pourrait la fonder en droit, que la question économique va être posée : quels sont les effets réels de la gouvernementalité au terme même de son exercice, et non pas : quels sont les droits originaires qui peuvent fonder cette gouvernementalité? C'est la troisième raison pour laquelle l'économie politique a pu dans sa réflexion, dans sa rationalité nouvelle prendre place, si vous voulez, à l'intérieur même de la pratique et de la raison gouvernementales établies à l'époque précédente.\n\nQuatrième raison, c'est que, en répondant à ce type de question, l'économie politique a fait apparaître l'existence de phénomènes, de processus et de régularités qui se produisent nécessairement en fonction de mécanismes intelligibles. Ces mécanismes intelligibles et nécessaires, bien sûr, ils peuvent être contrariés par certaines formes de gouvernementalité, par certaines pratiques gouvernementales. Ils peuvent être contrariés, ils peuvent être brouillés, ils peuvent être obscurcis mais de toute façon on",
+          "synthetic": false
+        }
+      ],
+      "unmatched_note_items": []
+    },
+    "page_contexts": [
+      {
+        "byte_size": 0,
+        "file_idx": 30,
+        "ocr_excerpt": "définie et qu'il contrôle lui-même totalement. Despotisme absolu, et par conséquent, dans cette mesure-là, vous voyez là aussi que la ligne de pente qui avait été dessinée par la raison d'État n'est pas inversée par l'économie politique, au moins en première instance ou au moins à ce niveau-là, et que l'économie politique peut apparaître comme étant dans la droite ligne d'une raison d'État qui donnait au monarque un pouvoir total et absolu. Troisièmement, l'économie politique, eh bien précisément, elle réfléchit sur quoi? Elle analyse quoi? Non pas quelque chose comme des droits antérieurs qui auraient été inscrits soit dans la nature humaine, soit dans l'histoire d'une société donnée. L'économie politique réfléchit sur [1]es pratiques gouvernementales elles-mêmes, et ces pratiques gouvernementales, elle ne les interroge pas en droit pour savoir si elles sont légitimes ou pas. Elle les envisage non pas du côté de leur origine mais du côté de leurs effets, en se demandant par exemple non pas : qu'est-ce qui autorise un souverain à lever des impôts ? mais tout simplement : quand on lève un impôt, quand on lève cet impôt à ce moment déterminé, sur telle catégorie de personnes ou sur telle catégorie de marchandises, qu'est-ce qui va arriver? Peu importe que ce droit soit légitime ou pas*, le problème est de savoir quels effets il a et si ces effets sont négatifs. C'est à ce moment- ...",
+        "page_no": 31,
+        "sha256": "",
+        "source_pdf_path": ""
+      }
+    ]
+  },
+  "request_context_summary": {
+    "cluster_id": "ch-fallback-0002:ch-fallback-0002:footnote",
+    "image_refused": false,
+    "page_context_count": 1,
+    "request_mode": "anchor_rebind"
+  },
+  "request_prompt": {
+    "system": "你是 FNM 注释修补助手（同时处理 endnote 和 footnote 两种 note_system）。只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。优先依据页面截图判断，不要被 OCR 坏掉的数字误导。如果截图已经足够清楚，就不要退回 needs_review。你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。match 需要 note_item_id、anchor_id、confidence、reason；ignore_ref 需要 anchor_id、confidence、reason；synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，需要 note_item_id、anchor_phrase（从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，需要 anchor_id、marker、note_text、confidence、reason；confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。needs_review 需要 reason。",
+    "user": "/no_think\n下面是一个 FNM unresolved cluster。请只返回 JSON 数组，不要解释。\n本次只允许动作：match、ignore_ref、needs_review。\n若信息足够明确，请直接输出可自动落地的动作，不要退回 needs_review；每条 reason 不超过 20 个词，禁止输出逐步分析。\n去重任务：判断 unmatched_anchors 中哪些是假阳性 ref。参考 page_contexts 的 OCR 文本片段和 matched_examples 的正例模式。以下情况应判定为假阳性（ignore_ref, confidence>=0.9）：(1) 同一 marker 在同一页或相邻页重复出现（取与 matched_examples 模式一致的那个，其余忽略）(2) marker 出现在明显非注释上下文中（如 'p. 15' 是页码、'n 9' 是编号、日期年份等）(3) marker 所在段落已有同编号的 matched anchor（该 unmatched 是重复检测）(4) marker 周围文字模式与同章 matched_examples 的锚点上下文明显不同以下情况应保留（needs_review, confidence<=0.5）：(1) marker 周围文字可能是注释引用，但 OCR 文本不足以确认(2) 该页的 OCR 文本损坏严重\n\n{\n  \"allowed_actions\": [\n    \"match\",\n    \"ignore_ref\",\n    \"needs_review\"\n  ],\n  \"chapter_title\": \"LEÇON DU 10 JANVIER 1979\",\n  \"cluster_id\": \"ch-fallback-0002:ch-fallback-0002:footnote\",\n  \"matched_examples\": [],\n  \"note_system\": \"footnote\",\n  \"page_contexts\": [\n    {\n      \"ocr_excerpt\": \"définie et qu'il contrôle lui-même totalement. Despotisme absolu, et par conséquent, dans cette mesure-là, vous voyez là aussi que la ligne de pente qui avait été dessinée par la raison d'État n'est pas inversée par l'économie politique, au moins en première instance ou au moins à ce niveau-là, et que l'économie politique peut apparaître comme étant dans la droite ligne d'une raison d'État qui donnait au monarque un pouvoir total et absolu. Troisièmement, l'économie politique, eh bien précisément, elle réfléchit sur quoi? Elle analyse quoi? Non pas quelque chose comme des droits antérieurs qui auraient été inscrits soit dans la nature humaine, soit dans l'histoire d'une société donnée. L'éco ...\",\n      \"page_no\": 31\n    }\n  ],\n  \"page_range\": [\n    31,\n    31\n  ],\n  \"rebind_candidates\": [\n    {\n      \"anchor_excerpt\": \"ne les évitera pas, on ne pourra pas les suspendre totalement et définitivement. De toute façon, ils feront retour sur la pratique gouvernementale. Autrement dit, ce que l'économie politique découvre, ce n'est pas des droits naturels antéri ...\",\n      \"anchor_page_no\": 32,\n      \"current_anchor_id\": \"anchor-00022\",\n      \"current_anchor_marker\": \"*\",\n      \"current_anchor_synthetic\": false,\n      \"link_id\": \"link-00363\",\n      \"marker\": \"*\",\n      \"note_excerpt\": \"\",\n      \"note_item_id\": \"fn-0013\",\n      \"note_page_no\": 31\n    }\n  ],\n  \"request_mode\": \"anchor_rebind\",\n  \"unmatched_anchors\": [\n    {\n      \"anchor_id\": \"anchor-00021\",\n      \"marker\": \"1\",\n      \"page_no\": 31,\n      \"paragraph_index\": 0,\n      \"source_text\": \"définie et qu'il contrôle lui-même totalement. Despotisme absolu, et par conséquent, dans cette mesure-là, vous voyez là aussi que la ligne de pente qui avait été dessinée par la raison d'État n'est pas inversée par l'économie politique, au ...\"\n    }\n  ],\n  \"unmatched_note_items\": []\n}"
+  },
+  "response_parsed": [
+    {
+      "action": "needs_review",
+      "anchor_id": "",
+      "anchor_phrase": "",
+      "confidence": 0.8,
+      "marker": "",
+      "note_item_id": "",
+      "note_text": "",
+      "reason": "缺少 note_item 供匹配，且 OCR 内容不足以确认 anchor 1 是否指向特定脚注。"
+    },
+    {
+      "action": "ignore_ref",
+      "anchor_id": "anchor-00022",
+      "anchor_phrase": "",
+      "confidence": 0.95,
+      "marker": "",
+      "note_item_id": "",
+      "note_text": "",
+      "reason": "该锚点在第 32 页，与其对应的注释 fn-0013 在第 31 页，跨页锚定不符合 footnote 规范。"
+    }
+  ],
+  "response_raw_text": "[\n  {\n    \"action\": \"needs_review\",\n    \"reason\": \"缺少 note_item 供匹配，且 OCR 内容不足以确认 anchor 1 是否指向特定脚注。\"\n  },\n  {\n    \"action\": \"ignore_ref\",\n    \"anchor_id\": \"anchor-00022\",\n    \"confidence\": 0.95,\n    \"reason\": \"该锚点在第 32 页，与其对应的注释 fn-0013 在第 31 页，跨页锚定不符合 footnote 规范。\"\n  }\n]",
+  "stage": "llm_repair.cluster_request",
+  "timing": {
+    "duration_ms": 9938
+  },
+  "token_accounting": {
+    "estimated_input_tokens": 1372,
+    "input_tokens": 1322,
+    "output_tokens": 132,
+    "request_count": 1,
+    "skip_reason": "",
+    "skipped": false,
+    "source": "provider_usage",
+    "total_tokens": 1454
+  },
+  "usage": {
+    "completion_tokens": 132,
+    "prompt_tokens": 1322,
+    "request_count": 1,
+    "total_tokens": 1454
+  }
+}

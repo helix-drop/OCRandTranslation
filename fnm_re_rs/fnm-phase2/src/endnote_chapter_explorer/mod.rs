@@ -464,10 +464,10 @@ fn yield_page_signal_candidates(
     let mut seen: HashSet<(String, String)> = HashSet::new();
 
     let push = |yielded: &mut Vec<(String, String, f64)>,
-                    seen: &mut HashSet<(String, String)>,
-                    title: &str,
-                    source: &str,
-                    bonus: f64| {
+                seen: &mut HashSet<(String, String)>,
+                title: &str,
+                source: &str,
+                bonus: f64| {
         let normalized = normalize_title(title);
         if normalized.is_empty() || is_generic_notes_title(&normalized) {
             return;

@@ -120,6 +120,56 @@ pub(crate) fn repair_parsed_row_sequence_markers(rows: Vec<ParsedNoteRow>) -> Ve
     updated
 }
 
+/// 过滤 endnote region 中可疑的 marker（年份、超大数字、明显不在序列内的数值）。
+///
+/// 正向验证策略：只信 region 内可解释的连续或近连续序列。
+/// - 拒绝年份范围 (1500-2100) 的数字 marker。
+/// - 拒绝比前后 marker 平均值大 100 倍以上的离群值。
+/// - 拒绝连续两个离群值（如 "1769\n1944" 都删）。
+/// - 非数字 marker 直接通过。
+pub(crate) fn filter_suspicious_endnote_markers(rows: Vec<ParsedNoteRow>) -> Vec<ParsedNoteRow> {
+    if rows.is_empty() {
+        return rows;
+    }
+
+    let mut accepted: Vec<ParsedNoteRow> = Vec::new();
+    for row in rows {
+        let marker = row.marker.trim();
+        // 非数字 marker 直接通过
+        if !marker.chars().all(|c| c.is_ascii_digit()) {
+            accepted.push(row);
+            continue;
+        }
+        let val = match marker.parse::<i64>() {
+            Ok(v) => v,
+            Err(_) => {
+                accepted.push(row);
+                continue;
+            }
+        };
+
+        // 年份范围 → 拒绝
+        if (1500..=2100).contains(&val) {
+            continue;
+        }
+
+        // 巨大离群值（相对前后已接受的 marker）→ 拒绝
+        if !accepted.is_empty() {
+            let last_accepted = &accepted[accepted.len() - 1];
+            let last_val = last_accepted.marker.parse::<i64>();
+            if let Ok(lv) = last_val {
+                if val > lv + 1000 {
+                    continue;
+                }
+            }
+        }
+
+        accepted.push(row);
+    }
+
+    accepted
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -276,5 +326,65 @@ mod tests {
         let rows = vec![row(1, "1", "a"), row(1, "42", "b"), row(1, "3", "c")];
         let result = repair_parsed_row_sequence_markers(rows);
         assert_eq!(result[1].marker, "2");
+    }
+
+    // ── filter_suspicious_endnote_markers ──
+
+    #[test]
+    fn filter_year_marker_rejected() {
+        let rows = vec![row(1, "33", "a"), row(1, "1769", "year"), row(1, "35", "b")];
+        let result = filter_suspicious_endnote_markers(rows);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].marker, "33");
+        assert_eq!(result[1].marker, "35");
+    }
+
+    #[test]
+    fn filter_year_marker_1944_rejected() {
+        let rows = vec![row(1, "33", "a"), row(1, "1944", "year"), row(1, "35", "b")];
+        let result = filter_suspicious_endnote_markers(rows);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].marker, "33");
+        assert_eq!(result[1].marker, "35");
+    }
+
+    #[test]
+    fn filter_multiple_years_all_rejected() {
+        let rows = vec![
+            row(1, "29", "a"),
+            row(1, "30", "b"),
+            row(1, "1769", "yr"),
+            row(1, "1944", "yr"),
+            row(1, "33", "c"),
+            row(1, "34", "d"),
+        ];
+        let result = filter_suspicious_endnote_markers(rows);
+        assert_eq!(result.len(), 4);
+        assert_eq!(result[0].marker, "29");
+        assert_eq!(result[1].marker, "30");
+        assert_eq!(result[2].marker, "33");
+        assert_eq!(result[3].marker, "34");
+    }
+
+    #[test]
+    fn filter_non_numeric_preserved() {
+        let rows = vec![row(1, "*", "sym"), row(1, "1", "num"), row(1, "†", "dag")];
+        let result = filter_suspicious_endnote_markers(rows);
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn filter_large_outlier_rejected() {
+        let rows = vec![row(1, "1", "a"), row(1, "6768", "big"), row(1, "2", "b")];
+        let result = filter_suspicious_endnote_markers(rows);
+        assert_eq!(result.len(), 2);
+        assert_eq!(result[0].marker, "1");
+        assert_eq!(result[1].marker, "2");
+    }
+
+    #[test]
+    fn filter_empty_input() {
+        let result = filter_suspicious_endnote_markers(vec![]);
+        assert!(result.is_empty());
     }
 }

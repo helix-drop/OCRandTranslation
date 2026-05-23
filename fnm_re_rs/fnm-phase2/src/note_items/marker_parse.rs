@@ -52,12 +52,6 @@ static INLINE_NOTE_BREAK_RE: Lazy<Regex> = Lazy::new(|| {
     .unwrap()
 });
 
-/// ←→ Python `_INLINE_FOLLOWUP_TOKEN_RE`：行内跟随标记（避免被误分为新 note）。
-static INLINE_FOLLOWUP_TOKEN_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"(?:\s*[,;:·•]+\s*|\s+)(?P<token>\d(?:[ ,\.\-]{0,2}\d){0,3})(?:[\.,\)\]]|\s{1,3})")
-        .unwrap()
-});
-
 /// 预处理页面文本，修复 inline break 等。←→ Python `_normalized_page_text` 预处理部分。
 pub(crate) fn preprocess_page_text(text: &str) -> String {
     // Python `_replace_inline_note_break`: 在 prefix（句末标点）和 digits 之间插入换行
@@ -68,24 +62,6 @@ pub(crate) fn preprocess_page_text(text: &str) -> String {
             format!("{}\n{}", prefix, digits)
         })
         .to_string()
-}
-
-/// 在 parse 后：对已识别的 ParsedNoteRow 应用 followup token 去重。
-#[allow(dead_code)]
-pub(crate) fn dedupe_followup_tokens(rows: &[ParsedNoteRow]) -> Vec<ParsedNoteRow> {
-    let mut result: Vec<ParsedNoteRow> = Vec::new();
-    for row in rows {
-        // 检查 marker 是否属于 followup token（跟在正文内的编号引用）
-        if INLINE_FOLLOWUP_TOKEN_RE.is_match(&row.marker) {
-            // 合并到前一 note，不生成独立条目
-            if let Some(last) = result.last_mut() {
-                last.text = format!("{} {}", last.text, row.text);
-            }
-            continue;
-        }
-        result.push(row.clone());
-    }
-    result
 }
 
 // ── Embedded note definition regex ─────────────────────────
