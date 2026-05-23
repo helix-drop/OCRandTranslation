@@ -142,18 +142,28 @@ def collect_llm_suggestions(overrides):
 
 def run_doc_pipeline(*args, **kwargs):
     """←→ Rust fnm_re_rs.run_doc_pipeline_json"""
+    import json as _json
     import fnm_re_rs
 
     doc_id = args[0] if args else kwargs.get("doc_id", "")
     max_body_chars = kwargs.get("max_body_chars")
     start_phase = kwargs.get("start_phase", "toc")
+
+    config_json = None
+    config_keys = {"pdf_path", "slug", "include_diagnostic_entries", "toc_offset",
+                   "manual_toc_ready", "pipeline_state", "review_overrides",
+                   "visual_toc_bundle"}
+    extra = {k: kwargs[k] for k in config_keys if k in kwargs}
+    if extra:
+        config_json = _json.dumps(extra)
+
     result_json = fnm_re_rs.run_doc_pipeline_json(
         _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
         doc_id,
         max_body_chars,
         start_phase,
+        config_json,
     )
-    import json as _json
     return _json.loads(result_json)
 
 

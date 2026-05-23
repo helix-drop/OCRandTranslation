@@ -317,10 +317,7 @@ async fn test_run_llm_repair_orphan_cluster_skipped_without_real_llm() {
     // request_mode = paired，需要请求 LLM → 走 HTTP 失败
     let result = run_llm_repair(params).await;
     let report = result.expect("部分失败应返回 Ok(report) 而非 Err");
-    assert!(
-        report.error.is_some(),
-        "期望 report.error 记录传输失败"
-    );
+    assert!(report.error.is_some(), "期望 report.error 记录传输失败");
     assert_eq!(report.clusters_completed, 0);
     assert_eq!(report.cluster_count, 1);
 }

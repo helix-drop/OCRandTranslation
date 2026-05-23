@@ -32,13 +32,11 @@ pub fn repair_system_prompt() -> String {
 只处理已经确认的 unresolved cluster，不要改 section、note zone、标题或原文。\
 优先依据页面截图判断，不要被 OCR 坏掉的数字误导。\
 如果截图已经足够清楚，就不要退回 needs_review。\
-你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor、synthesize_note_item 或 needs_review。\
+你只能输出 JSON 数组；每项 action 只能是 match、ignore_ref、synthesize_anchor 或 needs_review。\
 match 需要 note_item_id、anchor_id、confidence、reason；\
 ignore_ref 需要 anchor_id、confidence、reason；\
 synthesize_anchor 仅在正文里能找到一个独一无二的短语锚点、但该锚点没有对应的结构化 anchor 记录时使用，\
 需要 note_item_id、anchor_phrase(从正文中原样抄写的 3~12 词唯一短语，不要自编)、confidence、reason；\
-synthesize_note_item 仅在截图里能清楚看到同页注释文本、但 OCR / 结构化流程完全没产出 note item 时使用，\
-需要 anchor_id、marker、note_text、confidence、reason；\
 confidence 必须是 0.0 到 1.0 之间的数字（如 0.95、0.8、0.5），不能用 'high'、'medium'、'low' 等文字代替；\
 若某条 note 当前只是错误地绑到了 synthetic / 跨页锚点，而截图清楚显示它应改绑到当前显式锚点，也直接用 match，不要 needs_review。\
 needs_review 需要 reason。",
@@ -98,9 +96,7 @@ pub fn should_request_llm_for_cluster(request_cluster: &Value) -> bool {
 /// ←→ Python `_should_attach_repair_images` (llm_repair.py:512-514)
 pub fn should_attach_repair_images(request_cluster: &Value) -> bool {
     let actions = allowed_actions_of(request_cluster);
-    actions
-        .iter()
-        .any(|a| a == "synthesize_note_item" || a == "synthesize_anchor")
+    actions.iter().any(|a| a == "synthesize_anchor")
 }
 
 /// ←→ Python `_should_include_page_context_text` (llm_repair.py:517-526)
@@ -324,24 +320,13 @@ fn derive_actions(
     }
     if !unmatched_anchors.is_empty() && !rebind_candidates.is_empty() {
         if has_page_context && unmatched_anchors.len() > rebind_candidates.len() {
-            return (
-                vec![
-                    "match",
-                    "ignore_ref",
-                    "synthesize_note_item",
-                    "needs_review",
-                ],
-                "anchor_rebind",
-            );
+            return (vec!["match", "ignore_ref", "needs_review"], "anchor_rebind");
         }
         return (vec!["match", "ignore_ref", "needs_review"], "anchor_rebind");
     }
     if !unmatched_anchors.is_empty() {
         if has_page_context {
-            return (
-                vec!["ignore_ref", "synthesize_note_item", "needs_review"],
-                "ref_only_visual",
-            );
+            return (vec!["ignore_ref", "needs_review"], "ref_only_visual");
         }
         return (vec!["ignore_ref", "needs_review"], "ref_only");
     }
@@ -427,14 +412,7 @@ pub fn repair_user_prompt(cluster: &Value, caps: SliceCaps) -> String {
 禁止自编、禁止填章节其他地方或通用短语。",
         );
     }
-    if allowed_set.contains("synthesize_note_item") {
-        extra_rules.push_str(
-            "\n若截图里清楚看到同页注释文本、但 OCR / 结构化数据里没有 note item，\
-优先用 synthesize_note_item；marker 必须是截图上可见的数字，\
-note_text 只抄注释正文，不要自编，不要补全看不清的部分。",
-        );
-    }
-    if allowed_set.contains("ignore_ref") && !allowed_set.contains("synthesize_note_item") {
+    if allowed_set.contains("ignore_ref") {
         extra_rules.push_str(
             "\n去重任务：判断 unmatched_anchors 中哪些是假阳性 ref。\
 参考 page_contexts 的 OCR 文本片段和 matched_examples 的正例模式。\
@@ -596,7 +574,10 @@ mod tests {
         let prompt = repair_system_prompt();
         assert!(prompt.contains("match"));
         assert!(prompt.contains("synthesize_anchor"));
-        assert!(prompt.contains("synthesize_note_item"));
+        assert!(
+            !prompt.contains("synthesize_note_item"),
+            "system prompt must not mention removed action"
+        );
         assert!(prompt.contains("needs_review"));
     }
 
@@ -641,7 +622,7 @@ mod tests {
 
     #[test]
     fn test_should_attach_repair_images() {
-        let req = json!({"allowed_actions": ["match", "synthesize_note_item"]});
+        let req = json!({"allowed_actions": ["match", "synthesize_anchor"]});
         assert!(should_attach_repair_images(&req));
         let req = json!({"allowed_actions": ["match", "ignore_ref"]});
         assert!(!should_attach_repair_images(&req));
@@ -649,8 +630,8 @@ mod tests {
 
     #[test]
     fn test_should_include_page_context_text() {
-        // synthesize_note_item → 是
-        let req = json!({"allowed_actions": ["synthesize_note_item"]});
+        // synthesize_anchor → 是（也需要 page_context）
+        let req = json!({"allowed_actions": ["synthesize_anchor"]});
         assert!(should_include_page_context_text(&req));
         // ignore_ref → 是
         let req = json!({"allowed_actions": ["ignore_ref"]});
@@ -713,7 +694,8 @@ mod tests {
             .iter()
             .map(|v| v.as_str().unwrap().to_string())
             .collect();
-        assert!(actions.contains(&"synthesize_note_item".to_string()));
+        // synthesize_note_item 已移除（P0-2），ref_only_visual 只剩 ignore_ref + needs_review
+        assert_eq!(actions, vec!["ignore_ref", "needs_review"]);
     }
 
     #[test]
@@ -749,8 +731,11 @@ mod tests {
             .iter()
             .map(|v| v.as_str().unwrap().to_string())
             .collect();
-        // 有 page_context 且 unmatched_anchors > rebind_candidates → 含 synthesize_note_item
-        assert!(actions.contains(&"synthesize_note_item".to_string()));
+        // synthesize_note_item 已移除（P0-2），anchor_rebind 返回 match/ignore_ref/needs_review
+        assert!(!actions.contains(&"synthesize_note_item".to_string()));
+        assert!(actions.contains(&"match".to_string()));
+        assert!(actions.contains(&"ignore_ref".to_string()));
+        assert!(actions.contains(&"needs_review".to_string()));
     }
 
     #[test]

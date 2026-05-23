@@ -36,12 +36,17 @@ pub struct RepairAction {
     pub page_no: i64,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub link_id: String,
+    /// 字节偏移（与 BodySpan 单位一致，非字符偏移）
     #[serde(default, skip_serializing_if = "is_zero_i64")]
     pub char_start: i64,
+    /// 字节偏移（与 BodySpan 单位一致，非字符偏移）
     #[serde(default, skip_serializing_if = "is_zero_i64")]
     pub char_end: i64,
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub matched_text: String,
+    /// 置信度值是否来自 JSON number（而非文字映射）。auto-apply 路径要求 numeric。
+    #[serde(default)]
+    pub confidence_numeric: bool,
 }
 
 fn is_zero(v: &f64) -> bool {
@@ -53,13 +58,8 @@ fn is_zero_i64(v: &i64) -> bool {
 }
 
 /// 允许的 action 类型（与 Python set 对齐）
-const ALLOWED_ACTIONS: &[&str] = &[
-    "match",
-    "ignore_ref",
-    "needs_review",
-    "synthesize_anchor",
-    "synthesize_note_item",
-];
+/// synthesize_note_item 已被移除——Phase3.5 无权创建 note item（P0-2）。
+const ALLOWED_ACTIONS: &[&str] = &["match", "ignore_ref", "needs_review", "synthesize_anchor"];
 
 /// ←→ Python `parse_llm_repair_actions` (llm_repair.py:823-871)
 ///
@@ -148,11 +148,6 @@ pub fn parse_llm_repair_actions(text: &str) -> Vec<RepairAction> {
             .unwrap_or("")
             .trim()
             .to_string();
-        if action == "synthesize_note_item"
-            && (anchor_id_raw.is_empty() || marker.is_empty() || note_text.is_empty())
-        {
-            continue;
-        }
         let note_item_id = obj
             .get("note_item_id")
             .or_else(|| obj.get("definition_id"))
@@ -160,7 +155,9 @@ pub fn parse_llm_repair_actions(text: &str) -> Vec<RepairAction> {
             .unwrap_or("")
             .trim()
             .to_string();
-        let confidence = safe_float(obj.get("confidence").unwrap_or(&Value::Null), 0.8);
+        let confidence_value = obj.get("confidence").unwrap_or(&Value::Null);
+        let confidence = safe_float(confidence_value, 0.8);
+        let confidence_numeric = confidence_value.is_number();
         let reason = obj
             .get("reason")
             .and_then(|v| v.as_str())
@@ -175,6 +172,7 @@ pub fn parse_llm_repair_actions(text: &str) -> Vec<RepairAction> {
             marker,
             note_text,
             confidence,
+            confidence_numeric,
             reason,
             ..Default::default()
         });
@@ -191,6 +189,11 @@ pub struct SelectParams<'a> {
     pub note_system: &'a str,
     pub note_page_by_id: Option<&'a HashMap<String, i64>>,
     pub allowed_synthesize_pages: Option<&'a HashSet<i64>>,
+    /// 当前 cluster 中允许 auto-apply 的 note_item_id 白名单。
+    /// 空集合视为"无限制"（保留向后兼容）。
+    pub allowed_note_ids: Option<HashSet<String>>,
+    /// 当前 cluster 中允许 auto-apply 的 anchor_id 白名单。
+    pub allowed_anchor_ids: Option<HashSet<String>>,
 }
 
 impl<'a> Default for SelectParams<'a> {
@@ -201,6 +204,8 @@ impl<'a> Default for SelectParams<'a> {
             note_system: "",
             note_page_by_id: None,
             allowed_synthesize_pages: None,
+            allowed_note_ids: None,
+            allowed_anchor_ids: None,
         }
     }
 }
@@ -234,6 +239,10 @@ pub fn select_auto_applicable_actions(
         if confidence < effective_threshold {
             continue;
         }
+        // 文字派生的置信度（"high"/"medium"/"low"）不进入 auto-apply（P2-5）。
+        if !action.confidence_numeric {
+            continue;
+        }
 
         match kind.as_str() {
             "match" => {
@@ -245,6 +254,17 @@ pub fn select_auto_applicable_actions(
                 if used_definitions.contains(note_item_id) || used_refs.contains(anchor_id) {
                     continue;
                 }
+                // 校验 note_item_id 在 cluster 白名单内（P1-1）
+                if let Some(ref allowed) = params.allowed_note_ids {
+                    if !allowed.contains(note_item_id) {
+                        continue;
+                    }
+                }
+                if let Some(ref allowed) = params.allowed_anchor_ids {
+                    if !allowed.contains(anchor_id) {
+                        continue;
+                    }
+                }
                 used_definitions.insert(note_item_id.to_string());
                 used_refs.insert(anchor_id.to_string());
                 selected.push(action.clone());
@@ -253,6 +273,11 @@ pub fn select_auto_applicable_actions(
                 let anchor_id = action.anchor_id.trim();
                 if anchor_id.is_empty() || used_refs.contains(anchor_id) {
                     continue;
+                }
+                if let Some(ref allowed) = params.allowed_anchor_ids {
+                    if !allowed.contains(anchor_id) {
+                        continue;
+                    }
                 }
                 used_refs.insert(anchor_id.to_string());
                 selected.push(action.clone());
@@ -291,23 +316,13 @@ pub fn select_auto_applicable_actions(
                         }
                     }
                 }
+                if let Some(ref allowed) = params.allowed_note_ids {
+                    if !allowed.contains(note_item_id) {
+                        continue;
+                    }
+                }
                 used_definitions.insert(note_item_id.to_string());
                 selected.push(action.clone());
-            }
-            "synthesize_note_item" => {
-                let anchor_id = action.anchor_id.trim();
-                let marker = normalize_note_marker(&action.marker);
-                let note_text = action.note_text.trim();
-                if anchor_id.is_empty() || used_refs.contains(anchor_id) {
-                    continue;
-                }
-                if marker.is_empty() || note_text.is_empty() {
-                    continue;
-                }
-                used_refs.insert(anchor_id.to_string());
-                let mut cloned = action.clone();
-                cloned.marker = marker;
-                selected.push(cloned);
             }
             _ => {}
         }
@@ -361,21 +376,14 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_synth_note_missing_fields_rejected() {
-        // 缺 anchor_id
-        let text =
-            r#"[{"action":"synthesize_note_item","marker":"3","note_text":"x","confidence":0.9}]"#;
-        let actions = parse_llm_repair_actions(text);
-        assert!(actions.is_empty());
-    }
-
-    #[test]
     fn test_parse_confidence_label() {
         let text =
             r#"[{"action":"match","note_item_id":"n1","anchor_id":"a1","confidence":"high"}]"#;
         let actions = parse_llm_repair_actions(text);
         assert_eq!(actions.len(), 1);
         assert!((actions[0].confidence - 0.9).abs() < 1e-9);
+        // 文字置信度 marked as non-numeric → 不进入 auto-apply（P2-5）
+        assert!(!actions[0].confidence_numeric);
     }
 
     #[test]
@@ -391,6 +399,7 @@ mod tests {
             note_item_id: note_id.to_string(),
             anchor_id: anchor_id.to_string(),
             confidence: conf,
+            confidence_numeric: true,
             ..Default::default()
         }
     }
@@ -451,6 +460,7 @@ mod tests {
         let mut action = make_action("synthesize_anchor", "n1", "", 0.82);
         action.anchor_phrase = "p".into();
         action.fuzzy_score = 96.0; // >= 95 → effective threshold 0.80
+        action.confidence_numeric = true;
         let selected = select_auto_applicable_actions(
             &[action],
             SelectParams {
@@ -478,12 +488,95 @@ mod tests {
     }
 
     #[test]
-    fn test_select_synth_note_item_basic() {
-        let mut action = make_action("synthesize_note_item", "", "a1", 0.95);
-        action.marker = "3".into();
-        action.note_text = "note body".into();
+    fn test_confidence_numeric_blocks_text_based() {
+        // 文字置信度一定不被 auto-apply（即使值≥threshold）。
+        let mut action = make_action("match", "n1", "a1", 0.95);
+        action.confidence_numeric = false;
         let selected = select_auto_applicable_actions(&[action], SelectParams::default());
-        assert_eq!(selected.len(), 1);
+        assert!(
+            selected.is_empty(),
+            "text-derived confidence must not auto-apply"
+        );
+    }
+
+    #[test]
+    fn test_match_id_whitelist_rejects_out_of_cluster() {
+        let mut action = make_action("match", "n1", "a1", 0.95);
+        action.confidence_numeric = true;
+        let mut allowed_anchors = HashSet::new();
+        allowed_anchors.insert("a2".to_string()); // a1 NOT in whitelist
+        let mut allowed_notes = HashSet::new();
+        allowed_notes.insert("n1".to_string());
+        let selected = select_auto_applicable_actions(
+            &[action],
+            SelectParams {
+                allowed_note_ids: Some(allowed_notes),
+                allowed_anchor_ids: Some(allowed_anchors),
+                ..Default::default()
+            },
+        );
+        assert!(
+            selected.is_empty(),
+            "anchor_id outside whitelist must be rejected"
+        );
+    }
+
+    #[test]
+    fn test_match_id_whitelist_passes_in_cluster() {
+        let mut action = make_action("match", "n1", "a1", 0.95);
+        action.confidence_numeric = true;
+        let mut allowed_anchors = HashSet::new();
+        allowed_anchors.insert("a1".to_string());
+        let mut allowed_notes = HashSet::new();
+        allowed_notes.insert("n1".to_string());
+        let selected = select_auto_applicable_actions(
+            &[action],
+            SelectParams {
+                allowed_note_ids: Some(allowed_notes),
+                allowed_anchor_ids: Some(allowed_anchors),
+                ..Default::default()
+            },
+        );
+        assert_eq!(selected.len(), 1, "IDs in whitelist must be auto-applied");
+    }
+
+    #[test]
+    fn test_ignore_ref_id_whitelist_rejects_outside() {
+        let mut action = make_action("ignore_ref", "", "a1", 0.95);
+        action.confidence_numeric = true;
+        let mut allowed = HashSet::new();
+        allowed.insert("a2".into()); // a1 NOT in whitelist
+        let selected = select_auto_applicable_actions(
+            &[action],
+            SelectParams {
+                allowed_anchor_ids: Some(allowed),
+                ..Default::default()
+            },
+        );
+        assert!(
+            selected.is_empty(),
+            "anchor outside whitelist must be rejected"
+        );
+    }
+
+    #[test]
+    fn test_ignore_ref_id_whitelist_passes_in_cluster() {
+        let mut action = make_action("ignore_ref", "", "a1", 0.95);
+        action.confidence_numeric = true;
+        let mut allowed = HashSet::new();
+        allowed.insert("a1".into());
+        let selected = select_auto_applicable_actions(
+            &[action],
+            SelectParams {
+                allowed_anchor_ids: Some(allowed),
+                ..Default::default()
+            },
+        );
+        assert_eq!(
+            selected.len(),
+            1,
+            "anchor in whitelist must be auto-applied"
+        );
     }
 
     #[test]

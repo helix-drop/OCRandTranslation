@@ -60,18 +60,8 @@ mod parse_synthesize_anchor {
     }
 
     #[test]
-    fn test_synthesize_note_item_action_accepted() {
+    fn test_synthesize_note_item_dropped_by_parser() {
         let raw = r#"[{"action":"synthesize_note_item","anchor_id":"a-1","marker":"1","note_text":"Visible note text.","confidence":0.96,"reason":"clear"}]"#;
-        let actions = parse_llm_repair_actions(raw);
-        assert_eq!(actions.len(), 1);
-        assert_eq!(actions[0].action, "synthesize_note_item");
-        assert_eq!(actions[0].marker, "1");
-        assert_eq!(actions[0].note_text, "Visible note text.");
-    }
-
-    #[test]
-    fn test_synthesize_note_item_without_text_is_dropped() {
-        let raw = r#"[{"action":"synthesize_note_item","anchor_id":"a-1","marker":"1","confidence":0.96}]"#;
         let actions = parse_llm_repair_actions(raw);
         assert!(actions.is_empty());
     }
@@ -136,6 +126,7 @@ mod select_auto_applicable_synthesize {
             confidence: 0.95,
             fuzzy_score: 92.0,
             ambiguous: false,
+            confidence_numeric: true,
             ..Default::default()
         };
         for (key, value) in overrides {
@@ -241,6 +232,7 @@ mod select_auto_applicable_synthesize {
             note_item_id: "n-1".to_string(),
             anchor_id: "a-1".to_string(),
             confidence: 0.95,
+            confidence_numeric: true,
             ..Default::default()
         };
         let selected = select_auto_applicable_actions(
@@ -248,6 +240,16 @@ mod select_auto_applicable_synthesize {
             SelectParams {
                 confidence_threshold: 0.9,
                 chapter_unmatched_count: 1,
+                allowed_note_ids: {
+                    let mut s = HashSet::new();
+                    s.insert("n-1".to_string());
+                    Some(s)
+                },
+                allowed_anchor_ids: {
+                    let mut s = HashSet::new();
+                    s.insert("a-1".to_string());
+                    Some(s)
+                },
                 ..Default::default()
             },
         );
@@ -400,6 +402,8 @@ mod synthesize_anchor_auto_apply_gate_test {
                 note_system: "footnote",
                 note_page_by_id: Some(&note_pages),
                 allowed_synthesize_pages: None,
+                allowed_note_ids: None,
+                allowed_anchor_ids: None,
             },
         );
         assert!(selected.is_empty());
@@ -426,6 +430,8 @@ mod synthesize_anchor_auto_apply_gate_test {
                 note_system: "endnote",
                 note_page_by_id: None,
                 allowed_synthesize_pages: Some(&allowed),
+                allowed_note_ids: None,
+                allowed_anchor_ids: None,
             },
         );
         assert!(selected.is_empty());
@@ -638,7 +644,7 @@ mod footnote_note_only_with_body {
     }
 
     #[test]
-    fn test_ref_only_visual_can_synthesize_note_item() {
+    fn test_ref_only_visual_allowed_actions() {
         let cluster = json!({
             "cluster_id": "ch-1:r-1:endnote",
             "chapter_id": "ch-1",
@@ -660,7 +666,7 @@ mod footnote_note_only_with_body {
             .iter()
             .map(|v| v.as_str().unwrap())
             .collect();
-        assert!(actions.contains(&"synthesize_note_item"));
+        assert_eq!(actions, vec!["ignore_ref", "needs_review"]);
     }
 
     #[test]
@@ -690,7 +696,7 @@ mod footnote_note_only_with_body {
     }
 
     #[test]
-    fn test_only_synthesize_note_item_clusters_attach_images() {
+    fn test_synthesize_anchor_clusters_attach_images() {
         let rebind_cluster = json!({
             "cluster_id": "ch-1:r-1:footnote",
             "chapter_id": "ch-1",
@@ -700,12 +706,13 @@ mod footnote_note_only_with_body {
             "rebind_candidates": [{"note_item_id": "n-1", "current_anchor_id": "synthetic-1"}],
             "page_contexts": [{"page_no": 10, "ocr_excerpt": "page excerpt"}],
         });
-        let visual_cluster = json!({
+        let note_only_cluster = json!({
             "cluster_id": "ch-1:r-1:footnote",
             "chapter_id": "ch-1",
             "note_system": "footnote",
-            "unmatched_note_items": [],
-            "unmatched_anchors": [{"anchor_id": "a-1", "page_no": 10}],
+            "unmatched_note_items": [{"note_item_id": "n-1", "marker": "1", "page_no": 10}],
+            "unmatched_anchors": [],
+            "chapter_body_text": "Some chapter body text with enough words for the body text detection. More words here to pass the threshold.",
             "page_contexts": [{"page_no": 10, "ocr_excerpt": "page excerpt"}],
         });
         assert!(!should_attach_repair_images(&slice_cluster_for_request(
@@ -713,7 +720,7 @@ mod footnote_note_only_with_body {
             SliceCaps::default()
         )));
         assert!(should_attach_repair_images(&slice_cluster_for_request(
-            &visual_cluster,
+            &note_only_cluster,
             SliceCaps::default()
         )));
     }
@@ -725,7 +732,7 @@ mod footnote_note_only_with_body {
 
     #[test]
     fn test_normalize_marker_consistency() {
-        // 回归：synthesize_note_item 必须经过 normalize_note_marker
+        // 回归：normalize_note_marker 去除空白/方括号
         assert_eq!(normalize_note_marker(" 1 "), "1");
         assert_eq!(normalize_note_marker("[1]"), "1");
     }

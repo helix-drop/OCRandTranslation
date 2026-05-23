@@ -22,7 +22,9 @@ use crate::constants::{FUZZY_AMBIGUITY_MARGIN, FUZZY_SCORE_THRESHOLD};
 pub struct FuzzyHit {
     pub hit: bool,
     pub score: f64,
+    /// 命中区间在 body 内的字节偏移（非字符偏移）
     pub char_start: i64,
+    /// 命中区间在 body 内的字节偏移（非字符偏移）
     pub char_end: i64,
     pub matched_text: String,
     pub ambiguous: bool,
@@ -48,8 +50,8 @@ impl FuzzyHit {
 /// 字段语义与 Python 一致：
 /// - `hit`：是否达到 `FUZZY_SCORE_THRESHOLD`
 /// - `score`：partial_ratio 分数（0-100）
-/// - `char_start / char_end`：命中区间在 body 内的**字符**偏移（不是 byte）
-/// - `matched_text`：body[char_start..char_end]
+/// - `char_start / char_end`：命中区间在 body 内的**字节**偏移（与 BodySpan 单位一致）
+/// - `matched_text`：body[char_start..char_end] 的文本
 /// - `ambiguous`：把主命中替换为空格后再扫一次，若次命中 ≥ max(threshold, primary - margin) 则歧义
 pub fn locate_anchor_phrase_in_body(body_text: &str, phrase: &str) -> FuzzyHit {
     let needle = phrase.trim();
@@ -86,11 +88,30 @@ pub fn locate_anchor_phrase_in_body(body_text: &str, phrase: &str) -> FuzzyHit {
         }
     }
 
+    // 将字符索引转换为字节偏移（与 BodySpan 单位一致）
+    // char_indices() 返回 (byte_offset, char)，取第 N 个即可得到字节边界
+    debug_assert!(
+        primary.dest_start <= body_text.chars().count(),
+        "dest_start {} out of range (body has {} chars)",
+        primary.dest_start,
+        body_text.chars().count()
+    );
+    let byte_start = body_text
+        .char_indices()
+        .nth(primary.dest_start)
+        .map(|(i, _)| i)
+        .unwrap_or(body_text.len());
+    let byte_end = body_text
+        .char_indices()
+        .nth(primary.dest_end)
+        .map(|(i, _)| i)
+        .unwrap_or(body_text.len());
+
     FuzzyHit {
         hit: primary.score >= FUZZY_SCORE_THRESHOLD,
         score: primary.score,
-        char_start: primary.dest_start as i64,
-        char_end: primary.dest_end as i64,
+        char_start: byte_start as i64,
+        char_end: byte_end as i64,
         matched_text,
         ambiguous,
     }
@@ -220,12 +241,12 @@ mod tests {
     }
 
     #[test]
-    fn test_char_offsets_are_char_not_byte() {
+    fn test_char_offsets_are_byte_not_char() {
         let body = "中文上下文 brown fox jumps 后面";
         let hit = locate_anchor_phrase_in_body(body, "brown fox jumps");
         assert!(hit.hit);
         assert_eq!(hit.matched_text, "brown fox jumps");
-        // char_start 应该是字符索引 6（"中文上下文 " 5 字符 + 1 空格），不是 byte
-        assert_eq!(hit.char_start, 6);
+        // char_start 应该是字节偏移：5 个中文字符各 3 字节 + 1 空格 = 16，不是字符索引 6
+        assert_eq!(hit.char_start, 16);
     }
 }

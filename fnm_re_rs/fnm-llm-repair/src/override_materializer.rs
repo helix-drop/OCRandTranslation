@@ -241,8 +241,9 @@ pub fn enrich_synthesize_anchor_actions(
 /// ←→ Python `_prefilter_duplicate_anchors` (llm_repair.py:1780-1809)
 ///
 /// 启发式去重：同页同 marker 且已有 matched_example 的 unmatched_anchor 直接忽略。
-/// 返回被过滤的 anchor 数量。
-pub fn prefilter_duplicate_anchors(cluster: &mut Value) -> usize {
+/// 被移除的 anchor 存入 `cluster["_prefiltered_anchors"]`，
+/// 调用方（run.rs）据此为每个移除的 anchor 生成 `ignore_ref` override —— P1-2。
+pub fn prefilter_duplicate_anchors(cluster: &mut Value) {
     let matched: Vec<Value> = cluster
         .get("matched_examples")
         .and_then(|v| v.as_array())
@@ -254,8 +255,21 @@ pub fn prefilter_duplicate_anchors(cluster: &mut Value) -> usize {
         .cloned()
         .unwrap_or_default();
     if matched.is_empty() || unmatched.is_empty() {
-        return 0;
+        cluster["_prefiltered_anchors"] = Value::Array(vec![]);
+        return;
     }
+    // ── 归一化函数：优先 try `normalized_marker`，然后 `source_marker`，最后回退到 `marker`
+    let pick_marker = |v: &Value| -> String {
+        v.get("normalized_marker")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty())
+            .or_else(|| v.get("source_marker").and_then(|v| v.as_str()))
+            .filter(|s| !s.is_empty())
+            .or_else(|| v.get("marker").and_then(|v| v.as_str()))
+            .unwrap_or("")
+            .trim()
+            .to_string()
+    };
     let mut matched_keys: HashSet<(i64, String)> = HashSet::new();
     for m in &matched {
         let pn = m
@@ -263,39 +277,27 @@ pub fn prefilter_duplicate_anchors(cluster: &mut Value) -> usize {
             .and_then(|v| v.as_i64())
             .or_else(|| m.get("anchor_page_no").and_then(|v| v.as_i64()))
             .unwrap_or(0);
-        let marker = m
-            .get("marker")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .trim()
-            .to_string();
+        let marker = pick_marker(m);
         if pn > 0 && !marker.is_empty() {
             matched_keys.insert((pn, marker));
         }
     }
     let mut filtered: Vec<Value> = Vec::new();
-    let mut removed = 0_usize;
+    let mut removed_anchors: Vec<Value> = Vec::new();
     for anchor in &unmatched {
         let pn = anchor.get("page_no").and_then(|v| v.as_i64()).unwrap_or(0);
-        let marker = anchor
-            .get("normalized_marker")
-            .and_then(|v| v.as_str())
-            .filter(|s| !s.is_empty())
-            .or_else(|| anchor.get("source_marker").and_then(|v| v.as_str()))
-            .unwrap_or("")
-            .trim()
-            .to_string();
-        if matched_keys.contains(&(pn, marker.clone())) {
-            removed += 1;
+        let marker = pick_marker(anchor);
+        if matched_keys.contains(&(pn, marker)) {
+            removed_anchors.push(anchor.clone());
         } else {
             filtered.push(anchor.clone());
         }
     }
-    if removed > 0 {
+    if !removed_anchors.is_empty() {
         cluster["unmatched_anchors"] = Value::Array(filtered);
-        cluster["_prefilter_duplicates_removed"] = json!(removed);
+        cluster["_prefilter_duplicates_removed"] = json!(removed_anchors.len());
     }
-    removed
+    cluster["_prefiltered_anchors"] = Value::Array(removed_anchors);
 }
 
 // ── 测试 ────────────────────────────────────────────────────────
@@ -457,8 +459,9 @@ mod tests {
                 {"page_no": 6, "normalized_marker": "2"},  // keep
             ],
         });
-        let removed = prefilter_duplicate_anchors(&mut cluster);
-        assert_eq!(removed, 1);
+        prefilter_duplicate_anchors(&mut cluster);
+        let removed = cluster["_prefiltered_anchors"].as_array().unwrap();
+        assert_eq!(removed.len(), 1);
         let unmatched = cluster["unmatched_anchors"].as_array().unwrap();
         assert_eq!(unmatched.len(), 1);
         assert_eq!(unmatched[0]["page_no"], 6);
@@ -470,7 +473,27 @@ mod tests {
         let mut cluster = json!({
             "unmatched_anchors": [{"page_no": 5, "normalized_marker": "1"}],
         });
-        let removed = prefilter_duplicate_anchors(&mut cluster);
-        assert_eq!(removed, 0);
+        prefilter_duplicate_anchors(&mut cluster);
+        let removed = cluster["_prefiltered_anchors"].as_array().unwrap();
+        assert_eq!(removed.len(), 0);
+    }
+
+    /// 回归测试：matched_examples 使用 raw marker（如 "(1)"）而 unmatched 使用
+    /// normalized_marker（如 "1"）时，归一化后的 pick_marker 仍能正确匹配。
+    #[test]
+    fn test_prefilter_duplicate_anchors_raw_vs_normalized_marker() {
+        let mut cluster = json!({
+            "matched_examples": [{"marker": "(1)", "page_no": 5}],
+            "unmatched_anchors": [
+                {"page_no": 5, "normalized_marker": "1"},
+                {"page_no": 6, "normalized_marker": "2"},
+            ],
+        });
+        prefilter_duplicate_anchors(&mut cluster);
+        let removed = cluster["_prefiltered_anchors"].as_array().unwrap();
+        // "(1)" vs "1" —— 不匹配，所以 none removed
+        assert_eq!(removed.len(), 0);
+        let unmatched = cluster["unmatched_anchors"].as_array().unwrap();
+        assert_eq!(unmatched.len(), 2);
     }
 }

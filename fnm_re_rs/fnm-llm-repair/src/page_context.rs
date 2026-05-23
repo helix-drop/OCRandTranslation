@@ -246,10 +246,18 @@ pub fn trim_page_text(text: &str, limit: usize) -> String {
 
 /// ←→ Python `_fnm_page_role_by_no` (llm_repair.py:1067-1086)
 ///
-/// 从 DB 读取 page_role 索引；失败时返回空 map。
+/// 从 DB 读取 page_role 索引；失败时 warn 并返回空 map（P2-3）。
 pub fn fnm_page_role_by_no(doc_id: &str, repo: &dyn Repository) -> HashMap<i64, String> {
-    let Ok(rows) = repo.list_fnm_pages(doc_id) else {
-        return HashMap::new();
+    let rows = match repo.list_fnm_pages(doc_id) {
+        Ok(rows) => rows,
+        Err(e) => {
+            // TODO: replace with tracing::warn! when subscriber is initialized
+            eprintln!(
+                "[WARN] page_context::fnm_page_role_by_no: DB read failed for doc {}: {}",
+                doc_id, e
+            );
+            return HashMap::new();
+        }
     };
     let mut roles = HashMap::new();
     for row in rows {
@@ -262,7 +270,7 @@ pub fn fnm_page_role_by_no(doc_id: &str, repo: &dyn Repository) -> HashMap<i64, 
     roles
 }
 
-/// (page_no, char_start, char_end) span 三元组
+/// (page_no, byte_start, byte_end) span 三元组，单位均为字节偏移。
 pub type BodySpan = (i64, usize, usize);
 
 fn raw_page_markdown_trimmed(page: &RawPage) -> String {
@@ -457,9 +465,7 @@ fn should_attach_repair_images(request_cluster: &Value) -> bool {
         .into_iter()
         .filter_map(|v| v.as_str().map(|s| s.trim().to_string()))
         .collect();
-    actions
-        .iter()
-        .any(|a| a == "synthesize_note_item" || a == "synthesize_anchor")
+    actions.iter().any(|a| a == "synthesize_anchor")
 }
 
 /// ←→ Python `_attach_repair_images_to_contexts` (llm_repair.py:1223-1240)
@@ -731,7 +737,7 @@ mod tests {
     }
 
     #[test]
-    fn test_attach_repair_images_synthesize_note_item() {
+    fn test_attach_repair_images_with_synthesize_anchor() {
         let contexts = vec![
             json!({"page_no": 5, "file_idx": 4, "source_pdf_path": "/tmp/x.pdf"}),
             json!({"page_no": 6, "file_idx": 5, "source_pdf_path": "/tmp/x.pdf"}),
@@ -741,7 +747,7 @@ mod tests {
             // 第六个超过 LLM_REPAIR_MAX_IMAGE_PAGES = 5 → 被裁
             json!({"page_no": 10, "file_idx": 9, "source_pdf_path": "/tmp/x.pdf"}),
         ];
-        let cluster = json!({"allowed_actions": ["match", "synthesize_note_item"]});
+        let cluster = json!({"allowed_actions": ["match", "synthesize_anchor"]});
         let out = attach_repair_images_to_contexts(&contexts, &cluster, &StubRenderer);
         assert_eq!(out.len(), 5);
         assert!(out[0].get("image_url").is_some());

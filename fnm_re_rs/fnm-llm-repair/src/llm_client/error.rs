@@ -189,10 +189,7 @@ pub fn classify_provider_error(
             "reset by peer",
             "eof",
         ];
-        if TRANSPORT_KEYWORDS
-            .iter()
-            .any(|kw| normalized.contains(kw))
-        {
+        if TRANSPORT_KEYWORDS.iter().any(|kw| normalized.contains(kw)) {
             return ProviderError::Transient {
                 retry_after_s: None,
             };
@@ -331,7 +328,12 @@ mod tests {
 
     #[test]
     fn test_transport_incomplete_message_is_transient() {
-        let err = classify_provider_error(None, None, None, "connection closed before message completed");
+        let err = classify_provider_error(
+            None,
+            None,
+            None,
+            "connection closed before message completed",
+        );
         assert!(matches!(err, ProviderError::Transient { .. }));
     }
 

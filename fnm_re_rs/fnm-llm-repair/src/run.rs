@@ -137,7 +137,6 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
     let links_plain: Vec<Value> = links_raw.iter().map(record_to_value).collect();
 
     let note_items_by_id = index_by_key(&note_items_plain, "note_item_id");
-    let anchors_by_id = index_by_key(&body_anchors_plain, "anchor_id");
 
     // 2. 构建未解析簇
     let mut clusters = build_unresolved_clusters(
@@ -216,9 +215,7 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
         let llm_result = match request_llm_repair_actions(llm_request).await {
             Ok(r) => r,
             Err(e) => {
-                fatal_error = Some(format!(
-                    "cluster {cluster_index}/{cluster_count} 失败: {e}"
-                ));
+                fatal_error = Some(format!("cluster {cluster_index}/{cluster_count} 失败: {e}"));
                 break;
             }
         };
@@ -290,6 +287,37 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
             .and_then(|v| v.as_array())
             .map(|a| a.len())
             .unwrap_or(0);
+        // 收集当前 cluster 允许的 note_item_id 和 anchor_id 白名单（P1-1）
+        let allowed_note_ids: Option<HashSet<String>> = cluster
+            .get("unmatched_note_items")
+            .and_then(|v| v.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|item| {
+                        let id = str_field(item, "note_item_id");
+                        if id.is_empty() {
+                            None
+                        } else {
+                            Some(id)
+                        }
+                    })
+                    .collect()
+            });
+        let allowed_anchor_ids: Option<HashSet<String>> = cluster
+            .get("unmatched_anchors")
+            .and_then(|v| v.as_array())
+            .map(|arr| {
+                arr.iter()
+                    .filter_map(|item| {
+                        let id = str_field(item, "anchor_id");
+                        if id.is_empty() {
+                            None
+                        } else {
+                            Some(id)
+                        }
+                    })
+                    .collect()
+            });
         let select_params = SelectParams {
             confidence_threshold: params.confidence_threshold,
             chapter_unmatched_count,
@@ -302,6 +330,8 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
             } else {
                 None
             },
+            allowed_note_ids,
+            allowed_anchor_ids,
         };
         // select_auto_applicable_actions 借用 enriched_actions
         let auto_actions = select_auto_applicable_actions(&enriched_actions, select_params);
@@ -348,13 +378,37 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
                 &cluster,
                 &chapters_plain,
                 &note_items_by_id,
-                &anchors_by_id,
                 &links_plain,
                 &note_system,
                 &mut used_synth_positions,
                 &mut cluster_overrides,
                 &mut auto_applied,
             );
+        }
+
+        // ←→ 为预过滤的重复 anchor 生成 ignore_ref override（P1-2）
+        if let Some(prefiltered) = cluster
+            .get("_prefiltered_anchors")
+            .and_then(|v| v.as_array())
+        {
+            for anchor in prefiltered {
+                let anchor_id = str_field(anchor, "anchor_id");
+                if anchor_id.is_empty() {
+                    continue;
+                }
+                let link_id = find_link_id_for_ignore(&links_plain, &anchor_id);
+                if !link_id.is_empty() {
+                    cluster_overrides.push((
+                        "link".to_string(),
+                        link_id.clone(),
+                        json!({
+                            "action": "ignore_ref",
+                            "anchor_id": anchor_id,
+                            "source": "llm",
+                        }),
+                    ));
+                }
+            }
         }
 
         // 4h. 批量提交本 cluster overrides
@@ -404,7 +458,7 @@ fn build_suggestion_payload(cluster: &Value, action: &RepairAction, auto_selecte
     })
 }
 
-/// 物化单个 auto action 为 override（match / ignore_ref / synthesize_anchor / synthesize_note_item）。
+/// 物化单个 auto action 为 override（match / ignore_ref / synthesize_anchor）。
 ///
 /// ←→ Python `run_llm_repair` 行 1959-2071 的 match 主体
 #[allow(clippy::too_many_arguments)]
@@ -413,7 +467,6 @@ fn apply_action(
     cluster: &Value,
     chapters_plain: &[Value],
     note_items_by_id: &HashMap<String, Value>,
-    anchors_by_id: &HashMap<String, Value>,
     links_plain: &[Value],
     note_system: &str,
     used_synth_positions: &mut HashSet<(String, i64, i64, i64)>,
@@ -463,15 +516,15 @@ fn apply_action(
             cluster_overrides,
             auto_applied,
         ),
-        "synthesize_note_item" => apply_synthesize_note_item(
-            action,
-            chapters_plain,
-            anchors_by_id,
-            links_plain,
-            note_system,
-            cluster_overrides,
-            auto_applied,
-        ),
+        // synthesize_note_item 已被移除（P0-2）——Phase3.5 无权创建 note item。
+        // 即使 LLM 返回了此 action，也不物化 override，仅记录 warning。
+        "synthesize_note_item" => {
+            eprintln!(
+                "  [WARNING] synthesize_note_item action ignored: \
+                 note_item_id={}, anchor_id={}, reason={}",
+                action.note_item_id, action.anchor_id, action.reason,
+            );
+        }
         _ => {}
     }
 }
@@ -587,79 +640,6 @@ fn apply_synthesize_anchor(
     auto_applied.push(merge_action_with(
         action,
         json!({"link_id": link_id, "anchor_id": anchor_id}),
-    ));
-}
-
-fn apply_synthesize_note_item(
-    action: &RepairAction,
-    chapters_plain: &[Value],
-    anchors_by_id: &HashMap<String, Value>,
-    links_plain: &[Value],
-    note_system: &str,
-    cluster_overrides: &mut Vec<(String, String, Value)>,
-    auto_applied: &mut Vec<Value>,
-) {
-    let anchor_id = action.anchor_id.trim().to_string();
-    let Some(anchor) = anchors_by_id.get(&anchor_id) else {
-        return;
-    };
-    let marker = normalize_note_marker(&{
-        if !action.marker.is_empty() {
-            action.marker.clone()
-        } else {
-            str_field(anchor, "normalized_marker")
-        }
-    });
-    let note_text = action.note_text.trim().to_string();
-    if marker.is_empty() || note_text.is_empty() {
-        return;
-    }
-    let page_no_value = i64_field(anchor, "page_no");
-    let chapter_id = {
-        let from_anchor = str_field(anchor, "chapter_id");
-        if !from_anchor.is_empty() {
-            from_anchor
-        } else {
-            resolve_chapter_id_for_page(chapters_plain, page_no_value)
-        }
-    };
-    if chapter_id.is_empty() || page_no_value <= 0 {
-        return;
-    }
-    let note_item_id = format!(
-        "llm-note-{}-{}",
-        slug_token(&anchor_id),
-        slug_token(&marker)
-    );
-    cluster_overrides.push((
-        "note_item".to_string(),
-        note_item_id.clone(),
-        json!({
-            "action": "create",
-            "note_item_id": note_item_id,
-            "chapter_id": chapter_id,
-            "page_no": page_no_value,
-            "marker": marker,
-            "note_text": note_text,
-            "note_kind": note_system,
-            "source": "llm",
-        }),
-    ));
-    let link_id = find_link_id_for_ignore(links_plain, &anchor_id);
-    if !link_id.is_empty() {
-        cluster_overrides.push((
-            "link".to_string(),
-            link_id.clone(),
-            json!({
-                "action": "match",
-                "note_item_id": note_item_id,
-                "anchor_id": anchor_id,
-            }),
-        ));
-    }
-    auto_applied.push(merge_action_with(
-        action,
-        json!({"link_id": link_id, "note_item_id": note_item_id}),
     ));
 }
 
