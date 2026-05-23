@@ -16,7 +16,7 @@ pub mod export;
 pub mod export_audit;
 
 use anyhow::Result;
-use fnm_core::records::{ExportAuditReportRecord, ExportBundleRecord, Phase1Structure};
+use fnm_core::records::{ExportAuditReportRecord, ExportBundleRecord, Phase1Structure, StructureReviewRecord};
 use fnm_phase2::chapter_split::structure_model::BookStructureModel;
 
 /// 导出 bundle 构建。
@@ -28,6 +28,7 @@ pub fn build_module_export_bundle(
     book_structure_model: Option<&BookStructureModel>,
     slug: &str,
     doc_id: &str,
+    structure_reviews: &[StructureReviewRecord],
 ) -> Result<(
     ExportBundleRecord,
     Vec<u8>,
@@ -40,5 +41,6 @@ pub fn build_module_export_bundle(
         book_structure_model,
         slug,
         doc_id,
+        structure_reviews,
     )
 }

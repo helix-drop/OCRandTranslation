@@ -112,23 +112,26 @@ pub fn inject_token_once(
     let coord_start = anchor.char_start.max(0) as usize;
     let coord_end = anchor.char_end.max(0) as usize;
 
-    if coord_start <= coord_end && coord_end <= payload.len() {
+    if coord_start <= coord_end && coord_end <= payload.len()
+        && payload.is_char_boundary(coord_start)
+        && payload.is_char_boundary(coord_end)
+    {
         let (cs, ce) = shift_coords_out_of_note_ref_token(payload, coord_start, coord_end);
 
         // 1. llm source → 在 char_end 插入
-        if anchor_source == "llm" && ce >= cs && ce > 0 {
+        if anchor_source == "llm" && ce >= cs && ce > 0 && payload.is_char_boundary(ce) {
             let result = format!("{}{}{}", &payload[..ce], token, &payload[ce..]);
             return (result, true);
         }
 
         // 2. visual_repair source → 在 char_start 前插入
-        if anchor_source == "visual_repair" && cs > 0 {
+        if anchor_source == "visual_repair" && cs > 0 && payload.is_char_boundary(cs) {
             let result = format!("{}{}{}", &payload[..cs], token, &payload[cs..]);
             return (result, true);
         }
 
         // 3. 坐标区间包含 source_marker 或 normalized_marker → 替换
-        if ce > cs {
+        if ce > cs && payload.is_char_boundary(cs) && payload.is_char_boundary(ce) {
             let coord_slice = &payload[cs..ce];
             if (!source_marker.is_empty() && coord_slice.contains(&source_marker))
                 || (!normalized_marker.is_empty() && coord_slice.contains(&normalized_marker))
@@ -378,5 +381,34 @@ mod tests {
     fn test_clean_skipped_marker_sup() {
         let result = clean_skipped_marker("text <sup>7</sup> more", "7");
         assert!(!result.contains("<sup>"));
+    }
+
+    #[test]
+    fn test_inject_token_once_non_ascii_non_boundary_does_not_panic() {
+        // 中文文本中，非 UTF-8 边界坐标不应 panic，应返回 false
+        // payload = "中文abc" (中=3字节, 文=3字节, a/b/c=1字节)
+        // coord_start=2 falls in middle of "中" (byte 0-2), coord_end=5 is start of "a" (byte 6)
+        // → coord block skipped → "x" not in payload → false
+        let anchor = make_anchor(2, 5, "", "x", "", false);
+        let (result, injected) = inject_token_once("中文abc", &anchor, "x", "n1");
+        assert!(!injected);
+        assert_eq!(result, "中文abc");
+    }
+
+    #[test]
+    fn test_inject_token_once_accented_text_valid_boundary() {
+        // 法语重音文本，合法边界坐标注入
+        let anchor = make_anchor(2, 3, "", "[1]", "", false);
+        let (result, injected) = inject_token_once("hé [1] world", &anchor, "1", "n1");
+        assert!(injected);
+        assert!(result.contains("{{NOTE_REF:n1}}"));
+    }
+
+    #[test]
+    fn test_inject_token_once_coord_at_boundary_non_ascii() {
+        let anchor = make_anchor(0, 4, "", "[1]", "", false);  // "café" 是 5 字节
+        let (result, injected) = inject_token_once("café [1] text", &anchor, "1", "n1");
+        assert!(injected);
+        assert!(result.contains("{{NOTE_REF:n1}}"));
     }
 }

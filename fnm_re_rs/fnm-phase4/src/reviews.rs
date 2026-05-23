@@ -4,7 +4,8 @@
 //! 生成 9 类 StructureReviewRecord。
 
 use fnm_core::records::{
-    BodyAnchorRecord, ChapterRecord, NoteLinkRecord, Phase3Summary, StructureReviewRecord,
+    BodyAnchorRecord, ChapterRecord, FrozenRefEntry, NoteLinkRecord, Phase3Summary,
+    StructureReviewRecord,
 };
 use fnm_core::types::{AnchorKind, BoundaryState, LinkStatus, NoteKind};
 use once_cell::sync::Lazy;
@@ -24,6 +25,7 @@ const REVIEW_TYPE_WHITELIST: &[&str] = &[
     "ambiguous",
     "toc_alignment_review_required",
     "toc_semantic_review_required",
+    "freeze_matched_ref_not_injected",
 ];
 
 /// ←→ Python `_WARNING_REVIEW_TYPES` (reviews.py:22)
@@ -117,6 +119,7 @@ fn append_review(
 /// - `summary` — Phase3Summary（用于 toc_alignment/toc_semantic）
 /// - `ignored_link_override_count` — 忽略的链接覆盖数
 /// - `invalid_override_count` — 无效覆盖数
+/// - `freeze_error_rows` — freeze 阶段注入失败条目列表
 ///
 /// # 返回
 ///
@@ -128,6 +131,7 @@ pub fn build_structure_reviews(
     summary: &Phase3Summary,
     ignored_link_override_count: usize,
     invalid_override_count: usize,
+    freeze_error_rows: &[FrozenRefEntry],
 ) -> (Vec<StructureReviewRecord>, serde_json::Value) {
     let mut reviews: Vec<StructureReviewRecord> = Vec::new();
 
@@ -241,6 +245,26 @@ pub fn build_structure_reviews(
         );
     }
 
+    // 10. freeze_matched_ref_not_injected
+    //     matched link 因坐标/锚点/页面缺失等错误导致注入失败时产生 blocker
+    for entry in freeze_error_rows {
+        append_review(
+            &mut reviews,
+            "freeze_matched_ref_not_injected",
+            &entry.chapter_id,
+            entry.page_no,
+            entry.page_no,
+            serde_json::json!({
+                "link_id": entry.link_id,
+                "anchor_id": entry.anchor_id,
+                "note_item_id": entry.note_item_id,
+                "reason": entry.reason,
+                "skip_category": entry.skip_category,
+                "target_ref": entry.target_ref,
+            }),
+        );
+    }
+
     // 去重
     let mut seen_ids: HashSet<String> = HashSet::new();
     let mut deduped: Vec<StructureReviewRecord> = Vec::new();
@@ -283,6 +307,7 @@ pub fn build_structure_reviews(
         "warning_count": warning_count,
         "ignored_link_override_count": ignored_link_override_count,
         "invalid_override_count": invalid_override_count,
+        "freeze_error_count": freeze_error_rows.len(),
     });
 
     (deduped, summary)
@@ -351,10 +376,14 @@ mod tests {
         }
     }
 
+    fn default_freeze_error_rows() -> Vec<FrozenRefEntry> {
+        Vec::new()
+    }
+
     #[test]
     fn test_boundary_review_required() {
         let chapters = vec![make_chapter("ch1", BoundaryState::ReviewRequired)];
-        let (reviews, _) = build_structure_reviews(&chapters, &[], &[], &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&chapters, &[], &[], &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "boundary_review_required");
     }
@@ -362,7 +391,7 @@ mod tests {
     #[test]
     fn test_uncertain_anchor_unknown_kind() {
         let anchors = vec![make_anchor("a1", "ch1", 10, AnchorKind::Unknown, 1.0)];
-        let (reviews, _) = build_structure_reviews(&[], &anchors, &[], &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &anchors, &[], &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "uncertain_anchor");
     }
@@ -370,7 +399,7 @@ mod tests {
     #[test]
     fn test_uncertain_anchor_low_certainty() {
         let anchors = vec![make_anchor("a1", "ch1", 10, AnchorKind::Footnote, 0.5)];
-        let (reviews, _) = build_structure_reviews(&[], &anchors, &[], &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &anchors, &[], &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "uncertain_anchor");
     }
@@ -383,7 +412,7 @@ mod tests {
             LinkStatus::OrphanNote,
             NoteKind::Footnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "footnote_orphan_note");
     }
@@ -396,7 +425,7 @@ mod tests {
             LinkStatus::OrphanAnchor,
             NoteKind::Endnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "endnote_orphan_anchor");
     }
@@ -409,7 +438,7 @@ mod tests {
             LinkStatus::Ambiguous,
             NoteKind::Footnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "ambiguous");
         assert_eq!(reviews[0].severity, "warning");
@@ -423,7 +452,7 @@ mod tests {
             LinkStatus::Ignored,
             NoteKind::Footnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert!(reviews.is_empty());
     }
 
@@ -433,7 +462,7 @@ mod tests {
             chapter_title_alignment_ok: false,
             ..default_summary()
         };
-        let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "toc_alignment_review_required");
     }
@@ -444,7 +473,7 @@ mod tests {
             toc_semantic_contract_ok: false,
             ..default_summary()
         };
-        let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "toc_semantic_review_required");
     }
@@ -455,7 +484,7 @@ mod tests {
             make_link("l1", "ch1", LinkStatus::OrphanNote, NoteKind::Footnote),
             make_link("l1", "ch1", LinkStatus::OrphanNote, NoteKind::Footnote), // 重复
         ];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0);
+        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
     }
 
@@ -469,7 +498,7 @@ mod tests {
             NoteKind::Footnote,
         )];
         let (reviews, _) =
-            build_structure_reviews(&chapters, &[], &links, &default_summary(), 0, 0);
+            build_structure_reviews(&chapters, &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 2);
         // boundary_review_required < footnote_orphan_note (按 review_type 排序)
         assert_eq!(reviews[0].review_type, "boundary_review_required");
@@ -486,8 +515,29 @@ mod tests {
             NoteKind::Footnote,
         )];
         let (_, summary) =
-            build_structure_reviews(&chapters, &[], &links, &default_summary(), 0, 0);
+            build_structure_reviews(&chapters, &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
         assert_eq!(summary["error_count"], 1);
         assert_eq!(summary["warning_count"], 1);
+    }
+
+    #[test]
+    fn test_freeze_error_generates_review() {
+        let freeze_errors = vec![FrozenRefEntry {
+            link_id: "l1".to_string(),
+            chapter_id: "ch1".to_string(),
+            anchor_id: "a1".to_string(),
+            note_item_id: "n1".to_string(),
+            target_ref: "{{NOTE_REF:n1}}".to_string(),
+            decision: "skipped".to_string(),
+            reason: "token_not_found".to_string(),
+            skip_category: "ceiling_skip".to_string(),
+            page_no: 10,
+        }];
+        let (reviews, _) = build_structure_reviews(&[], &[], &[], &default_summary(), 0, 0, &freeze_errors);
+        assert_eq!(reviews.len(), 1);
+        assert_eq!(reviews[0].review_type, "freeze_matched_ref_not_injected");
+        assert_eq!(reviews[0].severity, "error");
+        assert_eq!(reviews[0].chapter_id, "ch1");
+        assert_eq!(reviews[0].page_start, 10);
     }
 }

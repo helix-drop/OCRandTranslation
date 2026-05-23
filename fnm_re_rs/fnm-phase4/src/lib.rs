@@ -23,7 +23,6 @@ pub mod text;
 pub mod units;
 
 use anyhow::Result;
-use fnm_core::records::ChapterRecord;
 #[cfg(test)]
 use fnm_core::records::Phase3Summary;
 use input::Phase4Input;
@@ -44,20 +43,19 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
     let frozen_refs = frozen_units.ref_map.clone();
     let freeze_summary = frozen_units.freeze_summary.clone();
 
-    // 2. units: 构建 translation_units
-    //    需要从 frozen_units 构建 Phase4Structure 供 units 消费
-    let phase4_for_units = build_phase4_structure_for_units(
-        input.page_partitions,
-        input.chapters,
-        input.note_regions,
-        input.body_anchors,
-        input.effective_note_links,
-        &frozen_units,
-    );
+    // 2. units: 翻译单元由 frozen units 一对一映射生成
     let (translation_units, units_summary) =
-        units::build_translation_units(&phase4_for_units, input.raw_pages, input.max_body_chars);
+        units::build_translation_units(&frozen_units);
 
     // 3. reviews: 构建 structure_reviews
+    //     freeze_error_rows = ref_map 中注入失败的条目（policy_skip 除外）
+    let freeze_error_rows: Vec<fnm_core::records::FrozenRefEntry> = frozen_refs
+        .iter()
+        .filter(|r| {
+            r.skip_category == "ceiling_skip" || r.skip_category == "error_skip"
+        })
+        .cloned()
+        .collect();
     let (structure_reviews, reviews_summary) = reviews::build_structure_reviews(
         input.chapters,
         input.body_anchors,
@@ -65,6 +63,7 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
         input.summary,
         input.ignored_link_override_count,
         input.invalid_override_count,
+        &freeze_error_rows,
     );
 
     // 4. 组装 summary
@@ -80,6 +79,7 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
         "frozen_ref_count": frozen_refs.len(),
         "translation_unit_count": translation_units.len(),
         "structure_review_count": structure_reviews.len(),
+        "freeze_error_count": freeze_error_rows.len(),
     });
 
     Ok(Phase4Output {
@@ -92,35 +92,6 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
     })
 }
 
-/// 构建供 units 消费的 Phase4Structure。
-fn build_phase4_structure_for_units(
-    page_partitions: &[fnm_core::records::PagePartitionRecord],
-    chapters: &[ChapterRecord],
-    note_regions: &[fnm_core::records::NoteRegionRecord],
-    body_anchors: &[fnm_core::records::BodyAnchorRecord],
-    effective_note_links: &[fnm_core::records::NoteLinkRecord],
-    frozen_units: &fnm_core::records::FrozenUnits,
-) -> fnm_core::records::Phase4Structure {
-    fnm_core::records::Phase4Structure {
-        pages: page_partitions.to_vec(),
-        chapters: chapters.to_vec(),
-        note_regions: note_regions.to_vec(),
-        note_items: frozen_units
-            .note_units
-            .iter()
-            .map(|u| fnm_core::records::NoteItemRecord {
-                note_item_id: u.note_id.clone(),
-                chapter_id: u.owner_id.clone(),
-                page_no: u.page_start,
-                text: u.source_text.clone(),
-                ..Default::default()
-            })
-            .collect(),
-        body_anchors: body_anchors.to_vec(),
-        effective_note_links: effective_note_links.to_vec(),
-        ..Default::default()
-    }
-}
 
 /// ←→ Python `persist_phase4`
 ///

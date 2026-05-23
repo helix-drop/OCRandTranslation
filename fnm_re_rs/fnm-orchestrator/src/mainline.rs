@@ -205,7 +205,7 @@ pub fn run_pipeline_for_doc<R: Repository>(
     });
 
     // ── Phase 6 ──
-    let phase6 = pipeline::run_phase6(&phase5, &phase1, &config)?;
+    let phase6 = pipeline::run_phase6(&phase5, &phase4, &phase1, &config)?;
     let phase6_products = Phase6Products {
         export_chapters: phase6.export_bundle.chapters.clone(),
         export_bundle: phase6.export_bundle.clone(),

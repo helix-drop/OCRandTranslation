@@ -59,6 +59,8 @@
 - 阶段 1：`FNM_REPAIR_PHASE1_FOUNDATION.md`
 - 阶段 2：`FNM_REPAIR_PHASE2_NOTE_CAPTURE.md`
 - 阶段 3 收尾：`FNM_REPAIR_PHASE3_LINKING.md`
+- 阶段 4：`FNM_REPAIR_PHASE4_ORCHESTRATOR.md`
+- 阶段 5：`FNM_REPAIR_PHASE5_REF_FREEZE.md`
 
 测试工具说明位于仓库根目录 `FNM_TESTING.md`。
 
@@ -79,8 +81,10 @@
 |---|---|---|---|
 | 阶段 1：基础设施与可复现性 | 已验收 | DB/error trace/PyO3 panic 边界/Gemini custom provider/`NoteKind::Unknown` 等已修，Biopolitics smoke 可产出 artifacts | 不重复返工，除非后续发现回归 |
 | 阶段 2：注释捕获与分类 | 已验收 | Biopolitics 与 Goldstein 完整批次均 `ready`、`blocked=0`；Goldstein Notes 第 331 页存在；Biopolitics 使用了 repair，Goldstein 为 0 repair | Phase2 事实作为 Phase3 权威输入 |
-| 阶段 3：链接匹配边界 | **P0/P1 代码修复已闭合，双书集成批未执行** | P0 全部清零（contract 隔离、Unknown 拦截、upstream facts 透传（输出+内部消费）、link_overrides 严格过滤、chapter_note_modes 权威输入）；40/40 cargo test 通过；5 个 parity 差异登记到阶段 7 | 先执行双书集成批确认无新增 Phase3 P0/P1 blocker，再推进阶段 4 计划编写 |
-| 阶段 4-6 | 未开始正式验收 | 审计已有风险条目 | 待阶段 3 的结构边界封住后推进 |
+| 阶段 3：链接匹配边界 | 已验收 | P0/P1 清零；Biopolitics 与 Goldstein 新批次均 `ready`；5 个 strict parity 差异登记到阶段 7 | Phase3 事实可作为后续输入 |
+| 阶段 4：Orchestrator、PyO3 与 repair 接线 | 已完成 | repair 回写后重跑下游、action 越权拦截、partial/error 边界与 PyO3 接线已落入当前提交历史；当前定向回归通过 | 进入 Phase4 crate 内部的冻结/单元收口 |
+| 阶段 5：Phase4 引用冻结与翻译单元 | 计划编写完成，待实施 | 审计确认仍存在双注入路径、冻结失败未硬阻断、UTF-8 坐标风险与伪 parity 测试 | 按 `FNM_REPAIR_PHASE5_REF_FREEZE.md` 执行 |
+| 阶段 6 | 未开始正式验收 | Phase5/Phase6 职责倒挂等风险已登记 | 待阶段 5 闭合后推进 |
 | 阶段 7：最终 parity 与质量门禁 | 未开始 | 最终逐段相等、ignored 清零和完整发布门禁尚未完成 | 在整体流程闭合后集中完成 |
 
 阶段 2 已确认的批跑证据：
@@ -90,11 +94,13 @@
 | Biopolitics | `/Users/hao/OCRandTranslation/output/fnm_real_batch/phase2_note_capture_v2/` | `ready`，`blocked=0`，LLM repair 请求 20 |
 | Goldstein | `/Users/hao/OCRandTranslation/output/fnm_real_batch/phase2_note_capture_v2_goldstein/` | `ready`，`blocked=0`，endnotes 第 331 页，LLM repair 请求 0 |
 
-阶段 3 已全部修复。详见 `FNM_REPAIR_PHASE3_LINKING.md` 交接记录。关键事实更新：
+阶段 3 已全部修复并完成双书集成批。详见 `FNM_REPAIR_PHASE3_LINKING.md` 交接记录。关键事实更新：
 
 - 全部 P0 已在 2026-05-23 Build 阶段修复：contract 类型隔离、Unknown 拦截、upstream facts 等值透传（含 chapter_note_modes）、link_overrides 严格候选过滤。
 - `fnm-phase3/tests/biopolitics_phase3_parity.rs` 的 5 个真实 parity 测试仍为 `#[ignore]`（保持严格断言），登记到阶段 7 backlog。
 - `cargo test -p fnm-phase3`：39 passed, 0 failed, 2 ignored。
+- Biopolitics 批次：`output/fnm_real_batch/phase3_linking_closeout/`，`ready`、无 blocker。
+- Goldstein 批次：`output/fnm_real_batch/phase3_linking_closeout_goldstein/`，`ready`、无 blocker。
 
 ## 四、Golden 与问题追溯原则
 
@@ -202,7 +208,7 @@ cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
 
 **后置到阶段 7 的 P2：** Biopolitics internal Phase3 parity 差异（5 个 ignored 测试保持严格断言）；弱 OCR 消歧细节；根底本语义比较中的个段差异。
 
-### 阶段 4：Orchestrator、PyO3 与 LLM repair 接线闭合
+### 阶段 4：Orchestrator、PyO3 与 LLM repair 接线闭合（已完成）
 
 目标：repair auto-apply 后，本轮 Phase4-6 消费更新后的 link table；续跑不可用时明确拒绝，不静默假跑。
 
@@ -225,7 +231,9 @@ cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
 
 细节识别差异不在本阶段扩大修复范围。
 
-### 阶段 5：Phase4 引用冻结与翻译单元
+完成记录与上下文入口见 `FNM_REPAIR_PHASE4_ORCHESTRATOR.md`。当前工作区已有对应实现提交；若阶段 5 实施暴露接线回归，按阶段 4 职责归因，不在 Phase4 crate 内绕过。
+
+### 阶段 5：Phase4 引用冻结与翻译单元（当前待实施）
 
 目标：普通 `Matched` link 必须可注入正文；不能注入则形成明确 Phase4 blocker。
 
@@ -240,6 +248,8 @@ cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
 - 唯一权威 ref-freeze 路径。
 - 注入失败/UTF-8 offset 错误形成可追溯 blocker，不 panic 或静默丢标记。
 - 翻译单元从 frozen units 派生。
+
+详细执行文件：`FNM_REPAIR_PHASE5_REF_FREEZE.md`。
 
 ### 阶段 6：Phase5/Phase6 合并与导出审计边界
 
@@ -286,11 +296,11 @@ cd /Users/hao/OCRandTranslation
 
 ## 七、接下来的工作
 
-阶段 3 P0/P1 已全部清零。下一步按顺序：
+阶段 4 已完成。下一步按顺序：
 
-1. **编写阶段 4 完整计划文档**（不执行实施代码）。
-2. 阶段 4 计划完成后，准备双书集成批以验证阶段 3 修复未引入新的运行时 blocker。
-3. 合法集成批结果后，进入阶段 4 实施。
+1. 按 `FNM_REPAIR_PHASE5_REF_FREEZE.md` 执行阶段 5，只修改 Phase4 引用冻结与翻译单元职责相关代码。
+2. 阶段 5 开发期间用 crate/SPEC/真实 fixture parity 快速验证，不以内容细节差异扩大范围。
+3. 阶段 5 交付前必须完整运行 Biopolitics 与 Goldstein 真实整批，等待自然结束并保存报告。
 
 当前不变规则：
 - 不修改 `real_golden_template/`。

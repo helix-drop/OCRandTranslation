@@ -90,7 +90,7 @@ pub fn run_pipeline(
     });
 
     // ── Phase 6 ──
-    let phase6 = run_phase6(&phase5, &phase1, &config)?;
+    let phase6 = run_phase6(&phase5, &phase4, &phase1, &config)?;
     snapshot.phase6 = Some(SerPhase6 {
         export_bundle: phase6.export_bundle.clone(),
         export_audit: phase6.export_audit.clone(),
@@ -329,6 +329,7 @@ pub(crate) fn run_phase5(
 
 pub(crate) fn run_phase6(
     phase5: &Phase5Snapshot,
+    phase4: &Phase4Snapshot,
     phase1: &Phase1Snapshot,
     config: &PipelineConfig,
 ) -> Result<Phase6Snapshot> {
@@ -339,6 +340,7 @@ pub(crate) fn run_phase6(
             None,
             &config.slug,
             &config.doc_id,
+            &phase4.structure_reviews,
         )
         .map_err(OrchestratorError::Phase6)?;
 

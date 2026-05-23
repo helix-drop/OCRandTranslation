@@ -184,8 +184,9 @@ pub fn build_frozen_units(
                 skip_category: category.to_string(),
                 page_no,
             });
-            // ceiling_skip / policy_skip → clean marker from body text
-            if (category == "ceiling_skip" || category == "policy_skip") && page_no > 0 {
+            // policy_skip → 去除正文中的重复标记（明确的噪声）
+            // ceiling_skip / error_skip → 保留原 marker 作为失败证据
+            if category == "policy_skip" && page_no > 0 {
                 if let Some(body_pages) = chapter_body_pages.get_mut(&link.chapter_id) {
                     if let Some(body_page) = body_pages.get_mut(&page_no) {
                         if let Some(text) = body_page.get("text").and_then(|v| v.as_str()) {
@@ -697,7 +698,7 @@ pub fn build_frozen_units(
         .filter(|r| r.decision == "skipped" && r.skip_category == "policy_skip")
         .count() as i64;
 
-    let _hard = serde_json::json!({
+    let contract = serde_json::json!({
         "freeze.only_matched_frozen": injected_rows.iter().all(|r| matched_link_ids.contains(&r.link_id)),
         "freeze.no_duplicate_injection": injected_count == injected_rows.iter().map(|r| &r.anchor_id).collect::<HashSet<_>>().len() as i64,
         "freeze.closed_without_error": ref_map.len() == matched_links.len()
@@ -706,7 +707,7 @@ pub fn build_frozen_units(
         "freeze.unit_contract_valid": contract_issues.is_empty(),
     });
 
-    let _soft = serde_json::json!({
+    let caution = serde_json::json!({
         "freeze.ceiling_skip_warn": ceiling_skip_count == 0,
         "freeze.policy_skip_warn": policy_skip_count == 0,
         "freeze.synthetic_skip_warn": synthetic_skipped_count == 0,
@@ -745,6 +746,8 @@ pub fn build_frozen_units(
         "chapter_unit_counts": chapter_unit_counts,
         "empty_body_chapter_count": empty_body_chapter_count,
         "max_body_chars": effective_max_chars,
+        "freeze_contract": contract,
+        "freeze_caution": caution,
     });
 
     Ok(FrozenUnits {

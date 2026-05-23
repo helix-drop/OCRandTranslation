@@ -32,7 +32,8 @@ use crate::export::markdown_clean::normalize_markdown_content;
 use crate::export::zip::build_export_zip;
 use crate::export_audit::audit_phase6_export;
 use fnm_core::records::{
-    ExportAuditReportRecord, Phase6Structure, Phase6Summary, StructureStatusRecord,
+    ExportAuditReportRecord, Phase6Structure, Phase6Summary, StructureReviewRecord,
+    StructureStatusRecord,
 };
 
 /// 整书导出组装：将 Phase 5 的 ChapterMarkdownSet 组装为导出包。
@@ -44,6 +45,7 @@ pub fn build_module_export_bundle(
     book_structure_model: Option<&BookStructureModel>,
     slug: &str,
     _doc_id: &str,
+    structure_reviews: &[StructureReviewRecord],
 ) -> Result<(
     ExportBundleRecord,
     Vec<u8>,
@@ -126,6 +128,7 @@ pub fn build_module_export_bundle(
     // 10. 构建 Phase6Structure 用于审计
     let phase6 = Phase6Structure {
         export_bundle: bundle_record.clone(),
+        structure_reviews: structure_reviews.to_vec(),
         status: StructureStatusRecord {
             structure_state: "done".to_string(),
             ..Default::default()

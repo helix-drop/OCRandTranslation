@@ -5,12 +5,19 @@
 mod file_audit;
 pub mod helpers;
 
+/// 在 export audit 中检查 structure_reviews 里哪些 review_type 应视为 blocker。
+/// 不属于此列表的类型即使 severity="error" 也不阻塞导出。
+const BLOCKING_STRUCTURE_REVIEW_TYPES: &[&str] = &["freeze_matched_ref_not_injected"];
+
 use std::collections::{HashMap, HashSet};
 
 use anyhow::Result;
 use fnm_core::records::{
     ExportAuditFileRecord, ExportAuditReportRecord, ExportChapterRecord, Phase6Structure,
 };
+
+#[cfg(test)]
+use fnm_core::records::StructureReviewRecord;
 
 pub use file_audit::audit_markdown_file;
 
@@ -275,15 +282,37 @@ pub fn audit_phase6_export(
         });
     }
 
+    // 检查 structure_reviews 中的 blocker 类型（如 freeze_matched_ref_not_injected）
+    let mut freeze_blocking_reasons: Vec<String> = Vec::new();
+    for review in &phase6.structure_reviews {
+        if BLOCKING_STRUCTURE_REVIEW_TYPES.contains(&review.review_type.as_str()) {
+            freeze_blocking_reasons.push(format!(
+                "{}: {}",
+                review.review_type,
+                review
+                    .payload
+                    .get("message")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or(&review.review_type)
+            ));
+        }
+    }
+
     // 统计
-    let blocking_issue_count = file_reports
+    let mut blocking_issue_count = file_reports
         .iter()
         .filter(|r| r.severity == "blocking")
         .count() as i64;
+    blocking_issue_count += freeze_blocking_reasons.len() as i64;
     let major_issue_count = file_reports
         .iter()
         .filter(|r| r.severity == "major")
         .count() as i64;
+
+    // 合并 blocking_reasons
+    let mut combined_blocking_reasons: Vec<String> =
+        phase6.status.blocking_reasons.clone();
+    combined_blocking_reasons.extend(freeze_blocking_reasons);
 
     let mut issue_counts: HashMap<String, i64> = HashMap::new();
     for row in &file_reports {
@@ -332,7 +361,7 @@ pub fn audit_phase6_export(
         ),
         applicable: true,
         structure_state: phase6.status.structure_state.clone(),
-        blocking_reasons: phase6.status.blocking_reasons.clone(),
+        blocking_reasons: combined_blocking_reasons,
         manual_toc_summary: serde_json::to_value(&phase6.status.manual_toc_summary)
             .unwrap_or_default(),
         toc_role_summary: serde_json::to_value(&summary.toc_role_summary).unwrap_or_default(),
@@ -388,5 +417,42 @@ mod tests {
         assert_eq!(report.slug, "test");
         assert!(report.can_ship);
         assert!(report.files.is_empty());
+    }
+
+    #[test]
+    fn test_audit_phase6_export_blocks_on_freeze_error() {
+        let mut phase6 = Phase6Structure::default();
+        phase6.structure_reviews = vec![StructureReviewRecord {
+            review_id: "review-freeze_matched_ref_not_injected-ch001-1-5-abc".into(),
+            review_type: "freeze_matched_ref_not_injected".into(),
+            chapter_id: "ch001".into(),
+            page_start: 1,
+            page_end: 5,
+            severity: "error".into(),
+            payload: serde_json::json!({
+                "message": "anchor coord out of bounds for page 3",
+            }),
+        }];
+        let (report, _summary) = audit_phase6_export(&phase6, "test", None);
+        assert!(!report.can_ship, "freeze error should block export");
+        assert_eq!(report.blocking_issue_count, 1);
+        assert!(report.blocking_reasons.iter().any(|r| r.contains("freeze_matched_ref_not_injected")));
+    }
+
+    #[test]
+    fn test_audit_phase6_export_ignores_non_blocking_review() {
+        let mut phase6 = Phase6Structure::default();
+        phase6.structure_reviews = vec![StructureReviewRecord {
+            review_id: "review-boundary_review_required-ch001-1-5-xyz".into(),
+            review_type: "boundary_review_required".into(),
+            chapter_id: "ch001".into(),
+            page_start: 1,
+            page_end: 5,
+            severity: "error".into(),
+            payload: serde_json::json!({}),
+        }];
+        let (report, _summary) = audit_phase6_export(&phase6, "test", None);
+        assert!(report.can_ship, "non-freeze error should not block export");
+        assert_eq!(report.blocking_issue_count, 0);
     }
 }
