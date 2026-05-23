@@ -237,6 +237,7 @@ pub(crate) fn run_phase3(
         phase1_section_heads: &phase1.structure.section_heads,
         phase2_note_regions: &phase2.note_regions,
         phase2_note_items: &phase2.note_items,
+        phase2_chapter_note_modes: &phase2.chapter_note_modes,
         raw_pages: pages,
         pdf_path: if config.pdf_path.is_empty() {
             None

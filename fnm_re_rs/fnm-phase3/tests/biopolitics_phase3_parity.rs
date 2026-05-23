@@ -81,6 +81,7 @@ fn biopolitics_phase3_smoke() {
         pdf_path: None,
         config: fnm_phase3::input::Phase3Config::default(),
         overrides: None,
+        phase2_chapter_note_modes: &[],
     };
 
     let output = fnm_phase3::build_phase3_structure(input).expect("Phase 3 should build");
@@ -128,6 +129,7 @@ fn spec_biopolitics_contract_v2_def_anchor_mismatch() {
         pdf_path: None,
         config: fnm_phase3::input::Phase3Config::default(),
         overrides: None,
+        phase2_chapter_note_modes: &[],
     };
 
     let output = fnm_phase3::build_phase3_structure(input).expect("Phase 3 should build");
@@ -297,6 +299,7 @@ fn run_biopolitics_phase3_with_phase2() -> fnm_phase3::output::Phase3Output {
         pdf_path: None,
         config: fnm_phase3::input::Phase3Config::default(),
         overrides: None,
+        phase2_chapter_note_modes: &phase2_output.chapter_note_modes,
     };
     fnm_phase3::build_phase3_structure(phase3_input).expect("Phase 3 should build")
 }

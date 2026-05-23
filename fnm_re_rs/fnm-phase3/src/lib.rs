@@ -68,7 +68,8 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         input.raw_pages,
     );
 
-    // 2. 调用核心编排——返回的 result.phase2_build 已包含 materialize 后的 note 数据
+    // 2. 调用核心编排——返回的 result.phase2_build 已包含 materialize 后的 note 数据。
+    // 传入 Phase2 权威 chapter_note_modes 确保内部诊断消费上游事实而非重建值。
     let result = note_linking::build_note_link_table(
         &chapter_layers,
         input.raw_pages,
@@ -76,6 +77,7 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         input.pdf_path.unwrap_or(""),
         input.phase1_chapters,
         input.phase1_pages,
+        input.phase2_chapter_note_modes,
     );
 
     // 3. 按章产物：paragraph_footnotes / paragraph_endnotes / chapter_anchor_alignment
@@ -126,7 +128,9 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         section_heads: input.phase1_section_heads.to_vec(),
         note_regions: result.phase2_build.note_regions,
         note_items: result.phase2_build.note_items,
-        chapter_note_modes: result.phase2_build.chapter_note_modes,
+        // 透传 Phase2 权威的 chapter_note_modes，不依赖内部重建
+        //（铁律 §1：Phase N 只能消费 Phase N-1 的事实，不能重建）。
+        chapter_note_modes: input.phase2_chapter_note_modes.to_vec(),
         body_anchors: result.data.anchors.clone(),
         note_links: renumber_link_ids(result.data.effective_links.clone()),
         paragraph_footnotes,

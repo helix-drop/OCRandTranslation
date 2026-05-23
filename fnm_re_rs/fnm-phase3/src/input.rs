@@ -3,8 +3,8 @@
 //! ←→ Python: FNM_RE/models.py Phase3 相关 dataclass（输入侧）
 
 use fnm_core::records::{
-    ChapterRecord, HeadingCandidate, NoteItemRecord, NoteRegionRecord, PagePartitionRecord,
-    SectionHeadRecord,
+    ChapterNoteModeRecord, ChapterRecord, HeadingCandidate, NoteItemRecord, NoteRegionRecord,
+    PagePartitionRecord, SectionHeadRecord,
 };
 use fnm_phase1::input::RawPage;
 use serde_json::Value;
@@ -20,6 +20,9 @@ pub struct Phase3Input<'a> {
     pub phase1_section_heads: &'a [SectionHeadRecord],
     pub phase2_note_regions: &'a [NoteRegionRecord],
     pub phase2_note_items: &'a [NoteItemRecord],
+    /// Phase2 权威的 chapter_note_modes。Phase3 必须透传此字段（铁律 §1：Phase N 只能消费
+    /// Phase N-1 的事实，不能重建或覆盖上游事实）。
+    pub phase2_chapter_note_modes: &'a [ChapterNoteModeRecord],
     pub raw_pages: &'a [RawPage],
     pub pdf_path: Option<&'a str>,
     pub config: Phase3Config,

@@ -29,7 +29,9 @@ fn find_existing_explicit_anchor<'a>(
             continue;
         }
         let anchor_kind = anchor.anchor_kind.as_str();
-        if anchor_kind != note_kind && anchor_kind != "unknown" {
+        // 严格匹配 expected_note_kind：Unknown 不能用于自动匹配
+        //（铁律 §4：Phase3 不能重新分类；Unknown 只有 review/orphan 路径）。
+        if anchor_kind != note_kind {
             continue;
         }
         if note_kind == "footnote" {

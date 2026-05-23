@@ -2,8 +2,10 @@
 //!
 //! 25 个 SPEC（2 个 ignore，待真实数据回归后启用）
 
-use fnm_core::records::{ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord};
-use fnm_core::types::{BoundaryState, ChapterSource, NoteKind, PageRole};
+use fnm_core::records::{
+    ChapterNoteModeRecord, ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord,
+};
+use fnm_core::types::{BoundaryState, ChapterSource, NoteKind, NoteMode, PageRole};
 use fnm_phase1::input::RawPage;
 use std::collections::HashMap;
 
@@ -1380,8 +1382,15 @@ fn spec_phase3_contains_phase2_fields_without_mutating_phase2() {
     ];
     let regions = vec![make_region("rg-en", "ch-2", 3, NoteKind::Endnote)];
     let items = vec![make_item("en-1", "rg-en", "ch-2", 3, "1")];
-    // 注：原 `modes` 局部变量已删除——Phase3Input 不再接 chapter_note_modes
-    // （由 phase2_rebuild 内部重新生成）。
+
+    let input_modes = vec![ChapterNoteModeRecord {
+        chapter_id: "ch-2".to_string(),
+        note_mode: NoteMode::ChapterEndnotePrimary,
+        region_ids: vec!["rg-en".to_string()],
+        primary_region_scope: "chapter".to_string(),
+        has_footnote_band: false,
+        has_endnote_region: true,
+    }];
 
     let input = fnm_phase3::input::Phase3Input {
         phase1_chapters: &chapters,
@@ -1394,6 +1403,7 @@ fn spec_phase3_contains_phase2_fields_without_mutating_phase2() {
         pdf_path: None,
         config: fnm_phase3::input::Phase3Config::default(),
         overrides: None,
+        phase2_chapter_note_modes: &input_modes,
     };
 
     let output = fnm_phase3::build_phase3_structure(input).expect("phase3 should build");
@@ -1999,6 +2009,279 @@ fn spec_footnote_ocr_shortened_marker_still_repairs() {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// 修复包 B(continued)：link_overrides unknown 不干扰明确 anchor
+// ═══════════════════════════════════════════════════════════════
+
+#[test]
+fn spec_link_override_unknown_anchor_does_not_interfere() {
+    // 验证 find_existing_explicit_anchor 不会因为 Unknown anchor 的存在
+    // 而让明确类型 Footnote anchor 被挤出候选集。
+    //
+    // 场景：note_item 的 marker=5，region 是 footnote。
+    // 同时存在 AnchorKind::Unknown(marker=5) 和 AnchorKind::Footnote(marker=5)。
+    // find_existing_explicit_anchor 必须排除 Unknown，只接受 Footnote。
+    use fnm_core::records::{BodyAnchorRecord, NoteItemRecord, NoteLinkRecord, NoteRegionRecord};
+    use fnm_core::types::{AnchorKind, LinkStatus, NoteKind};
+    use std::collections::HashMap;
+
+    let note_item = NoteItemRecord {
+        note_item_id: "fn-1".to_string(),
+        region_id: "rg-fn".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        marker: "5".to_string(),
+        marker_type: "footnote_marker".to_string(),
+        text: "Footnote 5 content.".to_string(),
+        source: "test".to_string(),
+        source_page_label: "p1".to_string(),
+        is_reconstructed: false,
+        review_required: false,
+        note_kind: NoteKind::Footnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
+    };
+
+    let region = NoteRegionRecord {
+        region_id: "rg-fn".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_start: 1,
+        page_end: 1,
+        pages: vec![1],
+        note_kind: NoteKind::Footnote,
+        scope: fnm_core::types::RegionScope::Chapter,
+        source: fnm_core::types::RegionSource::HeadingScan,
+        heading_text: "Footnotes".to_string(),
+        start_reason: "heading".to_string(),
+        end_reason: "page_end".to_string(),
+        region_marker_alignment_ok: true,
+        region_start_first_source_marker: String::new(),
+        region_first_note_item_marker: String::new(),
+        review_required: false,
+    };
+
+    // Two anchors: Unknown and Footnote, same marker and chapter
+    let anchors = vec![
+        BodyAnchorRecord {
+            anchor_id: "unk-5".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 1,
+            paragraph_index: 0,
+            char_start: 5,
+            char_end: 8,
+            source_marker: "[5]".to_string(),
+            normalized_marker: "5".to_string(),
+            anchor_kind: AnchorKind::Unknown,
+            certainty: 0.6,
+            source_text: "Body [5].".to_string(),
+            source: "markdown:bracket".to_string(),
+            synthetic: false,
+            ocr_repaired_from_marker: String::new(),
+        },
+        BodyAnchorRecord {
+            anchor_id: "fn-5".to_string(),
+            chapter_id: "ch-1".to_string(),
+            page_no: 1,
+            paragraph_index: 1,
+            char_start: 10,
+            char_end: 15,
+            source_marker: "<sup>5</sup>".to_string(),
+            normalized_marker: "5".to_string(),
+            anchor_kind: AnchorKind::Footnote,
+            certainty: 1.0,
+            source_text: "Body <sup>5</sup>.".to_string(),
+            source: "markdown:html".to_string(),
+            synthetic: false,
+            ocr_repaired_from_marker: String::new(),
+        },
+    ];
+
+    // Pre-existing link (orphan_note) that the override will target
+    let existing_links = vec![NoteLinkRecord {
+        link_id: "link-fn-5".to_string(),
+        chapter_id: "ch-1".to_string(),
+        region_id: "rg-fn".to_string(),
+        note_item_id: "fn-1".to_string(),
+        anchor_id: "dummy".to_string(),
+        status: LinkStatus::OrphanNote,
+        resolver: fnm_core::types::LinkResolver::Rule,
+        confidence: 0.0,
+        note_kind: NoteKind::Footnote,
+        marker: "5".to_string(),
+        page_no_start: 1,
+        page_no_end: 1,
+    }];
+
+    // Override payload: match f_n-1 to anchor via llm-anchor pattern
+    let mut overrides = HashMap::new();
+    let mut payload = serde_json::Map::new();
+    payload.insert(
+        "action".to_string(),
+        serde_json::Value::String("match".to_string()),
+    );
+    payload.insert(
+        "note_item_id".to_string(),
+        serde_json::Value::String("fn-1".to_string()),
+    );
+    payload.insert(
+        "anchor_id".to_string(),
+        serde_json::Value::String("llm-anchor-dummy".to_string()),
+    );
+    overrides.insert("link-fn-5".to_string(), serde_json::Value::Object(payload));
+
+    let (effective_links, summary, _logs) =
+        fnm_phase3::note_linking::link_overrides::apply_link_overrides(
+            &existing_links,
+            Some(&overrides),
+            &[note_item],
+            &anchors,
+            &[region],
+        );
+
+    // The override must succeed — the explicit Footnote anchor should be found
+    let invalids = summary["invalid_override_count"].as_i64().unwrap_or(999);
+    assert_eq!(
+        invalids, 0,
+        "override must not be invalid (unknown anchor should not interfere): {}",
+        summary["invalid_override_flags"]
+    );
+
+    let matched: Vec<_> = effective_links
+        .iter()
+        .filter(|l| l.status.as_str() == "matched")
+        .collect();
+    assert!(
+        !matched.is_empty(),
+        "override should produce a matched link"
+    );
+    assert_eq!(
+        matched[0].anchor_id, "fn-5",
+        "override should match the explicit Footnote anchor, not unknown"
+    );
+}
+
+#[test]
+fn spec_link_override_unknown_anchor_only_remains_unmatched() {
+    // 验证当只有 Unknown anchor 存在时（无明确类型 anchor），
+    // find_existing_explicit_anchor 应返回 None —— Unknown 不能用于自动匹配。
+    use fnm_core::records::{BodyAnchorRecord, NoteItemRecord, NoteLinkRecord, NoteRegionRecord};
+    use fnm_core::types::{AnchorKind, LinkStatus, NoteKind};
+    use std::collections::HashMap;
+
+    let note_item = NoteItemRecord {
+        note_item_id: "fn-1".to_string(),
+        region_id: "rg-fn".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        marker: "5".to_string(),
+        marker_type: "footnote_marker".to_string(),
+        text: "Footnote 5 content.".to_string(),
+        source: "test".to_string(),
+        source_page_label: "p1".to_string(),
+        is_reconstructed: false,
+        review_required: false,
+        note_kind: NoteKind::Footnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
+    };
+
+    let region = NoteRegionRecord {
+        region_id: "rg-fn".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_start: 1,
+        page_end: 1,
+        pages: vec![1],
+        note_kind: NoteKind::Footnote,
+        scope: fnm_core::types::RegionScope::Chapter,
+        source: fnm_core::types::RegionSource::HeadingScan,
+        heading_text: "Footnotes".to_string(),
+        start_reason: "heading".to_string(),
+        end_reason: "page_end".to_string(),
+        region_marker_alignment_ok: true,
+        region_start_first_source_marker: String::new(),
+        region_first_note_item_marker: String::new(),
+        review_required: false,
+    };
+
+    let anchors = vec![BodyAnchorRecord {
+        anchor_id: "unk-5".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 1,
+        paragraph_index: 0,
+        char_start: 5,
+        char_end: 8,
+        source_marker: "[5]".to_string(),
+        normalized_marker: "5".to_string(),
+        anchor_kind: AnchorKind::Unknown,
+        certainty: 0.6,
+        source_text: "Body [5].".to_string(),
+        source: "markdown:bracket".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let existing_links = vec![NoteLinkRecord {
+        link_id: "link-fn-5".to_string(),
+        chapter_id: "ch-1".to_string(),
+        region_id: "rg-fn".to_string(),
+        note_item_id: "fn-1".to_string(),
+        anchor_id: "dummy".to_string(),
+        status: LinkStatus::OrphanNote,
+        resolver: fnm_core::types::LinkResolver::Rule,
+        confidence: 0.0,
+        note_kind: NoteKind::Footnote,
+        marker: "5".to_string(),
+        page_no_start: 1,
+        page_no_end: 1,
+    }];
+
+    let mut overrides = HashMap::new();
+    let mut payload = serde_json::Map::new();
+    payload.insert(
+        "action".to_string(),
+        serde_json::Value::String("match".to_string()),
+    );
+    payload.insert(
+        "note_item_id".to_string(),
+        serde_json::Value::String("fn-1".to_string()),
+    );
+    payload.insert(
+        "anchor_id".to_string(),
+        serde_json::Value::String("llm-anchor-dummy".to_string()),
+    );
+    overrides.insert("link-fn-5".to_string(), serde_json::Value::Object(payload));
+
+    let (effective_links, summary, _logs) =
+        fnm_phase3::note_linking::link_overrides::apply_link_overrides(
+            &existing_links,
+            Some(&overrides),
+            &[note_item],
+            &anchors,
+            &[region],
+        );
+
+    // Only unknown anchor exists → find_existing_explicit_anchor must return None
+    // → override invalid (no valid anchor)
+    let invalids = summary["invalid_override_count"].as_i64().unwrap_or(0);
+    assert!(
+        invalids > 0,
+        "override must be invalid when only Unknown anchor exists"
+    );
+
+    let matched: Vec<_> = effective_links
+        .iter()
+        .filter(|l| l.status.as_str() == "matched")
+        .collect();
+    assert!(
+        matched.is_empty(),
+        "Unknown anchor alone must not create a matched link"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // 修复包 D：endnote orphan recovery 不跨章
 // ═══════════════════════════════════════════════════════════════
 
@@ -2068,8 +2351,8 @@ fn spec_endnote_orphan_recovery_respects_chapter_boundary() {
 fn spec_phase3_does_not_rewrite_upstream_facts() {
     // Phase3 必须透传 Phase1/2 facts，不得重建、覆盖或修改。
     // 本测试对每一类上游事实做 JSON-level 等值断言。
-    use fnm_core::records::{NoteItemRecord, NoteRegionRecord};
-    use fnm_core::types::{NoteKind, PageRole, RegionScope, RegionSource};
+    use fnm_core::records::{ChapterNoteModeRecord, NoteItemRecord, NoteRegionRecord};
+    use fnm_core::types::{NoteKind, NoteMode, PageRole, RegionScope, RegionSource};
     use fnm_phase3::input::{Phase3Config, Phase3Input};
 
     let pages = vec![
@@ -2177,6 +2460,16 @@ fn spec_phase3_does_not_rewrite_upstream_facts() {
     let input_headings_json = serde_json::to_value(&heading_candidates).unwrap();
     let input_sections_json = serde_json::to_value(&section_heads).unwrap();
 
+    let input_modes = vec![ChapterNoteModeRecord {
+        chapter_id: "ch-1".to_string(),
+        note_mode: NoteMode::ChapterEndnotePrimary,
+        region_ids: vec!["rg-en".to_string()],
+        primary_region_scope: "chapter".to_string(),
+        has_footnote_band: false,
+        has_endnote_region: true,
+    }];
+    let input_modes_json = serde_json::to_value(&input_modes).unwrap();
+
     let input = Phase3Input {
         phase1_chapters: &chapters,
         phase1_pages: &pages,
@@ -2188,6 +2481,7 @@ fn spec_phase3_does_not_rewrite_upstream_facts() {
         pdf_path: None,
         config: Phase3Config::default(),
         overrides: None,
+        phase2_chapter_note_modes: &input_modes,
     };
 
     let output =
@@ -2232,11 +2526,11 @@ fn spec_phase3_does_not_rewrite_upstream_facts() {
         "Phase3 must NOT modify Phase2 note_items (rebuild should be faithful)"
     );
 
-    // chapter_note_modes: 确认至少存在且与 Phase2 输入一致
+    // chapter_note_modes: 必须等于 Phase2 输入（透传，非重建）
     let out_modes_json = serde_json::to_value(&output.structure.chapter_note_modes).unwrap();
-    assert!(
-        serde_json::to_value(&out_modes_json).is_ok(),
-        "Phase3 should produce chapter_note_modes"
+    assert_eq!(
+        out_modes_json, input_modes_json,
+        "Phase3 must pass through input chapter_note_modes, not rebuild them"
     );
 
     // 确认 Phase3 新增了 anchors 和 links（自身产物）
@@ -2247,5 +2541,192 @@ fn spec_phase3_does_not_rewrite_upstream_facts() {
     assert!(
         !output.structure.note_links.is_empty(),
         "Phase3 should produce note_links"
+    );
+}
+
+#[test]
+fn spec_phase3_preserves_explicit_chapter_note_modes() {
+    // 验证 Phase3 输出中的 chapter_note_modes 完全等于输入（透传），
+    // 而非从 chapter_layers 重建。使用 phase2_rebuild 不可能产生的值。
+    use fnm_core::records::{ChapterNoteModeRecord, NoteItemRecord, NoteRegionRecord};
+    use fnm_core::types::{NoteKind, NoteMode, PageRole, RegionScope, RegionSource};
+    use fnm_phase3::input::{Phase3Config, Phase3Input};
+
+    let chapters = vec![make_chapter("ch-1", "Chapter 1", vec![1, 2])];
+    let regions = vec![NoteRegionRecord {
+        region_id: "rg-en".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_start: 2,
+        page_end: 2,
+        pages: vec![2],
+        note_kind: NoteKind::Endnote,
+        scope: RegionScope::Chapter,
+        source: RegionSource::HeadingScan,
+        heading_text: "NOTES".to_string(),
+        start_reason: "heading".to_string(),
+        end_reason: "page_end".to_string(),
+        region_marker_alignment_ok: true,
+        region_start_first_source_marker: String::new(),
+        region_first_note_item_marker: String::new(),
+        review_required: false,
+    }];
+    let items = vec![NoteItemRecord {
+        note_item_id: "en-1".to_string(),
+        region_id: "rg-en".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 2,
+        marker: "1".to_string(),
+        marker_type: "numeric".to_string(),
+        text: "Endnote 1.".to_string(),
+        source: "note_scan".to_string(),
+        source_page_label: "p2".to_string(),
+        is_reconstructed: false,
+        review_required: false,
+        note_kind: NoteKind::Endnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
+    }];
+    let phase1_pages = vec![
+        make_partition(1, PageRole::Body),
+        make_partition(2, PageRole::Note),
+    ];
+    let raw_pages = vec![
+        make_raw_page(1, "# Chapter 1\nBody text."),
+        make_raw_page(2, "NOTES\n1. Endnote 1."),
+    ];
+
+    // 故意构造一个 phase2_rebuild 不可能产生的 chapter_note_modes：
+    // - note_mode=ReviewRequired（重建逻辑会根据实际 region/band 推断）
+    // - region_ids 含 fake region（重建只包含真实 region_id）
+    // - primary_region_scope="book"（重建会输出"chapter"因为 RegionScope 是 Chapter）
+    let input_modes = vec![ChapterNoteModeRecord {
+        chapter_id: "ch-1".to_string(),
+        note_mode: NoteMode::ReviewRequired,
+        region_ids: vec!["rg-en".to_string(), "fake-extra-region".to_string()],
+        primary_region_scope: "book".to_string(),
+        has_footnote_band: false,
+        has_endnote_region: true,
+    }];
+    let input_modes_json = serde_json::to_value(&input_modes).unwrap();
+
+    let input = Phase3Input {
+        phase1_chapters: &chapters,
+        phase1_pages: &phase1_pages,
+        phase1_heading_candidates: &[],
+        phase1_section_heads: &[],
+        phase2_note_regions: &regions,
+        phase2_note_items: &items,
+        raw_pages: &raw_pages,
+        pdf_path: None,
+        config: Phase3Config::default(),
+        overrides: None,
+        phase2_chapter_note_modes: &input_modes,
+    };
+
+    let output =
+        fnm_phase3::build_phase3_structure(input).expect("phase3 should build successfully");
+
+    let out_modes_json = serde_json::to_value(&output.structure.chapter_note_modes).unwrap();
+    assert_eq!(
+        out_modes_json, input_modes_json,
+        "Phase3 must pass through input chapter_note_modes verbatim, not rebuild them"
+    );
+}
+
+#[test]
+fn spec_phase3_internal_consumes_authoritative_chapter_note_modes() {
+    // Phase3 内部的 review_seed_summary.boundary_review_required_count
+    // 必须消费 Phase2 权威 chapter_note_modes，而非从 chapter_layers 重建的值。
+    //
+    // 场景：ch-1 有 endnote region → rebuild 会输出 ChapterEndnotePrimary；
+    // 但输入传入 ReviewRequired → boundary_review_required_count 应 =1（权威值），
+    // 而非 =0（重建值）。
+    use fnm_core::records::{ChapterNoteModeRecord, NoteItemRecord, NoteRegionRecord};
+    use fnm_core::types::{NoteKind, NoteMode, PageRole, RegionScope, RegionSource};
+    use fnm_phase3::input::{Phase3Config, Phase3Input};
+
+    let chapters = vec![make_chapter("ch-1", "Chapter 1", vec![1, 2])];
+    let regions = vec![NoteRegionRecord {
+        region_id: "rg-en".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_start: 2,
+        page_end: 2,
+        pages: vec![2],
+        note_kind: NoteKind::Endnote,
+        scope: RegionScope::Chapter,
+        source: RegionSource::HeadingScan,
+        heading_text: "NOTES".to_string(),
+        start_reason: "heading".to_string(),
+        end_reason: "page_end".to_string(),
+        region_marker_alignment_ok: true,
+        region_start_first_source_marker: String::new(),
+        region_first_note_item_marker: String::new(),
+        review_required: false,
+    }];
+    let items = vec![NoteItemRecord {
+        note_item_id: "en-1".to_string(),
+        region_id: "rg-en".to_string(),
+        chapter_id: "ch-1".to_string(),
+        page_no: 2,
+        marker: "1".to_string(),
+        marker_type: "numeric".to_string(),
+        text: "Endnote 1.".to_string(),
+        source: "note_scan".to_string(),
+        source_page_label: "p2".to_string(),
+        is_reconstructed: false,
+        review_required: false,
+        note_kind: NoteKind::Endnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
+    }];
+    let phase1_pages = vec![
+        make_partition(1, PageRole::Body),
+        make_partition(2, PageRole::Note),
+    ];
+    let raw_pages = vec![
+        make_raw_page(1, "# Chapter 1\nBody text."),
+        make_raw_page(2, "NOTES\n1. Endnote 1."),
+    ];
+
+    // 输入 ReviewRequired——phase2_rebuild 在此数据下会输出 ChapterEndnotePrimary
+    let input_modes = vec![ChapterNoteModeRecord {
+        chapter_id: "ch-1".to_string(),
+        note_mode: NoteMode::ReviewRequired,
+        region_ids: vec!["rg-en".to_string()],
+        primary_region_scope: "chapter".to_string(),
+        has_footnote_band: false,
+        has_endnote_region: true,
+    }];
+
+    let input = Phase3Input {
+        phase1_chapters: &chapters,
+        phase1_pages: &phase1_pages,
+        phase1_heading_candidates: &[],
+        phase1_section_heads: &[],
+        phase2_note_regions: &regions,
+        phase2_note_items: &items,
+        raw_pages: &raw_pages,
+        pdf_path: None,
+        config: Phase3Config::default(),
+        overrides: None,
+        phase2_chapter_note_modes: &input_modes,
+    };
+
+    let output =
+        fnm_phase3::build_phase3_structure(input).expect("phase3 should build successfully");
+
+    let review_seed = output.structure.summary.review_seed_summary;
+    let review_required_count = review_seed["boundary_review_required_count"]
+        .as_i64()
+        .unwrap_or(-1);
+    assert_eq!(
+        review_required_count, 1,
+        "boundary_review_required_count should use authoritative chapter_note_modes (ReviewRequired=1), \
+         not rebuild (ChapterEndnotePrimary=0). Got: {}",
+        review_required_count
     );
 }

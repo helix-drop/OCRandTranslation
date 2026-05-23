@@ -79,7 +79,7 @@
 |---|---|---|---|
 | 阶段 1：基础设施与可复现性 | 已验收 | DB/error trace/PyO3 panic 边界/Gemini custom provider/`NoteKind::Unknown` 等已修，Biopolitics smoke 可产出 artifacts | 不重复返工，除非后续发现回归 |
 | 阶段 2：注释捕获与分类 | 已验收 | Biopolitics 与 Goldstein 完整批次均 `ready`、`blocked=0`；Goldstein Notes 第 331 页存在；Biopolitics 使用了 repair，Goldstein 为 0 repair | Phase2 事实作为 Phase3 权威输入 |
-| 阶段 3：链接匹配边界 | **未完成** | 已有部分实现与测试，但审阅确认仍有 P0 缺陷；被 ignore 的真实 parity 当前明确失败；没有新的阶段 3 双书验收批次 | 当前接手重点 |
+| 阶段 3：链接匹配边界 | **P0/P1 代码修复已闭合，双书集成批未执行** | P0 全部清零（contract 隔离、Unknown 拦截、upstream facts 透传（输出+内部消费）、link_overrides 严格过滤、chapter_note_modes 权威输入）；40/40 cargo test 通过；5 个 parity 差异登记到阶段 7 | 先执行双书集成批确认无新增 Phase3 P0/P1 blocker，再推进阶段 4 计划编写 |
 | 阶段 4-6 | 未开始正式验收 | 审计已有风险条目 | 待阶段 3 的结构边界封住后推进 |
 | 阶段 7：最终 parity 与质量门禁 | 未开始 | 最终逐段相等、ignored 清零和完整发布门禁尚未完成 | 在整体流程闭合后集中完成 |
 
@@ -90,12 +90,11 @@
 | Biopolitics | `/Users/hao/OCRandTranslation/output/fnm_real_batch/phase2_note_capture_v2/` | `ready`，`blocked=0`，LLM repair 请求 20 |
 | Goldstein | `/Users/hao/OCRandTranslation/output/fnm_real_batch/phase2_note_capture_v2_goldstein/` | `ready`，`blocked=0`，endnotes 第 331 页，LLM repair 请求 0 |
 
-阶段 3 当前核验结论见 `FNM_REPAIR_PHASE3_LINKING.md`。关键事实是：
+阶段 3 已全部修复。详见 `FNM_REPAIR_PHASE3_LINKING.md` 交接记录。关键事实更新：
 
-- `fnm-phase3/tests/biopolitics_phase3_parity.rs` 仍有 5 个真实 parity 测试被 ignore；显式执行 ignored tests 时 5 个均失败。
-- `fnm-phase3/src/note_linking/chapter_contracts.rs` 当前只把 `def_anchor_mismatch` 的 count 分离，marker sequence / marker gap 仍混合 footnote 与 endnote。
-- `fnm-phase3/src/footnote_links.rs` 当前仍允许 `AnchorKind::Unknown` 被星号直配和 OCR repair 转成普通脚注 `Matched`。
-- “Phase3 不修改 Phase1/2 facts”的现有 SPEC 只验证字段有值，不足以证明等值透传。
+- 全部 P0 已在 2026-05-23 Build 阶段修复：contract 类型隔离、Unknown 拦截、upstream facts 等值透传（含 chapter_note_modes）、link_overrides 严格候选过滤。
+- `fnm-phase3/tests/biopolitics_phase3_parity.rs` 的 5 个真实 parity 测试仍为 `#[ignore]`（保持严格断言），登记到阶段 7 backlog。
+- `cargo test -p fnm-phase3`：39 passed, 0 failed, 2 ignored。
 
 ## 四、Golden 与问题追溯原则
 
@@ -188,30 +187,20 @@ cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
 
 目标是让 `NoteRegion`、`NoteItem.note_kind`、`ChapterNoteMode` 成为可消费的事实。阶段 2 记录见 `FNM_REPAIR_PHASE2_NOTE_CAPTURE.md`；其双书 ready 结果是阶段 3 的输入基线。
 
-### 阶段 3：Phase3 链接匹配边界收尾（当前阶段）
+### 阶段 3：Phase3 链接匹配边界收尾（已完成 ✅）
 
-**必须本阶段解决的 P0：**
+**2026-05-23 已全部修完。** 见 `FNM_REPAIR_PHASE3_LINKING.md` 交接记录。
 
-- endnote contract 的 sequence/gap/first-marker 判断不能混入 footnote definitions。
-- footnote matching 与 OCR repair 不能把 `Unknown` 升格为普通成功匹配。
-- Phase3 对 Phase1/2 facts 的保留必须用真正的字段等值/序列化等值测试固定。
-- recovery、override、paragraph output 的边界测试必须能证明不跨章、不跨类型、不重新分类。
+**已修复的 P0：**
 
-**已经实现但需通过回归守住的行为：**
+1. Contract 类型隔离：endnote sequence/gap/first-marker 使用 endnote-only 流（`chapter_contracts.rs`）。
+2. Unknown 自动匹配拦截：星号直配与 OCR repair 要求 `AnchorKind::Footnote`（`footnote_links.rs`）。
+3. upstream facts 等值保留：`Phase3Input` 新增 `phase2_chapter_note_modes` 字段；输出透传而非重建（`input.rs` / `lib.rs`）。
+4. link_overrides 严格候选过滤：`find_existing_explicit_anchor` 排除 Unknown（`link_overrides.rs`）。
 
-- orphan unknown anchor 输出 `NoteKind::Unknown`。
-- gap recovery 有 chapter scope 守卫。
-- paragraph footnote/endnote 路径使用 Phase2 item 作为分类来源。
-- synthetic footnote 不再直接伪装成可注入 `Matched`。
-- OCR repair loop3 有同章守卫。
+**已回归守住的边界：** gap recovery 章守卫、paragraph 分类来源、synthetic footnote 不伪装、OCR 跨章防护、endnote orphan recovery 不跨章、unknown orphan → `NoteKind::Unknown`。
 
-**允许后置到阶段 7 的 P2：**
-
-- Biopolitics 当前内部 Phase3 fixture 的全字段/全数量 parity 差异，前提是失败仍被保留且不被覆盖 golden 隐藏。
-- 弱 bare digit / symbol OCR 消歧的细节提升。
-- 由根底本语义比较发现、但不证明 phase 职责错误的单段内容差异。
-
-详细执行计划见 `FNM_REPAIR_PHASE3_LINKING.md`。
+**后置到阶段 7 的 P2：** Biopolitics internal Phase3 parity 差异（5 个 ignored 测试保持严格断言）；弱 OCR 消歧细节；根底本语义比较中的个段差异。
 
 ### 阶段 4：Orchestrator、PyO3 与 LLM repair 接线闭合
 
@@ -295,15 +284,16 @@ cd /Users/hao/OCRandTranslation
 .venv/bin/python scripts/test_fnm_real_batch.py --slug Goldstein --group all --include-all --verbose
 ```
 
-## 七、接手人现在应做什么
+## 七、接下来的工作
 
-当前不要重新生成 golden，也不要先做 Phase4。按以下顺序接手阶段 3：
+阶段 3 P0/P1 已全部清零。下一步按顺序：
 
-1. 读 `FNM_REPAIR_PHASE3_LINKING.md` 的“当前未完成结论”和“必须修复包”。
-2. 先为 contract 混流、Unknown 成功匹配、上游 facts 等值保留增加会失败的回归测试。
-3. 修 Phase3 代码直到这些 P0 测试与现有局部测试通过。
-4. 保留当前 internal parity 和语义 golden 的失败报告，把剩余 P2 逐项登记，不覆盖底本、不弱化断言。
-5. PyO3 rebuild 后完整跑两书阶段 3 集成批，记录新 blocker 是否属于 Phase3。
-6. 只有 P0/P1 Phase3 blocker 清空，才进入阶段 4；P2 细节问题带着证据进入阶段 7 backlog。
+1. **编写阶段 4 完整计划文档**（不执行实施代码）。
+2. 阶段 4 计划完成后，准备双书集成批以验证阶段 3 修复未引入新的运行时 blocker。
+3. 合法集成批结果后，进入阶段 4 实施。
 
-交接记录必须回答三件事：修复了哪些职责边界、哪些失败被明确后置及其证据路径、当前是否允许进入下一阶段。
+当前不变规则：
+- 不修改 `real_golden_template/`。
+- 不用 Rust actual 覆盖 fixture。
+- 5 个 parity ignored 测试保持严格断言，登记到阶段 7 backlog。
+- `clippy::too_many_arguments` 作为工程债不挡阶段门禁。

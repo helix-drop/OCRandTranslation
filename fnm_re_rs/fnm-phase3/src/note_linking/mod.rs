@@ -23,8 +23,8 @@ pub mod ocr_repair;
 pub mod phase2_rebuild;
 
 use fnm_core::records::{
-    BodyAnchorRecord, ChapterLinkContract, ChapterRecord, NoteItemRecord, NoteLinkRecord,
-    NoteRegionRecord, PagePartitionRecord,
+    BodyAnchorRecord, ChapterLinkContract, ChapterNoteModeRecord, ChapterRecord, NoteItemRecord,
+    NoteLinkRecord, NoteRegionRecord, PagePartitionRecord,
 };
 use fnm_phase1::input::RawPage;
 use fnm_phase2::chapter_split::ChapterLayers;
@@ -85,6 +85,10 @@ pub fn build_note_link_table(
     pdf_path: &str,
     phase1_chapters: &[ChapterRecord],
     phase1_pages: &[PagePartitionRecord],
+    // Phase2 权威 chapter_note_modes — 外部调用时直接传递输入层的事实，
+    // 不依赖内部 phase2_rebuild 重建的值，确保 review_seed_summary 等内部
+    // 诊断计数与上游一致。
+    phase2_chapter_note_modes: &[ChapterNoteModeRecord],
 ) -> NoteLinkTableResult {
     // Python 行 1437：_phase2_from_chapter_layers
     // 本函数只返回 note 数据，不输出退化的 Phase1/2 facts。
@@ -110,12 +114,15 @@ pub fn build_note_link_table(
         note_item_overrides_group,
     );
 
-    // 组装 phase2 with overrides：chapters/pages 来自原始 Phase1 输入
+    // 组装 phase2 with overrides：chapters/pages 来自原始 Phase1 输入，
+    // chapter_note_modes 使用 Phase2 权威值而非内部重建值（铁律 §1：Phase N
+    // 只能消费 Phase N-1 的事实）。此权威值通过 build_note_links 最终影响
+    // review_seed_summary.boundary_review_required_count 等内部诊断度量。
     let phase2_with_overrides = Phase2WithOverrides {
         note_items: phase2_note_items,
         note_regions: phase2_note_regions,
         chapters: phase1_chapters.to_vec(),
-        chapter_note_modes: phase2_build.chapter_note_modes.clone(),
+        chapter_note_modes: phase2_chapter_note_modes.to_vec(),
         pages: phase1_pages.to_vec(),
     };
 
