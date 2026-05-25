@@ -19,7 +19,7 @@ use fnm_core::db::{
     Repository,
 };
 use fnm_core::records::{
-    Phase1Structure, Phase2Structure, Phase2Summary, Phase3Structure, Phase3Summary,
+    Phase1Structure, Phase1Summary, Phase2Structure, Phase2Summary, Phase3Structure, Phase3Summary,
 };
 use fnm_core::types::NoteKind;
 use fnm_llm_repair::page_context::RepairImageRenderer;
@@ -195,7 +195,8 @@ pub fn run_pipeline_for_doc<R: Repository>(
     });
 
     // ── Phase 5 ──
-    let phase5 = pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
+    let phase5 =
+        pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &phase2, &config)?;
     let phase5_products = Phase5Products {
         chapter_markdowns: phase5.chapter_markdowns.chapters.clone(),
         diagnostic_pages: phase5.chapter_markdowns.diagnostic_pages.clone(),
@@ -304,13 +305,24 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
         .iter()
         .filter(|region| region.note_kind == NoteKind::Endnote)
         .all(|region| region.region_marker_alignment_ok);
+    // 所有 gate bool 显式构造：不可从 DB 恢复的字段保守设为 false（阻止误放行）。
+    // DB 不存储 Phase1Summary / Phase2Summary / Phase3Summary / NoteLinkTable
+    // 的 gate 结果，因此回放只重建可恢复的核心数据。
     let phase1 = Phase1Snapshot {
         structure: Phase1Structure {
             pages: pages.clone(),
             chapters: chapters.clone(),
             heading_candidates: heading_candidates.clone(),
             section_heads: section_heads.clone(),
-            ..Default::default()
+            endnote_explorer_hints: serde_json::Value::Null,
+            summary: Phase1Summary {
+                chapter_title_alignment_ok: false,
+                chapter_section_alignment_ok: false,
+                toc_semantic_contract_ok: false,
+                ..Phase1Summary::default()
+            },
+            toc_tree: Vec::new(),
+            page_roles: Vec::new(),
         },
         diagnostics: serde_json::json!({"source": "persisted_phase1"}),
     };
@@ -325,7 +337,10 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
             chapter_note_modes: chapter_note_modes.clone(),
             summary: Phase2Summary {
                 chapter_endnote_region_alignment_ok: endnote_alignment_ok,
-                ..Default::default()
+                chapter_title_alignment_ok: false,
+                chapter_section_alignment_ok: false,
+                toc_semantic_contract_ok: false,
+                ..Phase2Summary::default()
             },
         },
         note_regions: note_regions.clone(),
@@ -344,17 +359,24 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
             chapter_note_modes: chapter_note_modes.clone(),
             body_anchors: body_anchors.clone(),
             note_links: note_links.clone(),
+            paragraph_footnotes: Vec::new(),
+            paragraph_endnotes: Vec::new(),
+            chapter_anchor_alignments: Vec::new(),
             summary: Phase3Summary {
                 chapter_endnote_region_alignment_ok: endnote_alignment_ok,
-                ..Default::default()
+                chapter_title_alignment_ok: false,
+                chapter_section_alignment_ok: false,
+                toc_semantic_contract_ok: false,
+                ..Phase3Summary::default()
             },
-            ..Default::default()
         },
         note_link_table: fnm_phase3::note_linking::NoteLinkTable {
             anchors: body_anchors.clone(),
             links: note_links.clone(),
             effective_links: note_links.clone(),
-            ..Default::default()
+            chapter_link_contracts: Vec::new(),
+            anchor_summary: serde_json::json!({"source": "persisted_phase3"}),
+            link_summary: serde_json::json!({"source": "persisted_phase3"}),
         },
         body_anchors: body_anchors.clone(),
         note_links: note_links.clone(),
@@ -381,7 +403,8 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
     )
     .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("persist phase4: {}", e)))?;
 
-    let phase5 = pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
+    let phase5 =
+        pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &phase2, &config)?;
     repo.replace_fnm_phase5_products(
         doc_id,
         &Phase5Products {

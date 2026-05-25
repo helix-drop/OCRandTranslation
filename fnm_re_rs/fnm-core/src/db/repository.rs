@@ -1566,15 +1566,17 @@ impl Repository for SqliteRepository {
         let rows = stmt.query_map([doc_id], |row| {
             let payload: Option<String> = row.get(0)?;
             let book_page: i64 = row.get(1)?;
-            // 非法 JSON 返回 Err，NULL / 空字符串跳过
+            // 非法 JSON 跳过+警告，NULL / 空字符串跳过；DB 行错误仍传播
             let page: RawPage = match payload {
                 Some(ref s) if !s.trim().is_empty() => match serde_json::from_str(s) {
                     Ok(p) => p,
                     Err(e) => {
-                        return Err(rusqlite::Error::InvalidParameterName(format!(
-                            "load_raw_pages_for_doc: book_page={} invalid payload_json: {}",
+                        eprintln!(
+                            "[WARNING] load_raw_pages_for_doc: book_page={} \
+                             invalid payload_json: {}",
                             book_page, e
-                        )));
+                        );
+                        return Ok(None);
                     }
                 },
                 _ => return Ok(None),
@@ -2086,18 +2088,22 @@ mod tests {
     }
 
     #[test]
-    fn load_raw_pages_fails_on_invalid_json() {
+    fn load_raw_pages_skips_invalid_json() {
         let repo = setup_repo();
         let conn = repo.get_conn().unwrap();
         conn.execute(
-            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES ('json-fail', 1, 'not-valid-json')",
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES ('json-skip', 1, 'not-valid-json')",
             [],
         ).unwrap();
 
-        let result = repo.load_raw_pages_for_doc("json-fail");
+        let result = repo.load_raw_pages_for_doc("json-skip");
         assert!(
-            result.is_err(),
-            "invalid JSON should return Err, not silently skip"
+            result.is_ok(),
+            "invalid JSON should be skipped with warning, not error out"
+        );
+        assert!(
+            result.unwrap().is_empty(),
+            "invalid JSON should produce no pages"
         );
     }
 

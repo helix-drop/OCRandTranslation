@@ -56,12 +56,12 @@ pub fn build_module_export_bundle(
     let (ordered_chapters, missing_chapter_ids, extra_chapter_ids) =
         reorder_chapters(&chapter_markdown_set.chapters, &phase1.chapters);
 
-    // 2. 乱码修复 + 去重
+    // 2. 乱码修复 + 去重（仅保留到审计摘要，不修改导出内容——Phase6 只审计不修文）
     let (canonicalized_chapters, canonicalization_summary) =
         apply_semantic_canonicalization(&ordered_chapters);
 
-    // 3. 转换为 ExportChapterRecord
-    let export_chapters = to_export_chapter_records(&canonicalized_chapters);
+    // 3. 转换为 ExportChapterRecord（使用原始未修改的 ordered_chapters）
+    let export_chapters = to_export_chapter_records(&ordered_chapters);
 
     // 4. 构建 chapter_files
     let mut chapter_files: HashMap<String, String> = HashMap::new();

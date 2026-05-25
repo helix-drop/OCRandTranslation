@@ -9,6 +9,10 @@
 //! - 不含 DB 持久化（caller 拿到 ModulePipelineSnapshot 后自行 persist；
 //!   或调用 `mainline::run_phase6_pipeline_for_doc` DB-driven 版本）
 
+use std::collections::HashSet;
+
+use anyhow::anyhow;
+
 use crate::error::{OrchestratorError, Result};
 use crate::types::{
     ModulePipelineSnapshot, Phase1Snapshot, Phase2Snapshot, Phase3Snapshot, Phase4Snapshot,
@@ -18,6 +22,7 @@ use crate::types::{
 
 use fnm_phase1::input::{RawPage, TocItem};
 use fnm_phase2::chapter_split::{build_chapter_layers, ChapterLayers};
+use fnm_phase6::export::contract::build_export_chapters;
 
 /// Pipeline 完整运行：phase1 → phase6（不含 LLM repair 回环）。
 ///
@@ -83,7 +88,7 @@ pub fn run_pipeline(
     });
 
     // ── Phase 5 ──
-    let phase5 = run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
+    let phase5 = run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &phase2, &config)?;
     snapshot.phase5 = Some(SerPhase5 {
         chapter_count: phase5.chapter_markdowns.chapters.len() as i64,
         merge_summary: phase5.chapter_markdowns.merge_summary.clone(),
@@ -312,15 +317,41 @@ pub(crate) fn run_phase5(
     phase3: &Phase3Snapshot,
     chapter_layers: &ChapterLayers,
     phase1: &Phase1Snapshot,
+    phase2: &Phase2Snapshot,
     config: &PipelineConfig,
 ) -> Result<Phase5Snapshot> {
-    let chapter_markdowns = fnm_phase5::build_chapter_markdown_set(
+    let phase5_structure = fnm_phase5::phase5_shadow::build_phase5_shadow(
         &phase4.frozen_units,
         &phase3.note_link_table,
         chapter_layers,
+        &phase1.structure.chapters,
+        &phase2.structure.chapter_note_modes,
         None,
         config.include_diagnostic_entries,
         Some(&phase1.structure.section_heads),
+    );
+
+    let unlinked =
+        fnm_phase5::compute_unlinked_note_ids(&phase4.frozen_units, &phase3.note_link_table);
+    let skip_ids: Option<&HashSet<String>> = if unlinked.is_empty() {
+        None
+    } else {
+        Some(&unlinked)
+    };
+
+    let (export_chapters, export_summary) = build_export_chapters(
+        &phase5_structure,
+        config.include_diagnostic_entries,
+        skip_ids,
+    )
+    .map_err(|e| OrchestratorError::Phase5(anyhow!("build export chapters: {}", e)))?;
+
+    let chapter_markdowns = fnm_phase5::assemble_chapter_markdown_set(
+        &phase5_structure,
+        &export_chapters,
+        &export_summary,
+        &phase4.frozen_units,
+        chapter_layers,
     )
     .map_err(OrchestratorError::Phase5)?;
 

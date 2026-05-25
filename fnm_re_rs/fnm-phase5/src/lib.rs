@@ -2,47 +2,75 @@
 //!
 //! ←→ Python:
 //! - `FNM_RE/modules/chapter_merge.py` (~827 行) → 本 crate
-//! - `FNM_RE/stages/export_contract.py` (via fnm-phase6)
-//! - `FNM_RE/stages/export_footnote.py` (via fnm-phase6)
+//! - `FNM_RE/stages/export_contract.py` (via orchestrator)
+//! - `FNM_RE/stages/export_footnote.py` (via orchestrator)
 
 #![deny(unused_must_use)]
 
-mod convert;
+pub mod convert;
 mod diagnostics;
-mod marker_rewrite;
-mod phase5_shadow;
+pub mod marker_rewrite;
+pub mod phase5_shadow;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use anyhow::Result;
 use fnm_core::export_constants::TRAILING_IMAGE_ONLY_BLOCK_RE;
-use fnm_core::records::{ChapterMarkdownEntry, ChapterMarkdownSet, FrozenUnits, SectionHeadRecord};
+use fnm_core::records::{
+    ChapterMarkdownEntry, ChapterMarkdownSet, ChapterRecord, ExportChapterRecord, FrozenUnits,
+};
 use fnm_phase2::chapter_split::ChapterLayers;
 use fnm_phase3::note_linking::NoteLinkTable;
-use fnm_phase6::export::contract::build_export_chapters;
-use fnm_phase6::export_audit::helpers::{detect_mid_paragraph_heading, split_body_and_definitions};
+use once_cell::sync::Lazy;
+use regex::Regex;
 
-/// 构建章 markdown 集合。
+static LOCAL_DEF_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"^\[(\d+)\]|^\^\[(\d+)\]|^\^?\[\d+\]\s*:").unwrap());
+
+pub(crate) fn split_body_and_definitions(content: &str) -> (String, String) {
+    let mut body_lines: Vec<String> = Vec::new();
+    let mut definition_lines: Vec<String> = Vec::new();
+    let mut in_definition_block = false;
+
+    for raw_line in content.lines() {
+        if LOCAL_DEF_RE.is_match(raw_line) {
+            in_definition_block = true;
+            definition_lines.push(raw_line.to_string());
+            continue;
+        }
+        if in_definition_block && (raw_line.starts_with("    ") || raw_line.starts_with('\t')) {
+            definition_lines.push(raw_line.to_string());
+            continue;
+        }
+        in_definition_block = false;
+        body_lines.push(raw_line.to_string());
+    }
+
+    (body_lines.join("\n"), definition_lines.join("\n"))
+}
+
+fn detect_mid_paragraph_heading(body_text: &str) -> bool {
+    let lines: Vec<&str> = body_text.lines().collect();
+    for (idx, line) in lines.iter().enumerate() {
+        let stripped = line.trim();
+        if !stripped.starts_with("### ") {
+            continue;
+        }
+        let prev = if idx > 0 { lines[idx - 1].trim() } else { "" };
+        if !prev.is_empty() && !prev.starts_with('#') {
+            return true;
+        }
+    }
+    false
+}
+
+/// 计算未链接的 note ID，供调用方控制跳过列表。
 ///
-/// ←→ Python `build_chapter_markdown_set()` (chapter_merge.py:645)
-pub fn build_chapter_markdown_set(
+/// ←→ Python `build_chapter_markdown_set` 中的 unlinked_note_ids 计算。
+pub fn compute_unlinked_note_ids(
     frozen_units: &FrozenUnits,
     note_link_table: &NoteLinkTable,
-    chapter_layers: &ChapterLayers,
-    diagnostic_machine_by_page: Option<&HashMap<String, String>>,
-    include_diagnostic_entries: bool,
-    section_heads: Option<&[SectionHeadRecord]>,
-) -> Result<ChapterMarkdownSet> {
-    let phase5 = phase5_shadow::build_phase5_shadow(
-        frozen_units,
-        note_link_table,
-        chapter_layers,
-        diagnostic_machine_by_page,
-        include_diagnostic_entries,
-        section_heads,
-    );
-
-    // 收集无正文引用的注释
+) -> HashSet<String> {
     let mut unlinked_note_ids: HashSet<String> = HashSet::new();
     for r in &frozen_units.ref_map {
         let nid = r.note_item_id.trim();
@@ -69,18 +97,24 @@ pub fn build_chapter_markdown_set(
             unlinked_note_ids.insert(nid);
         }
     }
+    unlinked_note_ids
+}
 
-    let skip_ids: Option<&HashSet<String>> = if unlinked_note_ids.is_empty() {
-        None
-    } else {
-        Some(&unlinked_note_ids)
-    };
-
-    let (export_chapters, export_summary) =
-        build_export_chapters(&phase5, include_diagnostic_entries, skip_ids)?;
-
+/// 从 Phase5 影子结构和导出章节记录组装最终 ChapterMarkdownSet。
+///
+/// 调用方先构建 Phase5Structure + 调用 `build_export_chapters`，再通过此函数
+/// 完成 marker_rewrite + notes_block_format + diagnostics。
+///
+/// ←→ Python `build_chapter_markdown_set()` (chapter_merge.py:645)
+pub fn assemble_chapter_markdown_set(
+    phase5_structure: &fnm_core::records::Phase5Structure,
+    export_chapters: &[ExportChapterRecord],
+    export_summary: &serde_json::Value,
+    frozen_units: &FrozenUnits,
+    chapter_layers: &ChapterLayers,
+) -> Result<ChapterMarkdownSet> {
     let mut chapters: Vec<ChapterMarkdownEntry> = export_chapters
-        .into_iter()
+        .iter()
         .filter(|row| !row.section_id.trim().is_empty())
         .map(|row| {
             let start_page = row.start_page;
@@ -131,7 +165,7 @@ pub fn build_chapter_markdown_set(
         })
         .collect();
 
-    let expected_chapters: Vec<&fnm_core::records::ChapterRecord> = chapter_layers
+    let expected_chapters: Vec<&ChapterRecord> = chapter_layers
         .chapters
         .iter()
         .filter(|row| !row.chapter_id.trim().is_empty())
@@ -179,7 +213,7 @@ pub fn build_chapter_markdown_set(
     let merge_summary = serde_json::json!({
         "chapter_count": chapters.len() as i64,
         "expected_chapter_count": expected_chapters.len() as i64,
-        "include_diagnostic_entries": include_diagnostic_entries,
+        "include_diagnostic_entries": false,
         "local_refs_closed": local_refs_closed,
         "no_frozen_ref_leak": no_frozen_ref_leak,
         "no_raw_marker_leak_in_body": no_raw_marker_leak_in_body,
@@ -198,7 +232,7 @@ pub fn build_chapter_markdown_set(
         chapters,
         chapter_contract_summary,
         merge_summary,
-        diagnostic_pages: phase5.diagnostic_pages,
-        diagnostic_notes: phase5.diagnostic_notes,
+        diagnostic_pages: phase5_structure.diagnostic_pages.clone(),
+        diagnostic_notes: phase5_structure.diagnostic_notes.clone(),
     })
 }
