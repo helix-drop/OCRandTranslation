@@ -171,6 +171,54 @@ pub fn candidate_section_rows(
 
 // ── 分类 ────────────────────────────────────────────────────────
 
+fn is_explicit_chapter_boundary_candidate(candidate: &HeadingCandidate) -> bool {
+    candidate.source == "visual_toc"
+        || (candidate.source == "ocr_block"
+            && candidate.block_label == "doc_title"
+            && candidate.top_band)
+}
+
+/// 章级标题的内容跨度应由下一条章级标题界定，不能被章内小节标题截短。
+fn classification_span_pages(
+    section: &SectionRow,
+    page_roles: &HashMap<i64, String>,
+    heading_candidates: &[HeadingCandidate],
+) -> usize {
+    let title_key = chapter_title_match_key(&section.title);
+    let has_explicit_boundary = heading_candidates.iter().any(|candidate| {
+        candidate.page_no == section.start_page
+            && chapter_title_match_key(&candidate.text) == title_key
+            && is_explicit_chapter_boundary_candidate(candidate)
+    });
+    if !has_explicit_boundary {
+        return section.filtered_pages.len();
+    }
+
+    let next_boundary = heading_candidates
+        .iter()
+        .filter(|candidate| {
+            candidate.page_no > section.start_page
+                && is_explicit_chapter_boundary_candidate(candidate)
+        })
+        .map(|candidate| candidate.page_no)
+        .min();
+    let last_page = page_roles
+        .keys()
+        .copied()
+        .max()
+        .unwrap_or(section.start_page);
+    let end_page = next_boundary.map(|page| page - 1).unwrap_or(last_page);
+
+    page_roles
+        .iter()
+        .filter(|(page, role)| {
+            section.start_page <= **page
+                && **page <= end_page
+                && matches!(role.as_str(), "body" | "front_matter")
+        })
+        .count()
+}
+
 #[allow(dead_code)]
 pub struct ClassifiedSection {
     section_id: String,
@@ -197,7 +245,7 @@ pub fn classify_fallback_sections(
     for section in section_rows {
         let title = normalize_title(&section.title);
         let start_page = section.start_page;
-        let span_pages = section.filtered_pages.len();
+        let span_pages = classification_span_pages(&section, page_roles, heading_candidates);
 
         // Find matched heading_candidates for evidence
         let title_key = chapter_title_match_key(&title);
@@ -407,10 +455,54 @@ pub fn mark_suppressed_candidates(
 
 // ── 构建 fallback 章节和节头 ─────────────────────────────────────
 
+/// 找到书末按章汇总尾注的起始页。
+///
+/// note 页面重现一个早期章节标题，且该章节之后已有其它正文 chapter 时，
+/// 该标题不是新正文起点，而是书末尾注的章节分组标题。
+fn book_endnote_start_from_replayed_prior_chapter_titles(
+    classified: &[ClassifiedSection],
+    heading_candidates: &[HeadingCandidate],
+    page_roles: &HashMap<i64, String>,
+) -> Option<i64> {
+    let kept_titles: Vec<(i64, String)> = classified
+        .iter()
+        .filter(|section| section.keep_as_chapter)
+        .filter_map(|section| {
+            let key = chapter_title_match_key(&section.title);
+            (!key.is_empty()).then_some((section.start_page, key))
+        })
+        .collect();
+
+    heading_candidates
+        .iter()
+        .filter(|candidate| {
+            page_roles
+                .get(&candidate.page_no)
+                .is_some_and(|role| role == "note")
+        })
+        .filter_map(|candidate| {
+            let key = chapter_title_match_key(&candidate.text);
+            let matched_start = kept_titles
+                .iter()
+                .find(|(start_page, title_key)| {
+                    *start_page < candidate.page_no && *title_key == key
+                })
+                .map(|(start_page, _)| *start_page)?;
+            kept_titles
+                .iter()
+                .any(|(start_page, _)| {
+                    matched_start < *start_page && *start_page < candidate.page_no
+                })
+                .then_some(candidate.page_no)
+        })
+        .min()
+}
+
 pub fn build_fallback_chapters_and_sections(
     classified: Vec<ClassifiedSection>,
     all_pages: &[i64],
     page_roles: &HashMap<i64, String>,
+    heading_candidates: &[HeadingCandidate],
 ) -> (Vec<ChapterRecord>, Vec<SectionHeadRecord>) {
     if classified.is_empty() || all_pages.is_empty() {
         return (vec![], vec![]);
@@ -424,6 +516,11 @@ pub fn build_fallback_chapters_and_sections(
     if kept_indices.is_empty() {
         return (vec![], vec![]);
     }
+    let book_endnote_start = book_endnote_start_from_replayed_prior_chapter_titles(
+        &classified,
+        heading_candidates,
+        page_roles,
+    );
 
     let mut chapters: Vec<ChapterRecord> = Vec::new();
     let mut section_to_chapter: HashMap<String, String> = HashMap::new();
@@ -458,6 +555,11 @@ pub fn build_fallback_chapters_and_sections(
                 role == "body" || role == "front_matter"
             })
             .collect();
+        if let Some(endnote_start) = book_endnote_start {
+            if section_start < endnote_start {
+                filtered.retain(|page| *page < endnote_start);
+            }
+        }
         if filtered.is_empty() {
             filtered = section.filtered_pages.clone();
         }
@@ -716,8 +818,12 @@ pub fn build_chapter_skeleton_fallback(
     mark_suppressed_candidates(&classified, heading_candidates);
 
     // Step 4: build chapters + section heads
-    let (chapters, _section_heads) =
-        build_fallback_chapters_and_sections(classified, &all_pages, &page_roles);
+    let (chapters, _section_heads) = build_fallback_chapters_and_sections(
+        classified,
+        &all_pages,
+        &page_roles,
+        heading_candidates,
+    );
 
     // Step 5: normalize
     normalize_chapters(chapters)
@@ -967,6 +1073,13 @@ mod tests {
         }
     }
 
+    fn top_doc_hc(page_no: i64, text: &str) -> HeadingCandidate {
+        let mut candidate = hc(page_no, text, "ocr_block", "chapter");
+        candidate.block_label = "doc_title".into();
+        candidate.top_band = true;
+        candidate
+    }
+
     #[test]
     fn fallback_single_chapter() {
         let parts = vec![
@@ -1026,6 +1139,57 @@ mod tests {
             build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 4);
         assert_eq!(chapters.len(), 1);
         assert_eq!(chapters[0].title, "Chapter One");
+    }
+
+    #[test]
+    fn top_level_doc_titles_are_not_shortened_by_nested_section_headings() {
+        let parts: Vec<PagePartitionRecord> = (1..=12).map(|p| pp(p, PageRole::Body)).collect();
+        let mut hcs = vec![
+            top_doc_hc(1, "First Main Subject"),
+            hc(2, "Nested discussion", "ocr_block", "section"),
+            top_doc_hc(7, "Second Main Subject"),
+            hc(8, "Another nested discussion", "ocr_block", "section"),
+        ];
+
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 12);
+
+        assert_eq!(chapters.len(), 2);
+        assert_eq!(chapters[0].pages, vec![1, 2, 3, 4, 5, 6]);
+        assert_eq!(chapters[1].pages, vec![7, 8, 9, 10, 11, 12]);
+    }
+
+    #[test]
+    fn fallback_chapter_preserves_body_after_internal_note_band() {
+        let mut parts: Vec<PagePartitionRecord> = (1..=4).map(|p| pp(p, PageRole::Body)).collect();
+        parts.extend((5..=6).map(|p| pp(p, PageRole::Note)));
+        parts.extend((7..=10).map(|p| pp(p, PageRole::Body)));
+        let mut hcs = vec![hc(1, "Chapter One", "visual_toc", "chapter")];
+
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 10);
+
+        assert_eq!(chapters.len(), 1);
+        assert_eq!(chapters[0].pages, vec![1, 2, 3, 4, 7, 8, 9, 10]);
+    }
+
+    #[test]
+    fn fallback_stops_after_book_endnote_run_that_replays_prior_chapter_titles() {
+        let mut parts: Vec<PagePartitionRecord> = (1..=8).map(|p| pp(p, PageRole::Body)).collect();
+        parts.extend((9..=12).map(|p| pp(p, PageRole::Note)));
+        parts.extend((13..=14).map(|p| pp(p, PageRole::Body)));
+        let mut hcs = vec![
+            hc(1, "Introduction", "visual_toc", "chapter"),
+            hc(5, "Epilogue", "visual_toc", "chapter"),
+            hc(9, "Introduction", "ocr_block", "section"),
+        ];
+
+        let chapters =
+            build_chapter_skeleton_fallback(&parts, &mut hcs, &HeadingGraph::default(), 14);
+
+        assert_eq!(chapters.len(), 2);
+        assert_eq!(chapters[1].title, "Epilogue");
+        assert_eq!(chapters[1].pages, vec![5, 6, 7, 8]);
     }
 
     #[test]

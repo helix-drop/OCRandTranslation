@@ -5,6 +5,7 @@ use fnm_core::note_marker::first_notes_heading;
 use fnm_core::records::ChapterRecord;
 use std::collections::HashMap;
 
+use crate::note_items::marker_parse::has_multiple_digit_note_definitions;
 use crate::note_regions::chapter_lookup::find_chapter_id;
 use fnm_phase1::input::RawPage;
 
@@ -30,6 +31,7 @@ pub fn is_endnote_candidate_page(
     page_role_by_no: &HashMap<i64, String>,
     page_by_no: &HashMap<i64, &RawPage>,
     first_body_page: i64,
+    last_body_page: i64,
 ) -> bool {
     let page = match page_by_no.get(&page_no) {
         Some(p) => p,
@@ -49,6 +51,9 @@ pub fn is_endnote_candidate_page(
     // page_role == "note" — 需要 endnote 正向证据
     if page_role == "note" {
         if !first_notes_heading(&page.markdown).is_empty() {
+            return true;
+        }
+        if page_no > last_body_page && has_multiple_digit_note_definitions(&page.markdown) {
             return true;
         }
         // 必须 page_kind 是 endnote 或存在 endnote kind 的 scan items

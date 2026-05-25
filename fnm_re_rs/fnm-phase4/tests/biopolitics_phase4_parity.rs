@@ -34,7 +34,13 @@ fn load_golden() -> Phase4Golden {
     serde_json::from_str(data).expect("Failed to parse golden fixture")
 }
 
-fn make_chapter(chapter_id: &str, title: &str, start: i64, end: i64, boundary: BoundaryState) -> ChapterRecord {
+fn make_chapter(
+    chapter_id: &str,
+    title: &str,
+    start: i64,
+    end: i64,
+    boundary: BoundaryState,
+) -> ChapterRecord {
     ChapterRecord {
         chapter_id: chapter_id.to_string(),
         title: title.to_string(),
@@ -179,7 +185,11 @@ fn biopolitics_phase4_real_translation_units() {
             page_start: (i - 1) * 30 + 1,
             page_end: i * 30,
             char_count: 200,
-            source_text: format!("Chapter {} body text with {} ref.", i, refs::frozen_note_ref(&format!("ref{}", i))),
+            source_text: format!(
+                "Chapter {} body text with {} ref.",
+                i,
+                refs::frozen_note_ref(&format!("ref{}", i))
+            ),
             ..Default::default()
         });
     }
@@ -230,7 +240,10 @@ fn biopolitics_phase4_real_translation_units() {
 
     // NOTE_REF token 未修改（body unit 的 source_text 含 token，note unit 在 target_ref）
     assert!(units[0].source_text.contains("{{NOTE_REF:ref1}}"));
-    let body_with_token: Vec<_> = units.iter().filter(|u| u.source_text.contains("{{NOTE_REF:")).collect();
+    let body_with_token: Vec<_> = units
+        .iter()
+        .filter(|u| u.source_text.contains("{{NOTE_REF:"))
+        .collect();
     assert_eq!(body_with_token.len(), 12);
     // note units 的 target_ref 保留
     let fn_note = units.iter().find(|u| u.note_id == "f001").unwrap();
@@ -332,9 +345,8 @@ fn biopolitics_phase4_real_structure_reviews() {
         ..Default::default()
     };
 
-    let (reviews, _summary) = build_structure_reviews(
-        &chapters, &anchors, &links, &summary, 0, 0, &freeze_errors,
-    );
+    let (reviews, _summary) =
+        build_structure_reviews(&chapters, &anchors, &links, &summary, 0, 0, &freeze_errors);
 
     // 期望：
     //   - 1 boundary_review_required (ch02)
@@ -359,8 +371,14 @@ fn biopolitics_phase4_real_structure_reviews() {
     assert_eq!(type_counts.get("freeze_matched_ref_not_injected"), Some(&1));
 
     // freeze blocker 的 payload 包含定位证据
-    let freeze_review = reviews.iter().find(|r| r.review_type == "freeze_matched_ref_not_injected").unwrap();
+    let freeze_review = reviews
+        .iter()
+        .find(|r| r.review_type == "freeze_matched_ref_not_injected")
+        .unwrap();
     assert_eq!(freeze_review.payload["link_id"].as_str(), Some("l003"));
-    assert_eq!(freeze_review.payload["skip_category"].as_str(), Some("ceiling_skip"));
+    assert_eq!(
+        freeze_review.payload["skip_category"].as_str(),
+        Some("ceiling_skip")
+    );
     assert_eq!(freeze_review.severity, "error");
 }

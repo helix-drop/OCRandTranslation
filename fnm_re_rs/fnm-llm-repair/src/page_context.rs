@@ -270,7 +270,7 @@ pub fn fnm_page_role_by_no(doc_id: &str, repo: &dyn Repository) -> HashMap<i64, 
     roles
 }
 
-/// (page_no, byte_start, byte_end) span 三元组，单位均为字节偏移。
+/// (page_no, char_start, char_end) span 三元组，单位均为 Python 字符索引。
 pub type BodySpan = (i64, usize, usize);
 
 fn raw_page_markdown_trimmed(page: &RawPage) -> String {
@@ -328,9 +328,9 @@ pub fn build_chapter_body_text(
             }
             if !parts.is_empty() {
                 parts.push(sep.to_string());
-                cursor += sep.len();
+                cursor += sep.chars().count();
             }
-            let len = text.len();
+            let len = text.chars().count();
             parts.push(text);
             spans.push((page_no, cursor, cursor + len));
             cursor += len;
@@ -362,9 +362,9 @@ pub fn build_fallback_body_text_from_contexts(
         }
         if !parts.is_empty() {
             parts.push(sep.to_string());
-            cursor += sep.len();
+            cursor += sep.chars().count();
         }
-        let len = text.len();
+        let len = text.chars().count();
         parts.push(text);
         spans.push((page_no, cursor, cursor + len));
         cursor += len;
@@ -588,6 +588,17 @@ mod tests {
         // start 在 page5，end 在 page6 → 取 start 所在页
         let r = resolve_page_span_from_range(&spans, 5, 15);
         assert_eq!(r, Some((5, 0)));
+    }
+
+    #[test]
+    fn test_fallback_body_spans_use_character_offsets() {
+        let contexts = vec![
+            json!({"page_no": 5, "ocr_excerpt": "é"}),
+            json!({"page_no": 6, "ocr_excerpt": "body"}),
+        ];
+        let (text, spans) = build_fallback_body_text_from_contexts(Some(&contexts));
+        assert_eq!(text, "é\n\nbody");
+        assert_eq!(spans, vec![(5, 0, 1), (6, 3, 7)]);
     }
 
     #[test]

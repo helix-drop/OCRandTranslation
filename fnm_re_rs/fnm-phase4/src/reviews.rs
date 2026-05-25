@@ -383,7 +383,15 @@ mod tests {
     #[test]
     fn test_boundary_review_required() {
         let chapters = vec![make_chapter("ch1", BoundaryState::ReviewRequired)];
-        let (reviews, _) = build_structure_reviews(&chapters, &[], &[], &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &chapters,
+            &[],
+            &[],
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "boundary_review_required");
     }
@@ -391,7 +399,15 @@ mod tests {
     #[test]
     fn test_uncertain_anchor_unknown_kind() {
         let anchors = vec![make_anchor("a1", "ch1", 10, AnchorKind::Unknown, 1.0)];
-        let (reviews, _) = build_structure_reviews(&[], &anchors, &[], &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &anchors,
+            &[],
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "uncertain_anchor");
     }
@@ -399,7 +415,15 @@ mod tests {
     #[test]
     fn test_uncertain_anchor_low_certainty() {
         let anchors = vec![make_anchor("a1", "ch1", 10, AnchorKind::Footnote, 0.5)];
-        let (reviews, _) = build_structure_reviews(&[], &anchors, &[], &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &anchors,
+            &[],
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "uncertain_anchor");
     }
@@ -412,7 +436,15 @@ mod tests {
             LinkStatus::OrphanNote,
             NoteKind::Footnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "footnote_orphan_note");
     }
@@ -425,7 +457,15 @@ mod tests {
             LinkStatus::OrphanAnchor,
             NoteKind::Endnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "endnote_orphan_anchor");
     }
@@ -438,7 +478,15 @@ mod tests {
             LinkStatus::Ambiguous,
             NoteKind::Footnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "ambiguous");
         assert_eq!(reviews[0].severity, "warning");
@@ -452,7 +500,15 @@ mod tests {
             LinkStatus::Ignored,
             NoteKind::Footnote,
         )];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert!(reviews.is_empty());
     }
 
@@ -462,7 +518,8 @@ mod tests {
             chapter_title_alignment_ok: false,
             ..default_summary()
         };
-        let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
+        let (reviews, _) =
+            build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "toc_alignment_review_required");
     }
@@ -473,7 +530,8 @@ mod tests {
             toc_semantic_contract_ok: false,
             ..default_summary()
         };
-        let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
+        let (reviews, _) =
+            build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "toc_semantic_review_required");
     }
@@ -484,7 +542,15 @@ mod tests {
             make_link("l1", "ch1", LinkStatus::OrphanNote, NoteKind::Footnote),
             make_link("l1", "ch1", LinkStatus::OrphanNote, NoteKind::Footnote), // 重复
         ];
-        let (reviews, _) = build_structure_reviews(&[], &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &[],
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 1);
     }
 
@@ -497,8 +563,15 @@ mod tests {
             LinkStatus::OrphanNote,
             NoteKind::Footnote,
         )];
-        let (reviews, _) =
-            build_structure_reviews(&chapters, &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (reviews, _) = build_structure_reviews(
+            &chapters,
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(reviews.len(), 2);
         // boundary_review_required < footnote_orphan_note (按 review_type 排序)
         assert_eq!(reviews[0].review_type, "boundary_review_required");
@@ -514,8 +587,15 @@ mod tests {
             LinkStatus::Ambiguous,
             NoteKind::Footnote,
         )];
-        let (_, summary) =
-            build_structure_reviews(&chapters, &[], &links, &default_summary(), 0, 0, &default_freeze_error_rows());
+        let (_, summary) = build_structure_reviews(
+            &chapters,
+            &[],
+            &links,
+            &default_summary(),
+            0,
+            0,
+            &default_freeze_error_rows(),
+        );
         assert_eq!(summary["error_count"], 1);
         assert_eq!(summary["warning_count"], 1);
     }
@@ -533,7 +613,8 @@ mod tests {
             skip_category: "ceiling_skip".to_string(),
             page_no: 10,
         }];
-        let (reviews, _) = build_structure_reviews(&[], &[], &[], &default_summary(), 0, 0, &freeze_errors);
+        let (reviews, _) =
+            build_structure_reviews(&[], &[], &[], &default_summary(), 0, 0, &freeze_errors);
         assert_eq!(reviews.len(), 1);
         assert_eq!(reviews[0].review_type, "freeze_matched_ref_not_injected");
         assert_eq!(reviews[0].severity, "error");

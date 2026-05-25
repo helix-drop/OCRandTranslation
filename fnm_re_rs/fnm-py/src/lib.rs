@@ -626,6 +626,60 @@ fn run_doc_pipeline_json(
         .map_err(|e| PyRuntimeError::new_err(format!("serialize summary: {}", e)))
 }
 
+/// 对已验收的持久化 Phase 1-3 仅回放 Phase 4-6，不调用任何模型。
+///
+/// ←→ Stage 5 下游集成验收入口。
+#[pyfunction]
+#[pyo3(signature = (db_path, doc_id, slug="", max_body_chars=6000))]
+fn replay_phase4_to6_json(
+    db_path: &str,
+    doc_id: &str,
+    slug: &str,
+    max_body_chars: i64,
+) -> PyResult<String> {
+    let pool = open_pool(Path::new(db_path))
+        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
+    let repo = SqliteRepository::new(pool);
+    let config = PipelineConfig {
+        doc_id: doc_id.to_string(),
+        slug: if slug.is_empty() {
+            doc_id.to_string()
+        } else {
+            slug.to_string()
+        },
+        max_body_chars,
+        start_phase: fnm_orchestrator::StartPhase::FrozenUnits,
+        skip_sup_recovery: true,
+        skip_llm_verify: true,
+        pipeline_state: "downstream_replay".to_string(),
+        ..Default::default()
+    };
+    let snapshot = fnm_orchestrator::replay_phase4_to6_from_db(&repo, doc_id, config)
+        .map_err(|e| PyRuntimeError::new_err(format!("downstream replay: {}", e)))?;
+    let phase4 = snapshot
+        .phase4
+        .as_ref()
+        .ok_or_else(|| PyRuntimeError::new_err("downstream replay produced no phase4 output"))?;
+    let phase6 = snapshot
+        .phase6
+        .as_ref()
+        .ok_or_else(|| PyRuntimeError::new_err("downstream replay produced no phase6 output"))?;
+    let result = serde_json::json!({
+        "ok": true,
+        "doc_id": doc_id,
+        "slug": snapshot.slug,
+        "pipeline_run_id": snapshot.pipeline_run_id,
+        "unit_count": phase4.translation_units.len(),
+        "review_count": phase4.structure_reviews.len(),
+        "structure_state": phase6.export_audit.structure_state,
+        "can_ship": phase6.export_audit.can_ship,
+        "blocking_reasons": phase6.export_audit.blocking_reasons,
+        "model_requests": 0,
+    });
+    serde_json::to_string(&result)
+        .map_err(|e| PyRuntimeError::new_err(format!("serialize summary: {}", e)))
+}
+
 /// 对已有 Phase1-3 数据运行 LLM repair。
 ///
 /// 从 DB 拉 pages + phase1-3 → build unresolved clusters → 调 LLM → 物化 overrides。
@@ -1322,6 +1376,7 @@ fn fnm_re_rs(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_diagnostic_entry_for_page_json, m)?)?;
     m.add_function(wrap_pyfunction!(load_toc_items_for_doc_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_doc_pipeline_json, m)?)?;
+    m.add_function(wrap_pyfunction!(replay_phase4_to6_json, m)?)?;
     m.add_function(wrap_pyfunction!(run_llm_repair_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_doc_status_json, m)?)?;
     m.add_function(wrap_pyfunction!(build_unit_progress_json, m)?)?;

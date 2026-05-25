@@ -19,9 +19,43 @@ analyze_export_text = SCRIPT_NS["_analyze_export_text"]
 select_documents = SCRIPT_NS["select_documents"]
 select_documents_from_manifest = SCRIPT_NS["select_documents_from_manifest"]
 verify_fnm_structure = SCRIPT_NS["verify_fnm_structure"]
+materialize_test_placeholders = SCRIPT_NS["materialize_test_placeholders"]
 
 
 class FnmBatchReportTest(unittest.TestCase):
+    def test_materialize_placeholders_uses_explicit_db_path(self):
+        globals_dict = materialize_test_placeholders.__globals__
+        originals = {
+            key: globals_dict[key]
+            for key in (
+                "SQLiteRepository",
+                "load_pages_from_disk",
+                "rebuild_fnm_diagnostic_page_entries",
+                "_save_translate_state",
+                "sync_fnm_retry_state",
+            )
+        }
+        captured = {}
+
+        class _FakeRepo:
+            def __init__(self, db_path=None):
+                captured["db_path"] = db_path
+
+            def list_fnm_translation_units(self, _doc_id):
+                return []
+
+        try:
+            globals_dict["SQLiteRepository"] = _FakeRepo
+            globals_dict["load_pages_from_disk"] = lambda _doc_id: ([], "")
+            globals_dict["rebuild_fnm_diagnostic_page_entries"] = lambda *_args, **_kwargs: []
+            globals_dict["_save_translate_state"] = lambda *_args, **_kwargs: None
+            globals_dict["sync_fnm_retry_state"] = lambda *_args, **_kwargs: {}
+            materialize_test_placeholders("doc-1", db_path="/tmp/replay.db")
+        finally:
+            globals_dict.update(originals)
+
+        self.assertEqual(captured["db_path"], "/tmp/replay.db")
+
     def test_verify_fnm_structure_keeps_module_gate_blocking_reasons(self):
         globals_dict = verify_fnm_structure.__globals__
         original_repo_cls = globals_dict["SQLiteRepository"]

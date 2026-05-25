@@ -3,6 +3,7 @@
 //! 尾注 link 匹配：anchor → note_item 配对、orphan repair、正文搜索恢复。
 
 use fnm_core::records::{BodyAnchorRecord, NoteItemRecord, NoteRegionRecord};
+use fnm_core::text::byte_index_to_char_index;
 use fnm_core::types::{AnchorKind, LinkResolver, LinkStatus, NoteKind, RegionScope};
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -36,7 +37,6 @@ pub fn build_endnote_links(
     page_text_by_no: &HashMap<i64, String>,
     link_serial_start: usize,
     regions_by_id: &HashMap<String, &NoteRegionRecord>,
-    anchor_count_by_chapter: &HashMap<String, usize>,
     chapter_body_pages: &HashMap<String, HashSet<i64>>,
 ) -> (Vec<fnm_core::records::NoteLinkRecord>, Vec<usize>) {
     let mut links: Vec<fnm_core::records::NoteLinkRecord> = Vec::new();
@@ -87,31 +87,8 @@ pub fn build_endnote_links(
 
         let is_direct_match = !candidates.is_empty();
 
-        // fallback chapter 跨章搜索（带 anchor_count 守卫）
-        if candidates.is_empty()
-            && crate::link_utils::is_fallback_chapter_id(chapter_id)
-            && anchor_count_by_chapter
-                .get(chapter_id)
-                .copied()
-                .unwrap_or(0)
-                == 0
-        {
-            candidates = crate::link_utils::link_candidate_anchors(
-                anchors,
-                &crate::link_utils::CandidateFilter {
-                    chapter_id,
-                    marker,
-                    expected_kinds: &[AnchorKind::Endnote],
-                    used_anchor_ids,
-                    page_no: Some(note_item.page_no),
-                    footnote_window: false,
-                    include_synthetic: false,
-                    allow_cross_chapter: true,
-                },
-            );
-        }
-
-        // scope=book 跨章搜索（Python endnote_links.py:201-207）
+        // book-scope region 在 Phase 2 后仍可能未分配到真实章。
+        // Phase 3 不得只凭 marker 跨章重新分配；这里只接受同章 evidence。
         if candidates.is_empty() {
             let scope = regions_by_id
                 .get(&note_item.region_id)
@@ -309,8 +286,12 @@ pub fn build_endnote_links(
                             chapter_id: chapter_id.clone(),
                             page_no: *pno,
                             paragraph_index: 0,
-                            char_start: hit.start as i64,
-                            char_end: hit.end as i64,
+                            char_start: byte_index_to_char_index(body_text, hit.start)
+                                .expect("regex boundary")
+                                as i64,
+                            char_end: byte_index_to_char_index(body_text, hit.end)
+                                .expect("regex boundary")
+                                as i64,
                             source_marker: hit.matched_text.clone(),
                             normalized_marker: marker.clone(),
                             anchor_kind: AnchorKind::Endnote,
@@ -346,8 +327,10 @@ pub fn build_endnote_links(
                         chapter_id: chapter_id.clone(),
                         page_no: page_nos[0],
                         paragraph_index: 0,
-                        char_start: hit.start as i64,
-                        char_end: hit.end as i64,
+                        char_start: byte_index_to_char_index(&combined, hit.start)
+                            .expect("regex boundary") as i64,
+                        char_end: byte_index_to_char_index(&combined, hit.end)
+                            .expect("regex boundary") as i64,
                         source_marker: hit.matched_text.clone(),
                         normalized_marker: marker.clone(),
                         anchor_kind: AnchorKind::Endnote,

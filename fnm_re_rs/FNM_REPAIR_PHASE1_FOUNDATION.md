@@ -4,6 +4,8 @@
 
 本文是第一阶段的执行说明。接手人只读本文，应能知道为什么先修基础设施、要改哪些文件、每个文件怎么改、怎么验证。
 
+> 2026-05-25 状态覆盖：当前执行以 `FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 为准。本文保留阶段 1 的历史任务与证据，不表示当前工作区已经重新验收；在用户重新授权前不进行真实批跑或模型请求。
+
 ## 阶段目标
 
 先让 FNM Rust pipeline 的入口、DB contract、LLM 错误、trace、批测脚本稳定可信。
@@ -481,4 +483,3 @@ cd /Users/hao/OCRandTranslation
 ## 交接提醒
 
 本阶段修完后，不要直接在 Phase3/4/6 绕过 Biopolitics blocker。下一阶段必须进入 Phase2，修 note item 捕获边界，让 `endnote_region_marker_misalignment` 在源头消失。
-

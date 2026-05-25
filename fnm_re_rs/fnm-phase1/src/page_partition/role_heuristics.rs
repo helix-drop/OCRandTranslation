@@ -349,6 +349,22 @@ pub(crate) fn looks_like_note_continuation_page(
     note_def_count >= (4).max(lines.len() / 2)
 }
 
+/// 判断紧邻已确认 note 区之前的页面是否也是尾注开头页。
+///
+/// 与 `looks_like_note_continuation_page` 不同，首张尾注页允许在编号定义前包含
+/// 缩略语或章节标题；相邻 note 页由 caller 作为必要的正向证据。
+/// ←→ Python `_looks_like_note_continuation_page` 的首张页缺口修复。
+pub(crate) fn looks_like_note_leading_page(text: &str, page_no: i64, total_pages: i64) -> bool {
+    if page_no <= (8).max((total_pages as f64 * 0.03) as i64) {
+        return false;
+    }
+    let lines = plain_text_lines(text);
+    if lines.iter().any(|line| is_notes_heading_match(line)) {
+        return false;
+    }
+    lines.len() >= 4 && lines.iter().filter(|line| note_def_match(line)).count() >= 2
+}
+
 pub(crate) fn looks_like_bibliography_continuation_page(text: &str) -> bool {
     let normalized: String = plain_text_lines(text).join(" ");
     if normalized.is_empty() {

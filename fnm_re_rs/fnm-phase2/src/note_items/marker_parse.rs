@@ -40,6 +40,17 @@ static HTML_SUP_RE: Lazy<Regex> =
 
 static LATEX_SUP_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\$\s*\^\{(\d{1,4})\}\s*\$").unwrap());
 
+/// 判断页面是否包含足以支持 note partition 的编号定义证据。
+///
+/// region 候选判定只调用这一正向证据，不在上游复制完整 note item 解析流程。
+pub(crate) fn has_multiple_digit_note_definitions(text: &str) -> bool {
+    text.lines()
+        .filter(|line| NOTE_DEF_RE.is_match(line.trim()))
+        .take(2)
+        .count()
+        >= 2
+}
+
 // ── 补充 Python `shared/notes.py` regex ──────────────────────
 
 /// ←→ Python `_INLINE_NOTE_BREAK_RE`：修复行内注释放置的断点。

@@ -127,7 +127,6 @@ pub fn segment_paragraphs_from_body_pages(
                     source_text: String::new(),
                     display_text: String::new(),
                     paragraphs: visible_fallback,
-                    ..Default::default()
                 });
             }
             continue;
@@ -259,7 +258,6 @@ pub fn segment_paragraphs_from_body_pages(
                 source_text: String::new(),
                 display_text: String::new(),
                 paragraphs: normalized_paragraphs,
-                ..Default::default()
             });
         }
     }

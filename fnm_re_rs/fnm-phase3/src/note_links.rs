@@ -31,7 +31,7 @@ pub fn build_note_links(
 
     let mut used_anchor_ids: HashSet<String> = HashSet::new();
 
-    // 构建 regions_by_id + anchor_count_by_chapter
+    // 构建 regions_by_id
     let regions_by_id: HashMap<String, &NoteRegionRecord> = note_regions
         .iter()
         .filter_map(|r| {
@@ -43,15 +43,6 @@ pub fn build_note_links(
             }
         })
         .collect();
-    let mut anchor_count_by_chapter: HashMap<String, usize> = HashMap::new();
-    for anchor in anchors.iter() {
-        if !anchor.synthetic && !anchor.chapter_id.is_empty() {
-            *anchor_count_by_chapter
-                .entry(anchor.chapter_id.clone())
-                .or_default() += 1;
-        }
-    }
-
     // 按 page_no 排序 note_items
     let mut note_items_sorted: Vec<&NoteItemRecord> = note_items.iter().collect();
     note_items_sorted.sort_by_key(|row| (row.page_no, &row.note_item_id));
@@ -64,7 +55,6 @@ pub fn build_note_links(
         &page_text_by_no,
         link_serial_start,
         &regions_by_id,
-        &anchor_count_by_chapter,
         chapter_body_pages,
     );
 

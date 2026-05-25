@@ -7,6 +7,8 @@
 
 **重要区分**：本阶段修的是 orchestrator → LLM repair → PyO3 的**接线和流程闭合**问题，不是 `fnm-phase4` crate 内部的引用冻结/翻译单元逻辑（那属于阶段 5 的 Phase4 引用冻结修复）。
 
+> 2026-05-25 状态覆盖：当前工作区中的 repair/orchestrator/PyO3 改动为待复核候选实现，不能依据本文旧的上游“已验收”基线跳层继续。实施顺序、无真实 API 验证边界与完成判定以 `FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 为准。
+
 ## 一、阶段职责与口径
 
 ### 本阶段目标
@@ -26,13 +28,13 @@
 
 ## 二、必须先掌握的上下文
 
-### 1. 上游已验收基线
+### 1. 上游历史验收基线（当前须重新复核）
 
 | 阶段 | 状态 | 关键结论 |
 |---|---|---|
-| 阶段 1 | 已验收 | DB/error/trace/PyO3 panic 边界/Gemini provider 已修 |
-| 阶段 2 | 已验收 | Biopolitics + Goldstein 双书 `ready`、`blocked=0` |
-| 阶段 3 | 已完成 | 4 个 P0 全清零（contract 隔离、Unknown 拦截、upstream facts 透传、overrides 过滤） |
+| 阶段 1 | 历史验收记录 | DB/error/trace/PyO3 panic 边界/Gemini provider 当时已修 |
+| 阶段 2 | 历史验收记录 | Biopolitics + Goldstein 历史批次 `ready`、`blocked=0` |
+| 阶段 3 | 历史交接记录 | 当时记录 4 个 P0 已清零；后续追溯发现仍须重新打开合同复核 |
 
 阶段 2 的双书批跑证据：
 

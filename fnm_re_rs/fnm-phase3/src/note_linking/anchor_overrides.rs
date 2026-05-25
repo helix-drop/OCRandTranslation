@@ -167,7 +167,7 @@ pub fn materialize_anchor_overrides(
                 reasons.push(Value::String(format!("{}:non_body_page", target_id)));
                 continue;
             }
-            let text_len = body_text.unwrap().len() as i64;
+            let text_len = body_text.unwrap().chars().count() as i64;
             if char_end > text_len {
                 summary["rejected_count"] =
                     (summary["rejected_count"].as_i64().unwrap_or(0) + 1).into();

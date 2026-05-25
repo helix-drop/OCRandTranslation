@@ -167,6 +167,21 @@ def run_doc_pipeline(*args, **kwargs):
     return _json.loads(result_json)
 
 
+def replay_phase4_to6(*args, **kwargs):
+    """从落库的已验收 Phase 1-3 仅回放 Rust Phase 4-6，不调用模型。"""
+    import json as _json
+    import fnm_re_rs
+
+    doc_id = args[0] if args else kwargs.get("doc_id", "")
+    result_json = fnm_re_rs.replay_phase4_to6_json(
+        _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
+        doc_id,
+        kwargs.get("slug", "") or "",
+        int(kwargs.get("max_body_chars", 6000) or 6000),
+    )
+    return _json.loads(result_json)
+
+
 def load_doc_structure(*args, **kwargs):
     """←→ Rust fnm_re_rs.load_doc_structure_json"""
     import json as _json
@@ -631,6 +646,7 @@ def _resolve_db_path(db_path=None, repo=None):
 
 __all__ = [
     "run_doc_pipeline",
+    "replay_phase4_to6",
     "load_doc_structure",
     "build_doc_status",
     "build_export_bundle_for_doc",

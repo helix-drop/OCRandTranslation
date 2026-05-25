@@ -7,6 +7,8 @@
 
 本文给接手阶段 5 的实现者使用。读完本文后，应能直接确定本阶段为什么要修、哪些行为必须保持、哪些文件要先写失败测试再修改、如何判断阶段完成。
 
+> 2026-05-25 状态覆盖：Phase4 freeze blocker 门槛继续保留，但当前实现只视为候选闭合；必须先按 `FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 完成 Core 至 repair/编排的顺序复核。用户重新授权前不进行真实批跑或模型请求。
+
 ## 一、阶段定位
 
 ### 1. 本阶段修什么
@@ -27,6 +29,7 @@
 
 - 不修 Phase3 的 anchor/link 分类与 weak OCR parity 差异；已登记的 strict parity 留到阶段 7。
 - 不修 `fnm-phase5` 章节 Markdown 合并与 `fnm-phase6` 导出审计职责倒挂；它们属于阶段 6。
+- 不以 `semantic_golden` 的缺章、逐段正文或弱 OCR 差异阻断本阶段；这些报告用于向上游追溯，并在流程合同闭合后集中收敛。
 - 不为 Biopolitics 或 Goldstein 加书名特例、marker 黑名单或专书阈值。
 - 不修改 `real_golden_template/`，也不使用当前 Rust actual 覆盖 expected fixture。
 
@@ -41,14 +44,14 @@
 
 ## 二、进入本阶段的已确认基线
 
-### 1. 前序阶段状态
+### 1. 前序阶段历史状态（当前须按新计划复核）
 
 | 阶段 | 已确认事实 | 本阶段如何使用 |
 |---|---|---|
 | 阶段 1 | DB/error/trace/PyO3 基础边界闭合 | blocker 和持久化错误必须可见 |
 | 阶段 2 | note region/item/kind 是分类事实；双书曾 `ready` | Phase4 只透传 note metadata |
-| 阶段 3 | P0/P1 链接边界闭合；双书真实整批通过 | matched links 可作为冻结输入 |
-| 阶段 4 | repair 接线、PyO3 与 orchestrator 闭合已完成 | Phase4 将接收 repair 后的最新 Phase3 状态 |
+| 阶段 3 | 历史记录曾认为 P0/P1 闭合；后续已重新打开复核 | 只有重新确认后的 matched links 才可作为冻结输入 |
+| 阶段 4 | repair 接线、PyO3 与 orchestrator 存在候选实现，待复核 | Phase4 只可接收复核后的最新 Phase3 状态 |
 
 阶段 3 双书证据：
 
@@ -148,7 +151,7 @@ repair 模型具备视觉能力时，最多附加 5 页页面证据。真实批�
 - blocker 可通过持久化读回或阶段报告观察到。
 - `summary` 不是唯一证据；失败必须能阻止交付。
 
-### P0-3 UTF-8 非边界坐标可能 panic
+### P0-3 Python 字符坐标在 Rust 中被误作 UTF-8 字节坐标
 
 位置：
 
@@ -156,14 +159,14 @@ repair 模型具备视觉能力时，最多附加 5 页页面证据。真实批�
 
 现状：
 
-- `inject_token_once()` 对 `payload[..ce]`、`payload[cs..ce]` 直接 byte slice，未验证 `is_char_boundary()`。
-- repair/视觉/override 坐标落在法语重音或其它多字节字符中间时会 panic。
+- `inject_token_once()` 对 `payload[..ce]`、`payload[cs..ce]` 直接 byte slice。
+- 实批 DB 的 `char_start/char_end` 源于 Python 字符索引；在法语重音或其它多字节文本中直接按 Rust byte offset 使用会 panic 或误报失败。
 
 完成条件：
 
-- 非 UTF-8 边界坐标返回明确的未注入结果与 reason，不 panic。
-- 测试至少包含重音文本和非边界 offset。
-- 坐标单位在记录类型或函数文档中明确为 byte offset。
+- Python 字符 offset 先转换为合法 UTF-8 byte boundary 后再切片，不 panic。
+- 超出字符范围且无法通过 marker 证据回退的坐标，返回明确 reason 并形成 blocker。
+- 测试至少包含重音/中文字符 offset 成功注入与越界 offset 阻断。
 
 ### P1-1 note units 元数据在中间转换中丢失
 
@@ -296,14 +299,14 @@ repair 模型具备视觉能力时，最多附加 5 页页面证据。真实批�
 
 改法：
 
-- 给坐标切片增加 UTF-8 boundary 校验，并返回含 reason 的结果类型；不要只返回 `(String, bool)` 后丢失原因。
-- 区分 `token_not_found`、`invalid_utf8_boundary`、`missing_anchor` 等 reason。
+- 将上游 Python 字符 offset 转换为 Rust UTF-8 byte boundary，并返回含 reason 的结果类型；不要只返回 `(String, bool)` 后丢失原因。
+- 区分 `token_not_found`、`coordinate_out_of_range`、`missing_anchor` 等 reason。
 - 读取并尊重权威 owner 字段；若核心 records 不足，先扩合同再继续。
 - 失败不调用 marker 清理。
 
 验收：
 
-- 法语重音/中文非边界坐标测试不 panic，并产生 blocker。
+- 法语重音/中文合法字符坐标测试可注入；越界坐标不 panic 且产生 blocker。
 - 注入成功路径行为不退化。
 
 ### 任务 6：`fnm-phase4/src/ref_freeze/mod.rs`
@@ -390,7 +393,7 @@ repair 模型具备视觉能力时，最多附加 5 页页面证据。真实批�
 | 2 | 顶层入口保留 footnote/endnote note units | `tests/spec_tests.rs` | P0 |
 | 3 | matched 注入失败形成 blocker | `tests/spec_tests.rs` | P0 |
 | 4 | 注入失败保留原 marker | `tests/spec_tests.rs` | P1 |
-| 5 | 非 ASCII 非边界坐标不 panic 且有 reason | `src/ref_freeze/inject.rs` tests | P0 |
+| 5 | 非 ASCII 字符坐标正确注入、越界坐标有 reason | `src/ref_freeze/inject.rs` tests | P0 |
 | 6 | owner/book-scope note 归属透传 | `tests/spec_tests.rs` | P1 |
 | 7 | freeze reviews/products 持久化 roundtrip | `fnm-core` 或 orchestrator tests | P1 |
 | 8 | Phase4 blocker 能穿过 orchestrator 到最终状态 | `fnm-orchestrator` tests | P1 |
@@ -447,9 +450,19 @@ git diff -- test_example/Biopolitics/golden_exports/real_golden_template \
   test_example/post-revolutionary/golden_exports/real_golden_template
 ```
 
-### 3. 阶段交付真实整批
+### 3. 阶段交付回放与真实整批边界
 
-阶段 5 改变最终业务输出，交付前必须重建 PyO3 并完整顺序跑两书。不能使用 `--skip-translation`，不能因时间长而中断：
+阶段 5 只改 Phase4-6。已有 Phase1-3 验收 DB 足够时，先重建 PyO3 后运行不调用模型的下游回放；它复制源 DB，不覆盖上游验收事实：
+
+```bash
+cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
+../../.venv/bin/maturin develop --release
+
+cd /Users/hao/OCRandTranslation
+.venv/bin/python scripts/test_fnm_downstream_replay.py --tag phase5_acceptance
+```
+
+若目标是验证视觉/repair 网络调用或完成最终内容交付，才必须完整顺序跑两书真实整批。仅为排查 P0/P1 程序合同而修改 Phase1-3 时，应先在相应 crate 和可复制诊断库中逐层验证，不为已知内容差异消耗模型额度。启动真实整批后不能使用 `--skip-translation`，也不能因时间长而中断：
 
 ```bash
 cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
@@ -504,13 +517,13 @@ cargo clippy --all-targets -- -D warnings
 | 1 | 顶层 Phase4 只有一条权威 ref-freeze/injection 路径 |
 | 2 | translation units 从 frozen units 派生，不从 raw pages 二次注入 |
 | 3 | matched link 无法注入时产生 `freeze_matched_ref_not_injected` blocker/review |
-| 4 | 非 UTF-8 边界坐标不 panic，错误有可追溯 reason |
+| 4 | Python 字符 offset 可安全转换，越界错误有可追溯 reason |
 | 5 | 注入失败保留原 marker，不把失败伪装成正文 clean |
 | 6 | note kind 与 owner 透传上游事实，footnote/endnote/book-scope 测试通过 |
 | 7 | Phase4 blocker 能持久化并穿过 orchestrator 被最终状态观察 |
 | 8 | 真实 Rust Phase4 fixture 测试已建立；P2 差异不被伪装为通过 |
 | 9 | `cargo fmt --check` 与受影响 crate 测试通过，无新增 lint 抑制 |
-| 10 | Biopolitics 与 Goldstein 完整真实批次自然结束，无新增阶段 5 P0/P1 blocker |
+| 10 | 程序合同验收使用已完成上游合同复核后的双书复制库回放且无 Phase4 blocker；真实视觉/repair 与内容交付由后续集成/最终验收执行 |
 | 11 | `real_golden_template/` 无改动，actual 未覆盖 expected |
 
 ## 九、交接输出要求
@@ -519,6 +532,49 @@ cargo clippy --all-targets -- -D warnings
 
 1. 按任务号列出的修改文件与实现结果。
 2. 新增测试名称及其 RED/GREEN 证据。
-3. 双书整批目录、状态、blocker、模型调用数与 trace 位置。
+3. 双书回放或真实整批目录、状态、blocker、模型调用数与 trace 位置。
 4. 已明确后置到阶段 7 的 P2 差异及回溯入口。
 5. 若阶段 5 未完成，精确说明阻断在哪个任务和哪条证据，不得写“基本完成”。
+
+## 十、2026-05-24 实施与验收记录
+
+已落地：
+
+- Phase4 translation units 从 `FrozenUnits` 单向映射，freeze 错误通过 `freeze_matched_ref_not_injected` 持久化并由 Phase6 阻断。
+- `fnm-core/src/text.rs` 修复 `enriched_markdown=null` 导致正文读取为空的问题。
+- `BodyAnchorRecord.char_start/char_end` 合同统一为 Python 字符索引；`fnm-phase3` 与 `fnm-llm-repair` 产出端已按字符写入，`ref_freeze/inject.rs` 仅在切片时转换为 Rust 字节边界，越界记录 `coordinate_out_of_range`。
+- `ref_freeze/mod.rs` 使用 anchor 所属章定位正文注入，保留 book-scope note 原归属。
+- 新增 `scripts/test_fnm_downstream_replay.py` 与 PyO3 回放入口，双书复制 DB 后只运行 Phase4-6，再在复制库写占位译文并执行翻译后导出检查；模型请求数为 0。
+
+当前验收结论：**阶段 5 尚不能标为交付完成**。
+
+| 书 | 产物 | 回放结果 | 冻结 blocker |
+|---|---|---|---|
+| Biopolitics | `output/fnm_downstream_replay/phase5_acceptance_final/Biopolitics/` | 上游表未改写；占位译文成功；未放行 | `token_not_found=1` |
+| Goldstein | `output/fnm_downstream_replay/phase5_acceptance_final/Goldstein/` | 上游表未改写；占位译文成功；未放行 | `token_not_found=90`, `coordinate_out_of_range=1` |
+
+该回放故意复制坐标合同修复前的 Phase1-3 DB；其结论是旧输入能够被 Phase4 稳定阻断，而不是新 Phase3 已生成干净数据。Goldstein 的主要证据：同一正文坐标存在两条 Phase3 `matched` link，例如 page 288 的 `$ ^{8} $` 同时对应 `link-00395` 与 `link-00495`，Phase4 首次注入后第二条必然无法再注入。下一步应修 Phase3 重复 matched 来源与 Biopolitics page 96 单元缺失来源；由于坐标产出端已经改变，修清后必须运行新的双书真实整批刷新证据，而不是降低 Phase4 blocker。
+
+验证补充：
+
+- `cargo test --all`、`cargo build --release`、Python 批测单测/编译检查通过；`real_golden_template/` 未修改。
+- 本阶段实现范围的严格 lint 已闭合：`cargo clippy --no-deps -p fnm-phase4 -p fnm-phase6 --all-targets -- -D warnings` 通过，其中已清除 Phase4 循环内 `Regex::new()` 等违反仓库规范的项目。
+- 全 workspace 的 `cargo clippy --all-targets -- -D warnings` 仍被前序或相邻模块债务阻断：`fnm-core` 有 5 个 `too_many_arguments`；隔离检查暴露 `fnm-phase3` 的 `too_many_arguments`/`ptr_arg`、`fnm-llm-repair` 的 `filter_map_bool_then`/`assertions_on_constants`/`redundant_locals`，以及 `fnm-orchestrator` 的参数过多、无效 `.into()`、可派生默认实现等 lint。这些不是降低 Phase4 blocker 的理由，应纳入后续代码质量清理。
+- 全量测试过程中复现并修复了 `fnm-llm-repair` trace dump 测试的共享全局用量记录竞争：无预置状态测试不再清空其他并行测试的记录。`cargo test --all` 与 `cargo build --release` 已重新通过。
+
+## 十一、2026-05-25 门槛校正与当前结论
+
+本阶段原先把“上游事实有误后造成的冻结 blocker”和“根底本内容仍不一致”混在同一收口判断里。现按总领计划重新划分：
+
+| 证据 | 说明 | 本阶段判定 |
+|---|---|---|
+| `phase5_acceptance_final` 中的冻结 blocker | 旧 Phase1-3 输入可稳定触发 Phase4 拒绝，且拒绝是正确行为 | 不应放宽门禁，应回到上游修合同 |
+| `phase5_rootfix_diagnostic_v4/` | 刷新上游 link/region 后，Biopolitics 与 Goldstein 复制库均 `blocking=0`；模型请求为 0 | Phase4 冻结合同已有闭合证据 |
+| `phase5_rootfix_diagnostic_v5/` | Goldstein 恢复两个具有明确 `doc_title` 证据的章节后仍 `blocking=0` | 上游章节边界变化未打破冻结合同 |
+| `semantic_markdown_report.json` 失败 | 仍有缺章、文本与 refs/defs 差异 | 记录为内容/P2 追溯，不作为 Phase4 门禁 |
+
+当前处理策略：
+
+1. 阶段 5 不再因逐段 golden 失败而保持阻断；冻结合同是否成立只看 Phase4 自身事实是否可注入或明确阻断、诊断是否可追溯。
+2. 因后续追溯已经修改 Core/Phase1-3，正式确认状态前按 `Core -> Phase1 -> Phase2 -> Phase3 -> LLM repair/编排 -> Phase4` 顺序复核程序合同。
+3. 诊断末尾发现 Phase1 漏标题恢复尝试使用了数据库不允许的新 `source` 值，且该识别启发式属于内容调校；当前已将此尝试移出代码变更，Goldstein 剩余漏章留到内容收敛阶段处理。按暂停测试要求，不宣称新的验证结果。

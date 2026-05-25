@@ -97,10 +97,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn dump_traces_empty_records() {
-        fnm_core::token_counter::clear_usage();
+    fn dump_traces_without_setup_does_not_panic() {
         let dir = tempfile::tempdir().unwrap();
-        // 并行测试可能污染全局状态，只验证不 panic
+        // 全局记录可能被并行测试写入；这里只验证无预置状态时不 panic。
         let _written = dump_traces(dir.path().to_str().unwrap(), "test-doc");
     }
 

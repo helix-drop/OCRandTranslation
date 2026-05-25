@@ -214,15 +214,11 @@ pub fn build_phase1_structure(
     };
 
     // 10. 组装 Phase1Structure（page_partitions 已 owned，零 clone）
-    let toc_semantic_meta = skeleton
-        .diagnostics
-        .get("toc_semantic_meta")
-        .cloned()
-        .unwrap_or_default();
+    // builder.rs 把 toc_semantics 的完整 meta 写入 diagnostics 顶层，不再嵌套 toc_semantic_meta
     let toc_tree = build_toc_tree(
         toc_items.unwrap_or(&[]),
         &skeleton.chapters,
-        &toc_semantic_meta,
+        &skeleton.diagnostics,
     );
 
     // D5: TOC tree 过滤/补入（←→ Python toc_structure.py:401-449）
@@ -325,8 +321,7 @@ pub fn build_phase1_structure(
     });
     let toc_semantic_contract_ok = skeleton
         .diagnostics
-        .get("toc_semantic_meta")
-        .and_then(|m| m.get("toc_semantic_contract_ok"))
+        .get("toc_semantic_contract_ok")
         .and_then(|v| v.as_bool())
         .unwrap_or(true);
     let first_back_matter_page = page_roles
@@ -370,16 +365,14 @@ pub fn build_phase1_structure(
     let has_exportable_chapters = !filtered_chapters.is_empty();
     let chapter_titles_aligned = skeleton
         .diagnostics
-        .get("toc_semantic_meta")
-        .and_then(|m| m.get("chapter_title_alignment_ok"))
+        .get("chapter_title_alignment_ok")
         .and_then(|v| v.as_bool())
         .unwrap_or(true);
 
     let section_alignment_warn = chapter_titles_aligned;
     let visual_toc_conflict_count = skeleton
         .diagnostics
-        .get("toc_semantic_meta")
-        .and_then(|m| m.get("visual_toc_conflict_count"))
+        .get("visual_toc_conflict_count")
         .and_then(|v| v.as_i64())
         .unwrap_or(0);
     let visual_toc_conflict_warn = visual_toc_conflict_count == 0;

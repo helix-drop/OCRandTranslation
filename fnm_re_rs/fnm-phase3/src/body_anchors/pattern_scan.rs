@@ -4,6 +4,7 @@
 
 use fnm_core::anchor_kind::{is_bracket_ref_valid, looks_like_year_marker, patterns};
 use fnm_core::note_marker::normalize_note_marker;
+use fnm_core::text::byte_index_to_char_index;
 use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
@@ -175,8 +176,8 @@ pub fn scan_inline_refs(text: &str) -> Vec<RawAnchor> {
             refs.push(RawAnchor {
                 source_marker: raw.to_string(),
                 normalized_marker: marker,
-                char_start: m.start(),
-                char_end: m.end(),
+                char_start: byte_index_to_char_index(text, m.start()).expect("regex boundary"),
+                char_end: byte_index_to_char_index(text, m.end()).expect("regex boundary"),
                 pattern: "unicode".to_string(),
                 certainty: pattern_certainty("unicode"),
             });
@@ -199,8 +200,8 @@ pub fn scan_inline_refs(text: &str) -> Vec<RawAnchor> {
         refs.push(RawAnchor {
             source_marker: digit_match.as_str().to_string(),
             normalized_marker: marker,
-            char_start: digit_start,
-            char_end: digit_end,
+            char_start: byte_index_to_char_index(text, digit_start).expect("regex boundary"),
+            char_end: byte_index_to_char_index(text, digit_end).expect("regex boundary"),
             pattern: "bare_digit".to_string(),
             certainty: pattern_certainty("bare_digit"),
         });
@@ -262,12 +263,12 @@ fn extract_marker(caps: &regex::Captures<'_>, group_idx: usize) -> Option<String
     }
 }
 
-fn build_raw_anchor(_text: &str, m: regex::Match, marker: &str, kind: &str) -> RawAnchor {
+fn build_raw_anchor(text: &str, m: regex::Match, marker: &str, kind: &str) -> RawAnchor {
     RawAnchor {
         source_marker: m.as_str().trim().to_string(),
         normalized_marker: marker.to_string(),
-        char_start: m.start(),
-        char_end: m.end(),
+        char_start: byte_index_to_char_index(text, m.start()).expect("regex boundary"),
+        char_end: byte_index_to_char_index(text, m.end()).expect("regex boundary"),
         pattern: kind.to_string(),
         certainty: pattern_certainty(kind),
     }
@@ -292,5 +293,21 @@ fn preferred(left: RawAnchor, right: RawAnchor) -> RawAnchor {
         right
     } else {
         left
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn inline_ref_offsets_follow_python_character_indices() {
+        let refs = scan_inline_refs("économie¹⁶");
+        let anchor = refs
+            .iter()
+            .find(|row| row.source_marker == "¹⁶")
+            .expect("unicode marker");
+        assert_eq!(anchor.char_start, 8);
+        assert_eq!(anchor.char_end, 10);
     }
 }

@@ -80,7 +80,10 @@ fn spec_translation_units_body_from_frozen_one_to_one() {
     assert_eq!(units.len(), 2);
     assert_eq!(units[0].unit_id, "body-ch1-0001");
     assert_eq!(units[1].unit_id, "body-ch2-0001");
-    assert_eq!(units[0].source_text, "Chapter 1 text with {{NOTE_REF:n1}} ref.");
+    assert_eq!(
+        units[0].source_text,
+        "Chapter 1 text with {{NOTE_REF:n1}} ref."
+    );
     assert_eq!(units[1].source_text, "Chapter 2 text.");
     assert_eq!(units[0].page_start, 1);
     assert_eq!(units[0].page_end, 3);
@@ -162,7 +165,15 @@ fn spec_structure_reviews_generated_for_orphan_links() {
     }];
 
     let summary = default_summary();
-    let (reviews, _) = build_structure_reviews(&chapters, &[], &links, &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) = build_structure_reviews(
+        &chapters,
+        &[],
+        &links,
+        &summary,
+        0,
+        0,
+        &empty_freeze_errors(),
+    );
 
     assert_eq!(reviews.len(), 1);
     assert_eq!(reviews[0].review_type, "footnote_orphan_note");
@@ -192,10 +203,14 @@ fn spec_injection_failure_preserves_raw_marker() {
     };
     let (units, _) = build_translation_units(&frozen_units);
     assert_eq!(units.len(), 1);
-    assert!(units[0].source_text.contains("[^47]"),
-        "raw marker should survive when injection failed");
-    assert!(!units[0].source_text.contains("{{NOTE_REF:"),
-        "no frozen ref token when injection failed");
+    assert!(
+        units[0].source_text.contains("[^47]"),
+        "raw marker should survive when injection failed"
+    );
+    assert!(
+        !units[0].source_text.contains("{{NOTE_REF:"),
+        "no frozen ref token when injection failed"
+    );
 }
 
 #[test]
@@ -222,8 +237,10 @@ fn spec_book_scope_note_owner_is_preserved() {
     // owner_id 与 section_id 不同 → book-scope
     assert_eq!(units[0].owner_id, "book-endnote-region");
     assert_eq!(units[0].section_id, "ch5");
-    assert_ne!(units[0].owner_id, units[0].section_id,
-        "book-scope note has owner_id different from section_id");
+    assert_ne!(
+        units[0].owner_id, units[0].section_id,
+        "book-scope note has owner_id different from section_id"
+    );
     assert_eq!(units[0].note_id, "en001");
     assert_eq!(units[0].kind, "endnote");
 }
@@ -273,7 +290,15 @@ fn test_structure_reviews_generated_for_orphan_links() {
     }];
 
     let summary = default_summary();
-    let (reviews, _) = build_structure_reviews(&chapters, &[], &links, &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) = build_structure_reviews(
+        &chapters,
+        &[],
+        &links,
+        &summary,
+        0,
+        0,
+        &empty_freeze_errors(),
+    );
 
     assert_eq!(reviews.len(), 1);
     assert_eq!(reviews[0].review_type, "footnote_orphan_note");
@@ -287,7 +312,8 @@ fn test_structure_reviews_boundary_state() {
     let chapters = vec![make_chapter("ch1", "Chapter 1", 1, 10), chapter];
 
     let summary = default_summary();
-    let (reviews, _) = build_structure_reviews(&chapters, &[], &[], &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) =
+        build_structure_reviews(&chapters, &[], &[], &summary, 0, 0, &empty_freeze_errors());
 
     assert_eq!(reviews.len(), 1);
     assert_eq!(reviews[0].review_type, "boundary_review_required");
@@ -303,7 +329,8 @@ fn test_structure_reviews_toc_alignment() {
         ..Default::default()
     };
 
-    let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) =
+        build_structure_reviews(&[], &[], &[], &summary, 0, 0, &empty_freeze_errors());
 
     assert_eq!(reviews.len(), 1);
     assert_eq!(reviews[0].review_type, "toc_alignment_review_required");
@@ -319,7 +346,8 @@ fn test_structure_reviews_toc_semantic() {
         ..Default::default()
     };
 
-    let (reviews, _) = build_structure_reviews(&[], &[], &[], &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) =
+        build_structure_reviews(&[], &[], &[], &summary, 0, 0, &empty_freeze_errors());
 
     assert_eq!(reviews.len(), 1);
     assert_eq!(reviews[0].review_type, "toc_semantic_review_required");
@@ -344,7 +372,8 @@ fn test_structure_reviews_ambiguous_link_is_warning() {
     }];
 
     let summary = default_summary();
-    let (reviews, _) = build_structure_reviews(&[], &[], &links, &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) =
+        build_structure_reviews(&[], &[], &links, &summary, 0, 0, &empty_freeze_errors());
 
     assert_eq!(reviews.len(), 1);
     assert_eq!(reviews[0].review_type, "ambiguous");
@@ -369,7 +398,8 @@ fn test_structure_reviews_ignored_link_skipped() {
     }];
 
     let summary = default_summary();
-    let (reviews, _) = build_structure_reviews(&[], &[], &links, &summary, 0, 0, &empty_freeze_errors());
+    let (reviews, _) =
+        build_structure_reviews(&[], &[], &links, &summary, 0, 0, &empty_freeze_errors());
 
     assert!(
         reviews.is_empty(),

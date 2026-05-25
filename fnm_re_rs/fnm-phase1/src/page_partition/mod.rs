@@ -143,6 +143,7 @@ pub fn build_page_partitions(
         &page_texts,
     );
     continuation::apply_note_continuation_fix(&mut records, total_pages.max(1), &page_texts);
+    continuation::apply_note_leading_page_fix(&mut records, total_pages.max(1), &page_texts);
 
     // 应用 manual overrides（最后执行，确保用户手动指定优先）
     if let Some(overrides) = page_overrides {
@@ -237,4 +238,63 @@ pub struct PagePartitionResult {
     pub pre_extracted_page_candidates: Vec<i64>,
     pub file_idx_map: HashMap<i64, i64>,
     pub page_texts: HashMap<i64, String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fnm_core::types::PageRole;
+
+    #[test]
+    fn pulls_missed_endnote_opening_page_into_following_note_run() {
+        let opening = RawPage {
+            book_page: 348,
+            markdown:
+                "Abbreviations\n\n## Introduction\n\n1. First definition.\n\n2. Second definition."
+                    .into(),
+            pruned_result: serde_json::json!({
+                "parsing_res_list": [{"block_label": "paragraph_title", "block_content": "Introduction"}]
+            }),
+            ..Default::default()
+        };
+        let continuation = RawPage {
+            book_page: 349,
+            markdown: "3. Third definition.\n\n4. Fourth definition.".into(),
+            note_scan: Some(serde_json::json!({
+                "page_kind": "endnote_collection",
+                "items": [{"kind": "endnote", "marker": "3.", "text": "Third definition."}]
+            })),
+            ..Default::default()
+        };
+
+        let result = build_page_partitions(&[opening, continuation], None, None);
+        assert_eq!(
+            result.partitions[0].page_role,
+            PageRole::Note,
+            "an endnote opening page immediately before a confirmed note run must not become a front-matter chapter"
+        );
+    }
+
+    #[test]
+    fn keeps_body_page_with_inline_notes_heading_out_of_note_run() {
+        let mixed = RawPage {
+            book_page: 139,
+            markdown: "Body paragraph continues here.\n\n## NOTES\n\n1. First definition.\n\n2. Second definition."
+                .into(),
+            ..Default::default()
+        };
+        let continuation = RawPage {
+            book_page: 140,
+            markdown: "3. Third definition.\n\n4. Fourth definition.".into(),
+            note_scan: Some(serde_json::json!({"page_kind": "endnote_collection"})),
+            ..Default::default()
+        };
+
+        let result = build_page_partitions(&[mixed, continuation], None, None);
+        assert_eq!(
+            result.partitions[0].page_role,
+            PageRole::Body,
+            "a body page that begins its notes section inline remains a mixed body page"
+        );
+    }
 }

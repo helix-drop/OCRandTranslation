@@ -304,6 +304,29 @@ fn run_biopolitics_phase3_with_phase2() -> fnm_phase3::output::Phase3Output {
     fnm_phase3::build_phase3_structure(phase3_input).expect("Phase 3 should build")
 }
 
+#[test]
+fn phase3_public_link_views_keep_identical_link_ids() {
+    let output = run_biopolitics_phase3_with_phase2();
+
+    for internal in &output.note_link_table.effective_links {
+        let published = output
+            .structure
+            .note_links
+            .iter()
+            .find(|link| {
+                link.note_item_id == internal.note_item_id
+                    && link.anchor_id == internal.anchor_id
+                    && link.status == internal.status
+            })
+            .expect("effective link must be present in the persisted Phase 3 view");
+        assert_eq!(
+            internal.link_id, published.link_id,
+            "Phase 4 and persisted Phase 3 must refer to the same link id for note {}",
+            internal.note_item_id
+        );
+    }
+}
+
 // ── 严格 byte-equal 回归（暂 #[ignore]：等 Phase 2 调校后启用） ───
 //
 // 当前 Rust phase2 note_items 抽取（564）与 golden（584）仍有 -20 差距，

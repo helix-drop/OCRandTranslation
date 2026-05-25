@@ -225,7 +225,13 @@ pub fn build_endnote_regions_raw(
     };
 
     for &page_no in sorted_page_nos {
-        if !is_endnote_candidate_page(page_no, page_role_by_no, page_by_no, first_body_page) {
+        if !is_endnote_candidate_page(
+            page_no,
+            page_role_by_no,
+            page_by_no,
+            first_body_page,
+            last_chapter_end_page,
+        ) {
             if let Some(r) = flush_region(
                 &mut region_counter,
                 &mut current_pages,

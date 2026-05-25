@@ -289,9 +289,17 @@ pub fn build_frozen_units(
             continue;
         }
 
+        // 正文注入位置属于 anchor 所在章；book-scope endnote 的 link 归属章
+        // 可以是全书尾注章，不能拿它查正文页。
+        let body_chapter_id = if chapter_body_pages.contains_key(&anchor.chapter_id) {
+            anchor.chapter_id.as_str()
+        } else {
+            chapter_id.as_str()
+        };
+
         // skip reason 5: missing_body_page (error_skip)
         let body_page = chapter_body_pages
-            .get(chapter_id)
+            .get(body_chapter_id)
             .and_then(|pages| pages.get(&anchor.page_no));
         if body_page.is_none() {
             record_skipped(
@@ -307,21 +315,19 @@ pub fn build_frozen_units(
             continue;
         }
 
-        // inject_token_once
+        // inject_token_once: 坐标损坏和普通未找到必须保留不同原因。
         let text = body_page
             .unwrap()
             .get("text")
             .and_then(|v| v.as_str())
             .unwrap_or("");
-        let (updated_text, injected) =
-            inject::inject_token_once(text, anchor, marker, &note_item_id);
+        let outcome = inject::inject_token_once_with_reason(text, anchor, marker, &note_item_id);
 
-        if !injected {
-            // skip reason 6: token_not_found (ceiling_skip)
+        if !outcome.injected {
             record_skipped(
                 &mut ref_map,
                 link,
-                "token_not_found",
+                &outcome.reason,
                 anchor.page_no,
                 &target_ref,
                 &mut chapter_body_pages,
@@ -332,11 +338,11 @@ pub fn build_frozen_units(
         }
 
         // Update body page text
-        if let Some(pages) = chapter_body_pages.get_mut(chapter_id) {
+        if let Some(pages) = chapter_body_pages.get_mut(body_chapter_id) {
             if let Some(page) = pages.get_mut(&anchor.page_no) {
                 page.as_object_mut()
                     .unwrap()
-                    .insert("text".to_string(), serde_json::Value::String(updated_text));
+                    .insert("text".to_string(), serde_json::Value::String(outcome.text));
             }
         }
         injected_anchor_ids.insert(anchor_id.clone());
@@ -388,7 +394,7 @@ pub fn build_frozen_units(
         let body_pages = chapter_body_pages.get(&chapter_id);
         let page_order: Vec<i64> = order
             .into_iter()
-            .filter(|pno| body_pages.map_or(false, |bp| bp.contains_key(pno)))
+            .filter(|pno| body_pages.is_some_and(|bp| bp.contains_key(pno)))
             .collect();
         let frozen_body_pages: Vec<serde_json::Value> = page_order
             .iter()
@@ -550,7 +556,6 @@ pub fn build_frozen_units(
             error_msg: String::new(),
             target_ref: refs::frozen_note_ref(&note_item_id),
             page_segments: Vec::new(),
-            ..Default::default()
         });
         seen.insert(dedupe_key);
         true
@@ -756,4 +761,68 @@ pub fn build_frozen_units(
         ref_map,
         freeze_summary,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use fnm_core::types::{AnchorKind, LinkResolver, LinkStatus, NoteKind, NoteMode};
+    use fnm_phase2::chapter_split::BodyPageLayer;
+
+    #[test]
+    fn book_scope_note_link_injects_into_anchor_chapter_body_page() {
+        let layers = ChapterLayers {
+            chapter_layers: vec![
+                ChapterLayer {
+                    chapter_id: "body-ch".into(),
+                    title: "Body".into(),
+                    body_pages: vec![BodyPageLayer {
+                        page_no: 7,
+                        text: "Body [1].".into(),
+                        ..Default::default()
+                    }],
+                    note_mode: NoteMode::ChapterEndnotePrimary,
+                    ..Default::default()
+                },
+                ChapterLayer {
+                    chapter_id: "notes-ch".into(),
+                    title: "Notes".into(),
+                    note_mode: NoteMode::ChapterEndnotePrimary,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let anchor = BodyAnchorRecord {
+            anchor_id: "a1".into(),
+            chapter_id: "body-ch".into(),
+            page_no: 7,
+            source_marker: "[1]".into(),
+            normalized_marker: "1".into(),
+            anchor_kind: AnchorKind::Endnote,
+            ..Default::default()
+        };
+        let link = NoteLinkRecord {
+            link_id: "l1".into(),
+            chapter_id: "notes-ch".into(),
+            anchor_id: "a1".into(),
+            note_item_id: "n1".into(),
+            status: LinkStatus::Matched,
+            resolver: LinkResolver::Rule,
+            note_kind: NoteKind::Endnote,
+            marker: "1".into(),
+            ..Default::default()
+        };
+        let table = NoteLinkTable {
+            anchors: vec![anchor],
+            links: vec![link.clone()],
+            effective_links: vec![link],
+            ..Default::default()
+        };
+
+        let frozen = build_frozen_units(&layers, &table, None, 6000, "test").unwrap();
+
+        assert_eq!(frozen.ref_map[0].decision, "injected");
+        assert!(frozen.body_units[0].source_text.contains("{{NOTE_REF:n1}}"));
+    }
 }

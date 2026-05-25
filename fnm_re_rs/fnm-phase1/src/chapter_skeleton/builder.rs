@@ -90,6 +90,7 @@ pub fn build_chapter_skeleton(
             classified_sections,
             &all_pages,
             &page_roles_str,
+            &heading_candidates,
         );
 
     // ── Step 2: visual TOC 路径 ──────────────────────────────────

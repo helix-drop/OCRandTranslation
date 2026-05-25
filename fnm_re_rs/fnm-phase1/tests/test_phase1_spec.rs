@@ -393,7 +393,64 @@ fn spec_visual_toc_export_candidate_default() {
     );
 }
 
-// ── SPEC 12: endnotes_start_page 传递 ──────────────────────────
+// ── SPEC 12: gate_report 结构验证 ──────────────────────────────
+
+#[test]
+fn spec_toc_gate_report_contains_expected_keys() {
+    use fnm_phase1::toc_structure::{build_phase1_structure, Phase1Config};
+    // 3 章结构，验证 gate report 所有 7 个预期键均存在且为 bool
+    let pages: Vec<RawPage> = (1..=12)
+        .map(|i| RawPage {
+            book_page: i,
+            markdown: if i % 4 == 0 {
+                format!("## Chapter {}\nContent.", i / 4)
+            } else {
+                format!("Body text page {}.", i)
+            },
+            ..Default::default()
+        })
+        .collect();
+    let toc: Vec<TocItem> = (1..=3)
+        .map(|i| TocItem {
+            item_id: format!("ch-{}", i),
+            title: format!("Chapter {}", i),
+            level: 1,
+            target_pdf_page: Some(i * 4),
+            role_hint: "chapter".into(),
+            export_candidate: Some(true),
+            ..Default::default()
+        })
+        .collect();
+    let config = Phase1Config::default();
+    let output = build_phase1_structure(&pages, Some(&toc), &config).unwrap();
+
+    // 验证 gate report 直接读取 builder diagnostics 顶层字段，
+    // 不经过 toc_semantic_meta 子对象（Fix: builder 写 diagnostics 顶层）
+    let expected_hard = [
+        "toc.pages_classified",
+        "toc.chapter_order_monotonic",
+        "toc.role_semantics_valid",
+        "toc.has_exportable_chapters",
+        "toc.chapter_titles_aligned",
+    ];
+    for key in &expected_hard {
+        assert!(
+            output.gate_report.hard.contains_key(*key),
+            "missing hard gate: {}",
+            key
+        );
+    }
+    let expected_soft = ["toc.section_alignment_warn", "toc.visual_toc_conflict_warn"];
+    for key in &expected_soft {
+        assert!(
+            output.gate_report.soft.contains_key(*key),
+            "missing soft gate: {}",
+            key
+        );
+    }
+}
+
+// ── SPEC 13: endnotes_start_page 传递 ──────────────────────────
 
 #[test]
 fn spec_endnotes_start_page_applied() {

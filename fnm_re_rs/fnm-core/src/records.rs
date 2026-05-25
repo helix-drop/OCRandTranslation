@@ -458,7 +458,9 @@ pub struct BodyAnchorRecord {
     pub chapter_id: String,
     pub page_no: i64,
     pub paragraph_index: i64,
+    /// 页面正文中的 Python 字符索引起点，不是 UTF-8 字节偏移。
     pub char_start: i64,
+    /// 页面正文中的 Python 字符索引终点，不是 UTF-8 字节偏移。
     pub char_end: i64,
     pub source_marker: String,
     pub normalized_marker: String,

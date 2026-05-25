@@ -97,6 +97,11 @@ static SUPERSCRIPT_FOOTNOTE_MARK_RE: Lazy<Regex> = Lazy::new(|| {
     )
     .unwrap()
 });
+static WHITESPACE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
+static SENTENCE_END_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"[.;!?\u{3002}\u{ff1b}\u{ff01}\u{ff1f}]$").unwrap());
+static PAREN_ONLY_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^\([^)]+\)$").unwrap());
+static ROMAN_NUMERAL_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^[IVXLC]+$").unwrap());
 
 /// 上标数字 → 普通数字转换表
 fn superscript_to_digit(c: char) -> Option<char> {
@@ -119,10 +124,7 @@ fn superscript_to_digit(c: char) -> Option<char> {
 
 /// 按 bookPage 查找页面。
 /// ←→ Python `_find_page` (L346)
-pub fn find_page<'a>(
-    pages: &'a [SyntheticMarkdownPage],
-    bp: i64,
-) -> Option<&'a SyntheticMarkdownPage> {
+pub fn find_page(pages: &[SyntheticMarkdownPage], bp: i64) -> Option<&SyntheticMarkdownPage> {
     pages.iter().find(|p| p.book_page == bp)
 }
 
@@ -348,8 +350,7 @@ pub fn inject_block_heading_candidates(
         if block.label != "paragraph_title" {
             continue;
         }
-        let title = Regex::new(r"\s+")
-            .unwrap()
+        let title = WHITESPACE_RE
             .replace_all(&normalize_latex_footnote_markers(&block.text), " ")
             .trim()
             .to_string();
@@ -368,8 +369,7 @@ pub fn inject_block_heading_candidates(
             if next_block.label == "paragraph_title" {
                 continue;
             }
-            anchor_text = Regex::new(r"\s+")
-                .unwrap()
+            anchor_text = WHITESPACE_RE
                 .replace_all(&normalize_latex_footnote_markers(&next_block.text), " ")
                 .trim()
                 .to_string();
@@ -405,8 +405,7 @@ pub fn inject_block_heading_candidates(
 
     candidates.sort_by_key(|(pos, _)| *pos);
     let mut expanded = segments;
-    let mut offset = 0;
-    for (insert_at, title) in candidates {
+    for (offset, (insert_at, title)) in candidates.into_iter().enumerate() {
         expanded.insert(
             insert_at + offset,
             ParsedParagraph {
@@ -417,7 +416,6 @@ pub fn inject_block_heading_candidates(
                 ..Default::default()
             },
         );
-        offset += 1;
     }
     expanded
 }
@@ -470,7 +468,7 @@ pub fn prepare_markdown_for_note_page(md: &str, note_scan: &PageNoteScan) -> Str
         extract_note_page_heading_lines(note_scan, &raw_lines[start_idx.min(raw_lines.len())..]);
     if !kept_lines.is_empty()
         && !heading_lines.is_empty()
-        && kept_lines.last().map_or(false, |l| !l.trim().is_empty())
+        && kept_lines.last().is_some_and(|l| !l.trim().is_empty())
     {
         kept_lines.push(String::new());
     }
@@ -627,12 +625,8 @@ pub fn fallback_blocks_to_paragraphs(
     for seg in raw {
         let hl = seg.heading_level;
         let txt = &seg.text;
-        let is_short = hl == 0
-            && txt.len() < 60
-            && !Regex::new(r"[.;!?\u{3002}\u{ff1b}\u{ff01}\u{ff1f}]$")
-                .unwrap()
-                .is_match(txt.trim());
-        let is_paren = hl == 0 && Regex::new(r"^\([^)]+\)$").unwrap().is_match(txt.trim());
+        let is_short = hl == 0 && txt.len() < 60 && !SENTENCE_END_RE.is_match(txt.trim());
+        let is_paren = hl == 0 && PAREN_ONLY_RE.is_match(txt.trim());
 
         if (is_short || is_paren) && !merged.is_empty() {
             let prev = merged.last_mut().unwrap();
@@ -702,8 +696,8 @@ pub fn parse_page_markdown(
     let next_page = find_page(pages, bp + 1);
     let prev_raw_md = prev_page.map_or(String::new(), |p| p.markdown.trim().to_string());
     let next_raw_md = next_page.map_or(String::new(), |p| p.markdown.trim().to_string());
-    let prev_note_scan = prev_page.map(|p| get_page_note_scan(p)).unwrap_or_default();
-    let next_note_scan = next_page.map(|p| get_page_note_scan(p)).unwrap_or_default();
+    let prev_note_scan = prev_page.map(get_page_note_scan).unwrap_or_default();
+    let next_note_scan = next_page.map(get_page_note_scan).unwrap_or_default();
     let prev_md = prepare_markdown_for_note_page(&prev_raw_md, &prev_note_scan);
     let next_md = prepare_markdown_for_note_page(&next_raw_md, &next_note_scan);
 
@@ -752,21 +746,17 @@ pub fn parse_page_markdown(
             let prev_hl = merged.last().unwrap().heading_level;
             let prev_txt = merged.last().unwrap().text.clone();
             let should_merge = if prev_hl == hl
-                && ALLCAPS_TITLE_RE.is_match(prev_txt.trim())
-                && ALLCAPS_TITLE_RE.is_match(txt.trim())
-            {
-                true
-            } else if prev_hl == hl && Regex::new(r"^[IVXLC]+$").unwrap().is_match(prev_txt.trim())
+                && (ALLCAPS_TITLE_RE.is_match(prev_txt.trim())
+                    && ALLCAPS_TITLE_RE.is_match(txt.trim())
+                    || ROMAN_NUMERAL_RE.is_match(prev_txt.trim()))
             {
                 true
             } else if txt.trim().len() <= 3 {
                 let last = merged.last_mut().unwrap();
                 last.text = format!("{} {}", prev_txt, txt);
                 continue;
-            } else if txt.trim().starts_with(|c: char| c.is_lowercase()) {
-                true
             } else {
-                false
+                txt.trim().starts_with(|c: char| c.is_lowercase())
             };
 
             if should_merge {
@@ -798,7 +788,7 @@ pub fn parse_page_markdown(
         // 短碎片合并
         let mut is_short =
             hl == 0 && txt.len() < 60 && !re_utils::has_explicit_sentence_end(txt.trim());
-        if hl == 0 && Regex::new(r"^\([^)]+\)$").unwrap().is_match(txt.trim()) {
+        if hl == 0 && PAREN_ONLY_RE.is_match(txt.trim()) {
             is_short = true;
         }
 
@@ -962,7 +952,7 @@ pub fn parse_page_markdown(
             scan_bp = pg.book_page + 1;
             scan_pg = find_page(pages, scan_bp);
             let next_raw = scan_pg.map_or(String::new(), |p| p.markdown.trim().to_string());
-            let next_ns = scan_pg.map(|p| get_page_note_scan(p)).unwrap_or_default();
+            let next_ns = scan_pg.map(get_page_note_scan).unwrap_or_default();
             scan_md = prepare_markdown_for_note_page(&next_raw, &next_ns);
         }
 

@@ -8,7 +8,8 @@ use fnm_core::types::PageRole;
 
 use crate::page_partition::role_heuristics::{
     is_body_entry_page, looks_like_back_matter_continuation_page,
-    looks_like_note_continuation_page, seed_back_matter_family, ENDNOTES_HINT_STOP_REASONS,
+    looks_like_note_continuation_page, looks_like_note_leading_page, seed_back_matter_family,
+    ENDNOTES_HINT_STOP_REASONS,
 };
 
 /// 修复 endnotes_start_page 提示后的 front_matter 延续页误判。
@@ -70,6 +71,42 @@ pub fn apply_note_continuation_fix(
         record.page_role = PageRole::Note;
         record.confidence = record.confidence.max(0.90);
         record.reason = "note_continuation".into();
+    }
+}
+
+/// 将被标题或前置文本遮蔽的尾注首张页并入其后的连续 note 区。
+///
+/// ←→ Python `_apply_note_continuation_fix` 缺失的 leading-page 回收分支。
+pub fn apply_note_leading_page_fix(
+    records: &mut [PagePartitionRecord],
+    total_pages: i64,
+    page_texts: &std::collections::HashMap<i64, String>,
+) {
+    if records.len() < 2 {
+        return;
+    }
+    for index in (0..records.len() - 1).rev() {
+        let next_page = records[index + 1].page_no;
+        if next_page != records[index].page_no + 1 || records[index + 1].page_role != PageRole::Note
+        {
+            continue;
+        }
+        if !matches!(
+            records[index].page_role,
+            PageRole::Body | PageRole::FrontMatter
+        ) {
+            continue;
+        }
+        let text = page_texts
+            .get(&records[index].page_no)
+            .cloned()
+            .unwrap_or_default();
+        if !looks_like_note_leading_page(&text, records[index].page_no, total_pages.max(1)) {
+            continue;
+        }
+        records[index].page_role = PageRole::Note;
+        records[index].confidence = records[index].confidence.max(0.90);
+        records[index].reason = "note_leading_page".into();
     }
 }
 

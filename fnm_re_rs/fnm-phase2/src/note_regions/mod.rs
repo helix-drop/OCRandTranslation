@@ -178,6 +178,56 @@ mod tests {
     }
 
     #[test]
+    fn note_partition_with_parseable_definitions_is_endnote_candidate() {
+        let chapters = vec![make_chapter("ch-1", 1, 1)];
+        let pages = vec![RawPage {
+            book_page: 2,
+            markdown: "## Introduction\n\n1. First definition.\n\n2. Second definition.".into(),
+            ..Default::default()
+        }];
+        let pp = vec![PagePartitionRecord {
+            page_no: 2,
+            target_pdf_page: 2,
+            page_role: PageRole::Note,
+            confidence: 0.9,
+            reason: "note_leading_page".into(),
+            section_hint: "".into(),
+            has_note_heading: false,
+            note_scan_summary: serde_json::json!({}),
+        }];
+
+        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new(), &[]);
+
+        assert_eq!(regions.len(), 1);
+        assert_eq!(regions[0].pages, vec![2]);
+        assert_eq!(regions[0].note_kind, NoteKind::Endnote);
+    }
+
+    #[test]
+    fn in_chapter_note_partition_with_numbered_definitions_is_not_promoted_to_endnotes() {
+        let chapters = vec![make_chapter("ch-1", 1, 3)];
+        let pages = vec![RawPage {
+            book_page: 2,
+            markdown: "1. First footnote.\n\n2. Second footnote.".into(),
+            ..Default::default()
+        }];
+        let pp = vec![PagePartitionRecord {
+            page_no: 2,
+            target_pdf_page: 2,
+            page_role: PageRole::Note,
+            confidence: 0.9,
+            reason: "footnote_band".into(),
+            section_hint: "".into(),
+            has_note_heading: false,
+            note_scan_summary: serde_json::json!({}),
+        }];
+
+        let regions = build_note_regions(&chapters, &pages, &pp, &HashSet::new(), &[]);
+
+        assert!(regions.is_empty());
+    }
+
+    #[test]
     fn explicit_notes_heading_region() {
         let chapters = vec![make_chapter("ch-1", 1, 2)];
         let pages = vec![RawPage {

@@ -4,6 +4,7 @@
 //! bare_digit 正向门：三层守卫 + LLM 二次验证回调。
 
 use fnm_core::records::BodyAnchorRecord;
+use fnm_core::text::char_index_to_byte_index;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -207,10 +208,13 @@ pub fn is_bare_digit_false_positive_context(anchor: &BodyAnchorRecord) -> bool {
         return false;
     }
     let char_end = anchor.char_end as usize;
-    if char_end >= source_text.len() {
+    if char_end >= source_text.chars().count() {
         return false;
     }
-    let remainder = &source_text[char_end..];
+    let Some(byte_end) = char_index_to_byte_index(source_text, char_end) else {
+        return false;
+    };
+    let remainder = &source_text[byte_end..];
     if remainder.trim().is_empty() {
         return false;
     }

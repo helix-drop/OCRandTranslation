@@ -577,8 +577,10 @@ mod tests {
 
     #[test]
     fn test_entry_status() {
-        let mut p = UnitParagraphRecord::default();
-        p.translation_status = "error".to_string();
+        let mut p = UnitParagraphRecord {
+            translation_status: "error".to_string(),
+            ..Default::default()
+        };
         assert_eq!(entry_status(&p), "error");
 
         p.translation_status = "done".to_string();

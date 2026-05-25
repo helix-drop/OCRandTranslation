@@ -44,16 +44,13 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
     let freeze_summary = frozen_units.freeze_summary.clone();
 
     // 2. units: 翻译单元由 frozen units 一对一映射生成
-    let (translation_units, units_summary) =
-        units::build_translation_units(&frozen_units);
+    let (translation_units, units_summary) = units::build_translation_units(&frozen_units);
 
     // 3. reviews: 构建 structure_reviews
     //     freeze_error_rows = ref_map 中注入失败的条目（policy_skip 除外）
     let freeze_error_rows: Vec<fnm_core::records::FrozenRefEntry> = frozen_refs
         .iter()
-        .filter(|r| {
-            r.skip_category == "ceiling_skip" || r.skip_category == "error_skip"
-        })
+        .filter(|r| r.skip_category == "ceiling_skip" || r.skip_category == "error_skip")
         .cloned()
         .collect();
     let (structure_reviews, reviews_summary) = reviews::build_structure_reviews(
@@ -91,7 +88,6 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
         diagnostics,
     })
 }
-
 
 /// ←→ Python `persist_phase4`
 ///

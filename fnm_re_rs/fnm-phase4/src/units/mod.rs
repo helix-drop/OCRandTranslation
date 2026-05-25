@@ -14,9 +14,7 @@
 pub mod endnote_lookup;
 pub mod page_split;
 
-use fnm_core::records::{
-    FrozenUnit, FrozenUnits, TranslationUnitRecord,
-};
+use fnm_core::records::{FrozenUnit, FrozenUnits, TranslationUnitRecord};
 use std::collections::HashMap;
 
 /// ←→ Python `build_translation_units` (units.py:690-868)
@@ -82,9 +80,7 @@ pub fn build_translation_units(
     let mut chapter_unit_counts: HashMap<String, usize> = HashMap::new();
     for u in &units {
         if u.kind == "body" {
-            *chapter_unit_counts
-                .entry(u.section_id.clone())
-                .or_default() += 1;
+            *chapter_unit_counts.entry(u.section_id.clone()).or_default() += 1;
         }
     }
 

@@ -16,6 +16,24 @@ static NOTES_HEADER_RE: Lazy<Regex> = Lazy::new(|| {
         .unwrap()
 });
 
+/// 将有效 UTF-8 字节边界转换为 Python 字符索引。
+pub fn byte_index_to_char_index(text: &str, byte_index: usize) -> Option<usize> {
+    if byte_index > text.len() || !text.is_char_boundary(byte_index) {
+        return None;
+    }
+    Some(text[..byte_index].chars().count())
+}
+
+/// 将 Python 字符索引转换为 UTF-8 字节边界。
+pub fn char_index_to_byte_index(text: &str, char_index: usize) -> Option<usize> {
+    if char_index == text.chars().count() {
+        return Some(text.len());
+    }
+    text.char_indices()
+        .nth(char_index)
+        .map(|(byte_index, _)| byte_index)
+}
+
 /// 从 page 对象提取 markdown 文本。与 Python `page_markdown_text` 一致。
 pub fn page_markdown_text(page: &Value) -> String {
     if !page.is_object() {
@@ -23,6 +41,7 @@ pub fn page_markdown_text(page: &Value) -> String {
     }
     if let Some(md) = page
         .get("enriched_markdown")
+        .filter(|value| !value.is_null())
         .or_else(|| page.get("markdown"))
     {
         if md.is_object() {
@@ -214,6 +233,20 @@ mod tests {
     fn markdown_text_from_raw() {
         let page = json!({"markdown": "plain text"});
         assert_eq!(page_markdown_text(&page), "plain text");
+    }
+
+    #[test]
+    fn markdown_text_falls_back_when_enriched_is_null() {
+        let page = json!({"enriched_markdown": null, "markdown": "plain text"});
+        assert_eq!(page_markdown_text(&page), "plain text");
+    }
+
+    #[test]
+    fn offset_conversion_matches_python_character_indices() {
+        assert_eq!(byte_index_to_char_index("éx", 2), Some(1));
+        assert_eq!(char_index_to_byte_index("éx", 1), Some(2));
+        assert_eq!(byte_index_to_char_index("éx", 1), None);
+        assert_eq!(char_index_to_byte_index("éx", 3), None);
     }
 
     #[test]

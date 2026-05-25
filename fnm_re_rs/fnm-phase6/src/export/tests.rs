@@ -807,10 +807,14 @@ fn test_compute_export_semantic_contract_clean() {
 
 #[test]
 fn test_visible_segment_paragraphs_filters_consumed() {
-    let mut p1 = UnitParagraphRecord::default();
-    p1.consumed_by_prev = true;
-    let mut p2 = UnitParagraphRecord::default();
-    p2.consumed_by_prev = false;
+    let p1 = UnitParagraphRecord {
+        consumed_by_prev: true,
+        ..Default::default()
+    };
+    let p2 = UnitParagraphRecord {
+        consumed_by_prev: false,
+        ..Default::default()
+    };
     let segment = UnitPageSegmentRecord {
         paragraphs: vec![p1.clone(), p2.clone()],
         ..Default::default()

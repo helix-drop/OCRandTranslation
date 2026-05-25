@@ -5,6 +5,7 @@
 //! 已知章级 marker 序列有缺口时，从 page text 中启发式恢复缺失的 anchor。
 
 use fnm_core::records::{BodyAnchorRecord, NoteItemRecord};
+use fnm_core::text::byte_index_to_char_index;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -253,6 +254,14 @@ pub struct GapHit {
     pub source_text: String,
 }
 
+/// 裸数字本身是弱信号；紧邻右引号说明数字位于引文/句末标注位置。
+/// 该证据仍需与章内缺失 marker 和相邻已确认页窗口共同成立。
+fn has_closing_quote_evidence(text: &str, digit_end: usize) -> bool {
+    text.get(digit_end..)
+        .and_then(|tail| tail.trim_start().chars().next())
+        .is_some_and(|next| matches!(next, '»' | '”' | '"'))
+}
+
 // ── 恢复函数 ────────────────────────────────────────────────────
 
 /// 恢复缺失的 bare digit endnote anchors。
@@ -334,6 +343,9 @@ pub fn recover_expected_gap_bare_digit_anchors(
                 if count_by_marker.get(&hit.marker).copied().unwrap_or(0) != 1 {
                     continue;
                 }
+                if !has_closing_quote_evidence(text, hit.end) {
+                    continue;
+                }
                 *anchor_counter += 1;
                 let anchor_id = format!("gap-bare-{anchor_counter:05}");
                 let key = ("bare_digit".to_string(), hit.marker.clone(), *page_no);
@@ -346,15 +358,17 @@ pub fn recover_expected_gap_bare_digit_anchors(
                     chapter_id: chapter_id.to_string(),
                     page_no: *page_no,
                     paragraph_index: 0,
-                    char_start: hit.start as i64,
-                    char_end: hit.end as i64,
+                    char_start: byte_index_to_char_index(text, hit.start).expect("regex boundary")
+                        as i64,
+                    char_end: byte_index_to_char_index(text, hit.end).expect("regex boundary")
+                        as i64,
                     source_marker: hit.marker.clone(),
                     normalized_marker: hit.marker.clone(),
                     anchor_kind: fnm_core::types::AnchorKind::Endnote,
                     certainty: 0.72,
                     source_text: hit.source_text,
-                    source: "markdown:bare_digit".to_string(),
-                    synthetic: true,
+                    source: "markdown:expected_gap_quoted_bare_digit".to_string(),
+                    synthetic: false,
                     ocr_repaired_from_marker: String::new(),
                 });
                 found_any = true;
@@ -445,8 +459,10 @@ pub fn recover_expected_gap_symbol_anchors(
                     chapter_id: chapter_id.to_string(),
                     page_no: *page_no,
                     paragraph_index: 0,
-                    char_start: hit.start as i64,
-                    char_end: hit.end as i64,
+                    char_start: byte_index_to_char_index(text, hit.start).expect("regex boundary")
+                        as i64,
+                    char_end: byte_index_to_char_index(text, hit.end).expect("regex boundary")
+                        as i64,
                     source_marker: hit.marker.clone(),
                     normalized_marker: hit.marker.clone(),
                     anchor_kind: fnm_core::types::AnchorKind::Endnote,

@@ -8,6 +8,7 @@
 
 use fnm_core::records::{BodyAnchorRecord, NoteItemRecord, NoteRegionRecord};
 use fnm_core::refs;
+use fnm_core::text::char_index_to_byte_index;
 use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -79,6 +80,26 @@ pub fn shift_coords_out_of_note_ref_token(
     (coord_start, coord_end)
 }
 
+/// 将权威字符索引坐标转换为 Rust UTF-8 字节边界。
+///
+/// BodyAnchorRecord 坐标合同与 Python 字符串切片语义一致；在 Rust 中直接
+/// 按字节切片会把合法的重音或中文位置误判为非法边界。
+fn character_range_to_byte_range(
+    payload: &str,
+    char_start: i64,
+    char_end: i64,
+) -> Option<(usize, usize)> {
+    let start = char_start.max(0) as usize;
+    let end = char_end.max(0) as usize;
+    if start > end {
+        return None;
+    }
+    Some((
+        char_index_to_byte_index(payload, start)?,
+        char_index_to_byte_index(payload, end)?,
+    ))
+}
+
 /// 按 7 层候选顺序注入 `{{NOTE_REF:{note_id}}}` token。
 ///
 /// ←→ Python `_inject_token_once` (ref_freeze.py:86-157)
@@ -109,12 +130,8 @@ pub fn inject_token_once(
     let source_marker = anchor.source_marker.trim().to_string();
     let anchor_source = anchor.source.trim().to_string();
 
-    let coord_start = anchor.char_start.max(0) as usize;
-    let coord_end = anchor.char_end.max(0) as usize;
-
-    if coord_start <= coord_end && coord_end <= payload.len()
-        && payload.is_char_boundary(coord_start)
-        && payload.is_char_boundary(coord_end)
+    if let Some((coord_start, coord_end)) =
+        character_range_to_byte_range(payload, anchor.char_start, anchor.char_end)
     {
         let (cs, ce) = shift_coords_out_of_note_ref_token(payload, coord_start, coord_end);
 
@@ -220,6 +237,43 @@ pub fn inject_token_once(
     (payload.to_string(), false)
 }
 
+/// 带失败原因的注入结果，供 Phase 4 将坐标损坏升级为 blocker。
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct InjectionOutcome {
+    pub text: String,
+    pub injected: bool,
+    pub reason: String,
+}
+
+/// 对 [`inject_token_once`] 的可诊断入口。
+///
+/// 坐标超出字符范围意味着上游 anchor 坐标不可用；当文本 fallback 同样
+/// 不能注入时，Phase 4 必须保留原文并生成错误复核记录。
+///
+/// ←→ Python `_inject_token_once` 的 Phase 4 合同强化。
+pub fn inject_token_once_with_reason(
+    text: &str,
+    anchor: &BodyAnchorRecord,
+    marker: &str,
+    note_id: &str,
+) -> InjectionOutcome {
+    let has_coordinate = anchor.char_start > 0 || anchor.char_end > 0;
+    let coordinate_valid =
+        character_range_to_byte_range(text, anchor.char_start, anchor.char_end).is_some();
+    let (updated_text, injected) = inject_token_once(text, anchor, marker, note_id);
+    InjectionOutcome {
+        text: updated_text,
+        injected,
+        reason: if injected {
+            String::new()
+        } else if has_coordinate && !coordinate_valid {
+            "coordinate_out_of_range".to_string()
+        } else {
+            "token_not_found".to_string()
+        },
+    }
+}
+
 /// 清理 skipped marker 的 raw 标记（`[N]` 和 `<sup>N</sup>` 格式）。
 ///
 /// ←→ Python `_clean_skipped_marker` (ref_freeze.py:276-285)
@@ -233,22 +287,18 @@ pub fn clean_skipped_marker(text: &str, marker: &str) -> String {
     let bracket = format!("[{}]", m);
     // 简单字符串替换：不要在 ^[N]: 后面
     let mut start = 0;
-    loop {
-        if let Some(pos) = payload[start..].find(&bracket) {
-            let abs_pos = start + pos;
-            // 检查前面不是 ^
-            let after_start = abs_pos + bracket.len();
-            if (abs_pos > 0 && payload.as_bytes()[abs_pos - 1] == b'^')
-                || (after_start < payload.len() && payload.as_bytes()[after_start] == b':')
-            {
-                start = abs_pos + 1;
-                continue;
-            }
-            payload.replace_range(abs_pos..abs_pos + bracket.len(), "");
-            start = abs_pos;
-        } else {
-            break;
+    while let Some(pos) = payload[start..].find(&bracket) {
+        let abs_pos = start + pos;
+        // 检查前面不是 ^
+        let after_start = abs_pos + bracket.len();
+        if (abs_pos > 0 && payload.as_bytes()[abs_pos - 1] == b'^')
+            || (after_start < payload.len() && payload.as_bytes()[after_start] == b':')
+        {
+            start = abs_pos + 1;
+            continue;
         }
+        payload.replace_range(abs_pos..abs_pos + bracket.len(), "");
+        start = abs_pos;
     }
     // <sup>N</sup> 格式
     let pattern_sup = format!(r"<sup>\s*{}\s*</sup>", regex::escape(m));
@@ -385,14 +435,28 @@ mod tests {
 
     #[test]
     fn test_inject_token_once_non_ascii_non_boundary_does_not_panic() {
-        // 中文文本中，非 UTF-8 边界坐标不应 panic，应返回 false
-        // payload = "中文abc" (中=3字节, 文=3字节, a/b/c=1字节)
-        // coord_start=2 falls in middle of "中" (byte 0-2), coord_end=5 is start of "a" (byte 6)
-        // → coord block skipped → "x" not in payload → false
+        // 上游坐标按 Unicode 字符计数；合法范围但无 marker 时应返回 false。
         let anchor = make_anchor(2, 5, "", "x", "", false);
         let (result, injected) = inject_token_once("中文abc", &anchor, "x", "n1");
         assert!(!injected);
         assert_eq!(result, "中文abc");
+    }
+
+    #[test]
+    fn test_inject_token_once_reports_coordinate_out_of_range_reason() {
+        let anchor = make_anchor(8, 9, "", "x", "", false);
+        let outcome = inject_token_once_with_reason("中文abc", &anchor, "x", "n1");
+        assert!(!outcome.injected);
+        assert_eq!(outcome.reason, "coordinate_out_of_range");
+        assert_eq!(outcome.text, "中文abc");
+    }
+
+    #[test]
+    fn test_inject_token_once_uses_character_offsets_for_non_ascii_text() {
+        let anchor = make_anchor(2, 5, "", "abc", "", false);
+        let (result, injected) = inject_token_once("中文abc", &anchor, "abc", "n1");
+        assert!(injected);
+        assert_eq!(result, "中文{{NOTE_REF:n1}}");
     }
 
     #[test]
@@ -406,7 +470,7 @@ mod tests {
 
     #[test]
     fn test_inject_token_once_coord_at_boundary_non_ascii() {
-        let anchor = make_anchor(0, 4, "", "[1]", "", false);  // "café" 是 5 字节
+        let anchor = make_anchor(0, 4, "", "[1]", "", false); // "café" 是 5 字节
         let (result, injected) = inject_token_once("café [1] text", &anchor, "1", "n1");
         assert!(injected);
         assert!(result.contains("{{NOTE_REF:n1}}"));

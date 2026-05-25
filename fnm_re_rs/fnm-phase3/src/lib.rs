@@ -159,9 +159,14 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         },
     };
 
+    // Phase 4 消费 NoteLinkTable，持久化与复核消费 Phase3Structure。
+    // 两个公开视图必须共享出口处统一分配的 link_id，否则 blocker 无法反查 DB link。
+    let mut note_link_table = result.data;
+    note_link_table.effective_links = structure.note_links.clone();
+
     Ok(Phase3Output {
         structure,
-        note_link_table: result.data,
+        note_link_table,
         evidence: result.evidence,
         diagnostics: result.diagnostics,
         gate_report: result.gate_report,

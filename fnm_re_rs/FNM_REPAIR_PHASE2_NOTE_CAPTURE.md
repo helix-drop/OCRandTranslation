@@ -4,6 +4,8 @@
 
 本文是第二阶段的执行说明。接手人只读本文，应能知道阶段 2 为什么修、改哪些文件、每个文件怎么改、必须新增哪些测试，以及怎样跑完整验收。
 
+> 2026-05-25 状态覆盖：当前执行以 `FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 为准。本文中要求立即进行双书真实批跑的历史验收步骤暂时停用；Phase2 须在 Core/Phase1 程序合同关闭后重新复核。
+
 ## 阶段目标
 
 修掉 Biopolitics 当前主 blocker：
@@ -629,4 +631,3 @@ PYTHONUNBUFFERED=1 .venv/bin/python scripts/test_fnm_real_batch.py \
 - 最终 blocker 列表。
 - 若仍 blocked，说明 blocker 属于哪个后续阶段。
 - 明确写出是否可以进入阶段 3。
-

@@ -226,6 +226,80 @@ fn spec_expected_gap_recovery_keeps_weak_endnote_digits() {
 }
 
 #[test]
+fn spec_gap_recovery_rejects_date_like_plain_bare_digit() {
+    let chapters = vec![make_chapter("ch-1", "Chapter 1", vec![1, 2, 3])];
+    let partitions = vec![
+        make_partition(1, PageRole::Body),
+        make_partition(2, PageRole::Body),
+        make_partition(3, PageRole::Body),
+    ];
+    let regions = vec![make_region("rg-en", "ch-1", 10, NoteKind::Endnote)];
+    let items = vec![
+        make_item("en-27", "rg-en", "ch-1", 10, "27"),
+        make_item("en-28", "rg-en", "ch-1", 10, "28"),
+        make_item("en-29", "rg-en", "ch-1", 10, "29"),
+    ];
+    let pages = vec![
+        make_raw_page(1, "Known marker $ ^{27} $."),
+        make_raw_page(2, "Dix jours apres, le 28, Ludwig Erhard intervient."),
+        make_raw_page(3, "Known marker $ ^{29} $."),
+    ];
+
+    let (anchors, _summary) = fnm_phase3::body_anchors::build_body_anchors(
+        &chapters,
+        &partitions,
+        &regions,
+        &items,
+        &pages,
+    );
+
+    assert!(
+        anchors
+            .iter()
+            .all(|anchor| anchor.normalized_marker != "28"),
+        "a date-like bare number must not become a matched endnote anchor"
+    );
+}
+
+#[test]
+fn spec_gap_recovery_promotes_quoted_expected_marker_to_injectable_anchor() {
+    let chapters = vec![make_chapter("ch-1", "Chapter 1", vec![1, 2, 3])];
+    let partitions = vec![
+        make_partition(1, PageRole::Body),
+        make_partition(2, PageRole::Body),
+        make_partition(3, PageRole::Body),
+    ];
+    let regions = vec![make_region("rg-en", "ch-1", 10, NoteKind::Endnote)];
+    let items = vec![
+        make_item("en-39", "rg-en", "ch-1", 10, "39"),
+        make_item("en-40", "rg-en", "ch-1", 10, "40"),
+        make_item("en-41", "rg-en", "ch-1", 10, "41"),
+    ];
+    let pages = vec![
+        make_raw_page(1, "Known marker $ ^{39} $."),
+        make_raw_page(2, "les ordoliberaux appellent le « cadre 40 »."),
+        make_raw_page(3, "Known marker $ ^{41} $."),
+    ];
+
+    let (anchors, _summary) = fnm_phase3::body_anchors::build_body_anchors(
+        &chapters,
+        &partitions,
+        &regions,
+        &items,
+        &pages,
+    );
+    let recovered = anchors
+        .iter()
+        .find(|anchor| anchor.normalized_marker == "40")
+        .expect("a quoted expected marker should be recovered");
+
+    assert!(
+        !recovered.synthetic,
+        "a located quoted marker with sequence evidence must be injectable"
+    );
+}
+
+#[test]
 #[ignore = "Python test skipped; symbol gap recovery needs real-data validation"]
 fn spec_expected_gap_recovery_disambiguates_by_text() {
     let chapters = vec![make_chapter("ch-1", "Chapter 1", vec![1, 2, 3])];
@@ -789,6 +863,61 @@ fn spec_book_scope_endnote_can_use_fallback_resolver() {
 }
 
 #[test]
+fn spec_unassigned_book_scope_endnote_does_not_steal_foreign_chapter_anchor() {
+    let mut region = make_region(
+        "rg-book-unassigned",
+        "ch-fallback-0008",
+        350,
+        NoteKind::Endnote,
+    );
+    region.scope = fnm_core::types::RegionScope::Book;
+    let items = vec![make_item(
+        "en-book-unassigned",
+        "rg-book-unassigned",
+        "ch-fallback-0008",
+        350,
+        "10",
+    )];
+
+    let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
+        anchor_id: "anchor-chapter-7-10".to_string(),
+        chapter_id: "ch-fallback-0007".to_string(),
+        page_no: 337,
+        paragraph_index: 0,
+        char_start: 4,
+        char_end: 12,
+        source_marker: "$ ^{10} $".to_string(),
+        normalized_marker: "10".to_string(),
+        anchor_kind: fnm_core::types::AnchorKind::Endnote,
+        certainty: 1.0,
+        source_text: "Epilogue body $ ^{10} $".to_string(),
+        source: "markdown:latex".to_string(),
+        synthetic: false,
+        ocr_repaired_from_marker: String::new(),
+    }];
+
+    let (links, _summary) = fnm_phase3::note_links::build_note_links(
+        &mut anchors,
+        &items,
+        &[],
+        1,
+        &[],
+        &[region],
+        &HashMap::new(),
+    );
+
+    let target = links
+        .iter()
+        .find(|l| l.note_item_id == "en-book-unassigned")
+        .expect("should have link for unresolved book-scope note");
+    assert_eq!(
+        target.status.as_str(),
+        "orphan_note",
+        "unassigned book-scope endnote must stay unresolved instead of stealing a foreign anchor"
+    );
+}
+
+#[test]
 fn spec_ambiguous_candidates_return_ambiguous_status() {
     let items = vec![make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1")];
 
@@ -1057,7 +1186,7 @@ fn spec_footnote_multiple_candidates_choose_unique_nearest() {
 }
 
 #[test]
-fn spec_fallback_chapter_endnote_can_repair_with_cross_chapter_anchor() {
+fn spec_fallback_chapter_endnote_does_not_cross_match_without_owner_evidence() {
     let items = vec![make_item("en-1", "rg-en", "ch-fallback-0001", 10, "5")];
 
     let mut anchors = vec![fnm_core::records::BodyAnchorRecord {
@@ -1093,12 +1222,12 @@ fn spec_fallback_chapter_endnote_can_repair_with_cross_chapter_anchor() {
         .expect("should have link for en-1");
     assert_eq!(
         target.status.as_str(),
-        "matched",
-        "fallback chapter should allow cross-chapter repair"
+        "orphan_note",
+        "fallback chapter without owner evidence must stay unresolved"
     );
-    assert_eq!(
-        target.anchor_id, "anchor-end-2",
-        "should match cross-chapter anchor"
+    assert!(
+        target.anchor_id.is_empty(),
+        "must not steal a foreign anchor"
     );
 }
 

@@ -1566,17 +1566,15 @@ impl Repository for SqliteRepository {
         let rows = stmt.query_map([doc_id], |row| {
             let payload: Option<String> = row.get(0)?;
             let book_page: i64 = row.get(1)?;
-            // NULL / 空字符串 / 非法 JSON 均跳过该行，不返回 Err
+            // 非法 JSON 返回 Err，NULL / 空字符串跳过
             let page: RawPage = match payload {
                 Some(ref s) if !s.trim().is_empty() => match serde_json::from_str(s) {
                     Ok(p) => p,
                     Err(e) => {
-                        tracing::warn!(
+                        return Err(rusqlite::Error::InvalidParameterName(format!(
                             "load_raw_pages_for_doc: book_page={} invalid payload_json: {}",
-                            book_page,
-                            e,
-                        );
-                        return Ok(None);
+                            book_page, e
+                        )));
                     }
                 },
                 _ => return Ok(None),
@@ -1605,14 +1603,13 @@ impl Repository for SqliteRepository {
         let mut rows = stmt.query_map(
             [doc_id],
             |row| -> std::result::Result<(Value, Value, Value), rusqlite::Error> {
-                let parse = |idx: usize| -> Value {
-                    row.get::<_, Option<String>>(idx)
-                        .ok()
-                        .flatten()
+                let parse = |idx: usize| -> rusqlite::Result<Value> {
+                    let raw: Option<String> = row.get(idx)?;
+                    Ok(raw
                         .and_then(|s| serde_json::from_str(&s).ok())
-                        .unwrap_or(Value::Null)
+                        .unwrap_or(Value::Null))
                 };
-                Ok((parse(0), parse(1), parse(2)))
+                Ok((parse(0)?, parse(1)?, parse(2)?))
             },
         )?;
 
@@ -2054,5 +2051,70 @@ mod tests {
         assert_eq!(run.unit_count, 8);
         assert_eq!(run.structure_state.as_deref(), Some("needs_review"));
         assert!(run.updated_at > 0);
+    }
+
+    #[test]
+    fn invalid_note_kind_reads_back_as_unknown() {
+        let repo = setup_repo();
+        seed_doc(&repo, "kind-test");
+        let conn = repo.get_conn().unwrap();
+
+        conn.execute(
+            "INSERT INTO fnm_note_regions (doc_id, region_id, region_kind, start_page, end_page, created_at, updated_at) VALUES ('kind-test', 'r1', 'garbage_kind', 1, 2, 0, 0)",
+            [],
+        ).unwrap();
+        conn.execute(
+            "INSERT INTO fnm_note_items (doc_id, note_item_id, note_kind, page_no, created_at, updated_at) VALUES ('kind-test', 'n1', 'garbage_kind', 1, 0, 0)",
+            [],
+        ).unwrap();
+        conn.execute(
+            "INSERT INTO fnm_note_links (doc_id, link_id, status, note_kind, created_at, updated_at) VALUES ('kind-test', 'l1', 'matched', 'garbage_kind', 0, 0)",
+            [],
+        ).unwrap();
+
+        let regions = repo.list_fnm_note_regions("kind-test").unwrap();
+        assert_eq!(regions.len(), 1);
+        assert_eq!(regions[0].note_kind, NoteKind::Unknown);
+
+        let items = repo.list_fnm_note_items("kind-test").unwrap();
+        assert_eq!(items.len(), 1);
+        assert_eq!(items[0].note_kind, NoteKind::Unknown);
+
+        let links = repo.list_fnm_note_links("kind-test").unwrap();
+        assert_eq!(links.len(), 1);
+        assert_eq!(links[0].note_kind, NoteKind::Unknown);
+    }
+
+    #[test]
+    fn load_raw_pages_fails_on_invalid_json() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES ('json-fail', 1, 'not-valid-json')",
+            [],
+        ).unwrap();
+
+        let result = repo.load_raw_pages_for_doc("json-fail");
+        assert!(
+            result.is_err(),
+            "invalid JSON should return Err, not silently skip"
+        );
+    }
+
+    #[test]
+    fn load_toc_items_fails_on_blob_in_toc_col() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        conn.execute(
+            "INSERT INTO documents (id, slug, toc_user_json) VALUES ('toc-blob', 'test', ?1)",
+            rusqlite::params![rusqlite::types::Value::Blob(vec![0xFF, 0xFE])],
+        )
+        .unwrap();
+
+        let result = repo.load_toc_items_for_doc("toc-blob");
+        assert!(
+            result.is_err(),
+            "BLOB in TOC col should cause row.get error to propagate"
+        );
     }
 }

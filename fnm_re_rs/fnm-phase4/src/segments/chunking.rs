@@ -134,7 +134,6 @@ pub fn chunk_body_page_segments(
             source_text: String::new(),
             display_text: String::new(),
             paragraphs: visible_paragraphs,
-            ..Default::default()
         };
 
         if page_no <= 0 {

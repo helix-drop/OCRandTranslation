@@ -310,8 +310,7 @@ pub fn audit_phase6_export(
         .count() as i64;
 
     // 合并 blocking_reasons
-    let mut combined_blocking_reasons: Vec<String> =
-        phase6.status.blocking_reasons.clone();
+    let mut combined_blocking_reasons: Vec<String> = phase6.status.blocking_reasons.clone();
     combined_blocking_reasons.extend(freeze_blocking_reasons);
 
     let mut issue_counts: HashMap<String, i64> = HashMap::new();
@@ -421,36 +420,43 @@ mod tests {
 
     #[test]
     fn test_audit_phase6_export_blocks_on_freeze_error() {
-        let mut phase6 = Phase6Structure::default();
-        phase6.structure_reviews = vec![StructureReviewRecord {
-            review_id: "review-freeze_matched_ref_not_injected-ch001-1-5-abc".into(),
-            review_type: "freeze_matched_ref_not_injected".into(),
-            chapter_id: "ch001".into(),
-            page_start: 1,
-            page_end: 5,
-            severity: "error".into(),
-            payload: serde_json::json!({
-                "message": "anchor coord out of bounds for page 3",
-            }),
-        }];
+        let phase6 = Phase6Structure {
+            structure_reviews: vec![StructureReviewRecord {
+                review_id: "review-freeze_matched_ref_not_injected-ch001-1-5-abc".into(),
+                review_type: "freeze_matched_ref_not_injected".into(),
+                chapter_id: "ch001".into(),
+                page_start: 1,
+                page_end: 5,
+                severity: "error".into(),
+                payload: serde_json::json!({
+                    "message": "anchor coord out of bounds for page 3",
+                }),
+            }],
+            ..Default::default()
+        };
         let (report, _summary) = audit_phase6_export(&phase6, "test", None);
         assert!(!report.can_ship, "freeze error should block export");
         assert_eq!(report.blocking_issue_count, 1);
-        assert!(report.blocking_reasons.iter().any(|r| r.contains("freeze_matched_ref_not_injected")));
+        assert!(report
+            .blocking_reasons
+            .iter()
+            .any(|r| r.contains("freeze_matched_ref_not_injected")));
     }
 
     #[test]
     fn test_audit_phase6_export_ignores_non_blocking_review() {
-        let mut phase6 = Phase6Structure::default();
-        phase6.structure_reviews = vec![StructureReviewRecord {
-            review_id: "review-boundary_review_required-ch001-1-5-xyz".into(),
-            review_type: "boundary_review_required".into(),
-            chapter_id: "ch001".into(),
-            page_start: 1,
-            page_end: 5,
-            severity: "error".into(),
-            payload: serde_json::json!({}),
-        }];
+        let phase6 = Phase6Structure {
+            structure_reviews: vec![StructureReviewRecord {
+                review_id: "review-boundary_review_required-ch001-1-5-xyz".into(),
+                review_type: "boundary_review_required".into(),
+                chapter_id: "ch001".into(),
+                page_start: 1,
+                page_end: 5,
+                severity: "error".into(),
+                payload: serde_json::json!({}),
+            }],
+            ..Default::default()
+        };
         let (report, _summary) = audit_phase6_export(&phase6, "test", None);
         assert!(report.can_ship, "non-freeze error should not block export");
         assert_eq!(report.blocking_issue_count, 0);

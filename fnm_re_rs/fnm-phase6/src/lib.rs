@@ -16,7 +16,9 @@ pub mod export;
 pub mod export_audit;
 
 use anyhow::Result;
-use fnm_core::records::{ExportAuditReportRecord, ExportBundleRecord, Phase1Structure, StructureReviewRecord};
+use fnm_core::records::{
+    ExportAuditReportRecord, ExportBundleRecord, Phase1Structure, StructureReviewRecord,
+};
 use fnm_phase2::chapter_split::structure_model::BookStructureModel;
 
 /// 导出 bundle 构建。

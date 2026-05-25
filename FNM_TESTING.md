@@ -2,6 +2,8 @@
 
 本文说明当前 FNM 主链的测试入口、数据来源、输出产物和适用边界。以下命令均假定当前目录是仓库根目录 `/Users/hao/OCRandTranslation`。修复规则或判断 blocker 时，先选择正确的数据层，再运行对应脚本；不要用诊断输出替代验收结果。
 
+**当前暂停边界（2026-05-25）：** 程序合同修复按 `fnm_re_rs/FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 执行。在用户重新授权前，只允许不调用模型的定向测试、离线取证与复制库下游回放；本手册列出的真实整批、视觉检查和真实 repair 入口暂不执行。
+
 ## 判断顺序
 
 | 要回答的问题 | 应使用的入口 | 依据 |
@@ -28,7 +30,8 @@
 | 定向单测 | `pytest` / `cargo test -p ...` | 否 | 测试输出 | 是，针对修改范围 |
 | 增量推进 | `scripts/test_fnm_incremental.py` | 仅 `--repair` 时调用 repair | 终端输出、可选 checkpoint | 是，phase gate |
 | 常规批测 | `scripts/test_fnm_batch.py` | 不调用真实翻译，写测试占位译文 | `output/fnm_batch_test_result.{json,md}` | 是，非真实模型集成 |
-| 真实整批 | `scripts/test_fnm_real_batch.py` | 真实视觉 TOC + 真实 LLM repair | `output/fnm_real_batch/<tag>/` 与单书产物 | 是，阶段交付必须跑 |
+| 下游回放 | `scripts/test_fnm_downstream_replay.py` | 否 | `output/fnm_downstream_replay/<tag>/` | 是，限 Phase4-6 改动 |
+| 真实整批 | `scripts/test_fnm_real_batch.py` | 真实视觉 TOC + 真实 LLM repair | `output/fnm_real_batch/<tag>/` 与单书产物 | 当前暂停；恢复集成验收后使用 |
 | 段落底本对照 | `scripts/fnm_semantic_golden.py` | 否 | JSONL 底本与 DB 对比报告 | 是，内容对照层 |
 | 导出审计 | `scripts/audit_fnm_exports.py --full` | 否 | `output/fnm_book_audits/` | 是，导出合同层 |
 | 页面定位 | `scripts/inspect_page.py` / `scripts/vision_page_check.py` | 视觉检查时调用 | `/tmp/fnm_inspect/` 或终端 JSON | 否，仅取证 |
@@ -91,7 +94,23 @@
 | `test_example/<folder>/fnm_real_test_{progress,result,modules}.json` | 单书阶段产物 |
 | `test_example/<folder>/llm_traces/` | 视觉和 repair 请求/响应 trace |
 
-阶段交付最低组合为 Biopolitics 与 Goldstein 两本真实整批均完成，并在当前代码生成的 `results.json` 中无 blocker；修改涉及更多书型时应运行完整 manifest 集合。
+真实整批用于验证真实视觉/repair 调用链或最终内容交付，不应作为每次程序合同修正的默认动作。当前按程序逻辑顺序审查时，Phase1-3 的 P0/P1 修复先用对应 Rust 测试和复制诊断库验证；完成整条合同复核、需要刷新模型调用证据时，再运行 Biopolitics 与 Goldstein 两本真实整批。仅修改 Phase4-6 且已有可接受的 Phase1-3 DB 时，先按下节执行不耗模型配额的下游回放。
+
+### 下游回放：`test_fnm_downstream_replay.py`
+
+用途：当改动只涉及 Phase4-6 时，从已有验收 DB 复制 Phase1-3 落库事实，只回放 Rust 冻结、合并和导出审计；回放后在复制库写入测试占位译文并执行翻译后导出检查。不调用视觉目录或 LLM repair，不消耗模型配额，也不改写源数据库。
+
+```bash
+.venv/bin/python scripts/test_fnm_downstream_replay.py --tag phase5_acceptance
+```
+
+默认回放 Biopolitics 与 Goldstein。报告位于 `output/fnm_downstream_replay/<tag>/results.json`，并在每本书目录保存复制后的 `doc.db` 与 `result.json`。通过条件包括：Phase1-3 表摘要前后不变、无 Phase4/6 blocker、`can_ship=true`。
+
+此入口不能替代真实模型调用验证或最终内容验收。若回放揭示 Phase1-3 已持久化事实存在程序合同缺陷，应回到相应 phase 修复并按顺序复核；不应仅因已知内容差异立刻启动真实整批。
+
+### 文档库前置条件
+
+FNM 的批测、回放和 repository 定向验证都以应用已经导入的文档 `doc.db` 为输入。该数据库必须含有应用维护的 `documents` 与 `pages` 表及 raw page 数据；Rust FNM migration 只负责创建和更新 `fnm_*` 流水线产物表，不负责凭空生成 OCR 页面。由此产生的“空 FNM migration DB 无 raw page 可读”不是 pipeline blocker，真正需要报告的是在已有文档输入上读取失败、吞错或阶段产物损坏。
 
 ## 增量推进
 
@@ -254,10 +273,11 @@ cargo test --manifest-path fnm_re_rs/Cargo.toml -p fnm-phase3 --test biopolitics
 
 | 修改范围 | 开发过程中 | 交付前必须完成 |
 |---|---|---|
-| Phase 1/2 结构或注释捕获 | 对应 Rust spec/parity + 增量单书 | Biopolitics 与 Goldstein 真实整批、导出审计 |
-| Phase 3 锚点/链接 | Phase 3 spec + 增量单书 + 段落对照定位 | 显式运行且无跳过的 parity、两书真实整批、`semantic_golden` export 对照 |
-| Phase 4-6 合并/导出 | crate 定向测试 + `audit_fnm_exports.py --full` | 两书真实整批、export 层段落对照 |
-| Python bridge/批跑脚本 | 对应 `pytest` + PyO3 build/test | 受影响书真实整批 |
+| Core / Phase 1/2/3 程序合同 | 按顺序运行对应 Rust spec 与复制库诊断；差异报告只用于定位 | P0/P1 合同闭合并留证；不要求当前轮清空 `semantic_golden` 内容差异 |
+| 真实视觉/LLM repair 接线 | 对应 crate/bridge 测试与受控请求 trace | Biopolitics 与 Goldstein 真实整批，自然结束并保留 trace |
+| Phase 4-6 合并/导出合同 | crate 定向测试 + 下游回放 | 上游合同已复核时跑两书复制库回放且无本层 blocker |
+| 阶段 7 内容/发布验收 | `semantic_golden` 定位与人工复核 | 两书真实整批、导出审计、允许项以外逐段对照通过 |
+| Python bridge/批跑脚本 | 对应 `pytest` + PyO3 build/test | 仅下游回放桥接改动时用两书下游回放；改变真实批跑或模型调用时用受影响书真实整批 |
 
 不应作为通过证明的内容：
 

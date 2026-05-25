@@ -10,14 +10,18 @@
 use crate::error::{OrchestratorError, Result};
 use crate::pipeline;
 use crate::types::{
-    ModulePipelineSnapshot, PipelineConfig, SerPhase1, SerPhase2, SerPhase3, SerPhase4, SerPhase5,
-    SerPhase6, StartPhase,
+    ModulePipelineSnapshot, Phase1Snapshot, Phase2Snapshot, Phase3Snapshot, PipelineConfig,
+    SerPhase1, SerPhase2, SerPhase3, SerPhase4, SerPhase5, SerPhase6, StartPhase,
 };
 
 use fnm_core::db::{
     Phase1Products, Phase2Products, Phase3Products, Phase4Products, Phase5Products, Phase6Products,
     Repository,
 };
+use fnm_core::records::{
+    Phase1Structure, Phase2Structure, Phase2Summary, Phase3Structure, Phase3Summary,
+};
+use fnm_core::types::NoteKind;
 use fnm_llm_repair::page_context::RepairImageRenderer;
 use fnm_llm_repair::run::{run_llm_repair, LlmRepairReport, RunLlmRepairParams};
 use fnm_phase1::input::{RawPage, TocItem};
@@ -236,6 +240,209 @@ pub fn run_pipeline_for_doc<R: Repository>(
     });
 
     Ok(snapshot)
+}
+
+/// 从已验收并持久化的 Phase 1-3 事实仅回放 Phase 4-6。
+///
+/// 此入口不重跑视觉目录、注释捕获、锚点匹配或 LLM repair，也不改写
+/// Phase 1-3 表；用于下游代码变更后的集成验收。调用方必须先确认该
+/// DB 的 Phase 3 已通过验收。
+pub fn replay_phase4_to6_from_db<R: Repository>(
+    repo: &R,
+    doc_id: &str,
+    mut config: PipelineConfig,
+) -> Result<ModulePipelineSnapshot> {
+    config.doc_id = doc_id.to_string();
+    config.start_phase = StartPhase::FrozenUnits;
+    let pipeline_run_id = pipeline::generate_run_id(doc_id);
+
+    let raw_pages = repo
+        .load_raw_pages_for_doc(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load pages: {}", e)))?;
+    if raw_pages.is_empty() {
+        return Err(OrchestratorError::Phase4(anyhow::anyhow!(
+            "no pages found for doc_id '{}'",
+            doc_id
+        )));
+    }
+    let pages = repo
+        .list_fnm_pages(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load phase1 pages: {}", e)))?;
+    let chapters = repo
+        .list_fnm_chapters(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load phase1 chapters: {}", e)))?;
+    let heading_candidates = repo
+        .list_fnm_heading_candidates(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load phase1 headings: {}", e)))?;
+    let section_heads = repo.list_fnm_section_heads(doc_id).map_err(|e| {
+        OrchestratorError::Phase4(anyhow::anyhow!("load phase1 section heads: {}", e))
+    })?;
+    if pages.is_empty() || chapters.is_empty() {
+        return Err(OrchestratorError::Phase4(anyhow::anyhow!(
+            "persisted Phase 1 is incomplete for doc_id '{}'",
+            doc_id
+        )));
+    }
+
+    let note_regions = repo.list_fnm_note_regions(doc_id).map_err(|e| {
+        OrchestratorError::Phase4(anyhow::anyhow!("load phase2 note regions: {}", e))
+    })?;
+    let note_items = repo
+        .list_fnm_note_items(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load phase2 note items: {}", e)))?;
+    let chapter_note_modes = repo.list_fnm_chapter_note_modes(doc_id).map_err(|e| {
+        OrchestratorError::Phase4(anyhow::anyhow!("load phase2 chapter modes: {}", e))
+    })?;
+    let body_anchors = repo
+        .list_fnm_body_anchors(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load phase3 anchors: {}", e)))?;
+    let note_links = repo
+        .list_fnm_note_links(doc_id)
+        .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("load phase3 links: {}", e)))?;
+
+    let endnote_alignment_ok = note_regions
+        .iter()
+        .filter(|region| region.note_kind == NoteKind::Endnote)
+        .all(|region| region.region_marker_alignment_ok);
+    let phase1 = Phase1Snapshot {
+        structure: Phase1Structure {
+            pages: pages.clone(),
+            chapters: chapters.clone(),
+            heading_candidates: heading_candidates.clone(),
+            section_heads: section_heads.clone(),
+            ..Default::default()
+        },
+        diagnostics: serde_json::json!({"source": "persisted_phase1"}),
+    };
+    let phase2 = Phase2Snapshot {
+        structure: Phase2Structure {
+            pages: pages.clone(),
+            chapters: chapters.clone(),
+            heading_candidates: heading_candidates.clone(),
+            section_heads: section_heads.clone(),
+            note_regions: note_regions.clone(),
+            note_items: note_items.clone(),
+            chapter_note_modes: chapter_note_modes.clone(),
+            summary: Phase2Summary {
+                chapter_endnote_region_alignment_ok: endnote_alignment_ok,
+                ..Default::default()
+            },
+        },
+        note_regions: note_regions.clone(),
+        note_items: note_items.clone(),
+        chapter_note_modes: chapter_note_modes.clone(),
+        diagnostics: serde_json::json!({"source": "persisted_phase2"}),
+    };
+    let phase3 = Phase3Snapshot {
+        structure: Phase3Structure {
+            pages: pages.clone(),
+            chapters: chapters.clone(),
+            heading_candidates: heading_candidates.clone(),
+            section_heads: section_heads.clone(),
+            note_regions: note_regions.clone(),
+            note_items: note_items.clone(),
+            chapter_note_modes: chapter_note_modes.clone(),
+            body_anchors: body_anchors.clone(),
+            note_links: note_links.clone(),
+            summary: Phase3Summary {
+                chapter_endnote_region_alignment_ok: endnote_alignment_ok,
+                ..Default::default()
+            },
+            ..Default::default()
+        },
+        note_link_table: fnm_phase3::note_linking::NoteLinkTable {
+            anchors: body_anchors.clone(),
+            links: note_links.clone(),
+            effective_links: note_links.clone(),
+            ..Default::default()
+        },
+        body_anchors: body_anchors.clone(),
+        note_links: note_links.clone(),
+        diagnostics: serde_json::json!({"source": "persisted_phase3"}),
+    };
+
+    let chapter_layers =
+        build_chapter_layers(&chapters, &note_regions, &note_items, &pages, &raw_pages);
+    let phase4 = pipeline::run_phase4(
+        &phase1,
+        &phase2,
+        &phase3,
+        &chapter_layers,
+        &raw_pages,
+        &pipeline_run_id,
+        &config,
+    )?;
+    repo.replace_fnm_phase4_products(
+        doc_id,
+        &Phase4Products {
+            translation_units: phase4.translation_units.clone(),
+            structure_reviews: phase4.structure_reviews.clone(),
+        },
+    )
+    .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("persist phase4: {}", e)))?;
+
+    let phase5 = pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
+    repo.replace_fnm_phase5_products(
+        doc_id,
+        &Phase5Products {
+            chapter_markdowns: phase5.chapter_markdowns.chapters.clone(),
+            diagnostic_pages: phase5.chapter_markdowns.diagnostic_pages.clone(),
+            diagnostic_notes: phase5.chapter_markdowns.diagnostic_notes.clone(),
+        },
+    )
+    .map_err(|e| OrchestratorError::Phase5(anyhow::anyhow!("persist phase5: {}", e)))?;
+
+    let phase6 = pipeline::run_phase6(&phase5, &phase4, &phase1, &config)?;
+    repo.replace_fnm_phase6_products(
+        doc_id,
+        &Phase6Products {
+            export_chapters: phase6.export_bundle.chapters.clone(),
+            export_bundle: phase6.export_bundle.clone(),
+            export_audit: phase6.export_audit.clone(),
+        },
+    )
+    .map_err(|e| OrchestratorError::Phase6(anyhow::anyhow!("persist phase6: {}", e)))?;
+
+    Ok(ModulePipelineSnapshot {
+        doc_id: doc_id.to_string(),
+        slug: config.slug.clone(),
+        pipeline_run_id: pipeline_run_id.clone(),
+        phase1: Some(SerPhase1 {
+            pages,
+            chapters,
+            heading_candidates,
+            section_heads,
+        }),
+        phase2: Some(SerPhase2 {
+            note_regions,
+            note_items,
+            chapter_note_modes,
+        }),
+        phase3: Some(SerPhase3 {
+            body_anchors,
+            note_links,
+        }),
+        phase4: Some(SerPhase4 {
+            translation_units: phase4.translation_units,
+            structure_reviews: phase4.structure_reviews,
+        }),
+        phase5: Some(SerPhase5 {
+            chapter_count: phase5.chapter_markdowns.chapters.len() as i64,
+            merge_summary: phase5.chapter_markdowns.merge_summary,
+        }),
+        phase6: Some(SerPhase6 {
+            export_bundle: phase6.export_bundle,
+            export_audit: phase6.export_audit,
+        }),
+        run_meta: serde_json::json!({
+            "pipeline_run_id": pipeline_run_id,
+            "start_phase": "FrozenUnits",
+            "phase_state": "done",
+            "persisted": true,
+            "replay_source": "persisted_phase1_to_phase3",
+            "llm_repair": serde_json::Value::Null,
+        }),
+    })
 }
 
 /// 同步包装 async `run_llm_repair`。
@@ -532,5 +739,37 @@ mod tests {
             run.is_none(),
             "no fnm_run should exist when error is before create_fnm_run"
         );
+    }
+
+    #[test]
+    fn replay_phase4_to6_from_db_reuses_persisted_upstream() {
+        let pool = create_test_db();
+        let doc_id = "replay-doc";
+
+        seed_data(&pool, |conn| {
+            conn.execute(
+                "INSERT INTO documents (id, slug, toc_user_json) VALUES (?1, 'replay',
+                 '[{\"item_id\":\"ch-1\",\"title\":\"Chapter 1\",\"level\":1,\"depth\":0,\"role_hint\":\"chapter\"}]')",
+                rusqlite::params![doc_id],
+            ).unwrap();
+            let page = serde_json::json!({"bookPage": 1, "markdown": "# Chapter 1\n\nBody text."});
+            conn.execute(
+                "INSERT INTO pages (doc_id, book_page, payload_json) VALUES (?1, 1, ?2)",
+                rusqlite::params![doc_id, page.to_string()],
+            )
+            .unwrap();
+        });
+
+        let repo = fnm_core::db::SqliteRepository::new(pool);
+        run_pipeline_from_db(&repo, doc_id, default_config(doc_id), None)
+            .expect("seed full pipeline");
+
+        let snapshot = replay_phase4_to6_from_db(&repo, doc_id, default_config(doc_id))
+            .expect("replay downstream phases");
+
+        assert!(snapshot.phase4.is_some());
+        assert!(snapshot.phase5.is_some());
+        assert!(snapshot.phase6.is_some());
+        assert_eq!(repo.list_fnm_chapters(doc_id).unwrap().len(), 1);
     }
 }

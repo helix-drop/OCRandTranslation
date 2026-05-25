@@ -715,8 +715,8 @@ def verify_fnm_structure(
 
 
 def materialize_test_placeholders(doc_id: str, *, db_path: str = "") -> dict[str, Any]:
-    repo = SQLiteRepository()
     resolved_db_path = str(db_path or get_document_db_path(doc_id))
+    repo = SQLiteRepository(resolved_db_path)
     pages, _ = load_pages_from_disk(doc_id)
     units = repo.list_fnm_translation_units(doc_id)
     total_chars = 0
