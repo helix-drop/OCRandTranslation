@@ -211,15 +211,11 @@ fn replace_def_note_refs(def_text: &str, local_ref_numbers: &HashMap<String, i64
 pub fn rewrite_residual_raw_markers_for_chapter(
     chapter: &ChapterMarkdownEntry,
     note_text_by_id: &HashMap<String, String>,
-    marker_note_sequences: &HashMap<String, Vec<String>>,
+    _marker_note_sequences: &HashMap<String, Vec<String>>,
     fallback_note_text_by_id: Option<&HashMap<String, String>>,
 ) -> String {
     let markdown_text = chapter.markdown_text.as_str();
     if markdown_text.trim().is_empty() {
-        return markdown_text.to_string();
-    }
-    // 无序列约束时跳过重写——不可由已知 link/note 序列确定的 marker 不改
-    if marker_note_sequences.is_empty() {
         return markdown_text.to_string();
     }
     let mut resolved_note_text_by_id: HashMap<String, String> =

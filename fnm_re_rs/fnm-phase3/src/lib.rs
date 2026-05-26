@@ -23,7 +23,7 @@ use fnm_core::{
     db::{Phase3Products, Repository},
     records::{NoteLinkRecord, Phase3Structure},
 };
-use fnm_phase2::chapter_split::build_chapter_layers;
+use fnm_phase2::chapter_split::build_chapter_layers_from_authoritative_phase2;
 use input::Phase3Input;
 use output::Phase3Output;
 use serde_json::Value;
@@ -60,12 +60,13 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
     }
 
     // 1. 从输入重建 ChapterLayers
-    let chapter_layers = build_chapter_layers(
+    let chapter_layers = build_chapter_layers_from_authoritative_phase2(
         input.phase1_chapters,
         input.phase2_note_regions,
         input.phase2_note_items,
         input.phase1_pages,
         input.raw_pages,
+        input.phase2_chapter_note_modes,
     );
 
     // 2. 调用核心编排——返回的 result.phase2_build 已包含 materialize 后的 note 数据。

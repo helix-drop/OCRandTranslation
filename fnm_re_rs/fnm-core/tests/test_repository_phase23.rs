@@ -60,16 +60,16 @@ fn roundtrip_phase2_products() {
         page_start: 1,
         page_end: 2,
         pages: vec![1, 2],
-        note_kind: NoteKind::Footnote,
-        scope: RegionScope::Chapter,
-        source: RegionSource::FootnoteBand,
+        note_kind: NoteKind::Endnote,
+        scope: RegionScope::Book,
+        source: RegionSource::ExplorerSignalMatch,
         heading_text: "Notes".into(),
         start_reason: "band found".into(),
         end_reason: "end of band".into(),
         region_marker_alignment_ok: true,
         region_start_first_source_marker: "1".into(),
         region_first_note_item_marker: "1".into(),
-        review_required: false,
+        review_required: true,
     }];
 
     let note_items = vec![NoteItemRecord {
@@ -78,26 +78,26 @@ fn roundtrip_phase2_products() {
         chapter_id: "ch-1".into(),
         page_no: 2,
         marker: "1".into(),
-        marker_type: "num".into(),
+        marker_type: "roman".into(),
         text: "This is note 1.".into(),
-        source: "note_scan".into(),
-        source_page_label: "2".into(),
-        is_reconstructed: false,
-        review_required: false,
-        note_kind: NoteKind::Footnote,
-        projection_mode: None,
-        owner_chapter_id: None,
-        source_marker: None,
-        normalized_marker: None,
+        source: "explorer".into(),
+        source_page_label: "xii".into(),
+        is_reconstructed: true,
+        review_required: true,
+        note_kind: NoteKind::Endnote,
+        projection_mode: Some("book_scope_projection".into()),
+        owner_chapter_id: Some("ch-1".into()),
+        source_marker: Some("i".into()),
+        normalized_marker: Some("1".into()),
     }];
 
     let chapter_note_modes = vec![ChapterNoteModeRecord {
         chapter_id: "ch-1".into(),
-        note_mode: NoteMode::FootnotePrimary,
+        note_mode: NoteMode::BookEndnoteBound,
         region_ids: vec!["r-1".into()],
-        primary_region_scope: "chapter".into(),
-        has_footnote_band: true,
-        has_endnote_region: false,
+        primary_region_scope: "book".into(),
+        has_footnote_band: false,
+        has_endnote_region: true,
     }];
 
     // Phase 1 先写基础数据
@@ -140,14 +140,31 @@ fn roundtrip_phase2_products() {
     let read_regions = repo.list_fnm_note_regions(doc_id).expect("read regions");
     assert_eq!(read_regions.len(), 1);
     assert_eq!(read_regions[0].region_id, "r-1");
-    assert_eq!(read_regions[0].note_kind, NoteKind::Footnote);
+    assert_eq!(read_regions[0].note_kind, NoteKind::Endnote);
+    assert_eq!(read_regions[0].scope, RegionScope::Book);
+    assert_eq!(read_regions[0].source, RegionSource::ExplorerSignalMatch);
+    assert_eq!(read_regions[0].start_reason, "band found");
+    assert_eq!(read_regions[0].end_reason, "end of band");
+    assert!(read_regions[0].review_required);
 
     // 验证 note_items
     let read_items = repo.list_fnm_note_items(doc_id).expect("read items");
     assert_eq!(read_items.len(), 1);
     assert_eq!(read_items[0].note_item_id, "ni-1");
-    assert_eq!(read_items[0].note_kind, NoteKind::Footnote);
+    assert_eq!(read_items[0].note_kind, NoteKind::Endnote);
     assert!(read_items[0].text.contains("note 1"));
+    assert_eq!(read_items[0].marker_type, "roman");
+    assert_eq!(read_items[0].source, "explorer");
+    assert_eq!(read_items[0].source_page_label, "xii");
+    assert!(read_items[0].is_reconstructed);
+    assert!(read_items[0].review_required);
+    assert_eq!(
+        read_items[0].projection_mode.as_deref(),
+        Some("book_scope_projection")
+    );
+    assert_eq!(read_items[0].owner_chapter_id.as_deref(), Some("ch-1"));
+    assert_eq!(read_items[0].source_marker.as_deref(), Some("i"));
+    assert_eq!(read_items[0].normalized_marker.as_deref(), Some("1"));
 
     // 验证 chapter_note_modes
     let read_modes = repo
@@ -155,7 +172,11 @@ fn roundtrip_phase2_products() {
         .expect("read modes");
     assert_eq!(read_modes.len(), 1);
     assert_eq!(read_modes[0].chapter_id, "ch-1");
-    assert_eq!(read_modes[0].note_mode, NoteMode::FootnotePrimary);
+    assert_eq!(read_modes[0].note_mode, NoteMode::BookEndnoteBound);
+    assert_eq!(read_modes[0].region_ids, vec!["r-1"]);
+    assert_eq!(read_modes[0].primary_region_scope, "book");
+    assert!(!read_modes[0].has_footnote_band);
+    assert!(read_modes[0].has_endnote_region);
 }
 
 // ── Phase 3 round-trip ───────────────────────────────────────
@@ -187,9 +208,9 @@ fn roundtrip_phase3_products() {
         anchor_kind: AnchorKind::Footnote,
         certainty: 1.0,
         source_text: "ref".into(),
-        source: "html".into(),
-        synthetic: false,
-        ocr_repaired_from_marker: "".into(),
+        source: "visual_repair".into(),
+        synthetic: true,
+        ocr_repaired_from_marker: "7".into(),
     }];
 
     let note_links = vec![NoteLinkRecord {
@@ -220,6 +241,9 @@ fn roundtrip_phase3_products() {
     assert_eq!(read_anchors[0].anchor_id, "ba-1");
     assert_eq!(read_anchors[0].anchor_kind, AnchorKind::Footnote);
     assert_eq!(read_anchors[0].normalized_marker, "1");
+    assert_eq!(read_anchors[0].source, "visual_repair");
+    assert!(read_anchors[0].synthetic);
+    assert_eq!(read_anchors[0].ocr_repaired_from_marker, "7");
 
     // 验证 note_links
     let read_links = repo.list_fnm_note_links(doc_id).expect("read links");
@@ -228,4 +252,42 @@ fn roundtrip_phase3_products() {
     assert_eq!(read_links[0].status, LinkStatus::Matched);
     assert_eq!(read_links[0].resolver, LinkResolver::Rule);
     assert_eq!(read_links[0].note_kind, NoteKind::Footnote);
+}
+
+#[test]
+fn byte_coordinate_anchors_are_rejected_on_read() {
+    let doc_id = "test-doc-byte-anchor";
+    let (repo, tmp) = setup_db(doc_id);
+    repo.replace_fnm_phase3_products(
+        doc_id,
+        &Phase3Products {
+            body_anchors: vec![BodyAnchorRecord {
+                anchor_id: "ba-byte".into(),
+                chapter_id: "ch-1".into(),
+                page_no: 1,
+                paragraph_index: 0,
+                char_start: 4,
+                char_end: 6,
+                source_marker: "1".into(),
+                normalized_marker: "1".into(),
+                anchor_kind: AnchorKind::Footnote,
+                certainty: 1.0,
+                source_text: "é¹".into(),
+                source: "pattern_scan".into(),
+                synthetic: false,
+                ocr_repaired_from_marker: String::new(),
+            }],
+            note_links: vec![],
+        },
+    )
+    .expect("write anchor");
+    rusqlite::Connection::open(tmp.path())
+        .expect("raw connection")
+        .execute(
+            "UPDATE fnm_body_anchors SET coordinate_unit = 'byte' WHERE doc_id = ?1",
+            [doc_id],
+        )
+        .expect("mark byte-based legacy coordinates");
+
+    assert!(repo.list_fnm_body_anchors(doc_id).is_err());
 }

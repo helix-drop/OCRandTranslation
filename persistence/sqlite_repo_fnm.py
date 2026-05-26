@@ -939,19 +939,47 @@ class FnmRepoMixin:
             ) for row in (rows or [])]
         )
 
+    @staticmethod
+    def _delete_optional_fnm_table(conn, table_name: str, doc_id: str) -> None:
+        """Delete from a Rust-only FNM table when the Python schema has not created it."""
+        row = conn.execute(
+            "SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?",
+            (table_name,),
+        ).fetchone()
+        if row is not None:
+            conn.execute(f"DELETE FROM {table_name} WHERE doc_id = ?", (doc_id,))
+
     # 清理：phase>=N 的产物表；保证下游也被清空
     @staticmethod
     def _delete_fnm_products_from_phase(conn, doc_id: str, phase_from: int) -> None:
         """清 phase>=phase_from 的产物表。和 PHASE_OUTPUT_TABLES 对齐。"""
         phase_from = int(phase_from)
-        # Phase 4 及下游（含 5、6）：reviews + translation_units
+        # Phase 6: Rust export products are absent from Python-only databases.
+        if phase_from <= 6:
+            for table_name in (
+                "fnm_export_chapters",
+                "fnm_export_audit",
+                "fnm_export_bundle",
+            ):
+                FnmRepoMixin._delete_optional_fnm_table(conn, table_name, doc_id)
+        # Phase 5: merged chapter markdown and diagnostics.
+        if phase_from <= 5:
+            for table_name in (
+                "fnm_chapter_markdowns",
+                "fnm_diagnostic_pages",
+                "fnm_diagnostic_notes",
+            ):
+                FnmRepoMixin._delete_optional_fnm_table(conn, table_name, doc_id)
+        # Phase 4: frozen source and translation units.
         if phase_from <= 4:
             conn.execute(
                 "DELETE FROM fnm_structure_reviews WHERE doc_id = ?", (doc_id,)
             )
-        if phase_from <= 5:
             conn.execute(
                 "DELETE FROM fnm_translation_units WHERE doc_id = ?", (doc_id,)
+            )
+            FnmRepoMixin._delete_optional_fnm_table(
+                conn, "fnm_chapter_body_pages", doc_id
             )
         # Phase 3
         if phase_from <= 3:
@@ -964,6 +992,9 @@ class FnmRepoMixin:
                 "DELETE FROM fnm_paragraph_footnotes WHERE doc_id = ?", (doc_id,)
             )
             conn.execute("DELETE FROM fnm_chapter_endnotes WHERE doc_id = ?", (doc_id,))
+            conn.execute(
+                "DELETE FROM fnm_review_overrides_v2 WHERE doc_id = ?", (doc_id,)
+            )
         # Phase 2
         if phase_from <= 2:
             conn.execute("DELETE FROM fnm_note_items WHERE doc_id = ?", (doc_id,))

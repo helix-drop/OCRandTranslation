@@ -133,6 +133,58 @@ pub fn build_structure_reviews(
     invalid_override_count: usize,
     freeze_error_rows: &[FrozenRefEntry],
 ) -> (Vec<StructureReviewRecord>, serde_json::Value) {
+    build_structure_reviews_with_policy(
+        chapters,
+        body_anchors,
+        effective_note_links,
+        SummaryReviewPolicy {
+            summary,
+            emit_upstream_gate_reviews: true,
+        },
+        ignored_link_override_count,
+        invalid_override_count,
+        freeze_error_rows,
+    )
+}
+
+pub(crate) fn build_structure_reviews_without_upstream_gate_reviews(
+    chapters: &[ChapterRecord],
+    body_anchors: &[BodyAnchorRecord],
+    effective_note_links: &[NoteLinkRecord],
+    summary: &Phase3Summary,
+    ignored_link_override_count: usize,
+    invalid_override_count: usize,
+    freeze_error_rows: &[FrozenRefEntry],
+) -> (Vec<StructureReviewRecord>, serde_json::Value) {
+    build_structure_reviews_with_policy(
+        chapters,
+        body_anchors,
+        effective_note_links,
+        SummaryReviewPolicy {
+            summary,
+            emit_upstream_gate_reviews: false,
+        },
+        ignored_link_override_count,
+        invalid_override_count,
+        freeze_error_rows,
+    )
+}
+
+struct SummaryReviewPolicy<'a> {
+    summary: &'a Phase3Summary,
+    emit_upstream_gate_reviews: bool,
+}
+
+fn build_structure_reviews_with_policy(
+    chapters: &[ChapterRecord],
+    body_anchors: &[BodyAnchorRecord],
+    effective_note_links: &[NoteLinkRecord],
+    summary_policy: SummaryReviewPolicy<'_>,
+    ignored_link_override_count: usize,
+    invalid_override_count: usize,
+    freeze_error_rows: &[FrozenRefEntry],
+) -> (Vec<StructureReviewRecord>, serde_json::Value) {
+    let summary = summary_policy.summary;
     let mut reviews: Vec<StructureReviewRecord> = Vec::new();
 
     // 1. boundary_review_required
@@ -214,7 +266,9 @@ pub fn build_structure_reviews(
     }
 
     // 8. toc_alignment_review_required
-    if !summary.chapter_title_alignment_ok || !summary.chapter_section_alignment_ok {
+    if summary_policy.emit_upstream_gate_reviews
+        && (!summary.chapter_title_alignment_ok || !summary.chapter_section_alignment_ok)
+    {
         append_review(
             &mut reviews,
             "toc_alignment_review_required",
@@ -230,7 +284,7 @@ pub fn build_structure_reviews(
     }
 
     // 9. toc_semantic_review_required
-    if !summary.toc_semantic_contract_ok {
+    if summary_policy.emit_upstream_gate_reviews && !summary.toc_semantic_contract_ok {
         append_review(
             &mut reviews,
             "toc_semantic_review_required",

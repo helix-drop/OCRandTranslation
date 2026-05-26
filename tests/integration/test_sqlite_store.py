@@ -108,6 +108,157 @@ class SQLiteStoreTest(unittest.TestCase):
         self.assertIn("model_id", run_columns)
         self.assertIn("provider", run_columns)
 
+    def test_reset_from_phase4_clears_all_downstream_products_only(self):
+        initialize_database(self.db_path)
+        repo = SQLiteRepository(self.db_path)
+        doc_id = "phase4-reset-doc"
+        repo.upsert_document(doc_id, "Phase 4 Reset")
+
+        with get_connection(self.db_path) as conn:
+            conn.executescript(
+                """
+                CREATE TABLE fnm_chapter_markdowns (doc_id TEXT);
+                CREATE TABLE fnm_diagnostic_pages (doc_id TEXT);
+                CREATE TABLE fnm_diagnostic_notes (doc_id TEXT);
+                CREATE TABLE fnm_export_chapters (doc_id TEXT);
+                CREATE TABLE fnm_export_audit (doc_id TEXT);
+                CREATE TABLE fnm_export_bundle (doc_id TEXT);
+                """
+            )
+            conn.execute(
+                """INSERT INTO fnm_body_anchors(
+                    doc_id, anchor_id, page_no, anchor_kind, created_at, updated_at
+                ) VALUES (?, 'a-1', 1, 'footnote', 1, 1)""",
+                (doc_id,),
+            )
+            conn.execute(
+                """INSERT INTO fnm_review_overrides_v2(
+                    doc_id, scope, target_id, payload_json, created_at, updated_at
+                ) VALUES (?, 'link', 'l-1', '{}', 1, 1)""",
+                (doc_id,),
+            )
+            conn.execute(
+                """INSERT INTO fnm_structure_reviews(
+                    doc_id, review_type, severity, created_at, updated_at
+                ) VALUES (?, 'freeze', 'blocking', 1, 1)""",
+                (doc_id,),
+            )
+            conn.execute(
+                """INSERT INTO fnm_translation_units(
+                    unit_id, doc_id, kind, section_id, created_at, updated_at
+                ) VALUES ('u-1', ?, 'body', 'ch-1', 1, 1)""",
+                (doc_id,),
+            )
+            conn.execute(
+                """INSERT INTO fnm_chapter_body_pages(
+                    doc_id, chapter_id, body_pages_json, created_at, updated_at
+                ) VALUES (?, 'ch-1', '[]', 1, 1)""",
+                (doc_id,),
+            )
+            for table in (
+                "fnm_chapter_markdowns",
+                "fnm_diagnostic_pages",
+                "fnm_diagnostic_notes",
+                "fnm_export_chapters",
+                "fnm_export_audit",
+                "fnm_export_bundle",
+            ):
+                conn.execute(f"INSERT INTO {table}(doc_id) VALUES (?)", (doc_id,))
+
+        repo.reset_from_phase(doc_id, 4)
+
+        with get_connection(self.db_path) as conn:
+            self.assertEqual(
+                conn.execute(
+                    "SELECT COUNT(*) FROM fnm_body_anchors WHERE doc_id=?", (doc_id,)
+                ).fetchone()[0],
+                1,
+            )
+            self.assertEqual(
+                conn.execute(
+                    "SELECT COUNT(*) FROM fnm_review_overrides_v2 WHERE doc_id=?",
+                    (doc_id,),
+                ).fetchone()[0],
+                1,
+            )
+            for table in (
+                "fnm_structure_reviews",
+                "fnm_translation_units",
+                "fnm_chapter_body_pages",
+                "fnm_chapter_markdowns",
+                "fnm_diagnostic_pages",
+                "fnm_diagnostic_notes",
+                "fnm_export_chapters",
+                "fnm_export_audit",
+                "fnm_export_bundle",
+            ):
+                self.assertEqual(
+                    conn.execute(
+                        f"SELECT COUNT(*) FROM {table} WHERE doc_id=?", (doc_id,)
+                    ).fetchone()[0],
+                    0,
+                    table,
+                )
+
+    def test_reset_from_phase3_clears_repair_overrides(self):
+        initialize_database(self.db_path)
+        repo = SQLiteRepository(self.db_path)
+        doc_id = "phase3-reset-doc"
+        repo.upsert_document(doc_id, "Phase 3 Reset")
+        with get_connection(self.db_path) as conn:
+            conn.execute(
+                """INSERT INTO fnm_review_overrides_v2(
+                    doc_id, scope, target_id, payload_json, created_at, updated_at
+                ) VALUES (?, 'link', 'l-1', '{}', 1, 1)""",
+                (doc_id,),
+            )
+
+        repo.reset_from_phase(doc_id, 3)
+
+        with get_connection(self.db_path) as conn:
+            self.assertEqual(
+                conn.execute(
+                    "SELECT COUNT(*) FROM fnm_review_overrides_v2 WHERE doc_id=?",
+                    (doc_id,),
+                ).fetchone()[0],
+                0,
+            )
+
+    def test_reset_from_phase5_preserves_phase4_translation_units(self):
+        initialize_database(self.db_path)
+        repo = SQLiteRepository(self.db_path)
+        doc_id = "phase5-reset-doc"
+        repo.upsert_document(doc_id, "Phase 5 Reset")
+        with get_connection(self.db_path) as conn:
+            conn.executescript("CREATE TABLE fnm_chapter_markdowns (doc_id TEXT);")
+            conn.execute(
+                """INSERT INTO fnm_translation_units(
+                    unit_id, doc_id, kind, section_id, created_at, updated_at
+                ) VALUES ('u-1', ?, 'body', 'ch-1', 1, 1)""",
+                (doc_id,),
+            )
+            conn.execute(
+                "INSERT INTO fnm_chapter_markdowns(doc_id) VALUES (?)", (doc_id,)
+            )
+
+        repo.reset_from_phase(doc_id, 5)
+
+        with get_connection(self.db_path) as conn:
+            self.assertEqual(
+                conn.execute(
+                    "SELECT COUNT(*) FROM fnm_translation_units WHERE doc_id=?",
+                    (doc_id,),
+                ).fetchone()[0],
+                1,
+            )
+            self.assertEqual(
+                conn.execute(
+                    "SELECT COUNT(*) FROM fnm_chapter_markdowns WHERE doc_id=?",
+                    (doc_id,),
+                ).fetchone()[0],
+                0,
+            )
+
     def test_initialize_database_skips_schema_rewrite_after_current_version_is_ready(
         self,
     ):

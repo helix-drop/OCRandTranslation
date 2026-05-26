@@ -25,7 +25,7 @@ use fnm_core::types::NoteKind;
 use fnm_llm_repair::page_context::RepairImageRenderer;
 use fnm_llm_repair::run::{run_llm_repair, LlmRepairReport, RunLlmRepairParams};
 use fnm_phase1::input::{RawPage, TocItem};
-use fnm_phase2::chapter_split::build_chapter_layers;
+use fnm_phase2::chapter_split::build_chapter_layers_from_authoritative_phase2;
 
 /// LLM repair 启用配置。
 ///
@@ -167,12 +167,13 @@ pub fn run_pipeline_for_doc<R: Repository>(
     };
 
     // ── Phase 4 ──
-    let chapter_layers = build_chapter_layers(
+    let chapter_layers = build_chapter_layers_from_authoritative_phase2(
         &phase1.structure.chapters,
         &phase2.note_regions,
         &phase2.note_items,
         &phase1.structure.pages,
         &raw_pages,
+        &phase2.chapter_note_modes,
     );
     let phase4 = pipeline::run_phase4(
         &phase1,
@@ -181,6 +182,7 @@ pub fn run_pipeline_for_doc<R: Repository>(
         &chapter_layers,
         &raw_pages,
         &pipeline_run_id,
+        true,
         &config,
     )?;
     let phase4_products = Phase4Products {
@@ -195,8 +197,7 @@ pub fn run_pipeline_for_doc<R: Repository>(
     });
 
     // ── Phase 5 ──
-    let phase5 =
-        pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &phase2, &config)?;
+    let phase5 = pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
     let phase5_products = Phase5Products {
         chapter_markdowns: phase5.chapter_markdowns.chapters.clone(),
         diagnostic_pages: phase5.chapter_markdowns.diagnostic_pages.clone(),
@@ -305,9 +306,8 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
         .iter()
         .filter(|region| region.note_kind == NoteKind::Endnote)
         .all(|region| region.region_marker_alignment_ok);
-    // 所有 gate bool 显式构造：不可从 DB 恢复的字段保守设为 false（阻止误放行）。
-    // DB 不存储 Phase1Summary / Phase2Summary / Phase3Summary / NoteLinkTable
-    // 的 gate 结果，因此回放只重建可恢复的核心数据。
+    // 此入口仅接受已验收的 Phase1-3 DB。DB 不保存三个 summary 的 gate，
+    // 下游回放不评估这些字段，也不据此产生新的上游 review。
     let phase1 = Phase1Snapshot {
         structure: Phase1Structure {
             pages: pages.clone(),
@@ -383,8 +383,14 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
         diagnostics: serde_json::json!({"source": "persisted_phase3"}),
     };
 
-    let chapter_layers =
-        build_chapter_layers(&chapters, &note_regions, &note_items, &pages, &raw_pages);
+    let chapter_layers = build_chapter_layers_from_authoritative_phase2(
+        &chapters,
+        &note_regions,
+        &note_items,
+        &pages,
+        &raw_pages,
+        &chapter_note_modes,
+    );
     let phase4 = pipeline::run_phase4(
         &phase1,
         &phase2,
@@ -392,6 +398,7 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
         &chapter_layers,
         &raw_pages,
         &pipeline_run_id,
+        false,
         &config,
     )?;
     repo.replace_fnm_phase4_products(
@@ -403,8 +410,7 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
     )
     .map_err(|e| OrchestratorError::Phase4(anyhow::anyhow!("persist phase4: {}", e)))?;
 
-    let phase5 =
-        pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &phase2, &config)?;
+    let phase5 = pipeline::run_phase5(&phase4, &phase3, &chapter_layers, &phase1, &config)?;
     repo.replace_fnm_phase5_products(
         doc_id,
         &Phase5Products {
@@ -790,7 +796,22 @@ mod tests {
         let snapshot = replay_phase4_to6_from_db(&repo, doc_id, default_config(doc_id))
             .expect("replay downstream phases");
 
-        assert!(snapshot.phase4.is_some());
+        let replay_reviews = &snapshot
+            .phase4
+            .as_ref()
+            .expect("phase4 replay")
+            .structure_reviews;
+        assert!(
+            replay_reviews.iter().all(|review| {
+                review.review_type != "toc_alignment_review_required"
+                    && review.review_type != "toc_semantic_review_required"
+            }),
+            "verified upstream replay must not manufacture TOC reviews: {:?}",
+            replay_reviews
+                .iter()
+                .map(|review| review.review_type.as_str())
+                .collect::<Vec<_>>()
+        );
         assert!(snapshot.phase5.is_some());
         assert!(snapshot.phase6.is_some());
         assert_eq!(repo.list_fnm_chapters(doc_id).unwrap().len(), 1);

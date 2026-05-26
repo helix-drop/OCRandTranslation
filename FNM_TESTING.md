@@ -2,7 +2,7 @@
 
 本文说明当前 FNM 主链的测试入口、数据来源、输出产物和适用边界。以下命令均假定当前目录是仓库根目录 `/Users/hao/OCRandTranslation`。修复规则或判断 blocker 时，先选择正确的数据层，再运行对应脚本；不要用诊断输出替代验收结果。
 
-**当前暂停边界（2026-05-25）：** 程序合同修复按 `fnm_re_rs/FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 执行。在用户重新授权前，只允许不调用模型的定向测试、离线取证与复制库下游回放；本手册列出的真实整批、视觉检查和真实 repair 入口暂不执行。
+**当前暂停边界（2026-05-26 更新）：** 实施顺序按 `fnm_re_rs/FNM_REPAIR_MASTER_PLAN.md` 的原阶段体系执行，阶段 5 的程序合同已通过无模型复制库回放完成验收。进入阶段 6 前，只编写并确认计划；在用户重新授权前，不执行真实整批、视觉检查或真实 repair。`fnm_re_rs/FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 仅为问题盘点，不是实施入口。
 
 ## 判断顺序
 
@@ -102,9 +102,23 @@
 
 ```bash
 .venv/bin/python scripts/test_fnm_downstream_replay.py --tag phase5_acceptance
+
+# 仅以 Phase4 引用冻结/翻译单元合同决定退出状态（阶段 5 收尾口径）
+.venv/bin/python scripts/test_fnm_downstream_replay.py \
+  --tag phase5_contract_closeout_20260526_v3 \
+  --phase4-contract-only
 ```
 
-默认回放 Biopolitics 与 Goldstein。报告位于 `output/fnm_downstream_replay/<tag>/results.json`，并在每本书目录保存复制后的 `doc.db` 与 `result.json`。通过条件包括：Phase1-3 表摘要前后不变、无 Phase4/6 blocker、`can_ship=true`。
+默认回放 Biopolitics 与 Goldstein。脚本用 SQLite 一致性快照复制源 DB，并为每本书启动隔离 worker，避免 WAL 内容或跨书连接生命周期影响证据。报告位于 `output/fnm_downstream_replay/<tag>/results.json`，并在每本书目录保存复制后的 `doc.db` 与 `result.json`。
+
+报告有两个不可混用的判定字段：
+
+| 字段 | 用途 | 判定内容 |
+|---|---|---|
+| `phase4_contract_passed` | 阶段 5 程序合同验收 | 上游摘要不变、生成 translation units、无 `freeze_matched_ref_not_injected` |
+| `passed` | Phase4-6 完整下游观察 | 另含占位翻译与 `export_ready_real` 等后续放行结果 |
+
+使用 `--phase4-contract-only` 时，进程退出状态由 `phase4_contract_passed` 决定；完整回放的 `passed` 仍写入报告供阶段 6 定位，但不得拿它否定已通过的阶段 5。
 
 此入口不能替代真实模型调用验证或最终内容验收。若回放揭示 Phase1-3 已持久化事实存在程序合同缺陷，应回到相应 phase 修复并按顺序复核；不应仅因已知内容差异立刻启动真实整批。
 

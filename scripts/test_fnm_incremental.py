@@ -35,6 +35,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from FNM_RE import run_doc_pipeline, run_llm_repair
+from persistence.sqlite_db_paths import get_document_db_path
 from persistence.sqlite_store import SQLiteRepository
 
 MODE_ALIASES = {
@@ -77,7 +78,7 @@ def _resolve_doc_id(slug: str) -> str:
 
 def _check_phase1(doc_id: str) -> dict[str, Any]:
     """检查 Phase 1 冻结数据是否干净。"""
-    repo = SQLiteRepository()
+    repo = SQLiteRepository(get_document_db_path(doc_id))
     chapters = repo.list_fnm_chapters(doc_id)
     note_modes = repo.list_fnm_chapter_note_modes(doc_id)
     mode_counts: dict[str, int] = {}
@@ -94,7 +95,7 @@ def _check_phase1(doc_id: str) -> dict[str, Any]:
 
 def _check_phase2(doc_id: str) -> dict[str, Any]:
     """检查 Phase 2 输出。"""
-    repo = SQLiteRepository()
+    repo = SQLiteRepository(get_document_db_path(doc_id))
     note_items = repo.list_fnm_note_items(doc_id)
     anchors = repo.list_fnm_body_anchors(doc_id)
 
@@ -135,7 +136,7 @@ def _check_persisted_note_links(doc_id: str) -> dict[str, Any]:
     这里不是 Module Phase 3 原始链接表。Phase4/Phase5/Phase6 可能会为了导出态
     重新打开未注入的 matched link，所以只能作为持久化 readback 观察。
     """
-    repo = SQLiteRepository()
+    repo = SQLiteRepository(get_document_db_path(doc_id))
     links = repo.list_fnm_note_links(doc_id)
     if not links:
         return {"error": "no links"}
@@ -188,17 +189,22 @@ def _run_pipeline_and_report(
     progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     """跑 pipeline 并汇总各 phase 状态。"""
+    db_path = get_document_db_path(doc_id)
     print(f"  Pipeline...", flush=True)
-    result = run_doc_pipeline(doc_id, progress_callback=progress_callback)
+    result = run_doc_pipeline(
+        doc_id, db_path=db_path, progress_callback=progress_callback
+    )
 
     if with_repair:
         print(f"  LLM repair...", flush=True)
-        repair_result = run_llm_repair(doc_id, auto_apply=True)
+        repair_result = run_llm_repair(doc_id, db_path=db_path, auto_apply=True)
         print(f"    clusters={repair_result.get('cluster_count')}, "
               f"suggestions={repair_result.get('suggestion_count')}, "
               f"auto_applied={repair_result.get('auto_applied_count')}", flush=True)
         print(f"  Rebuild...", flush=True)
-        result = run_doc_pipeline(doc_id, progress_callback=progress_callback)
+        result = run_doc_pipeline(
+            doc_id, db_path=db_path, progress_callback=progress_callback
+        )
 
     blocking = list(result.get("blocking_reasons") or [])
 
@@ -242,18 +248,27 @@ def _run_pipeline_and_report(
         report["persisted_links_detail"] = _check_persisted_note_links(doc_id)
         db_item_count = int(report["phase2_detail"].get("total_items") or 0)
         persisted_matched = int(report["persisted_links_detail"].get("matched") or 0)
-        module_matched = int(report["module_phase3_detail"].get("matched") or 0)
         report["persisted_readback"] = {
             "note_count_matches_run": db_item_count == int(result.get("note_count") or 0),
             "run_note_count": int(result.get("note_count") or 0),
             "db_note_item_count": db_item_count,
-            "persisted_matched_matches_module": persisted_matched == module_matched,
-            "module_phase3_matched": module_matched,
             "persisted_matched": persisted_matched,
-            "divergence": "none"
-            if persisted_matched == module_matched
-            else f"Module Phase3 matched={module_matched} → Persisted matched={persisted_matched} (delta={module_matched - persisted_matched})",
+            "module_phase3_snapshot_available": "matched"
+            in report["module_phase3_detail"],
+            "divergence": "none",
         }
+        if report["persisted_readback"]["module_phase3_snapshot_available"]:
+            module_matched = int(report["module_phase3_detail"].get("matched") or 0)
+            report["persisted_readback"].update(
+                {
+                    "persisted_matched_matches_module": persisted_matched
+                    == module_matched,
+                    "module_phase3_matched": module_matched,
+                    "divergence": "none"
+                    if persisted_matched == module_matched
+                    else f"Module Phase3 matched={module_matched} → Persisted matched={persisted_matched} (delta={module_matched - persisted_matched})",
+                }
+            )
 
     return report
 
@@ -367,9 +382,9 @@ def main() -> int:
 
     # ── reset-from 模式 ──
     if args.reset_from > 0:
-        repo = SQLiteRepository()
         for slug in slugs:
             doc_id = _resolve_doc_id(slug)
+            repo = SQLiteRepository(get_document_db_path(doc_id))
             counts = repo.reset_from_phase(doc_id, int(args.reset_from))
             print(f"{slug}: reset from phase {args.reset_from} → {counts}", flush=True)
         return 0
@@ -408,7 +423,7 @@ def main() -> int:
         if args.checkpoint:
             import hashlib, uuid
             run_id = hashlib.sha256(f"{doc_id}-{run_ts}".encode()).hexdigest()[:12]
-            repo = SQLiteRepository()
+            repo = SQLiteRepository(get_document_db_path(doc_id))
             import json as _json, tempfile, os
             snap_data = {
                 "slug": slug,

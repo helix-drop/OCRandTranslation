@@ -7,8 +7,27 @@ use crate::types::*;
 use anyhow::{Context, Result};
 use r2d2::Pool;
 use r2d2_sqlite::SqliteConnectionManager;
+use rusqlite::types::Type;
+use serde::de::DeserializeOwned;
 use serde_json::Value;
+use std::io;
 use std::str::FromStr;
+
+fn invalid_db_value(column: usize, message: impl Into<String>) -> rusqlite::Error {
+    rusqlite::Error::FromSqlConversionFailure(
+        column,
+        Type::Text,
+        Box::new(io::Error::new(io::ErrorKind::InvalidData, message.into())),
+    )
+}
+
+fn parse_required_json<T: DeserializeOwned>(
+    raw: Option<String>,
+    column: usize,
+) -> rusqlite::Result<T> {
+    let raw = raw.ok_or_else(|| invalid_db_value(column, "required JSON value is NULL"))?;
+    serde_json::from_str(&raw).map_err(|e| invalid_db_value(column, e.to_string()))
+}
 
 // ── Phase products payload ───────────────────────────────────────
 
@@ -300,10 +319,11 @@ impl SqliteRepository {
         // 插入 heading_candidates
         let mut stmt = conn.prepare(
             "INSERT INTO fnm_heading_candidates (doc_id, heading_id, page_no, text,
-             normalized_text, source, block_label, top_band, confidence,
+             normalized_text, source, block_label, top_band, font_height, x, y, width_estimate, confidence,
              heading_family_guess, suppressed_as_chapter, reject_reason,
+             font_name, font_weight_hint, align_hint, width_ratio, heading_level_hint,
              created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)",
         )?;
         for hc in heading_candidates {
             stmt.execute(rusqlite::params![
@@ -315,10 +335,19 @@ impl SqliteRepository {
                 hc.source,
                 hc.block_label,
                 hc.top_band as i64,
+                hc.font_height,
+                hc.x,
+                hc.y,
+                hc.width_estimate,
                 hc.confidence,
                 normalize_heading_family_guess(&hc.heading_family_guess),
                 hc.suppressed_as_chapter as i64,
                 hc.reject_reason,
+                hc.font_name,
+                hc.font_weight_hint,
+                hc.align_hint,
+                hc.width_ratio,
+                hc.heading_level_hint,
                 ts,
                 ts,
             ])?;
@@ -327,10 +356,10 @@ impl SqliteRepository {
         // 插入 section_heads
         let mut stmt = conn.prepare(
             "INSERT INTO fnm_section_heads (doc_id, section_head_id, chapter_id, page_no,
-             text, normalized_text, source, confidence, heading_family_guess,
+             text, normalized_text, level, source, confidence, heading_family_guess,
              rejected_chapter_candidate, reject_reason, derived_from_heading_id,
              created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
         )?;
         for sh in section_heads {
             stmt.execute(rusqlite::params![
@@ -340,6 +369,7 @@ impl SqliteRepository {
                 sh.page_no,
                 sh.title,
                 sh.title,
+                sh.level,
                 sh.source,
                 1.0_f64,
                 "section",
@@ -395,10 +425,7 @@ impl Repository for SqliteRepository {
                 title: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
                 start_page: row.get(2)?,
                 end_page: row.get(3)?,
-                pages: row
-                    .get::<_, Option<String>>(4)?
-                    .and_then(|s| serde_json::from_str(&s).ok())
-                    .unwrap_or_default(),
+                pages: parse_required_json(row.get(4)?, 4)?,
                 source: ChapterSource::from_str(
                     &row.get::<_, Option<String>>(5)?.unwrap_or_default(),
                 )
@@ -415,7 +442,7 @@ impl Repository for SqliteRepository {
     fn list_fnm_section_heads(&self, doc_id: &str) -> Result<Vec<SectionHeadRecord>> {
         let conn = self.get_conn()?;
         let mut stmt = conn.prepare(
-            "SELECT section_head_id, chapter_id, text, page_no, 0, source
+            "SELECT section_head_id, chapter_id, text, page_no, level, source
              FROM fnm_section_heads WHERE doc_id = ?1 ORDER BY page_no",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
@@ -424,7 +451,7 @@ impl Repository for SqliteRepository {
                 chapter_id: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
                 title: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
                 page_no: row.get(3)?,
-                level: 0,
+                level: row.get(4)?,
                 source: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
             })
         })?;
@@ -436,7 +463,8 @@ impl Repository for SqliteRepository {
         let mut stmt = conn.prepare(
             "SELECT heading_id, page_no, text, normalized_text, source, block_label,
                     top_band, confidence, heading_family_guess, suppressed_as_chapter,
-                    reject_reason
+                    reject_reason, font_height, x, y, width_estimate, font_name,
+                    font_weight_hint, align_hint, width_ratio, heading_level_hint
              FROM fnm_heading_candidates WHERE doc_id = ?1 ORDER BY page_no",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
@@ -452,7 +480,15 @@ impl Repository for SqliteRepository {
                 heading_family_guess: row.get::<_, Option<String>>(8)?.unwrap_or_default(),
                 suppressed_as_chapter: row.get::<_, i64>(9)? != 0,
                 reject_reason: row.get::<_, Option<String>>(10)?.unwrap_or_default(),
-                ..Default::default()
+                font_height: row.get(11)?,
+                x: row.get(12)?,
+                y: row.get(13)?,
+                width_estimate: row.get(14)?,
+                font_name: row.get(15)?,
+                font_weight_hint: row.get(16)?,
+                align_hint: row.get(17)?,
+                width_ratio: row.get(18)?,
+                heading_level_hint: row.get(19)?,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -474,28 +510,29 @@ impl Repository for SqliteRepository {
         let conn = self.get_conn()?;
         let mut stmt = conn.prepare(
             "SELECT region_id, bound_chapter_id, start_page, end_page, pages_json,
-                    region_kind, 'chapter', 'heading_scan', title_hint, '', '',
+                    region_kind, region_scope, region_source, title_hint, start_reason, end_reason,
                     region_marker_alignment_ok, region_start_first_source_marker,
-                    region_first_note_item_marker, 0
+                    region_first_note_item_marker, review_required
              FROM fnm_note_regions WHERE doc_id = ?1 ORDER BY start_page",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
+            let scope = RegionScope::from_str(&row.get::<_, String>(6)?)
+                .map_err(|e| invalid_db_value(6, e))?;
+            let source = RegionSource::from_str(&row.get::<_, String>(7)?)
+                .map_err(|e| invalid_db_value(7, e))?;
             Ok(NoteRegionRecord {
                 region_id: row.get(0)?,
                 chapter_id: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
                 page_start: row.get(2)?,
                 page_end: row.get(3)?,
-                pages: row
-                    .get::<_, Option<String>>(4)?
-                    .and_then(|s| serde_json::from_str(&s).ok())
-                    .unwrap_or_default(),
+                pages: parse_required_json(row.get(4)?, 4)?,
                 note_kind: NoteKind::from_str(&row.get::<_, String>(5)?)
                     .unwrap_or(NoteKind::Unknown),
-                scope: RegionScope::Chapter,
-                source: RegionSource::HeadingScan,
+                scope,
+                source,
                 heading_text: row.get::<_, Option<String>>(8)?.unwrap_or_default(),
-                start_reason: String::new(),
-                end_reason: String::new(),
+                start_reason: row.get(9)?,
+                end_reason: row.get(10)?,
                 region_marker_alignment_ok: row.get::<_, i64>(11)? != 0,
                 region_start_first_source_marker: row
                     .get::<_, Option<String>>(12)?
@@ -503,7 +540,7 @@ impl Repository for SqliteRepository {
                 region_first_note_item_marker: row
                     .get::<_, Option<String>>(13)?
                     .unwrap_or_default(),
-                review_required: false,
+                review_required: row.get::<_, i64>(14)? != 0,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -513,7 +550,9 @@ impl Repository for SqliteRepository {
         let conn = self.get_conn()?;
         let mut stmt = conn.prepare(
             "SELECT note_item_id, region_id, chapter_id, page_no, marker,
-                    note_kind, source_text, display_marker, source_marker, 0, 0
+                    marker_type, note_kind, source_text, item_source, source_page_label,
+                    is_reconstructed, review_required, projection_mode, owner_chapter_id,
+                    source_marker, normalized_marker
              FROM fnm_note_items WHERE doc_id = ?1 ORDER BY page_no, marker",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
@@ -523,18 +562,18 @@ impl Repository for SqliteRepository {
                 chapter_id: row.get::<_, Option<String>>(2)?.unwrap_or_default(),
                 page_no: row.get(3)?,
                 marker: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
-                marker_type: String::new(),
-                text: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
-                source: row.get::<_, Option<String>>(7)?.unwrap_or_default(),
-                source_page_label: row.get::<_, Option<String>>(8)?.unwrap_or_default(),
-                is_reconstructed: row.get::<_, Option<i64>>(9)?.unwrap_or(0) != 0,
-                review_required: row.get::<_, Option<i64>>(10)?.unwrap_or(0) != 0,
-                note_kind: NoteKind::from_str(&row.get::<_, String>(5)?)
+                marker_type: row.get(5)?,
+                text: row.get::<_, Option<String>>(7)?.unwrap_or_default(),
+                source: row.get(8)?,
+                source_page_label: row.get(9)?,
+                is_reconstructed: row.get::<_, i64>(10)? != 0,
+                review_required: row.get::<_, i64>(11)? != 0,
+                note_kind: NoteKind::from_str(&row.get::<_, String>(6)?)
                     .unwrap_or(NoteKind::Unknown),
-                projection_mode: None,
-                owner_chapter_id: None,
-                source_marker: None,
-                normalized_marker: None,
+                projection_mode: row.get(12)?,
+                owner_chapter_id: row.get(13)?,
+                source_marker: row.get(14)?,
+                normalized_marker: row.get(15)?,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -543,7 +582,8 @@ impl Repository for SqliteRepository {
     fn list_fnm_chapter_note_modes(&self, doc_id: &str) -> Result<Vec<ChapterNoteModeRecord>> {
         let conn = self.get_conn()?;
         let mut stmt = conn.prepare(
-            "SELECT chapter_id, note_mode
+            "SELECT chapter_id, note_mode, region_ids_json, primary_region_scope,
+                    has_footnote_band, has_endnote_region
              FROM fnm_chapter_note_modes WHERE doc_id = ?1 ORDER BY chapter_id",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
@@ -551,10 +591,10 @@ impl Repository for SqliteRepository {
                 chapter_id: row.get(0)?,
                 note_mode: NoteMode::from_str(&row.get::<_, String>(1)?)
                     .unwrap_or(NoteMode::ReviewRequired),
-                region_ids: vec![],
-                primary_region_scope: String::new(),
-                has_footnote_band: false,
-                has_endnote_region: false,
+                region_ids: parse_required_json(row.get(2)?, 2)?,
+                primary_region_scope: row.get(3)?,
+                has_footnote_band: row.get::<_, i64>(4)? != 0,
+                has_endnote_region: row.get::<_, i64>(5)? != 0,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -575,20 +615,27 @@ impl Repository for SqliteRepository {
         let mut stmt_region = conn.prepare(
             "INSERT INTO fnm_note_regions (doc_id, region_id, region_kind,
              start_page, end_page, pages_json, title_hint, bound_chapter_id,
+             region_scope, region_source, start_reason, end_reason, review_required,
              region_start_first_source_marker, region_first_note_item_marker,
              region_marker_alignment_ok, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
         )?;
         for r in &payload.note_regions {
+            let pages_json = serde_json::to_string(&r.pages)?;
             stmt_region.execute(rusqlite::params![
                 doc_id,
                 r.region_id,
                 r.note_kind.as_str(),
                 r.page_start,
                 r.page_end,
-                serde_json::to_string(&r.pages).ok(),
+                pages_json,
                 r.heading_text,
                 r.chapter_id,
+                r.scope.as_str(),
+                r.source.as_str(),
+                r.start_reason,
+                r.end_reason,
+                r.review_required as i64,
                 r.region_start_first_source_marker,
                 r.region_first_note_item_marker,
                 r.region_marker_alignment_ok as i64,
@@ -599,16 +646,22 @@ impl Repository for SqliteRepository {
 
         let mut stmt_mode = conn.prepare(
             "INSERT INTO fnm_chapter_note_modes (doc_id, chapter_id, chapter_title,
-             note_mode, sampled_pages_json, detection_confidence, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+             note_mode, region_ids_json, primary_region_scope, has_footnote_band,
+             has_endnote_region, sampled_pages_json, detection_confidence, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
         )?;
         for cm in &payload.chapter_note_modes {
+            let region_ids_json = serde_json::to_string(&cm.region_ids)?;
             stmt_mode.execute(rusqlite::params![
                 doc_id,
                 cm.chapter_id,
                 "",
                 cm.note_mode.as_str(),
-                serde_json::to_string(&cm.region_ids).ok(),
+                region_ids_json,
+                cm.primary_region_scope,
+                cm.has_footnote_band as i64,
+                cm.has_endnote_region as i64,
+                "[]",
                 1.0_f64,
                 ts,
                 ts,
@@ -617,10 +670,11 @@ impl Repository for SqliteRepository {
 
         let mut stmt_item = conn.prepare(
             "INSERT INTO fnm_note_items (doc_id, note_item_id, note_kind,
-             chapter_id, region_id, marker, normalized_marker, occurrence,
-             source_text, page_no, display_marker, source_marker, title_hint,
+             chapter_id, region_id, marker, marker_type, normalized_marker, occurrence,
+             source_text, item_source, source_page_label, is_reconstructed, review_required,
+             projection_mode, owner_chapter_id, page_no, display_marker, source_marker, title_hint,
              created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)",
         )?;
         for item in &payload.note_items {
             stmt_item.execute(rusqlite::params![
@@ -630,12 +684,19 @@ impl Repository for SqliteRepository {
                 item.chapter_id,
                 item.region_id,
                 item.marker,
-                item.marker,
+                item.marker_type,
+                item.normalized_marker,
                 1_i64,
                 item.text,
-                item.page_no,
                 item.source,
                 item.source_page_label,
+                item.is_reconstructed as i64,
+                item.review_required as i64,
+                item.projection_mode,
+                item.owner_chapter_id,
+                item.page_no,
+                item.marker,
+                item.source_marker,
                 "",
                 ts,
                 ts,
@@ -652,10 +713,18 @@ impl Repository for SqliteRepository {
         let mut stmt = conn.prepare(
             "SELECT anchor_id, chapter_id, page_no, paragraph_index, char_start,
                     char_end, source_marker, normalized_marker, anchor_kind, certainty,
-                    source_text, '', 0, ''
+                    source_text, anchor_source, synthetic, ocr_repaired_from_marker,
+                    coordinate_unit
              FROM fnm_body_anchors WHERE doc_id = ?1 ORDER BY page_no, paragraph_index",
         )?;
         let rows = stmt.query_map([doc_id], |row| {
+            let coordinate_unit: String = row.get(14)?;
+            if coordinate_unit != "char" {
+                return Err(invalid_db_value(
+                    14,
+                    format!("unsupported body anchor coordinate_unit: {coordinate_unit}"),
+                ));
+            }
             Ok(BodyAnchorRecord {
                 anchor_id: row.get(0)?,
                 chapter_id: row.get::<_, Option<String>>(1)?.unwrap_or_default(),
@@ -669,9 +738,9 @@ impl Repository for SqliteRepository {
                     .unwrap_or(AnchorKind::Unknown),
                 certainty: row.get(9)?,
                 source_text: row.get::<_, Option<String>>(10)?.unwrap_or_default(),
-                source: row.get::<_, Option<String>>(11)?.unwrap_or_default(),
+                source: row.get(11)?,
                 synthetic: row.get::<_, i64>(12)? != 0,
-                ocr_repaired_from_marker: row.get::<_, Option<String>>(13)?.unwrap_or_default(),
+                ocr_repaired_from_marker: row.get(13)?,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -721,8 +790,9 @@ impl Repository for SqliteRepository {
         let mut stmt_anchor = conn.prepare(
             "INSERT INTO fnm_body_anchors (doc_id, anchor_id, chapter_id, page_no,
              paragraph_index, char_start, char_end, source_marker, normalized_marker,
-             anchor_kind, certainty, source_text, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+             anchor_kind, certainty, source_text, anchor_source, synthetic,
+             ocr_repaired_from_marker, coordinate_unit, created_at, updated_at)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
         )?;
         for ba in &payload.body_anchors {
             stmt_anchor.execute(rusqlite::params![
@@ -738,6 +808,10 @@ impl Repository for SqliteRepository {
                 ba.anchor_kind.as_str(),
                 ba.certainty,
                 ba.source_text,
+                ba.source,
+                ba.synthetic as i64,
+                ba.ocr_repaired_from_marker,
+                "char",
                 ts,
                 ts,
             ])?;
@@ -2062,11 +2136,11 @@ mod tests {
         let conn = repo.get_conn().unwrap();
 
         conn.execute(
-            "INSERT INTO fnm_note_regions (doc_id, region_id, region_kind, start_page, end_page, created_at, updated_at) VALUES ('kind-test', 'r1', 'garbage_kind', 1, 2, 0, 0)",
+            "INSERT INTO fnm_note_regions (doc_id, region_id, region_kind, start_page, end_page, pages_json, region_scope, region_source, start_reason, end_reason, review_required, created_at, updated_at) VALUES ('kind-test', 'r1', 'garbage_kind', 1, 2, '[]', 'chapter', 'heading_scan', '', '', 0, 0, 0)",
             [],
         ).unwrap();
         conn.execute(
-            "INSERT INTO fnm_note_items (doc_id, note_item_id, note_kind, page_no, created_at, updated_at) VALUES ('kind-test', 'n1', 'garbage_kind', 1, 0, 0)",
+            "INSERT INTO fnm_note_items (doc_id, note_item_id, note_kind, marker_type, item_source, source_page_label, is_reconstructed, review_required, page_no, created_at, updated_at) VALUES ('kind-test', 'n1', 'garbage_kind', '', '', '', 0, 0, 1, 0, 0)",
             [],
         ).unwrap();
         conn.execute(

@@ -298,13 +298,12 @@ pub fn audit_phase6_export(
         }
     }
 
-    // 统计：file_reports 中的 blocking + freeze 阻断 + structural 阻断
+    // 统计
     let mut blocking_issue_count = file_reports
         .iter()
         .filter(|r| r.severity == "blocking")
         .count() as i64;
     blocking_issue_count += freeze_blocking_reasons.len() as i64;
-    blocking_issue_count += phase6.status.blocking_reasons.len() as i64;
     let major_issue_count = file_reports
         .iter()
         .filter(|r| r.severity == "major")

@@ -10,7 +10,7 @@ pub mod synth_markers;
 use fnm_core::records::{
     ChapterNoteModeRecord, ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord,
 };
-use fnm_core::types::NoteMode;
+use fnm_core::types::{NoteMode, RegionScope};
 use std::collections::HashMap;
 
 /// ChapterLayer：单章的完整聚合数据。
@@ -257,6 +257,16 @@ pub fn build_chapter_layers(
             .get(chapter_id.as_str())
             .map(|rs| rs.iter().map(|r| r.region_id.clone()).collect())
             .unwrap_or_default();
+        let primary_region_scope = region_by_chapter
+            .get(chapter_id.as_str())
+            .map(|rs| {
+                if rs.iter().any(|region| region.scope == RegionScope::Book) {
+                    "book"
+                } else {
+                    "chapter"
+                }
+            })
+            .unwrap_or("chapter");
 
         // 在 items/regions 被 move 之前计算事实字段
         let actual_has_footnote = !footnote_items.is_empty()
@@ -308,7 +318,7 @@ pub fn build_chapter_layers(
             chapter_id: chapter_id.clone(),
             note_mode: mode,
             region_ids,
-            primary_region_scope: "chapter".into(),
+            primary_region_scope: primary_region_scope.into(),
             has_footnote_band: actual_has_footnote,
             has_endnote_region: actual_has_endnote,
         });
@@ -336,4 +346,54 @@ pub fn build_chapter_layers(
         chapter_layers,
         gate_report,
     }
+}
+
+/// 下游阶段重建 chapter layer 的展示结构，但保留 Phase 2 已决定的 mode 事实。
+///
+/// ←→ Python `build_chapter_layers()` 输出被后续 module 直接消费的路径。
+pub fn build_chapter_layers_from_authoritative_phase2(
+    chapters: &[ChapterRecord],
+    note_regions: &[NoteRegionRecord],
+    note_items: &[NoteItemRecord],
+    page_partitions: &[PagePartitionRecord],
+    raw_pages: &[fnm_phase1::input::RawPage],
+    authoritative_modes: &[ChapterNoteModeRecord],
+) -> ChapterLayers {
+    let mut layers = build_chapter_layers(
+        chapters,
+        note_regions,
+        note_items,
+        page_partitions,
+        raw_pages,
+    );
+    if authoritative_modes.is_empty() {
+        return layers;
+    }
+
+    let mode_by_chapter: HashMap<&str, &ChapterNoteModeRecord> = authoritative_modes
+        .iter()
+        .map(|mode| (mode.chapter_id.as_str(), mode))
+        .collect();
+    for layer in &mut layers.chapter_layers {
+        if let Some(mode) = mode_by_chapter.get(layer.chapter_id.as_str()) {
+            layer.note_mode = mode.note_mode;
+            layer.policy_applied.insert(
+                "note_mode".to_string(),
+                serde_json::Value::String(mode.note_mode.as_str().to_string()),
+            );
+        }
+    }
+
+    layers.chapter_note_modes = authoritative_modes.to_vec();
+    layers.gate_report = gate::build_gate_report(&layers.chapter_layers, authoritative_modes);
+
+    let book_type = crate::book_structure::infer_book_type(authoritative_modes);
+    let book_type_value = serde_json::Value::String(book_type.as_str().to_string());
+    for layer in &mut layers.chapter_layers {
+        layer
+            .policy_applied
+            .insert("book_type".to_string(), book_type_value.clone());
+    }
+
+    layers
 }

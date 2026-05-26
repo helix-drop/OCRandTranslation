@@ -1,13 +1,15 @@
-# FNM 当前程序合同修复交接计划
+# FNM 程序合同问题盘点记录（非当前执行计划）
 
 创建时间：2026-05-25
 适用工作区：`/Users/hao/OCRandTranslation`
-执行范围：`fnm-core -> fnm-phase1 -> fnm-phase2 -> fnm-phase3 -> fnm-llm-repair / fnm-orchestrator / fnm-py -> fnm-phase4 -> fnm-phase5 -> fnm-phase6`
+记录范围：`fnm-core -> fnm-phase1 -> fnm-phase2 -> fnm-phase3 -> fnm-llm-repair / fnm-orchestrator / fnm-py -> fnm-phase4 -> fnm-phase5 -> fnm-phase6`
 当前执行约束：**不进行 Biopolitics / Goldstein 真实批跑，不调用视觉 TOC 或真实 LLM repair API。**
+
+> **2026-05-26 纠偏结论：** 本文件曾错误地把 A-H 复核序列当作新的实施主线，导致原阶段 6 的 `fnm-phase5`/`fnm-phase6` 工作提前混入阶段 5。当前已恢复以 `FNM_REPAIR_MASTER_PLAN.md` 的原阶段 1-7 为准，阶段 5 及其直接前置阻断修复已完成程序合同验收。本文件仅用于查阅已发现的合同风险，G/H 中的问题归入原阶段 6；本次提交不编写或实施阶段 6 计划。
 
 ## 一、这份文件的作用
 
-本文是当前修复工作的直接交接入口。接手人应先读本文，再按阶段读取审计文件和历史实施记录；不得只凭旧阶段文档中的“已完成”表述继续向下游推进。
+本文是追溯过程中产生的问题盘点记录，不是当前实施入口。接手人应先读 `FNM_REPAIR_MASTER_PLAN.md` 和当前原阶段文档，再用本文核对待归位问题。
 
 本轮目标不是消除全部识别差异，而是确认并修复 Rust pipeline 的程序合同问题：
 
@@ -51,12 +53,12 @@
 
 | 顺序 | 文件 | 用途 |
 |---|---|---|
-| 1 | `fnm_re_rs/FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` | 当前执行计划，以本文状态和边界为准 |
-| 2 | `fnm_re_rs/FNM_REPAIR_MASTER_PLAN.md` | 总目标、phase 边界和历史背景 |
+| 1 | `fnm_re_rs/FNM_REPAIR_MASTER_PLAN.md` | 唯一总领实施顺序与当前阶段边界 |
+| 2 | 当前原阶段文件，例如 `fnm_re_rs/FNM_REPAIR_PHASE5_REF_FREEZE.md` | 当前阶段任务和验收 |
 | 3 | `FNM_TESTING.md` | 测试入口、产物和当前禁止真实批跑的边界 |
 | 4 | `PROGRESS.md` | 最近追溯事实和尚未复核的候选改动 |
 | 5 | `fnm_re_rs/FNM_*_AUDIT.md` | 各 crate 原始问题清单 |
-| 6 | `fnm_re_rs/FNM_REPAIR_PHASE*.md` | 历史阶段实施/验收记录，仅作证据 |
+| 6 | `fnm_re_rs/FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` | A-H 追溯问题盘点，仅供归档到原阶段 |
 
 ### 2. 历史文档状态漂移
 
@@ -351,7 +353,7 @@ Repair 只能在 Phase3.5 辅助 anchor/link，不得创建或重分类 Phase2 �
 - Translation units 不重读 raw pages 重新物化引用。
 - Phase4 blocker 能被 Phase6 审计读取。
 
-## 十二、阶段 G：Phase5 章节 Markdown 合并
+## 十二、阶段 G：Phase5 章节 Markdown 合并（归入原阶段 6，当前禁止实施）
 
 ### 目标
 
@@ -359,7 +361,7 @@ Phase5 只把 Phase4 已冻结的 body 和 note definitions 合并成章节 Mark
 
 ### 当前重点：该 crate 尚未因 Phase4 候选修复而自动闭合
 
-当前工作区主要改动集中在 Phase4/6，并不等于 `fnm-phase5` 审计中的 P1 已解决。本阶段必须单独实施。
+`fnm-phase5` 审计中的 P1 尚未解决。以下内容保留为原阶段 6 的计划输入，阶段 5 收尾期间不得实施或宣称完成。
 
 ### 文件级任务
 
@@ -377,13 +379,13 @@ Phase5 只把 Phase4 已冻结的 body 和 note definitions 合并成章节 Mark
 - 不重推 note mode、chapter boundary 或 link。
 - raw marker、unclosed local ref、frozen token leak 形成明确 blocker。
 
-## 十三、阶段 H：Phase6 导出与审计
+## 十三、阶段 H：Phase6 导出与审计（归入原阶段 6，当前禁止实施）
 
 ### 目标
 
 Phase6 组装导出并判断是否可交付；不得修改正文内容来隐藏 Phase5 或更上游错误。
 
-### 文件级任务
+### 原阶段 6 待规划任务
 
 | 文件 | 要做什么 | 测试要求 |
 |---|---|---|
@@ -401,7 +403,7 @@ Phase6 组装导出并判断是否可交付；不得修改正文内容来隐藏 
 
 ## 十四、无真实批跑的验证矩阵
 
-本计划的实施验证必须分层进行。命令仅供接手人实际修复时运行；本计划编写过程中未执行。
+以下矩阵仅是问题盘点形成时的参考。当前执行验证以原阶段 5 文件为准；其中 Phase5/Phase6 项待进入原阶段 6 后才可执行。
 
 | 修复范围 | 开发验证 | 本轮阶段退出验证 | 禁止事项 |
 |---|---|---|---|
@@ -411,13 +413,13 @@ Phase6 组装导出并判断是否可交付；不得修改正文内容来隐藏 
 | Phase3 | link/contract/ID/synthetic 定向测试 | `cargo test -p fnm-phase3`，内容 parity 失败单列 | 不以改 golden 消除失败 |
 | Repair/Orchestrator/PyO3 | 模拟 response、fixture、bridge tests | 受影响 crate 测试；修改 bridge 才 rebuild 与跑对应 pytest | 不发真实 repair 请求 |
 | Phase4 | freeze/unit/review 定向测试 | `cargo test -p fnm-phase4` | 不放宽 blocker |
-| Phase5 | merge/gate 定向测试 | `cargo test -p fnm-phase5` | 不从 Phase6 helper 倒借业务逻辑 |
-| Phase6 | audit/export/ZIP 定向测试 | `cargo test -p fnm-phase6` | 不静默修正文 |
+| Phase5 | 原阶段 6 计划输入，当前不实施 | 进入原阶段 6 后决定 | 不从 Phase6 helper 倒借业务逻辑 |
+| Phase6 | 原阶段 6 计划输入，当前不实施 | 进入原阶段 6 后决定 | 不静默修正文 |
 | Phase4-6 集成 | 上游全部合同关闭后，复制 DB 下游回放 | `scripts/test_fnm_downstream_replay.py`，确认模型请求为 0 | 不运行真实批测 |
 
 ### 仅在最后允许的无模型集成动作
 
-当 Core 至 Phase6 的 P0/P1 均按顺序关闭后，可以运行复制库下游回放，条件是：
+阶段 5 可以运行复制库下游回放来验证 Phase4 freeze blocker 的最小透传，条件是：
 
 1. 输入 DB 明确来自已复核的 Phase1-3 facts。
 2. 脚本只复制 DB 并执行 Phase4-6，不覆盖源 DB。
@@ -426,7 +428,7 @@ Phase6 组装导出并判断是否可交付；不得修改正文内容来隐藏 
 
 ## 十五、交付记录模板
 
-接手人每关闭一个阶段，都在 `PROGRESS.md` 追加以下内容：
+进入相应原阶段后，接手人可参考以下模板在 `PROGRESS.md` 追加记录；不得再使用 A-H 作为完成编号：
 
 ```markdown
 ## YYYY-MM-DD 程序合同复核：<stage>
@@ -454,9 +456,9 @@ Phase6 组装导出并判断是否可交付；不得修改正文内容来隐藏 
 
 ## 十六、最终完成判定与后续真实批跑
 
-### 本计划完成的判定
+### 归档说明
 
-只有满足以下全部条件，才能报告“程序合同修复完成，可申请真实集成验收”：
+以下原清单只能作为后续原阶段 6/7 规划素材，不能作为当前阶段 5 的完成判定：
 
 1. Core 至 Phase6 按本文顺序逐层复核，无未关闭 P0/P1。
 2. 每个修复都有定向测试或明确可重复的离线诊断证据。

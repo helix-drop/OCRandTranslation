@@ -1,13 +1,14 @@
 # 阶段 5 计划：Phase4 引用冻结与翻译单元闭合
 
 创建时间：2026-05-23
+修订时间：2026-05-26
 上位目标：`FNM_REPAIR_MASTER_PLAN.md`
 主要审计依据：`FNM_PHASE4_AUDIT.md`
 前置交接：`FNM_REPAIR_PHASE4_ORCHESTRATOR.md`
 
 本文给接手阶段 5 的实现者使用。读完本文后，应能直接确定本阶段为什么要修、哪些行为必须保持、哪些文件要先写失败测试再修改、如何判断阶段完成。
 
-> 2026-05-25 状态覆盖：Phase4 freeze blocker 门槛继续保留，但当前实现只视为候选闭合；必须先按 `FNM_REPAIR_PROGRAM_CONTRACT_PLAN.md` 完成 Core 至 repair/编排的顺序复核。用户重新授权前不进行真实批跑或模型请求。
+> 2026-05-26 收尾口径：Phase4 freeze blocker 门槛继续保留，本文仍是当前阶段 5 的执行文档。只补修直接影响本阶段输入或回放可信性的阶段 1-4 合同问题；`fnm-phase5`/`fnm-phase6` 的职责重排属于阶段 6，不在本文范围内实施。本阶段使用无模型复制库回放，不进行真实批跑或模型请求。
 
 ## 一、阶段定位
 
@@ -30,6 +31,8 @@
 - 不修 Phase3 的 anchor/link 分类与 weak OCR parity 差异；已登记的 strict parity 留到阶段 7。
 - 不修 `fnm-phase5` 章节 Markdown 合并与 `fnm-phase6` 导出审计职责倒挂；它们属于阶段 6。
 - 不以 `semantic_golden` 的缺章、逐段正文或弱 OCR 差异阻断本阶段；这些报告用于向上游追溯，并在流程合同闭合后集中收敛。
+- 不以 Phase2 的 `review_required` 章数量阻断本阶段，只要该不确定事实被完整持久化、透传且未被 Phase4 改写为成功结论。
+- 不以 Phase6 的 `can_ship` 或 `export_ready_real` 作为阶段 5 判定；阶段 5 只认 Phase4 freeze/unit/blocker 事实。
 - 不为 Biopolitics 或 Goldstein 加书名特例、marker 黑名单或专书阈值。
 - 不修改 `real_golden_template/`，也不使用当前 Rust actual 覆盖 expected fixture。
 
@@ -44,7 +47,7 @@
 
 ## 二、进入本阶段的已确认基线
 
-### 1. 前序阶段历史状态（当前须按新计划复核）
+### 1. 前序阶段历史状态（仅复核直接阻断本阶段的合同）
 
 | 阶段 | 已确认事实 | 本阶段如何使用 |
 |---|---|---|
@@ -68,7 +71,20 @@
 
 若阶段 5 测试发现上述接线退化，应记录为阶段 4 回归并修其源头，不在 `fnm-phase4` 里加补丁掩盖。
 
-### OpenCode Plan 审阅确认
+### 2. 2026-05-26 可用程序输入基线
+
+本次已修复 Phase1-3 持久化字段、字符坐标单位、清理入口和增量脚本 DB 路径，并以无模型方式重生成两书 Phase1-3。源数据库中的 Phase4-6 产物已经清空，因此它们可用于复制库回放，不会把旧冻结结果混入阶段 5。
+
+| 书 | 新 Phase1-3 计数 | 合同检查 | 非本阶段阻断项 |
+|---|---|---|---|
+| Biopolitics | pages=370, chapters=13, regions=80, items=471, anchors=531, links=489 | 缺失合同字段=0；非 `char` 坐标=0；matched 缺实体=0 | `review_required`=11 章，保留为内容追溯信号 |
+| Goldstein | pages=431, chapters=9, regions=8, items=778, anchors=904, links=778 | 缺失合同字段=0；非 `char` 坐标=0；matched 缺实体=0 | 内容 parity 后置 |
+
+原数据备份：`output/fnm_phase13_regen_backup/20260526_130612/`。
+
+进入 Phase4 回放的含义仅为：输入数据在程序层可被正确消费。不表示 Biopolitics 的 11 章分类已经业务确认，也不表示最终 Markdown/export 内容已正确。
+
+### 3. OpenCode Plan 审阅确认
 
 2026-05-23 已将本文、总览与阶段 4 交接文档提交给 OpenCode Plan 会话审阅，使用模型 `deepseek/deepseek-v4-pro`（供应商 DeepSeek）。审阅结论为：**阶段 5 计划已确认，可进入 Build 实施**，不存在开工前必须修订的 P0 缺口。
 
@@ -78,9 +94,9 @@
 - `freeze_matched_ref_not_injected` 默认复用现有 `fnm_structure_reviews` 持久化，不为 blocker 单独扩 schema；只有证据确实无法保存时才进入任务 8。
 - `units` 改为纯派生层后，移除仅服务于旧 raw-page 注入路径的依赖；仍需保留的 metadata 必须说明用途。
 
-### 2. 当前模型与批测口径
+### 4. 后续真实模型与批测口径
 
-阶段交付真实批次继续使用当前模型职责：
+以下模型职责仅供后续需要真实视觉/repair 或最终内容验收时使用，不属于阶段 5 收尾执行步骤：
 
 | 用途 | 模型 |
 |---|---|
@@ -88,19 +104,19 @@
 | LLM repair 主模型 | `glm-4.6v` |
 | repair 最后一轮兜底 | `gemini-3.1-flash-lite` |
 
-repair 模型具备视觉能力时，最多附加 5 页页面证据。真实批跑必须保留占位翻译步骤，不得使用 `--skip-translation` 规避导出装配验证。
+repair 模型具备视觉能力时，最多附加 5 页页面证据。未来真实批跑必须保留占位翻译步骤，不得使用 `--skip-translation` 规避导出装配验证。
 
-### 3. 当前基线测试
+### 5. 当前基线测试
 
-在编写本计划前核对到的现状：
+2026-05-26 对当前代码再次核对：
 
 | 检查 | 结果 | 解读 |
 |---|---|---|
-| GLM 传输瞬时失败回归测试 | 通过 | repair 基础设施不是本阶段待办 |
-| `cargo test -p fnm-orchestrator` | 22 passed | orchestrator 可作为上游入口 |
-| `cargo test -p fnm-phase4` | 106 unit + 6 parity-name tests + 8 spec passed | crate 可运行，但不能证明职责正确 |
+| GLM 传输瞬时失败回归测试 | 历史通过 | repair 基础设施不是本阶段待办 |
+| `cargo test -p fnm-orchestrator` | 23 passed | 回放与 blocker 透传入口可运行 |
+| `cargo test -p fnm-phase4` | 106 unit + 8 fixture/parity + 12 spec passed | frozen/unit/blocker 主要程序合同测试通过 |
 
-注意：当前 `biopolitics_phase4_parity.rs` 只读取 golden 后断言 golden 自身数量和字段，不运行 Rust Phase4 输出，因此不是真实 parity 门禁。
+`biopolitics_phase4_parity.rs` 现已包含运行 Rust `build_translation_units` / `build_structure_reviews` 的输出测试；其中程序合同部分可用于本阶段。其内容 parity 范围仍不能替代阶段 7 的 `real_golden_template` 逐段验收。
 
 ## 三、当前代码问题与修复判定
 
@@ -452,7 +468,7 @@ git diff -- test_example/Biopolitics/golden_exports/real_golden_template \
 
 ### 3. 阶段交付回放与真实整批边界
 
-阶段 5 只改 Phase4-6。已有 Phase1-3 验收 DB 足够时，先重建 PyO3 后运行不调用模型的下游回放；它复制源 DB，不覆盖上游验收事实：
+阶段 5 只验 Phase4 的程序合同。已有 Phase1-3 程序合同输入足够时，先重建 PyO3 后运行不调用模型的下游回放；它复制源 DB，不覆盖上游事实：
 
 ```bash
 cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
@@ -460,9 +476,21 @@ cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
 
 cd /Users/hao/OCRandTranslation
 .venv/bin/python scripts/test_fnm_downstream_replay.py --tag phase5_acceptance
+.venv/bin/python scripts/test_fnm_downstream_replay.py \
+  --tag phase5_contract_closeout_20260526_v3 \
+  --phase4-contract-only
 ```
 
-若目标是验证视觉/repair 网络调用或完成最终内容交付，才必须完整顺序跑两书真实整批。仅为排查 P0/P1 程序合同而修改 Phase1-3 时，应先在相应 crate 和可复制诊断库中逐层验证，不为已知内容差异消耗模型额度。启动真实整批后不能使用 `--skip-translation`，也不能因时间长而中断：
+脚本为驱动方便会继续执行 Phase5/6，并将 `export_ready_real` 和最终 blocking reasons 纳入顶层 `passed`；这与本阶段职责边界不等价。`--phase4-contract-only` 已提供独立的 `phase4_contract_passed` 结论，包含：
+
+- `upstream_unchanged=true`，并附 Phase1-3 digest。
+- Phase4 `freeze_matched_ref_not_injected` 数量与逐条 reason；数量为 0 才可通过。
+- Phase4 产出的 translation unit 数量/摘要，证明可由 frozen units 构建。
+- `model_requests=0`。
+
+Phase5/6 的 `export_ready_real`、`can_ship` 或其它导出 blocker 即使存在，也只登记到阶段 6，不改变阶段 5 的 Phase4 判定。相反，任何 freeze blocker 都必须阻断阶段 5，即使 Phase6 汇总输出看似正常。
+
+若目标是验证视觉/repair 网络调用或完成最终内容交付，才完整顺序跑两书真实整批。仅为排查 P0/P1 程序合同而修改 Phase1-3 时，不为已知内容差异消耗模型额度。未来启动真实整批后不能使用 `--skip-translation`，也不能因时间长而中断：
 
 ```bash
 cd /Users/hao/OCRandTranslation/fnm_re_rs/fnm-py
@@ -486,7 +514,7 @@ PYTHONUNBUFFERED=1 .venv/bin/python scripts/test_fnm_real_batch.py \
   2>&1 | tee /tmp/phase5_ref_freeze_closeout_goldstein.console.log
 ```
 
-批次必须保留：
+未来真实批次必须保留：
 
 - `output/fnm_real_batch/<tag>/runtime_status.json`
 - `output/fnm_real_batch/<tag>/results.json`
@@ -523,8 +551,9 @@ cargo clippy --all-targets -- -D warnings
 | 7 | Phase4 blocker 能持久化并穿过 orchestrator 被最终状态观察 |
 | 8 | 真实 Rust Phase4 fixture 测试已建立；P2 差异不被伪装为通过 |
 | 9 | `cargo fmt --check` 与受影响 crate 测试通过，无新增 lint 抑制 |
-| 10 | 程序合同验收使用已完成上游合同复核后的双书复制库回放且无 Phase4 blocker；真实视觉/repair 与内容交付由后续集成/最终验收执行 |
+| 10 | 程序合同验收使用 2026-05-26 新生成的双书 Phase1-3 复制库回放；报告明确 `phase4_contract_passed=true` 且无 Phase4 freeze blocker |
 | 11 | `real_golden_template/` 无改动，actual 未覆盖 expected |
+| 12 | `review_required`、逐段差异、`export_ready_real` 与 `can_ship` 不被误当成本阶段通过或失败依据；它们按归属移交阶段 6/7 |
 
 ## 九、交接输出要求
 
@@ -532,11 +561,13 @@ cargo clippy --all-targets -- -D warnings
 
 1. 按任务号列出的修改文件与实现结果。
 2. 新增测试名称及其 RED/GREEN 证据。
-3. 双书回放或真实整批目录、状态、blocker、模型调用数与 trace 位置。
+3. 双书复制库回放目录、`phase4_contract_passed`、freeze blocker、translation unit 摘要和模型调用数。
 4. 已明确后置到阶段 7 的 P2 差异及回溯入口。
 5. 若阶段 5 未完成，精确说明阻断在哪个任务和哪条证据，不得写“基本完成”。
 
 ## 十、2026-05-24 实施与验收记录
+
+> 历史记录：本节描述坐标/上游合同修复前的失败证据，已由第十四节的 2026-05-26 最终收尾结论覆盖；不得用本节的“尚不能完成”作为当前阶段状态。
 
 已落地：
 
@@ -546,14 +577,14 @@ cargo clippy --all-targets -- -D warnings
 - `ref_freeze/mod.rs` 使用 anchor 所属章定位正文注入，保留 book-scope note 原归属。
 - 新增 `scripts/test_fnm_downstream_replay.py` 与 PyO3 回放入口，双书复制 DB 后只运行 Phase4-6，再在复制库写占位译文并执行翻译后导出检查；模型请求数为 0。
 
-当前验收结论：**阶段 5 尚不能标为交付完成**。
+该历史时点的验收结论：**阶段 5 尚不能标为交付完成**。
 
 | 书 | 产物 | 回放结果 | 冻结 blocker |
 |---|---|---|---|
 | Biopolitics | `output/fnm_downstream_replay/phase5_acceptance_final/Biopolitics/` | 上游表未改写；占位译文成功；未放行 | `token_not_found=1` |
 | Goldstein | `output/fnm_downstream_replay/phase5_acceptance_final/Goldstein/` | 上游表未改写；占位译文成功；未放行 | `token_not_found=90`, `coordinate_out_of_range=1` |
 
-该回放故意复制坐标合同修复前的 Phase1-3 DB；其结论是旧输入能够被 Phase4 稳定阻断，而不是新 Phase3 已生成干净数据。Goldstein 的主要证据：同一正文坐标存在两条 Phase3 `matched` link，例如 page 288 的 `$ ^{8} $` 同时对应 `link-00395` 与 `link-00495`，Phase4 首次注入后第二条必然无法再注入。下一步应修 Phase3 重复 matched 来源与 Biopolitics page 96 单元缺失来源；由于坐标产出端已经改变，修清后必须运行新的双书真实整批刷新证据，而不是降低 Phase4 blocker。
+该回放故意复制坐标合同修复前的 Phase1-3 DB；其结论是旧输入能够被 Phase4 稳定阻断，而不是新 Phase3 已生成干净数据。Goldstein 的主要证据：同一正文坐标存在两条 Phase3 `matched` link，例如 page 288 的 `$ ^{8} $` 同时对应 `link-00395` 与 `link-00495`，Phase4 首次注入后第二条必然无法再注入。下一步应修 Phase3 重复 matched 来源与 Biopolitics page 96 单元缺失来源；由于坐标产出端已经改变，修清后必须运行新的双书**无模型复制库 Phase4 验证**刷新阶段 5 证据，而不是降低 Phase4 blocker。真实整批留给模型接线或内容交付验收。
 
 验证补充：
 
@@ -578,3 +609,98 @@ cargo clippy --all-targets -- -D warnings
 1. 阶段 5 不再因逐段 golden 失败而保持阻断；冻结合同是否成立只看 Phase4 自身事实是否可注入或明确阻断、诊断是否可追溯。
 2. 因后续追溯已经修改 Core/Phase1-3，正式确认状态前按 `Core -> Phase1 -> Phase2 -> Phase3 -> LLM repair/编排 -> Phase4` 顺序复核程序合同。
 3. 诊断末尾发现 Phase1 漏标题恢复尝试使用了数据库不允许的新 `source` 值，且该识别启发式属于内容调校；当前已将此尝试移出代码变更，Goldstein 剩余漏章留到内容收敛阶段处理。按暂停测试要求，不宣称新的验证结果。
+
+## 十二、2026-05-25 原轨恢复记录
+
+追溯期间曾把原阶段 6 的修改作为 A-H 合同修复提前实施。为恢复阶段边界，当前阶段 5 处理如下：
+
+| 类别 | 当前处理 | 理由 |
+|---|---|---|
+| Core 文本坐标、raw page 容错，以及 Phase3 直接造成冻结失败的合同修复 | 保留 | 它们直接决定 Phase4 能否正确注入或正确阻断 |
+| Phase4 单一冻结路径、translation unit 派生和 `freeze_matched_ref_not_injected` 最小可观察透传 | 保留 | 这是阶段 5 本体 |
+| `replay_phase4_to6_from_db()` 将缺失 summary gate 设为失败 | 修正并补测试 | 符合程序合同的输入回放不重新评估不可持久化的上游 gate，不制造 TOC review，也不把缺失 gate 伪造为通过 |
+| `fnm-phase5` 拆分、Phase5/Phase6 编排迁移、Phase6 通用 `can_ship` 和“不修正文”改造 | 从阶段 5 工作面撤出 | 均属于阶段 6，问题继续登记但不得计为阶段 5 成果 |
+
+阶段 5 结束时只可报告 Phase4 冻结合同与 blocker 透传结果；不得报告阶段 6 的合并、导出审计职责已经完成。
+
+本次原轨恢复验证（不调用模型）：
+
+- `cargo fmt --all --check` 与 `cargo test --workspace` 通过。
+- `cargo clippy --no-deps -p fnm-phase4 -p fnm-phase6 --all-targets -- -D warnings` 通过。
+- 新增回归覆盖：符合程序合同的 Phase1-3 下游回放不生成不可重建的 TOC gate review；正常完整 pipeline 仍评估上游 gate。
+- 未运行 Biopolitics/Goldstein 真实整批、视觉 TOC 或真实 LLM repair API。
+
+## 十三、2026-05-26 最终收尾步骤
+
+当前已经具备新的 Phase1-3 程序输入基线，且 Phase4/orchestrator 定向测试已通过。本节所列步骤已经在 2026-05-26 执行完成，结论见下一节。
+
+按以下顺序收尾：
+
+1. 调整 `scripts/test_fnm_downstream_replay.py` 的报告口径，新增 `phase4_contract_passed` 和 Phase4 专属证据；保留现有总体 `passed` 供后续阶段观察，但不得以它代表阶段 5。
+2. 为上述口径补 Python 回归测试：构造 Phase4 成功而 Phase6 未放行的结果，断言 `phase4_contract_passed=true`、总体 `passed=false` 可同时成立。
+3. 重建 PyO3 后，以当前两份源 DB 运行 `--tag phase5_contract_closeout_20260526_v3 --phase4-contract-only` 的双书复制库无模型回放。
+4. 若两书 `upstream_unchanged=true`、`model_requests=0`、`phase4_contract_passed=true` 且 freeze blocker 为 0，则将阶段 5 标为程序合同完成；将 Biopolitics 的 `review_required` 和任何内容/export 差异分别登记到阶段 7/阶段 6。
+5. 若仍出现 freeze blocker，则按 `link_id`、页面和 reason 回到最早产生错误事实的阶段修复，不启动真实模型批跑，也不放宽 blocker。
+
+本阶段收尾不需要运行真实视觉 TOC、真实 LLM repair API 或 semantic golden 最终比较。
+
+## 十四、2026-05-26 阶段 5 收尾结论
+
+阶段 5 的程序合同验收已完成。收尾过程中新增的验证脚本修复不改变 pipeline 业务判断，只保证证据口径与数据库副本可信：
+
+| 文件 | 修改 | 证据 |
+|---|---|---|
+| `scripts/test_fnm_downstream_replay.py` | 新增 `phase4_contract_passed`/`--phase4-contract-only`，从 `fnm_structure_reviews` 单独读取 freeze blocker，不再用 Phase6 结果判定本阶段 | Phase4 可通过而总体 `passed=false` 的测试通过 |
+| `scripts/test_fnm_downstream_replay.py` | 使用 SQLite online backup 复制数据库，保留 WAL 中已提交输入 | WAL 快照回归测试通过 |
+| `scripts/test_fnm_downstream_replay.py` | 双书回放使用每书独立 worker，消除同一 Python 进程内 SQLite/Rust 连接状态对下一书读取的干扰 | 双书最终回放正常结束 |
+| `tests/unit/test_fnm_downstream_replay.py` | 增加以上三类脚本合同回归测试 | `4 passed` |
+
+最终无模型回放目录：`output/fnm_downstream_replay/phase5_contract_closeout_20260526_v3/`。
+
+| 书 | `upstream_unchanged` | Translation units | Freeze blocker | `phase4_contract_passed` |
+|---|---:|---:|---:|---:|
+| Biopolitics | `true` | 644 | 0 | `true` |
+| Goldstein | `true` | 978 | 0 | `true` |
+
+批次结论：
+
+- `model_requests=0`，未调用视觉 TOC 或真实 LLM repair。
+- `phase4_contract_passed=true`，满足本文完成判定中的 Phase4 合同条件。
+- 顶层 `passed=false`，因为两书 `export_ready_real=false`；这是阶段 6 的导出审计/放行问题，不回退阶段 5。
+- Biopolitics 的 `review_required` 与逐段内容差异继续保留到阶段 7，不由 Phase4 改写。
+- `real_golden_template/` 未作为本次回放输出目标，也未被更新。
+
+验证命令与结果：
+
+```bash
+.venv/bin/python -m pytest tests/unit/test_fnm_downstream_replay.py \
+  tests/unit/test_fnm_incremental_script.py tests/integration/test_sqlite_store.py \
+  -k 'downstream or incremental or reset_from_phase' -q
+# 11 passed, 31 deselected
+
+.venv/bin/python -m pytest tests/unit/test_fnm_downstream_replay.py \
+  tests/unit/test_fnm_incremental_script.py -q
+# 8 passed
+
+cd fnm_re_rs/fnm-py
+../../.venv/bin/python -m maturin develop --release
+# installed fnm-re-rs-0.1.0
+
+cd ..
+cargo test -p fnm-phase4 -p fnm-orchestrator --no-fail-fast
+# fnm-phase4: 106 unit + 8 parity + 12 spec passed; fnm-orchestrator: 23 passed
+
+cd ..
+cargo fmt --all --check
+cargo test --workspace --no-fail-fast
+cargo clippy --no-deps -p fnm-phase4 -p fnm-phase6 --all-targets -- -D warnings
+# 通过；ignored parity/真实模型用例仍按后置记录处理
+
+cd ..
+.venv/bin/python scripts/test_fnm_downstream_replay.py \
+  --tag phase5_contract_closeout_20260526_v3 \
+  --phase4-contract-only
+# exit_passed=true; phase4_contract_passed=true
+```
+
+下一步属于阶段 6：先写并确认 Phase5/Phase6 合并、导出审计和放行合同的计划，不把其结果补写成阶段 5 实现成果。

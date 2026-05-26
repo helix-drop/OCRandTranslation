@@ -53,15 +53,27 @@ pub fn build_phase4_structure(input: Phase4Input<'_>) -> Result<Phase4Output> {
         .filter(|r| r.skip_category == "ceiling_skip" || r.skip_category == "error_skip")
         .cloned()
         .collect();
-    let (structure_reviews, reviews_summary) = reviews::build_structure_reviews(
-        input.chapters,
-        input.body_anchors,
-        input.effective_note_links,
-        input.summary,
-        input.ignored_link_override_count,
-        input.invalid_override_count,
-        &freeze_error_rows,
-    );
+    let (structure_reviews, reviews_summary) = if input.emit_upstream_gate_reviews {
+        reviews::build_structure_reviews(
+            input.chapters,
+            input.body_anchors,
+            input.effective_note_links,
+            input.summary,
+            input.ignored_link_override_count,
+            input.invalid_override_count,
+            &freeze_error_rows,
+        )
+    } else {
+        reviews::build_structure_reviews_without_upstream_gate_reviews(
+            input.chapters,
+            input.body_anchors,
+            input.effective_note_links,
+            input.summary,
+            input.ignored_link_override_count,
+            input.invalid_override_count,
+            &freeze_error_rows,
+        )
+    };
 
     // 4. 组装 summary
     let summary = serde_json::json!({
@@ -124,6 +136,7 @@ mod tests {
             effective_note_links: &[],
             note_regions: &[],
             summary: &summary,
+            emit_upstream_gate_reviews: true,
             max_body_chars: 6000,
             pipeline_run_id: "test".to_string(),
             ignored_link_override_count: 0,

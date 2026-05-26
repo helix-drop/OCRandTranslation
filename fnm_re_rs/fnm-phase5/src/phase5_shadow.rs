@@ -5,8 +5,7 @@
 use std::collections::HashMap;
 
 use fnm_core::records::{
-    ChapterNoteModeRecord, ChapterRecord, DiagnosticPageRecord, Phase5Structure, Phase5Summary,
-    SectionHeadRecord,
+    ChapterNoteModeRecord, DiagnosticPageRecord, Phase5Structure, Phase5Summary, SectionHeadRecord,
 };
 use fnm_phase2::chapter_split::ChapterLayers;
 use fnm_phase3::note_linking::NoteLinkTable;
@@ -15,35 +14,28 @@ use crate::convert;
 
 /// 构建 Phase 5 影子结构。
 ///
-/// 接受 Phase1 权威章节列表和 Phase2 权威 chapter_note_modes，不重新推断。
-///
 /// ←→ Python `_build_phase5_shadow()` (chapter_merge.py:289)
 pub fn build_phase5_shadow(
     frozen_units: &fnm_core::records::FrozenUnits,
     note_link_table: &NoteLinkTable,
     chapter_layers: &ChapterLayers,
-    phase1_chapters: &[ChapterRecord],
-    phase2_chapter_note_modes: &[ChapterNoteModeRecord],
     diagnostic_machine_by_page: Option<&HashMap<String, String>>,
     include_diagnostic_entries: bool,
     section_heads: Option<&[SectionHeadRecord]>,
 ) -> Phase5Structure {
+    let chapter_note_modes: Vec<ChapterNoteModeRecord> =
+        convert::to_chapter_note_mode_records(chapter_layers);
     let mode_counts: HashMap<String, i64> = {
         let mut counts: HashMap<String, i64> = HashMap::new();
-        for row in phase2_chapter_note_modes {
+        for row in &chapter_note_modes {
             *counts
                 .entry(row.note_mode.as_str().to_string())
                 .or_insert(0) += 1;
         }
         counts
     };
-    let book_type = if phase2_chapter_note_modes.is_empty() {
-        convert::phase5_book_type(chapter_layers)
-    } else {
-        convert::phase5_book_type(chapter_layers)
-    };
     let chapter_note_mode_summary = serde_json::json!({
-        "book_type": book_type,
+        "book_type": convert::phase5_book_type(chapter_layers),
         "mode_counts": mode_counts,
     });
 
@@ -58,10 +50,10 @@ pub fn build_phase5_shadow(
     };
 
     Phase5Structure {
-        chapters: phase1_chapters.to_vec(),
+        chapters: convert::to_chapter_records(chapter_layers),
         section_heads: section_heads.map(|s| s.to_vec()).unwrap_or_default(),
         note_items: convert::to_note_item_records(chapter_layers),
-        chapter_note_modes: phase2_chapter_note_modes.to_vec(),
+        chapter_note_modes,
         body_anchors: convert::to_body_anchor_records(note_link_table),
         effective_note_links: convert::to_note_link_records(note_link_table),
         translation_units: convert::to_translation_unit_records(frozen_units),
@@ -86,8 +78,7 @@ mod tests {
         let frozen = fnm_core::records::FrozenUnits::default();
         let link_table = NoteLinkTable::default();
         let layers = ChapterLayers::default();
-        let result =
-            build_phase5_shadow(&frozen, &link_table, &layers, &[], &[], None, false, None);
+        let result = build_phase5_shadow(&frozen, &link_table, &layers, None, false, None);
         assert!(result.chapters.is_empty());
         assert!(result.note_items.is_empty());
         assert!(result.body_anchors.is_empty());
@@ -98,9 +89,6 @@ mod tests {
 
     #[test]
     fn test_build_phase5_shadow_with_chapter() {
-        use fnm_core::records::ChapterRecord;
-        use fnm_core::types::ChapterSource;
-
         let frozen = fnm_core::records::FrozenUnits::default();
         let link_table = NoteLinkTable::default();
         let mut layers = ChapterLayers::default();
@@ -124,23 +112,6 @@ mod tests {
             note_kind: fnm_core::types::NoteKind::Footnote,
             ..Default::default()
         });
-        let p1_chapters = vec![ChapterRecord {
-            chapter_id: "ch1".to_string(),
-            title: "Chapter 1".to_string(),
-            start_page: 5,
-            end_page: 10,
-            pages: vec![5, 6, 7, 8, 9, 10],
-            source: ChapterSource::Fallback,
-            boundary_state: fnm_core::types::BoundaryState::Ready,
-        }];
-        let p2_modes = vec![ChapterNoteModeRecord {
-            chapter_id: "ch1".to_string(),
-            note_mode: NoteMode::FootnotePrimary,
-            region_ids: Vec::new(),
-            primary_region_scope: String::new(),
-            has_footnote_band: true,
-            has_endnote_region: false,
-        }];
         let heads = vec![SectionHeadRecord {
             section_head_id: "sh1".to_string(),
             chapter_id: String::new(),
@@ -149,16 +120,7 @@ mod tests {
             level: 1,
             source: String::new(),
         }];
-        let result = build_phase5_shadow(
-            &frozen,
-            &link_table,
-            &layers,
-            &p1_chapters,
-            &p2_modes,
-            None,
-            false,
-            Some(&heads),
-        );
+        let result = build_phase5_shadow(&frozen, &link_table, &layers, None, false, Some(&heads));
         assert_eq!(result.chapters.len(), 1);
         assert_eq!(result.section_heads.len(), 1);
         assert_eq!(result.note_items.len(), 1);
@@ -185,16 +147,7 @@ mod tests {
         let mut diag = HashMap::new();
         diag.insert("1".to_string(), "Page 1 text.".to_string());
         diag.insert("3".to_string(), "Page 3 text.".to_string());
-        let result = build_phase5_shadow(
-            &frozen,
-            &link_table,
-            &layers,
-            &[],
-            &[],
-            Some(&diag),
-            true,
-            None,
-        );
+        let result = build_phase5_shadow(&frozen, &link_table, &layers, Some(&diag), true, None);
         assert_eq!(result.diagnostic_pages.len(), 2);
         assert_eq!(result.diagnostic_pages[0]._page_bp, 1);
         assert_eq!(result.diagnostic_pages[1]._page_bp, 3);

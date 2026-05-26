@@ -26,6 +26,8 @@ pub struct Phase4Input<'a> {
     pub effective_note_links: &'a [NoteLinkRecord],
     pub note_regions: &'a [NoteRegionRecord],
     pub summary: &'a Phase3Summary,
+    /// 下游回放不重建未持久化的上游 gate review；完整 pipeline 必须为 true。
+    pub emit_upstream_gate_reviews: bool,
 
     // ── 配置 ──
     pub max_body_chars: i64,

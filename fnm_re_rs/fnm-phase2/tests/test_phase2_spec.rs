@@ -2,13 +2,17 @@
 //!
 //! 合成数据 SPEC 测试，验证 note_items / note_regions / chapter_split / sup_recovery 的核心行为。
 
-use fnm_core::records::{ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord};
+use fnm_core::records::{
+    ChapterNoteModeRecord, ChapterRecord, NoteItemRecord, NoteRegionRecord, PagePartitionRecord,
+};
 use fnm_core::types::{
-    BoundaryState, ChapterSource, NoteKind, PageRole, RegionScope, RegionSource,
+    BoundaryState, ChapterSource, NoteKind, NoteMode, PageRole, RegionScope, RegionSource,
 };
 use fnm_phase1::input::RawPage;
-use fnm_phase2::chapter_split::build_chapter_layers;
 use fnm_phase2::chapter_split::endnote_project::compute_endnote_projections;
+use fnm_phase2::chapter_split::{
+    build_chapter_layers, build_chapter_layers_from_authoritative_phase2,
+};
 use fnm_phase2::note_items::build_note_items;
 use fnm_phase2::note_regions::build_note_regions;
 use std::collections::HashSet;
@@ -287,6 +291,85 @@ fn spec_chapter_split_note_mode() {
         fnm_core::types::NoteMode::ChapterEndnotePrimary,
         "Chapter with endnotes should be ChapterEndnotePrimary"
     );
+}
+
+#[test]
+fn spec_chapter_split_preserves_book_scope_in_mode_summary() {
+    let chapters = vec![make_chapter("ch1", "Chapter One", 1, 1)];
+    let pages = vec![make_page(1, "Body text.")];
+    let partitions = vec![make_page_partition(1, PageRole::Body)];
+    let regions = vec![NoteRegionRecord {
+        region_id: "r-book".into(),
+        chapter_id: "ch1".into(),
+        page_start: 10,
+        page_end: 10,
+        pages: vec![10],
+        note_kind: NoteKind::Endnote,
+        scope: RegionScope::Book,
+        source: RegionSource::ExplorerSignalMatch,
+        heading_text: "NOTES".into(),
+        start_reason: "heading".into(),
+        end_reason: "page_end".into(),
+        region_marker_alignment_ok: true,
+        region_start_first_source_marker: "1".into(),
+        region_first_note_item_marker: "1".into(),
+        review_required: false,
+    }];
+    let items = vec![NoteItemRecord {
+        note_item_id: "en-1".into(),
+        region_id: "r-book".into(),
+        chapter_id: "ch1".into(),
+        page_no: 10,
+        marker: "1".into(),
+        marker_type: "numeric".into(),
+        text: "Book-scope endnote.".into(),
+        source: "heading_scan".into(),
+        source_page_label: String::new(),
+        is_reconstructed: false,
+        review_required: false,
+        note_kind: NoteKind::Endnote,
+        projection_mode: None,
+        owner_chapter_id: None,
+        source_marker: None,
+        normalized_marker: None,
+    }];
+
+    let layers = build_chapter_layers(&chapters, &regions, &items, &partitions, &pages);
+    assert_eq!(layers.chapter_note_modes[0].primary_region_scope, "book");
+}
+
+#[test]
+fn spec_downstream_layers_use_authoritative_phase2_note_mode() {
+    let chapters = vec![make_chapter("ch1", "Chapter One", 1, 1)];
+    let pages = vec![make_page(1, "Body text.")];
+    let partitions = vec![make_page_partition(1, PageRole::Body)];
+    let authoritative_modes = vec![ChapterNoteModeRecord {
+        chapter_id: "ch1".into(),
+        note_mode: NoteMode::BookEndnoteBound,
+        region_ids: vec!["r-book".into()],
+        primary_region_scope: "book".into(),
+        has_footnote_band: false,
+        has_endnote_region: true,
+    }];
+
+    let layers = build_chapter_layers_from_authoritative_phase2(
+        &chapters,
+        &[],
+        &[],
+        &partitions,
+        &pages,
+        &authoritative_modes,
+    );
+
+    assert_eq!(
+        layers.chapter_layers[0].note_mode,
+        NoteMode::BookEndnoteBound
+    );
+    assert_eq!(
+        layers.chapter_note_modes[0].note_mode,
+        NoteMode::BookEndnoteBound
+    );
+    assert_eq!(layers.chapter_note_modes[0].primary_region_scope, "book");
 }
 
 // ── SPEC 6: note_regions detects heading-based endnotes ──────────────────────
