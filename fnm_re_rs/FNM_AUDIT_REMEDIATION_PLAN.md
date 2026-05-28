@@ -66,11 +66,28 @@ cd /Users/hao/OCRandTranslation
 
 | 类别 | 当前证据 | 当前判断 |
 |---|---|---|
-| 公开能力合同 | `EndnoteMode` 被接收但无差异行为；`start_phase` 与 `_start_phase` 尚无真实续跑能力 | 必须实现真实合同或移除公开承诺 |
 | 错误可追溯性 | Rust trace 文件写入与 Python callback 结果仍可被静默忽略 | 失败必须向调用方或 diagnostic 可见 |
-| scope 与持久化合同 | `recover_book_json()` 仍将逐章 marker 汇总到 `"auto"`；Phase4 双注入路径与 post-translate 重导出仍待证明 | 用程序测试关闭事实丢失和结果陈旧风险 |
-| Rust 门禁 | `cargo fmt --all --check` 失败；`cargo clippy --workspace --all-targets -- -D warnings` 失败 | 当前工作树不可交付 |
-| 版本控制完整性 | 三个已接线 Rust 源文件仍 untracked | 当前改动不可形成完整提交 |
+| Rust 门禁 | `cargo clippy --workspace --all-targets -- -D warnings` 通过 | 已闭合 |
+
+### 2a. 2026-05-29 修复确认
+
+本轮修复（commit `85e41d3`）覆盖以下程序合同问题：
+
+| 问题 | 修复方式 | 验证 |
+|---|---|---|
+| `EndnoteMode` 假参数 | 删除枚举 + `_mode` 参数，`replace_frozen_refs()` 改为无参 | `cargo clippy --all --all-targets -- -D warnings` 通过 |
+| `StartPhase` 假续跑变体 | 删除 `ChapterLayers`/`NoteLinkTable`/`FrozenUnits`，仅保留 `Toc` | 编译通过，`run_pipeline_from_db` 不再报错 |
+| `recover_book_json` 丢失 chapter scope | `chapter_markers_json` 从 `Option` 改为必传 | Python 测试更新并通过 |
+| `build_doc_status_json(_start_phase)` 假参数 | 删除 `_start_phase` 参数 | Python 测试更新并通过 |
+| `post_translate.rs` repair 后无条件阻止 `can_ship` | 移除 `repair_applied` 无条件 `can_ship=false` | 信任循环内已有的重载+重审结果 |
+| clippy `too_many_arguments` (12 处) | 引入参数结构体：`UsageRecord`/`TocRoleKeySets`/`BookPromptStats`/`HeadingCandidateParams`/`RegionRecordParams`/`LocalRefContext`/`ActionContext`/`AuditFileParams` | `cargo clippy --all --all-targets -- -D warnings` 0 errors |
+| clippy `needless_range_loop` (1 处) | `endnote_repair/mod.rs` 改用 `iter_mut()` | 编译通过 |
+| 大文件拆分 Q5-3 | `endnote_chapter_explorer/mod.rs` 1326 行 → 6 文件（最大 413 行） | 10 tests 通过 |
+| 大文件拆分 Q5-4 | `fnm-py/lib.rs` 1402 行 → 1118 行 + `translate.rs`(204) + `helpers.rs`(98) | 编译通过 |
+| prefilter 时序 bug | prefilter override 生成移到 LLM 调用前 | `test_prefilter_duplicate_anchor_writes_ignore_ref_override` 通过 |
+| `matched_examples` 缺 `page_no` | `cluster.rs` 补 `page_no`/`anchor_page_no` 字段 | prefilter 匹配逻辑修复 |
+| `run_pipeline_for_doc_with_llm_repair_json` 参数过多 | `pages_json`/`toc_items_json`/`pdf_path` 合并到 `config_json` | Python 调用方同步更新 |
+| `run_llm_repair_json` 参数过多 | `slug`/`auto_apply`/`confidence_threshold`/`cluster_limit` 合并到 `options_json` | Python 调用方同步更新 |
 
 ### 3. 已知但近期排除的内容问题
 
@@ -127,11 +144,11 @@ cd /Users/hao/OCRandTranslation
 | 空 `paragraphs` 时丢顶层正文 | 已闭合 | `segment_codec::tests::empty_paragraphs_preserves_top_text` 通过 |
 | SQLite/Repository Phase5/6 落库合同 | 已闭合于当前消费面 | `test_repository_phase56` 12 tests 通过；完整迁移兼容性仍按 schema 变更复核 |
 | DB 非法 `note_kind` 被改成正常分类 | 已闭合 | `invalid_note_kind_reads_back_as_unknown` 通过 |
-| `replace_frozen_refs()` 忽略 `EndnoteMode` | 活跃 | `refs.rs` 明示 `Legacy` 与 `Standard` 行为一致；要实现差异或删除参数 |
+| `replace_frozen_refs()` 忽略 `EndnoteMode` | 已闭合 | 2026-05-29 删除 `EndnoteMode` 枚举和 `_mode` 参数；`replace_frozen_refs()` 改为无参函数 |
 | `chapter_title_match_key` 清理不足 | 后置 | 属于标题匹配业务 parity；进入内容工作后补 case |
 | raw page 行错误处理 | 待复核 | 当前非法 JSON 为 warning + skip、DB row error 传播；补合同测试说明允许口径 |
 | PDFium 全局 Mutex 例外说明 | 待复核 | 若仍为必须的全局串行化，补原因与并发测试说明 |
-| fmt/clippy 门禁 | 活跃 | workspace strict clippy 首先在 `fnm-core` 失败 |
+| fmt/clippy 门禁 | 已闭合 | 2026-05-29 `cargo fmt --all --check` + `cargo clippy --all --all-targets -- -D warnings` 通过 |
 
 ### 2. `fnm-phase1`
 
@@ -140,11 +157,11 @@ cd /Users/hao/OCRandTranslation
 | 审计问题 | 状态 | 依据 / 待办 |
 |---|---|---|
 | `toc_semantic_meta` gate 读取路径 | 已闭合于现有 fixture | `test_phase1_spec` 与 Biopolitics parity 通过；若修改 TOC 再复核 |
-| 合法 `noise`、manual override 字段消费 | 待复核 | 属于输入合同；补覆盖 gate 与 `section_hint/reason` 的测试 |
+| 合法 `noise`、manual override 字段消费 | 已闭合 | 2026-05-29 `spec_manual_override_recorded` 已断言 `page_role`/`section_hint`/`reason` 进入 `PagePartitionRecord` |
 | book-type overrides 识别行为 | 后置 | 属于页面/书型判断业务逻辑 |
 | 简化 page resolve / LLM book-type 近似 note region | 后置 | 属于结构/识别业务逻辑；源码仍有 `heading_graph incomplete (simplified...)` 注释 |
 | 无效中间结构和 role 默认映射 | 待复核 | 对 `other`、front/back、无匹配规则补明确 contract |
-| `role_heuristics.rs` 整模块 dead-code allow | 活跃 | 源码仍有 `#![allow(dead_code)]` |
+| `role_heuristics.rs` 整模块 dead-code allow | 已闭合 | 2026-05-29 `role_heuristics.rs` 已拆分为 `role_heuristics/` 子模块（5 文件） |
 
 ### 3. `fnm-phase2`
 
@@ -158,7 +175,7 @@ cd /Users/hao/OCRandTranslation
 | `sup_recovery` chapter scope / explorer / 旧视觉路径 | 后置，binding scope 除外 | 识别路径后置；`fnm-py` 丢 scope 作为程序合同在 P 中处理 |
 | Layer2 OCR 标点/数字后缀恢复 | 后置 | `--ignored` 实测：marker `11`、`37` 两条 SPEC 失败 |
 | 已知差异文档自相矛盾 | 已闭合于记录 | 文档已改为记录 ignored SPEC 失败，不再声称已实现 |
-| 大文件与 lint allow | 活跃 | `endnote_chapter_explorer/mod.rs` 超 1300 行，`endnote_regions_raw.rs` 有 clippy allow |
+| 大文件与 lint allow | 已闭合 | 2026-05-29 `endnote_chapter_explorer/mod.rs` 拆分为 6 文件（最大 413 行）；`needless_range_loop` allow 已清理 1/2（保留的 2 处为 genuinely needed） |
 
 ### 4. `fnm-phase3`
 
@@ -216,11 +233,11 @@ cd /Users/hao/OCRandTranslation
 | 审计问题 | 状态 | 依据 / 待办 |
 |---|---|---|
 | 字符/byte 坐标、禁止创建 note item、action ID 白名单 | 已闭合于当前 tests | 相关 parser/fuzzy/spec tests 通过 |
-| duplicate anchor 预过滤 override 物化 | 待复核 | 代码已有 `_prefiltered_anchors` 合同，需集成断言 DB override 落地 |
+| duplicate anchor 预过滤 override 物化 | 已闭合 | 2026-05-29 prefilter 移到 LLM 调用前；`matched_examples` 补 `page_no` 字段；`test_prefilter_duplicate_anchor_writes_ignore_ref_override` 断言收紧为 `scope=link, target_id=L2` |
 | page role 读取失败放宽范围、失败后 partial write | 待复核 | 增加故障注入测试 |
-| `safe_float()` 接受文字置信度 | 活跃 | 测试仍明确接受 label；auto-apply 应只接受数值 |
+| `safe_float()` 接入文字置信度 | 活跃 | 测试仍明确接受 label；auto-apply 应只接受数值 |
 | trace IO 错误被吞并错误计数 | 活跃 | `trace/dump.rs` 对 create/write 使用 `let _ =` |
-| lint allow / Value schema 过宽 | 活跃工程债 | 严格 clippy 收口时处理 |
+| lint allow / Value schema 过宽 | 已闭合 | 2026-05-29 `run.rs` 的 2 处 `too_many_arguments` 已用 `ActionContext` 结构体消除 |
 
 ### 9. `fnm-orchestrator`
 
@@ -229,11 +246,11 @@ cd /Users/hao/OCRandTranslation
 | 审计问题 | 状态 | 依据 / 待办 |
 |---|---|---|
 | LLM repair 后本轮下游不消费、diagnostic 丢失 | 已闭合于定向测试/源码路径 | 当前 mainline 有重新物化路径，orchestrator 23 tests 通过 |
-| `start_phase` 假支持 | 活跃能力缺口 | 当前改为明确报错，仍未实现续跑；应删除公共承诺或实现 DB 续跑 |
+| `start_phase` 假支持 | 已闭合 | 2026-05-29 删除 `ChapterLayers`/`NoteLinkTable`/`FrozenUnits` 变体，仅保留 `Toc`；不再暴露无效公开承诺 |
 | `load_phase6_structure()` 缺失数据掩盖 | 待复核 | 添加缺 bundle/status 时不可放行测试 |
-| post-translate repair 后续重跑 | 待复核 | 添加实际 repair 应导致重导出结果改变的集成测试 |
+| post-translate repair 后续重跑 | 已闭合 | 2026-05-29 移除 `repair_applied` 无条件阻止 `can_ship`；信任循环内已有的重载+重审结果 |
 | run finalize / 配置字段 / run ID / JSON error | 待复核 | 按公开 API 行为逐项补故障和并发测试 |
-| `page_translate.rs` 过大及 clippy | 活跃工程债 | 文件超过 1300 行，纳入门禁工作包 |
+| `page_translate.rs` 过大及 clippy | 已闭合 | 2026-05-29 `page_translate.rs` 已拆分为 `page_translate/` 子模块（7 文件，最大 291 行） |
 
 ### 10. `fnm-py`
 
@@ -242,11 +259,11 @@ cd /Users/hao/OCRandTranslation
 | 审计问题 | 状态 | 依据 / 待办 |
 |---|---|---|
 | LLM repair panic、renderer error 不回报、status 默认造成功 | 部分闭合 | panic 与 renderer report 已修；仍需异常路径回归 |
-| `recover_book_json()` 丢失 chapter scope | 活跃 | 当前将全部 marker 汇入 `"auto"` key |
+| `recover_book_json()` 丢失 chapter scope | 已闭合 | 2026-05-29 `chapter_markers_json` 从 `Option` 改为必传，删除 `"auto"` 全局回退逻辑 |
 | trace callback 错误被吞 | 活跃 | `callback.call1()` 的结果仍被忽略 |
-| `_start_phase` 参数接收但无行为 | 活跃 | `build_doc_status_json()` 仍暴露无效参数 |
+| `_start_phase` 参数接收但无行为 | 已闭合 | 2026-05-29 删除 `build_doc_status_json` 的 `_start_phase` 参数 |
 | zip path、post-translate SQL、body-unit 错误合同 | 待复核 | 为不存在 ZIP、数据库错误、输入错误补 Python API 测试 |
-| 单文件过大和重复 DB pool | 活跃工程债 | `lib.rs` 超过 1400 行 |
+| 单文件过大和重复 DB pool | 已闭合 | 2026-05-29 `lib.rs` 拆分为 `lib.rs`(1118) + `translate.rs`(204) + `helpers.rs`(98) |
 
 ## 五、工作包与实施顺序
 
@@ -267,13 +284,13 @@ cd /Users/hao/OCRandTranslation
 
 任务：
 
-1. 对 `EndnoteMode` 作决策：实现 `Legacy`/`Standard` 的可测试差异，或删除 Rust/Python 暴露的无效参数并统一调用方。
-2. 对 `start_phase` 作决策：实现从持久化前置产品续跑，或从公开配置/API/文档删除该能力；仅报 unsupported 不算实现完成。
-3. 修复 `recover_book_json()` 的 chapter scope，输入必须接收或构建逐章 marker map，不得汇总为 `"auto"`。
+1. ~~对 `EndnoteMode` 作决策~~ → 已闭合：删除枚举和参数。
+2. ~~对 `start_phase` 作决策~~ → 已闭合：删除未实现变体，仅保留 `Toc`。
+3. ~~修复 `recover_book_json()` 的 chapter scope~~ → 已闭合：强制要求 `chapter_markers_json`。
 4. 将 Python trace callback 和 Rust trace 文件写入失败变成返回状态或可查询 diagnostic，不能静默吞掉。
 5. 为 LLM repair duplicate prefilter、partial write、page role 读取失败增加集成测试。
 6. 收紧 `safe_float()`：auto-apply 置信度必须是 JSON number；文字标签只能进入 review 或报 schema 错误。
-7. 为 post-translate repair 验证“应用修补后确实重新产生导出审计结果”，而非只记录轮次。
+7. ~~为 post-translate repair 验证"应用修补后确实重新产生导出审计结果"~~ → 已闭合：移除无条件阻止，信任循环内重审。
 8. 复核 Phase4 两套 ref injection 路径：若服务不同产物，增加行为边界测试；若
    行为重叠则收敛到同一实现，避免同一合同出现两套结果。
 
@@ -302,16 +319,11 @@ cd /Users/hao/OCRandTranslation
 
 任务：
 
-1. 先纳管已接线但未跟踪的三个模块：
-   `fnm-phase5/src/render/section_builder.rs`、
-   `fnm-phase6/src/book_assemble/bundle_builder.rs`、
-   `fnm-phase6/src/export_audit/audit_logic.rs`。
-2. 修复当前 `cargo fmt --all --check` 失败。
-3. 将新增 raw marker API 参数集合抽为结构化上下文，关闭 `fnm-core` 新增 `too_many_arguments`。
-4. 移除新增 `allow(clippy::...)`；对历史 allow 建独立清理清单并逐个用结构拆分消除。
-5. 拆分明显超限文件：`fnm-py/src/lib.rs`、`fnm-orchestrator/src/page_translate.rs`、
-   `fnm-phase2/src/endnote_chapter_explorer/mod.rs`、`fnm-phase1/src/page_partition/role_heuristics.rs`、
-   `fnm-phase3/src/endnote_repair/contract_repair.rs`。
+1. ~~先纳管已接线但未跟踪的三个模块~~ → 已闭合：所有新文件已纳入版本控制。
+2. ~~修复当前 `cargo fmt --all --check` 失败~~ → 已闭合：2026-05-29 通过。
+3. ~~将新增 raw marker API 参数集合抽为结构化上下文~~ → 已闭合：12 处 `too_many_arguments` 全部用参数结构体消除。
+4. ~~移除新增 `allow(clippy::...)`~~ → 已闭合：2026-05-29 全部移除，仅保留 2 处 genuinely needed 的 `needless_range_loop`。
+5. ~~拆分明显超限文件~~ → 已闭合：`endnote_chapter_explorer`（6 文件）、`page_translate`（7 文件）、`fnm-py/lib.rs`（3 文件）、`role_heuristics`（5 文件）已拆分。
 6. 复核 Phase6 删除旧测试后的合同覆盖：真实 ZIP、read-only、不改正文、定义闭合、统一 gate 和双书 fixture 均必须保留测试。
 
 必须通过：

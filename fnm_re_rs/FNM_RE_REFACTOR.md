@@ -1,12 +1,16 @@
 ## FNM_RE Rust 重构完成度报告
 
-> 历史记录说明（2026-05-27）：本文所写“全部完成”等结论已经失效，
+> 历史记录说明（2026-05-29）：本文所写“全部完成”等结论已经失效，
 > 不得作为当前验收或实施依据。当前未闭合问题和验证要求统一见
 > `FNM_AUDIT_REMEDIATION_PLAN.md`；原始 crate 审计见 `FNM_*_AUDIT.md`。
+> 2026-05-29 更新：程序合同问题已大部分闭合（EndnoteMode/StartPhase/
+> recover_book_json/build_doc_status_json/post_translate）；全部 clippy allow
+> 已消除（仅保留 2 处 genuinely needed 的 needless_range_loop）；大文件已拆分
+> （endnote_chapter_explorer/page_translate/fnm-py/lib.rs/role_heuristics）。
+> `cargo fmt --all --check` + `cargo clippy --all --all-targets -- -D warnings` 通过。
+> 剩余问题见 FNM_AUDIT_REMEDIATION_PLAN.md 第四节总账。
 >
 > 报告日期：2026-05-19（phase4/phase5/phase6/llm-repair 全完成，M5 审计修复落地）
-> 审计方法：逐 Python 函数 1:1 对照 + cargo test --workspace 实测
-> 范围：fnm-core / fnm-phase1 / fnm-phase2 / fnm-phase3 / fnm-phase4 / fnm-phase5 / fnm-phase6 / fnm-llm-repair
 
 ---
 
