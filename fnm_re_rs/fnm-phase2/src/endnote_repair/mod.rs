@@ -224,7 +224,7 @@ pub fn infer_missing_markers(items: &[NoteItemRecord]) -> Vec<NoteItemRecord> {
             {
                 if let (Ok(c), Ok(n)) = (curr.marker.parse::<i64>(), next.marker.parse::<i64>()) {
                     let gap = n - c;
-                    if gap >= 2 && gap <= 3 {
+                    if (2..=3).contains(&gap) {
                         result.push(curr.clone());
                         for k in 1..gap {
                             let mut placeholder = curr.clone();

@@ -35,13 +35,18 @@ phase3/note_links 匹配数量 cascade 下降
 chapter_link_contracts 中 def_count 与 anchor_count 不平衡
 ```
 
-**Cascade 涉及测试**（全部 `#[ignore]`，待 phase2 调校后 `--ignored` 验真）：
+**Cascade 涉及测试**（全部 `#[ignore]`，必须显式 `--ignored` 验真）：
 
 1. `biopolitics_phase3_body_anchors_parity`
 2. `biopolitics_phase3_note_links_parity`
 3. `biopolitics_phase3_chapter_contracts_parity`
 4. `biopolitics_phase3_summary_parity`
 5. `spec_biopolitics_contract_v2_def_anchor_mismatch`
+
+**2026-05-27 更新**：上述五项已显式运行并全部失败；与此同时
+`fnm-phase2` 的 active Biopolitics parity 测试通过。因此“仅因 Phase2
+note_items `-20`”已不足以作为当前根因说明。后续应比较 Phase3 测试入口
+实际消费的 Phase2 输出、fixture 版本与持久化输入，定位第一处分叉。
 
 **Phase 2 修复方向**：
 

@@ -7,9 +7,9 @@ use std::path::Path;
 /// 将全局 USAGE_RECORDS 逐条写入 llm_traces/ 目录。
 ///
 /// ←→ Python `dump_traces()`
-pub fn dump_traces(example_dir: &str, doc_id: &str) -> i64 {
+pub fn dump_traces(example_dir: &str, doc_id: &str) -> Result<i64, std::io::Error> {
     let trace_dir = Path::new(example_dir).join("llm_traces");
-    let _ = std::fs::create_dir_all(&trace_dir);
+    std::fs::create_dir_all(&trace_dir)?;
 
     let records = fnm_core::token_counter::get_usage_records();
     let mut stage_counters: HashMap<String, i64> = HashMap::new();
@@ -35,12 +35,12 @@ pub fn dump_traces(example_dir: &str, doc_id: &str) -> i64 {
         });
 
         if let Ok(content) = serde_json::to_string_pretty(&trace) {
-            let _ = std::fs::write(&path, content);
+            std::fs::write(&path, content)?;
             written += 1;
         }
     }
 
-    written
+    Ok(written)
 }
 
 /// 将 usage_summary 按阶段写入 llm_traces/ 目录（每阶段一个文件）。
@@ -50,9 +50,9 @@ pub fn write_summary_traces(
     example_dir: &str,
     usage_summary: &serde_json::Value,
     doc_id: &str,
-) -> i64 {
+) -> Result<i64, std::io::Error> {
     let trace_dir = Path::new(example_dir).join("llm_traces");
-    let _ = std::fs::create_dir_all(&trace_dir);
+    std::fs::create_dir_all(&trace_dir)?;
 
     let by_stage = usage_summary
         .get("by_stage")
@@ -84,12 +84,12 @@ pub fn write_summary_traces(
         });
 
         if let Ok(content) = serde_json::to_string_pretty(&trace) {
-            let _ = std::fs::write(&path, content);
+            std::fs::write(&path, content)?;
             written += 1;
         }
     }
 
-    written
+    Ok(written)
 }
 
 #[cfg(test)]
@@ -106,18 +106,18 @@ mod tests {
     #[test]
     fn dump_traces_writes_files() {
         fnm_core::token_counter::clear_usage();
-        fnm_core::token_counter::record_usage(
-            "dump_test_stage",
-            "gpt-4o",
-            "openai",
-            100,
-            50,
-            150,
-            1,
-            300,
-        );
+        fnm_core::token_counter::record_usage(fnm_core::token_counter::UsageRecord {
+            stage: "dump_test_stage".into(),
+            model_id: "gpt-4o".into(),
+            provider: "openai".into(),
+            prompt_tokens: 100,
+            completion_tokens: 50,
+            total_tokens: 150,
+            request_count: 1,
+            dur_ms: 300,
+        });
         let dir = tempfile::tempdir().unwrap();
-        let written = dump_traces(dir.path().to_str().unwrap(), "test-doc");
+        let written = dump_traces(dir.path().to_str().unwrap(), "test-doc").unwrap();
         assert!(written >= 1);
         let trace_dir = dir.path().join("llm_traces");
         assert!(trace_dir.join("dump_test_stage.001.json").exists());
@@ -136,7 +136,8 @@ mod tests {
                 }
             }
         });
-        let written = write_summary_traces(dir.path().to_str().unwrap(), &summary, "doc-1");
+        let written =
+            write_summary_traces(dir.path().to_str().unwrap(), &summary, "doc-1").unwrap();
         assert_eq!(written, 1);
         let trace_dir = dir.path().join("llm_traces");
         assert!(trace_dir.join("repair.summary.json").exists());
@@ -153,7 +154,8 @@ mod tests {
                 }
             }
         });
-        let written = write_summary_traces(dir.path().to_str().unwrap(), &summary, "doc-1");
+        let written =
+            write_summary_traces(dir.path().to_str().unwrap(), &summary, "doc-1").unwrap();
         assert_eq!(written, 0);
     }
 
@@ -161,7 +163,8 @@ mod tests {
     fn write_summary_traces_empty_summary() {
         let dir = tempfile::tempdir().unwrap();
         let summary = serde_json::json!({});
-        let written = write_summary_traces(dir.path().to_str().unwrap(), &summary, "doc-1");
+        let written =
+            write_summary_traces(dir.path().to_str().unwrap(), &summary, "doc-1").unwrap();
         assert_eq!(written, 0);
     }
 }

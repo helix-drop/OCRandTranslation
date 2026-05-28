@@ -121,6 +121,7 @@ fn roundtrip_chapter_markdowns() {
         chapter_markdowns: items.clone(),
         diagnostic_pages: vec![],
         diagnostic_notes: vec![],
+        merge_reviews: vec![],
     };
     repo.replace_fnm_phase5_products("doc-cm", &payload)
         .expect("write");
@@ -146,6 +147,7 @@ fn roundtrip_diagnostic_pages() {
         chapter_markdowns: vec![],
         diagnostic_pages: items.clone(),
         diagnostic_notes: vec![],
+        merge_reviews: vec![],
     };
     repo.replace_fnm_phase5_products("doc-dp", &payload)
         .expect("write");
@@ -169,6 +171,7 @@ fn roundtrip_diagnostic_notes() {
         chapter_markdowns: vec![],
         diagnostic_pages: vec![],
         diagnostic_notes: items.clone(),
+        merge_reviews: vec![],
     };
     repo.replace_fnm_phase5_products("doc-dn", &payload)
         .expect("write");
@@ -189,6 +192,7 @@ fn roundtrip_phase5_products_combined() {
         chapter_markdowns: vec![make_chapter_markdown("ch1", 0)],
         diagnostic_pages: vec![make_diagnostic_page(1)],
         diagnostic_notes: vec![make_diagnostic_note("n1", "s1")],
+        merge_reviews: vec![],
     };
     repo.replace_fnm_phase5_products("doc-p5", &payload)
         .expect("write");
@@ -208,6 +212,7 @@ fn phase5_replace_is_idempotent() {
         chapter_markdowns: vec![make_chapter_markdown("ch1", 0)],
         diagnostic_pages: vec![],
         diagnostic_notes: vec![],
+        merge_reviews: vec![],
     };
     repo.replace_fnm_phase5_products("doc-p5-idem", &p1)
         .expect("write 1");
@@ -219,6 +224,7 @@ fn phase5_replace_is_idempotent() {
         ],
         diagnostic_pages: vec![],
         diagnostic_notes: vec![],
+        merge_reviews: vec![],
     };
     repo.replace_fnm_phase5_products("doc-p5-idem", &p2)
         .expect("write 2");

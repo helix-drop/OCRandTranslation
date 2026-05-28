@@ -4,6 +4,10 @@
 
 审计范围：`/Users/hao/OCRandTranslation/fnm_re_rs` 下 10 个 crate。
 
+> 本文是 2026-05-22 的原始审计快照，不是当前实施计划。部分发现已经关闭，
+> 部分仍可复现。2026-05-27 起唯一处置入口为
+> `FNM_AUDIT_REMEDIATION_PLAN.md`，其中按当前源码和新鲜验证记录状态。
+
 ## 审计文件
 
 已按 crate 落盘：

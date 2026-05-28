@@ -8,8 +8,8 @@
 //!
 //! - `page_split` — 7 个文本切分 helper（P4.6）
 //! - `endnote_lookup` — endnote 区起始页映射（P4.7，保留为阶段6使用）
-//! - `body_pages` — 章级 body pages 结构化（保留为阶段6使用）
-//! - `ref_inject` — ref 物化 + 注入（保留为阶段6使用）
+//!
+//! 已清理：`body_pages`/`ref_inject` 未编译残留文件已删除（2026-05-28）。
 
 pub mod endnote_lookup;
 pub mod page_split;

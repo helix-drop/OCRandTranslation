@@ -238,6 +238,8 @@ pub fn build_unresolved_clusters(
                             "note_item_id": str_field(note_item, "note_item_id"),
                             "anchor_id": str_field(anchor, "anchor_id"),
                             "marker": pick_marker(note_item, link),
+                            "page_no": page_no_of(anchor),
+                            "anchor_page_no": page_no_of(anchor),
                             "note_excerpt": str_field(note_item, "source_text"),
                             "anchor_excerpt": str_field(anchor, "source_text"),
                         }));

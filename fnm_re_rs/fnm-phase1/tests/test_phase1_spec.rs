@@ -293,7 +293,8 @@ fn spec_manual_override_recorded() {
         "1".into(),
         ManualPageOverride {
             page_role: Some("front_matter".into()),
-            ..Default::default()
+            section_hint: Some("copyright".into()),
+            reason: Some("user_specified".into()),
         },
     );
 
@@ -313,6 +314,27 @@ fn spec_manual_override_recorded() {
             .iter()
             .any(|r| r.kind == "page_override"),
         "at least one override should have kind=page_override"
+    );
+
+    // 验证 section_hint 和 reason 实际进入 PagePartitionRecord
+    let page1 = output
+        .structure
+        .pages
+        .iter()
+        .find(|p| p.page_no == 1)
+        .expect("page 1 should exist in partitions");
+    assert_eq!(
+        page1.page_role,
+        fnm_core::types::PageRole::FrontMatter,
+        "page 1 role should be front_matter"
+    );
+    assert_eq!(
+        page1.section_hint, "copyright",
+        "section_hint should be 'copyright'"
+    );
+    assert_eq!(
+        page1.reason, "user_specified",
+        "reason should be 'user_specified'"
     );
 }
 

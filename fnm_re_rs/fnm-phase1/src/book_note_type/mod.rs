@@ -237,7 +237,7 @@ pub fn build_book_note_profile(
         }
 
         let has_footnote = !page.footnotes.trim().is_empty()
-            || page.fn_blocks.as_array().map_or(false, |a| !a.is_empty());
+            || page.fn_blocks.as_array().is_some_and(|a| !a.is_empty());
 
         let is_heading_endnote = has_notes_heading(&page.markdown);
         let is_weak_endnote = !is_heading_endnote && is_endnote_page(&page.markdown);

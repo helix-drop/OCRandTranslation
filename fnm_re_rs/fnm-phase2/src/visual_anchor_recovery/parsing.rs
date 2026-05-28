@@ -137,8 +137,7 @@ pub fn sanitize_anchor_phrase(raw: &str) -> String {
         return String::new();
     }
     let mut cleaned: String = raw
-        .replace('\n', " ")
-        .replace('\r', " ")
+        .replace(['\n', '\r'], " ")
         .chars()
         .filter(|c| !SUPERSCRIPT_CHARS.contains(c))
         .collect();

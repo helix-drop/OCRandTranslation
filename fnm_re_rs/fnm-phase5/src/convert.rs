@@ -8,24 +8,23 @@
 //!   to_page_segments            ←→ _to_page_segments (chapter_merge.py:140)
 //!   to_translation_unit_records ←→ _to_translation_unit_records (chapter_merge.py:180)
 //!   effective_note_mode_from_layer ←→ _effective_note_mode_from_layer (chapter_merge.py:210)
-//!   to_chapter_note_mode_records ←→ _to_chapter_note_mode_records (chapter_merge.py:222)
 //!   phase5_book_type            ←→ _phase5_book_type (chapter_merge.py:241)
 //!   to_diagnostic_pages         ←→ _to_diagnostic_pages (chapter_merge.py:253)
 
-use std::str::FromStr;
-
 use fnm_core::records::{
-    BodyAnchorRecord, ChapterNoteModeRecord, ChapterRecord, DiagnosticEntryRecord,
-    DiagnosticPageRecord, NoteItemRecord, NoteLinkRecord, TranslationUnitRecord,
-    UnitPageSegmentRecord, UnitParagraphRecord,
+    BodyAnchorRecord, ChapterRecord, DiagnosticEntryRecord, DiagnosticPageRecord, NoteItemRecord,
+    NoteLinkRecord, TranslationUnitRecord, UnitPageSegmentRecord, UnitParagraphRecord,
 };
-use fnm_core::types::{ChapterSource, NoteMode, RegionScope};
+use fnm_core::types::ChapterSource;
 use fnm_phase2::chapter_split::{ChapterLayer, ChapterLayers};
 use fnm_phase3::note_linking::NoteLinkTable;
 use serde_json::Value;
 use std::collections::HashSet;
 
-/// 从 ChapterLayer 收集所有页码。
+/// 从 ChapterLayer 收集章节边界页码（仅正文页）。
+///
+/// 不包含 note/endnote items 或 region 页 — 章节边界由 Phase1 权威决定，
+/// Phase5 不应从注释区域扩写边界。
 ///
 /// ←→ Python `_chapter_pages_from_layer()` (chapter_merge.py:53)
 pub fn chapter_pages_from_layer(chapter: &ChapterLayer) -> Vec<i64> {
@@ -33,29 +32,6 @@ pub fn chapter_pages_from_layer(chapter: &ChapterLayer) -> Vec<i64> {
     for row in &chapter.body_pages {
         if row.page_no > 0 {
             pages.insert(row.page_no);
-        }
-    }
-    for row in &chapter.footnote_items {
-        if row.page_no > 0 {
-            pages.insert(row.page_no);
-        }
-    }
-    for row in &chapter.endnote_items {
-        if row.page_no > 0 {
-            pages.insert(row.page_no);
-        }
-    }
-    for region in &chapter.endnote_regions {
-        for &page_no in &region.pages {
-            if page_no > 0 {
-                pages.insert(page_no);
-            }
-        }
-        if region.page_start > 0 {
-            pages.insert(region.page_start);
-        }
-        if region.page_end > 0 {
-            pages.insert(region.page_end);
         }
     }
     let mut result: Vec<i64> = pages.into_iter().collect();
@@ -208,77 +184,6 @@ pub fn to_translation_unit_records(
     rows
 }
 
-/// 从 ChapterLayer 推导注释模式。
-///
-/// ←→ Python `_effective_note_mode_from_layer()` (chapter_merge.py:210)
-pub fn effective_note_mode_from_layer(chapter: &ChapterLayer) -> String {
-    if !chapter.endnote_items.is_empty() {
-        let has_book_scope = chapter
-            .endnote_regions
-            .iter()
-            .any(|r| r.scope == RegionScope::Book);
-        if has_book_scope {
-            return "book_endnote_bound".to_string();
-        }
-        return "chapter_endnote_primary".to_string();
-    }
-    if !chapter.footnote_items.is_empty() {
-        return "footnote_primary".to_string();
-    }
-    "no_notes".to_string()
-}
-
-/// 从 ChapterLayers 转换为 ChapterNoteModeRecord 列表。
-///
-/// ←→ Python `_to_chapter_note_mode_records()` (chapter_merge.py:222)
-pub fn to_chapter_note_mode_records(chapter_layers: &ChapterLayers) -> Vec<ChapterNoteModeRecord> {
-    chapter_layers
-        .chapter_layers
-        .iter()
-        .map(|layer| {
-            let note_mode = effective_note_mode_from_layer(layer);
-            let region_ids: Vec<String> = layer
-                .endnote_regions
-                .iter()
-                .filter(|r| !r.region_id.trim().is_empty())
-                .map(|r| r.region_id.clone())
-                .collect();
-            ChapterNoteModeRecord {
-                chapter_id: layer.chapter_id.clone(),
-                note_mode: NoteMode::from_str(&note_mode).unwrap_or(NoteMode::NoNotes),
-                primary_region_scope: String::new(),
-                region_ids,
-                has_footnote_band: !layer.footnote_items.is_empty(),
-                has_endnote_region: !layer.endnote_regions.is_empty(),
-            }
-        })
-        .collect()
-}
-
-/// 推断全书注释类型。
-///
-/// ←→ Python `_phase5_book_type()` (chapter_merge.py:241)
-pub fn phase5_book_type(chapter_layers: &ChapterLayers) -> String {
-    let modes: HashSet<String> = chapter_layers
-        .chapter_layers
-        .iter()
-        .map(effective_note_mode_from_layer)
-        .collect();
-    let has_footnote = modes.contains("footnote_primary");
-    let has_endnote =
-        modes.contains("chapter_endnote_primary") || modes.contains("book_endnote_bound");
-    if has_footnote && has_endnote {
-        return "mixed".to_string();
-    }
-    if has_endnote {
-        return "endnote_only".to_string();
-    }
-    if has_footnote {
-        return "footnote_only".to_string();
-    }
-    "no_notes".to_string()
-}
-
 fn safe_int(value: &str) -> i64 {
     value.parse::<i64>().unwrap_or(0)
 }
@@ -353,105 +258,49 @@ mod tests {
 
     #[test]
     fn test_chapter_pages_from_layer_body_only() {
-        let mut layer = ChapterLayer::default();
-        layer.chapter_id = "ch1".to_string();
-        layer.body_pages = vec![make_body_layer(1), make_body_layer(2), make_body_layer(3)];
+        let layer = ChapterLayer {
+            chapter_id: "ch1".to_string(),
+            body_pages: vec![make_body_layer(1), make_body_layer(2), make_body_layer(3)],
+            ..Default::default()
+        };
         let pages = chapter_pages_from_layer(&layer);
         assert_eq!(pages, vec![1, 2, 3]);
     }
 
     #[test]
-    fn test_chapter_pages_from_layer_with_notes() {
-        let mut layer = ChapterLayer::default();
-        layer.chapter_id = "ch1".to_string();
-        layer.body_pages = vec![make_body_layer(1), make_body_layer(2)];
-        layer.footnote_items = vec![make_note_item(1, NoteKind::Footnote)];
-        layer.endnote_items = vec![make_note_item(5, NoteKind::Endnote)];
+    fn test_chapter_pages_from_layer_excludes_note_pages() {
+        let layer = ChapterLayer {
+            chapter_id: "ch1".to_string(),
+            body_pages: vec![make_body_layer(1), make_body_layer(2)],
+            footnote_items: vec![make_note_item(1, NoteKind::Footnote)],
+            endnote_items: vec![make_note_item(5, NoteKind::Endnote)],
+            endnote_regions: vec![fnm_core::records::NoteRegionRecord {
+                region_id: "r1".to_string(),
+                chapter_id: String::new(),
+                page_start: 100,
+                page_end: 150,
+                pages: vec![100, 101, 102],
+                note_kind: NoteKind::Endnote,
+                scope: RegionScope::Book,
+                source: fnm_core::types::RegionSource::HeadingScan,
+                heading_text: String::new(),
+                start_reason: String::new(),
+                end_reason: String::new(),
+                region_marker_alignment_ok: false,
+                region_start_first_source_marker: String::new(),
+                region_first_note_item_marker: String::new(),
+                review_required: false,
+            }],
+            ..Default::default()
+        };
         let pages = chapter_pages_from_layer(&layer);
-        assert_eq!(pages, vec![1, 2, 5]);
+        assert_eq!(pages, vec![1, 2]);
     }
 
     #[test]
     fn test_chapter_pages_from_layer_empty() {
         let layer = ChapterLayer::default();
         assert!(chapter_pages_from_layer(&layer).is_empty());
-    }
-
-    #[test]
-    fn test_effective_note_mode_footnote() {
-        let mut layer = ChapterLayer::default();
-        layer.footnote_items = vec![make_note_item(1, NoteKind::Footnote)];
-        assert_eq!(effective_note_mode_from_layer(&layer), "footnote_primary");
-    }
-
-    #[test]
-    fn test_effective_note_mode_endnote_chapter() {
-        let mut layer = ChapterLayer::default();
-        layer.endnote_items = vec![make_note_item(10, NoteKind::Endnote)];
-        assert_eq!(
-            effective_note_mode_from_layer(&layer),
-            "chapter_endnote_primary"
-        );
-    }
-
-    #[test]
-    fn test_effective_note_mode_book_endnote() {
-        let mut layer = ChapterLayer::default();
-        layer.endnote_items = vec![make_note_item(10, NoteKind::Endnote)];
-        layer.endnote_regions = vec![fnm_core::records::NoteRegionRecord {
-            region_id: "r1".to_string(),
-            chapter_id: String::new(),
-            page_start: 0,
-            page_end: 0,
-            pages: vec![],
-            note_kind: NoteKind::Endnote,
-            scope: RegionScope::Book,
-            source: fnm_core::types::RegionSource::HeadingScan,
-            heading_text: String::new(),
-            start_reason: String::new(),
-            end_reason: String::new(),
-            region_marker_alignment_ok: false,
-            region_start_first_source_marker: String::new(),
-            region_first_note_item_marker: String::new(),
-            review_required: false,
-        }];
-        assert_eq!(effective_note_mode_from_layer(&layer), "book_endnote_bound");
-    }
-
-    #[test]
-    fn test_effective_note_mode_no_notes() {
-        let layer = ChapterLayer::default();
-        assert_eq!(effective_note_mode_from_layer(&layer), "no_notes");
-    }
-
-    #[test]
-    fn test_phase5_book_type_footnote_only() {
-        let mut layers = ChapterLayers::default();
-        let mut layer = ChapterLayer::default();
-        layer.chapter_id = "ch1".to_string();
-        layer.footnote_items = vec![make_note_item(1, NoteKind::Footnote)];
-        layers.chapter_layers.push(layer);
-        assert_eq!(phase5_book_type(&layers), "footnote_only");
-    }
-
-    #[test]
-    fn test_phase5_book_type_mixed() {
-        let mut layers = ChapterLayers::default();
-        let mut ch1 = ChapterLayer::default();
-        ch1.chapter_id = "ch1".to_string();
-        ch1.footnote_items = vec![make_note_item(1, NoteKind::Footnote)];
-        layers.chapter_layers.push(ch1);
-        let mut ch2 = ChapterLayer::default();
-        ch2.chapter_id = "ch2".to_string();
-        ch2.endnote_items = vec![make_note_item(10, NoteKind::Endnote)];
-        layers.chapter_layers.push(ch2);
-        assert_eq!(phase5_book_type(&layers), "mixed");
-    }
-
-    #[test]
-    fn test_phase5_book_type_no_notes() {
-        let layers = ChapterLayers::default();
-        assert_eq!(phase5_book_type(&layers), "no_notes");
     }
 
     #[test]
@@ -507,11 +356,12 @@ mod tests {
     #[test]
     fn test_to_chapter_records_basic() {
         let mut layers = ChapterLayers::default();
-        let mut layer = ChapterLayer::default();
-        layer.chapter_id = "ch1".to_string();
-        layer.title = "Chapter 1".to_string();
-        layer.body_pages = vec![make_body_layer(5), make_body_layer(10)];
-        layers.chapter_layers.push(layer);
+        layers.chapter_layers.push(ChapterLayer {
+            chapter_id: "ch1".to_string(),
+            title: "Chapter 1".to_string(),
+            body_pages: vec![make_body_layer(5), make_body_layer(10)],
+            ..Default::default()
+        });
         let result = to_chapter_records(&layers);
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].chapter_id, "ch1");

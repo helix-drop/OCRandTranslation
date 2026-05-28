@@ -1,0 +1,2910 @@
+{
+  "description": "Goldstein Introduction — pages 18-24 from raw_pages.json",
+  "source": "test_example/post-revolutionary/raw_pages.json",
+  "pages": [
+    {
+      "fileIdx": 17,
+      "bookPage": 18,
+      "pdfPage": 18,
+      "printPage": 1,
+      "printPageLabel": "1",
+      "detectedPage": 1,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "Introduction: Psychological Interiority versus Self-Talk",
+          "x": 161,
+          "bbox": [
+            161,
+            246,
+            581,
+            325
+          ],
+          "label": "doc_title",
+          "is_meta": false,
+          "heading_level": 1,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Is the self a unitary whole, or is it fractured and fragmentary? That very general, open-ended question has been a recurrent one, assuming different forms and freighted with different meanings according to the historical context. In the aftermath of the Revolution of 1789, it took on an almost startling urgency in Fra nce; the highest social and political stakes seemed to ride on it. Spanning the period 1750 to 1850, this",
+          "x": 111,
+          "bbox": [
+            111,
+            491,
+            746,
+            752
+          ],
+          "label": "abstract",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "book explores a conjuncture between psychological discourse and sociopolitical change th at, I argue, captures the French in the act of grappling with the newly imposed conditions of modernity . Hence this is a book at once about the self and about sociopolitical order. As anyone who has embarked on research of this sort knows, basic definitional considerations make the self a treacherous object of investigation. Commonplace in present-day American English, the word “self” does not send us rushing to the dictionary; we have a firm if intuitive grasp of what it signifies and how to use it. At the same time, the word, which belongs both to everyday speech and to a variety of technical lan-",
+          "x": 112,
+          "bbox": [
+            112,
+            754,
+            746,
+            1144
+          ],
+          "label": "abstract",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 121,
+      "textSource": "pdf",
+      "markdown": "# Introduction: Psychological Interiority versus Self-Talk\n\nIs the self a unitary whole, or is it fractured and fragmentary? That very general, open-ended question has been a recurrent one, assuming different forms and freighted with different meanings according to the historical context. In the aftermath of the Revolution of 1789, it took on an almost startling urgency in France; the highest social and political stakes seemed to ride on it. Spanning the period 1750 to 1850, this book explores a conjuncture between psychological discourse and sociopolitical change that, I argue, captures the French in the act of grappling with the newly imposed conditions of modernity. Hence this is a book at once about the self and about sociopolitical order.\n\nAs anyone who has embarked on research of this sort knows, basic definitional considerations make the self a treacherous object of investigation. Commonplace in present-day American English, the word “self” does not send us rushing to the dictionary; we have a firm if intuitive grasp of what it signifies and how to use it. At the same time, the word, which belongs both to everyday speech and to a variety of technical languages, steadfastly resists our efforts to pin it down. Surrounding it, moreover, are a cluster of similarly vague near-synonyms—individual, person, personality, subject, subjectivity, identity—with which it seems to overlap substantially and from which it can be distinguished only with difficulty, if at all. The historical dimension of selfhood adds another layer to this definitional complexity. Historians and anthropologists long ago denaturalized the self, asserting its status as a mutable object constituted historically and culturally. The resulting scholarly literature, dating back at least as far as Jacob Burckhardt's The Civilization",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "doc_title",
+            "block_content": "Introduction: Psychological\nInteriority versus Self-Talk",
+            "block_bbox": [
+              161,
+              246,
+              581,
+              325
+            ],
+            "block_id": 0,
+            "block_order": 1,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                161.0,
+                246.0
+              ],
+              [
+                581.0,
+                246.0
+              ],
+              [
+                581.0,
+                325.0
+              ],
+              [
+                161.0,
+                325.0
+              ]
+            ]
+          },
+          {
+            "block_label": "abstract",
+            "block_content": "Is the self a unitary whole, or is it fractured and fragmentary? That very general, open-ended question has been a recurrent one, assuming different forms and freighted with different meanings according to the historical context. In the aftermath of the Revolution of 1789, it took on an almost startling urgency in France; the highest social and political stakes seemed to ride on it. Spanning the period 1750 to 1850, this book explores a conjuncture between psychological discourse and sociopolitical change that, I argue, captures the French in the act of grappling with the newly imposed conditions of modernity. Hence this is a book at once about the self and about sociopolitical order.",
+            "block_bbox": [
+              111,
+              491,
+              746,
+              752
+            ],
+            "block_id": 1,
+            "block_order": 2,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                111.0,
+                491.0
+              ],
+              [
+                746.0,
+                491.0
+              ],
+              [
+                746.0,
+                752.0
+              ],
+              [
+                111.0,
+                752.0
+              ]
+            ]
+          },
+          {
+            "block_label": "abstract",
+            "block_content": "As anyone who has embarked on research of this sort knows, basic definitional considerations make the self a treacherous object of investigation. Commonplace in present-day American English, the word “self” does not send us rushing to the dictionary; we have a firm if intuitive grasp of what it signifies and how to use it. At the same time, the word, which belongs both to everyday speech and to a variety of technical languages, steadfastly resists our efforts to pin it down. Surrounding it, moreover, are a cluster of similarly vague near-synonyms—individual, person, personality, subject, subjectivity, identity—with which it seems to overlap substantially and from which it can be distinguished only with difficulty, if at all. The historical dimension of selfhood adds another layer to this definitional complexity. Historians and anthropologists long ago denaturalized the self, asserting its status as a mutable object constituted historically and culturally. The resulting scholarly literature, dating back at least as far as Jacob Burckhardt's The Civilization",
+            "block_bbox": [
+              112,
+              754,
+              746,
+              1144
+            ],
+            "block_id": 2,
+            "block_order": 3,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                112.0,
+                754.0
+              ],
+              [
+                746.0,
+                754.0
+              ],
+              [
+                746.0,
+                1144.0
+              ],
+              [
+                112.0,
+                1144.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "1",
+            "block_bbox": [
+              729,
+              1158,
+              742,
+              1176
+            ],
+            "block_id": 3,
+            "block_order": null,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                729.0,
+                1158.0
+              ],
+              [
+                741.0,
+                1158.0
+              ],
+              [
+                741.0,
+                1175.0
+              ],
+              [
+                729.0,
+                1175.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 6,
+              "label": "doc_title",
+              "score": 0.8349316120147705,
+              "coordinate": [
+                161,
+                246,
+                581,
+                325
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  161.0,
+                  246.0
+                ],
+                [
+                  581.0,
+                  246.0
+                ],
+                [
+                  581.0,
+                  325.0
+                ],
+                [
+                  161.0,
+                  325.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 0,
+              "label": "abstract",
+              "score": 0.6008610725402832,
+              "coordinate": [
+                111,
+                491,
+                746,
+                752
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  111.0,
+                  491.0
+                ],
+                [
+                  746.0,
+                  491.0
+                ],
+                [
+                  746.0,
+                  752.0
+                ],
+                [
+                  111.0,
+                  752.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 0,
+              "label": "abstract",
+              "score": 0.566871166229248,
+              "coordinate": [
+                112,
+                754,
+                746,
+                1144
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  112.0,
+                  754.0
+                ],
+                [
+                  746.0,
+                  754.0
+                ],
+                [
+                  746.0,
+                  1144.0
+                ],
+                [
+                  112.0,
+                  1144.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.6349440813064575,
+              "coordinate": [
+                729,
+                1158,
+                742,
+                1176
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  729.0,
+                  1158.0
+                ],
+                [
+                  741.0,
+                  1158.0
+                ],
+                [
+                  741.0,
+                  1175.0
+                ],
+                [
+                  729.0,
+                  1175.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.1",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 18,
+      "bookPage": 19,
+      "pdfPage": 19,
+      "printPage": 2,
+      "printPageLabel": "2",
+      "detectedPage": 2,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for example, with Socrates,1 with the Stoics, 2 in twelfth-century religious devotion, 3 in the Italian Renaissance4—that, taken as a whole, it testifies to a widespread conceptual muddle about what, exactly , is the quarry being sought.",
+          "x": 133,
+          "bbox": [
+            133,
+            156,
+            766,
+            312
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Rather than attempting to illuminate this muddle through a grand theoretical intervention, I have in this book adopted a minimalist position toward the self, though one, I think, that adequately serves my purposes as a historian. That position has thr ee elements. First, I basically agree with the early twentieth-centur y anthropologist Marcel Mauss that “there has never existed a human being, who has not been aware 5 Or as I would gloss and nuance Mauss’s assertion, all human beings, with the exception of infants and some psychot6 Hence all human beings regard both their bodies and their minds as discrete, self-subsistent entities. It is the individunot only of his body , but also at the same time of his individuality , both ics, recognize, to a greater or lesser degree, the fact of individuation; if ated mental stuff, as well as the individual’s own representation of it, that go under the name of self. Second, I would readily assent to the spiritual and physical.”",
+          "x": 132,
+          "bbox": [
+            132,
+            313,
+            769,
+            1012
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "pressed, they cannot help but side with Nietzsche’s luminous Apollonians against his intoxicated Dionysians in their acceptance of the principium individuationis.",
+          "x": 133,
+          "bbox": [
+            133,
+            1014,
+            769,
+            1144
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 142,
+      "textSource": "pdf",
+      "markdown": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for example, with Socrates, $ ^{1} $ with the Stoics, $ ^{2} $ in twelfth-century religious devotion, $ ^{3} $ in the Italian Renaissance $ ^{4} $—that, taken as a whole, it testifies to a widespread conceptual muddle about what, exactly, is the quarry being sought.\n\nRather than attempting to illuminate this muddle through a grand theoretical intervention, I have in this book adopted a minimalist position toward the self, though one, I think, that adequately serves my purposes as a historian. That position has three elements. First, I basically agree with the early twentieth-century anthropologist Marcel Mauss that “there has never existed a human being, who has not been aware not only of his body, but also at the same time of his individuality, both spiritual and physical.” $ ^{5} $ Or as I would gloss and nuance Mauss’s assertion, all human beings, with the exception of infants and some psychotics, recognize, to a greater or lesser degree, the fact of individuation; if pressed, they cannot help but side with Nietzsche’s luminous Apollonians against his intoxicated Dionysians in their acceptance of the principium individuationis. $ ^{6} $ Hence all human beings regard both their bodies and their minds as discrete, self-subsistent entities. It is the individuated mental stuff, as well as the individual’s own representation of it, that go under the name of self. Second, I would readily assent to the claims of Mauss, Michel Foucault, and others, that what passes for a self is not the same in all places and times. Or to return to my own vocabulary, there is no representation of the individuated mental stuff that universally obtains. Third, while I believe that the category of the self exists in some fashion in all cultures, I also believe that the cultural salience of that category—or the prevalence of what I will call self-talk—varies widely. Nor must we traverse vast temporal or geographical spaces to find noteworthy differences in salience. In fact, the story I tell in this book charts a dramatic shift in the salience of the self between the closely neighboring cultures of eighteenth- and nineteenth-century France.\n\nOnly in a culture in which self-talk is prevalent will people generally take the further step of worrying about whether the self is whole or fragmented. But that chronology may also be reversed: recognition of the pervasive existence of fragmentation coupled with a strong sense of its drawbacks may spur a rather abrupt introduction of self-talk. At least",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "number",
+            "block_content": "2",
+            "block_bbox": [
+              136,
+              85,
+              151,
+              105
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                136.0,
+                85.0
+              ],
+              [
+                150.0,
+                85.0
+              ],
+              [
+                150.0,
+                104.0
+              ],
+              [
+                136.0,
+                104.0
+              ]
+            ]
+          },
+          {
+            "block_label": "header",
+            "block_content": "Introduction",
+            "block_bbox": [
+              194,
+              85,
+              296,
+              107
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                194.0,
+                85.0
+              ],
+              [
+                295.0,
+                85.0
+              ],
+              [
+                295.0,
+                106.0
+              ],
+              [
+                194.0,
+                106.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "of the Renaissance in Italy (1860) and divided among several disciplines, has located so many putative births of the Western self—for example, with Socrates, $ ^{1} $ with the Stoics, $ ^{2} $ in twelfth-century religious devotion, $ ^{3} $ in the Italian Renaissance $ ^{4} $—that, taken as a whole, it testifies to a widespread conceptual muddle about what, exactly, is the quarry being sought.",
+            "block_bbox": [
+              133,
+              156,
+              766,
+              312
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                133.0,
+                156.0
+              ],
+              [
+                766.0,
+                156.0
+              ],
+              [
+                766.0,
+                312.0
+              ],
+              [
+                133.0,
+                312.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Rather than attempting to illuminate this muddle through a grand theoretical intervention, I have in this book adopted a minimalist position toward the self, though one, I think, that adequately serves my purposes as a historian. That position has three elements. First, I basically agree with the early twentieth-century anthropologist Marcel Mauss that “there has never existed a human being, who has not been aware not only of his body, but also at the same time of his individuality, both spiritual and physical.” $ ^{5} $ Or as I would gloss and nuance Mauss’s assertion, all human beings, with the exception of infants and some psychotics, recognize, to a greater or lesser degree, the fact of individuation; if pressed, they cannot help but side with Nietzsche’s luminous Apollonians against his intoxicated Dionysians in their acceptance of the principium individuationis. $ ^{6} $ Hence all human beings regard both their bodies and their minds as discrete, self-subsistent entities. It is the individuated mental stuff, as well as the individual’s own representation of it, that go under the name of self. Second, I would readily assent to the claims of Mauss, Michel Foucault, and others, that what passes for a self is not the same in all places and times. Or to return to my own vocabulary, there is no representation of the individuated mental stuff that universally obtains. Third, while I believe that the category of the self exists in some fashion in all cultures, I also believe that the cultural salience of that category—or the prevalence of what I will call self-talk—varies widely. Nor must we traverse vast temporal or geographical spaces to find noteworthy differences in salience. In fact, the story I tell in this book charts a dramatic shift in the salience of the self between the closely neighboring cultures of eighteenth- and nineteenth-century France.",
+            "block_bbox": [
+              132,
+              313,
+              769,
+              1012
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                132.0,
+                313.0
+              ],
+              [
+                769.0,
+                313.0
+              ],
+              [
+                769.0,
+                1012.0
+              ],
+              [
+                132.0,
+                1012.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Only in a culture in which self-talk is prevalent will people generally take the further step of worrying about whether the self is whole or fragmented. But that chronology may also be reversed: recognition of the pervasive existence of fragmentation coupled with a strong sense of its drawbacks may spur a rather abrupt introduction of self-talk. At least",
+            "block_bbox": [
+              133,
+              1014,
+              769,
+              1144
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                133.0,
+                1014.0
+              ],
+              [
+                769.0,
+                1014.0
+              ],
+              [
+                769.0,
+                1144.0
+              ],
+              [
+                133.0,
+                1144.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.6019799113273621,
+              "coordinate": [
+                136,
+                85,
+                151,
+                105
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  136.0,
+                  85.0
+                ],
+                [
+                  150.0,
+                  85.0
+                ],
+                [
+                  150.0,
+                  104.0
+                ],
+                [
+                  136.0,
+                  104.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8154313564300537,
+              "coordinate": [
+                194,
+                85,
+                296,
+                107
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  194.0,
+                  85.0
+                ],
+                [
+                  295.0,
+                  85.0
+                ],
+                [
+                  295.0,
+                  106.0
+                ],
+                [
+                  194.0,
+                  106.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9543874859809875,
+              "coordinate": [
+                133,
+                156,
+                766,
+                312
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  133.0,
+                  156.0
+                ],
+                [
+                  766.0,
+                  156.0
+                ],
+                [
+                  766.0,
+                  312.0
+                ],
+                [
+                  133.0,
+                  312.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9695568680763245,
+              "coordinate": [
+                132,
+                313,
+                769,
+                1012
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  132.0,
+                  313.0
+                ],
+                [
+                  769.0,
+                  313.0
+                ],
+                [
+                  769.0,
+                  1012.0
+                ],
+                [
+                  132.0,
+                  1012.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9530492424964905,
+              "coordinate": [
+                133,
+                1014,
+                769,
+                1144
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  133.0,
+                  1014.0
+                ],
+                [
+                  769.0,
+                  1014.0
+                ],
+                [
+                  769.0,
+                  1144.0
+                ],
+                [
+                  133.0,
+                  1144.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.2",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 19,
+      "bookPage": 20,
+      "pdfPage": 20,
+      "printPage": 3,
+      "printPageLabel": "3",
+      "detectedPage": 3,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "three different types of fragme ntation have provided cause for worry . The type with which we are most familiar today was well evoked by Jean-Paul Sartre when he retrospectively described his first, youthful encounter with the work of Sigmund Fr e ud , w hi ch t ook p l ace in t h e early 1920s and resulted in a “deep repugnance”: “When you have just taken the bachot at the age of seventeen with the ‘I think, therefore I am’ of Descartes as your text and you open The Psychopathology of Everyday Life and you read the famous episode of Signorelli with its substitutions, combinations and displacements, implying that Freud was simultaneously thinking of a patient who had committed suicide and of certain Turkish mores, and so on—when you read all that, your breath is simply taken away .”7",
+          "x": 111,
+          "bbox": [
+            111,
+            155,
+            746,
+            467
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Sartre is relating the shock that he felt when, thoroughly schooled at the lycée in the belief that his individuated mental stuff took the form of a self-evident, transparent, and seamlessly whole Cartesian ego, he confronted a powerful argument for the contrary proposition that it",
+          "x": 111,
+          "bbox": [
+            111,
+            468,
+            747,
+            937
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "A second type of fragmentation, perhaps best labeled segmentation, refers to a disparity among the self's various roles. Unlike vertical fragmentation, which turns on the issue of the knowability of the self, segmentation turns on the issue of its sincerity and authenticity, its being all of a piece.",
+          "x": 111,
+          "bbox": [
+            111,
+            937,
+            745,
+            1065
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0
+        },
+        {
+          "text": "contained vast lodes of unconsciousness, could think multiple thoughts simultaneously , and might easily elude even its own possessor. His immediate reaction was to recoil in horror. Sartre’s case is",
+          "x": 111,
+          "bbox": [
+            111,
+            1066,
+            746,
+            1144
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 121,
+      "textSource": "pdf",
+      "markdown": "three different types of fragmentation have provided cause for worry. The type with which we are most familiar today was well evoked by Jean-Paul Sartre when he retrospectively described his first, youthful encounter with the work of Sigmund Freud, which took place in the early 1920s and resulted in a “deep repugnance”: “When you have just taken the bachot at the age of seventeen with the ‘I think, therefore I am’ of Descartes as your text and you open The Psychopathology of Everyday Life and you read the famous episode of Signorelli with its substitutions, combinations and displacements, implying that Freud was simultaneously thinking of a patient who had committed suicide and of certain Turkish mores, and so on—when you read all that, your breath is simply taken away.” $ ^{7} $\n\nSartre is relating the shock that he felt when, thoroughly schooled at the lycée in the belief that his individuated mental stuff took the form of a self-evident, transparent, and seamlessly whole Cartesian ego, he confronted a powerful argument for the contrary proposition that it contained vast lodes of unconsciousness, could think multiple thoughts simultaneously, and might easily elude even its own possessor. His immediate reaction was to recoil in horror. Sartre's case is prototypical for the late nineteenth and early twentieth centuries, when a host of new psychological theories inspired by the empirical evidence of hypnosis—and most notable among them, Freudian psychoanalysis—argued for a fragmentation of the self along vertical, or depth-psychological, lines. According to this model, the self embraced significant expanses of deeply buried unconscious contents as well as a thin layer of readily accessible consciousness that floated atop them. I will call fragmentation of this type, premised on the existence of an unconscious mental substratum, vertical fragmentation. It figures briefly in the epilogue of this book but, as its point of historical origin alone indicates, it is not my principal concern here.\n\nA second type of fragmentation, perhaps best labeled segmentation, refers to a disparity among the self's various roles. Unlike vertical fragmentation, which turns on the issue of the knowability of the self, segmentation turns on the issue of its sincerity and authenticity, its being all of a piece.\n\nThat role-playing is an integral component of the Western conception of selfhood was suggested by Mauss. He regarded the original form of the self, found alike among indigenous Australian and Northwest Amer-",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "header",
+            "block_content": "Introduction",
+            "block_bbox": [
+              583,
+              85,
+              685,
+              107
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                583.0,
+                85.0
+              ],
+              [
+                684.0,
+                85.0
+              ],
+              [
+                684.0,
+                106.0
+              ],
+              [
+                583.0,
+                106.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "3",
+            "block_bbox": [
+              728,
+              85,
+              743,
+              104
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                728.0,
+                85.0
+              ],
+              [
+                742.0,
+                85.0
+              ],
+              [
+                742.0,
+                103.0
+              ],
+              [
+                728.0,
+                103.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "three different types of fragmentation have provided cause for worry. The type with which we are most familiar today was well evoked by Jean-Paul Sartre when he retrospectively described his first, youthful encounter with the work of Sigmund Freud, which took place in the early 1920s and resulted in a “deep repugnance”: “When you have just taken the bachot at the age of seventeen with the ‘I think, therefore I am’ of Descartes as your text and you open The Psychopathology of Everyday Life and you read the famous episode of Signorelli with its substitutions, combinations and displacements, implying that Freud was simultaneously thinking of a patient who had committed suicide and of certain Turkish mores, and so on—when you read all that, your breath is simply taken away.” $ ^{7} $",
+            "block_bbox": [
+              111,
+              155,
+              746,
+              467
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                111.0,
+                155.0
+              ],
+              [
+                746.0,
+                155.0
+              ],
+              [
+                746.0,
+                467.0
+              ],
+              [
+                111.0,
+                467.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Sartre is relating the shock that he felt when, thoroughly schooled at the lycée in the belief that his individuated mental stuff took the form of a self-evident, transparent, and seamlessly whole Cartesian ego, he confronted a powerful argument for the contrary proposition that it contained vast lodes of unconsciousness, could think multiple thoughts simultaneously, and might easily elude even its own possessor. His immediate reaction was to recoil in horror. Sartre's case is prototypical for the late nineteenth and early twentieth centuries, when a host of new psychological theories inspired by the empirical evidence of hypnosis—and most notable among them, Freudian psychoanalysis—argued for a fragmentation of the self along vertical, or depth-psychological, lines. According to this model, the self embraced significant expanses of deeply buried unconscious contents as well as a thin layer of readily accessible consciousness that floated atop them. I will call fragmentation of this type, premised on the existence of an unconscious mental substratum, vertical fragmentation. It figures briefly in the epilogue of this book but, as its point of historical origin alone indicates, it is not my principal concern here.",
+            "block_bbox": [
+              111,
+              468,
+              747,
+              937
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                111.0,
+                468.0
+              ],
+              [
+                747.0,
+                468.0
+              ],
+              [
+                747.0,
+                937.0
+              ],
+              [
+                111.0,
+                937.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "A second type of fragmentation, perhaps best labeled segmentation, refers to a disparity among the self's various roles. Unlike vertical fragmentation, which turns on the issue of the knowability of the self, segmentation turns on the issue of its sincerity and authenticity, its being all of a piece.",
+            "block_bbox": [
+              111,
+              937,
+              745,
+              1065
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                111.0,
+                937.0
+              ],
+              [
+                745.0,
+                937.0
+              ],
+              [
+                745.0,
+                1065.0
+              ],
+              [
+                111.0,
+                1065.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "That role-playing is an integral component of the Western conception of selfhood was suggested by Mauss. He regarded the original form of the self, found alike among indigenous Australian and Northwest Amer-",
+            "block_bbox": [
+              111,
+              1066,
+              746,
+              1144
+            ],
+            "block_id": 5,
+            "block_order": 4,
+            "group_id": 5,
+            "block_polygon_points": [
+              [
+                111.0,
+                1066.0
+              ],
+              [
+                746.0,
+                1066.0
+              ],
+              [
+                746.0,
+                1144.0
+              ],
+              [
+                111.0,
+                1144.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8428995609283447,
+              "coordinate": [
+                583,
+                85,
+                685,
+                107
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  583.0,
+                  85.0
+                ],
+                [
+                  684.0,
+                  85.0
+                ],
+                [
+                  684.0,
+                  106.0
+                ],
+                [
+                  583.0,
+                  106.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.6582831740379333,
+              "coordinate": [
+                728,
+                85,
+                743,
+                104
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  728.0,
+                  85.0
+                ],
+                [
+                  742.0,
+                  85.0
+                ],
+                [
+                  742.0,
+                  103.0
+                ],
+                [
+                  728.0,
+                  103.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9611579775810242,
+              "coordinate": [
+                111,
+                155,
+                746,
+                467
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  111.0,
+                  155.0
+                ],
+                [
+                  746.0,
+                  155.0
+                ],
+                [
+                  746.0,
+                  467.0
+                ],
+                [
+                  111.0,
+                  467.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9663506746292114,
+              "coordinate": [
+                111,
+                468,
+                747,
+                937
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  111.0,
+                  468.0
+                ],
+                [
+                  747.0,
+                  468.0
+                ],
+                [
+                  747.0,
+                  937.0
+                ],
+                [
+                  111.0,
+                  937.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9553712010383606,
+              "coordinate": [
+                111,
+                937,
+                745,
+                1065
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  111.0,
+                  937.0
+                ],
+                [
+                  745.0,
+                  937.0
+                ],
+                [
+                  745.0,
+                  1065.0
+                ],
+                [
+                  111.0,
+                  1065.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9350072145462036,
+              "coordinate": [
+                111,
+                1066,
+                746,
+                1144
+              ],
+              "order": 5,
+              "polygon_points": [
+                [
+                  111.0,
+                  1066.0
+                ],
+                [
+                  746.0,
+                  1066.0
+                ],
+                [
+                  746.0,
+                  1144.0
+                ],
+                [
+                  111.0,
+                  1144.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.3",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 20,
+      "bookPage": 21,
+      "pdfPage": 21,
+      "printPage": 4,
+      "printPageLabel": "4",
+      "detectedPage": 4,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor’s social function. According to Mauss, an important evolution in this form occurred in early Roman society , which made extensive ritual use of ancestral masks. The name persona that designated the mask acquired an additional meaning; it became a technical legal term designating someone to whom the provisions of the law applied, the bearer 8 The legal persona did not give rise to concerns about fragmentation. In fact, as we will see later in this book, it seems to have functioned as the secure and stable",
+          "x": 132,
+          "bbox": [
+            132,
+            156,
+            768,
+            519
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "of rights and obligations. Thus evolved, persona was for the Romans “synonymous with the true nature of the individual.” template on which certain subsequent concepts of selfhood were drawn. But the intimate association of selfhood with something as superficial and inconstant as role-playing has at times provoked expressions of dissatisfaction and even moral outrage. The court societies of the European monarchies of the sixteenth and seventeenth centuries were a locus classicus of inveterate role-playing. 9 The great spokesman for the unified, authentic self With brutal rivalry for the favors of the monarch as their central against the habits of segmentation ingrained and valorized by the court dynamic, they required participants to adopt public faces at odds with was, of course, Jean-Jacques Rousseau. While his railing against artifice their private feelings. Widely circ ulated handbooks for courtiers even and his endorsements of a “natural” authe nticity were not carried out in offered instruction in the art of prudential self-concealment and an explicit language of selfhood, he nonetheless engaged in self-talk depicted achievement of an internal split within the person as a desirable goal. Such court-based codes of conduct, often transmitted as well 10",
+          "x": 132,
+          "bbox": [
+            132,
+            520,
+            768,
+            1039
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "The segmentation of the self through disin genuous role-playing continues to be an issue in our own day . For example, the historian George",
+          "x": 133,
+          "bbox": [
+            133,
+            1040,
+            767,
+            1145
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 142,
+      "textSource": "pdf",
+      "markdown": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor's social function. According to Mauss, an important evolution in this form occurred in early Roman society, which made extensive ritual use of ancestral masks. The name persona that designated the mask acquired an additional meaning; it became a technical legal term designating someone to whom the provisions of the law applied, the bearer of rights and obligations. Thus evolved, persona was for the Romans \"synonymous with the true nature of the individual.\"⁸ The legal persona did not give rise to concerns about fragmentation. In fact, as we will see later in this book, it seems to have functioned as the secure and stable template on which certain subsequent concepts of selfhood were drawn. But the intimate association of selfhood with something as superficial and inconstant as role-playing has at times provoked expressions of dissatisfaction and even moral outrage.\n\nThe court societies of the European monarchies of the sixteenth and seventeenth centuries were a locus classicus of inveterate role-playing. With brutal rivalry for the favors of the monarch as their central dynamic, they required participants to adopt public faces at odds with their private feelings. Widely circulated handbooks for courtiers even offered instruction in the art of prudential self-concealment and depicted achievement of an internal split within the person as a desirable goal. Such court-based codes of conduct, often transmitted as well to lower social strata, in turn produced a distinctive cultural backlash: criticism of the divided self and calls for the cultivation of sincere, holistic selves refusing to engage in flattery and other forms of calculated dissimulation. $ ^{9} $ The great spokesman for the unified, authentic self against the habits of segmentation ingrained and valorized by the court was, of course, Jean-Jacques Rousseau. While his railing against artifice and his endorsements of a “natural” authenticity were not carried out in an explicit language of selfhood, he nonetheless engaged in self-talk rather more than did his eighteenth-century contemporaries, famously reveling in the unmistakable self (soi-même) that he encountered as the simple “feeling of existence” while drifting aimlessly on a lake in a row-boat. $ ^{10} $\n\nThe segmentation of the self through disingenuous role-playing continues to be an issue in our own day. For example, the historian George Chauncey has examined the imperative that dates from the 1970s for gay American men to “come out,” or make their sexual orientation",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "number",
+            "block_content": "4",
+            "block_bbox": [
+              136,
+              86,
+              152,
+              104
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                136.0,
+                86.0
+              ],
+              [
+                151.0,
+                86.0
+              ],
+              [
+                151.0,
+                103.0
+              ],
+              [
+                136.0,
+                103.0
+              ]
+            ]
+          },
+          {
+            "block_label": "header",
+            "block_content": "Introduction",
+            "block_bbox": [
+              194,
+              85,
+              296,
+              106
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                194.0,
+                85.0
+              ],
+              [
+                295.0,
+                85.0
+              ],
+              [
+                295.0,
+                105.0
+              ],
+              [
+                194.0,
+                105.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "ican tribes, to be the persona, role, or mask, a concept referring to its possessor's social function. According to Mauss, an important evolution in this form occurred in early Roman society, which made extensive ritual use of ancestral masks. The name persona that designated the mask acquired an additional meaning; it became a technical legal term designating someone to whom the provisions of the law applied, the bearer of rights and obligations. Thus evolved, persona was for the Romans \"synonymous with the true nature of the individual.\"⁸ The legal persona did not give rise to concerns about fragmentation. In fact, as we will see later in this book, it seems to have functioned as the secure and stable template on which certain subsequent concepts of selfhood were drawn. But the intimate association of selfhood with something as superficial and inconstant as role-playing has at times provoked expressions of dissatisfaction and even moral outrage.",
+            "block_bbox": [
+              132,
+              156,
+              768,
+              519
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                132.0,
+                156.0
+              ],
+              [
+                768.0,
+                156.0
+              ],
+              [
+                768.0,
+                519.0
+              ],
+              [
+                132.0,
+                519.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "The court societies of the European monarchies of the sixteenth and seventeenth centuries were a locus classicus of inveterate role-playing. With brutal rivalry for the favors of the monarch as their central dynamic, they required participants to adopt public faces at odds with their private feelings. Widely circulated handbooks for courtiers even offered instruction in the art of prudential self-concealment and depicted achievement of an internal split within the person as a desirable goal. Such court-based codes of conduct, often transmitted as well to lower social strata, in turn produced a distinctive cultural backlash: criticism of the divided self and calls for the cultivation of sincere, holistic selves refusing to engage in flattery and other forms of calculated dissimulation. $ ^{9} $ The great spokesman for the unified, authentic self against the habits of segmentation ingrained and valorized by the court was, of course, Jean-Jacques Rousseau. While his railing against artifice and his endorsements of a “natural” authenticity were not carried out in an explicit language of selfhood, he nonetheless engaged in self-talk rather more than did his eighteenth-century contemporaries, famously reveling in the unmistakable self (soi-même) that he encountered as the simple “feeling of existence” while drifting aimlessly on a lake in a row-boat. $ ^{10} $",
+            "block_bbox": [
+              132,
+              520,
+              768,
+              1039
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                132.0,
+                520.0
+              ],
+              [
+                768.0,
+                520.0
+              ],
+              [
+                768.0,
+                1039.0
+              ],
+              [
+                132.0,
+                1039.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "The segmentation of the self through disingenuous role-playing continues to be an issue in our own day. For example, the historian George Chauncey has examined the imperative that dates from the 1970s for gay American men to “come out,” or make their sexual orientation",
+            "block_bbox": [
+              133,
+              1040,
+              767,
+              1145
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                133.0,
+                1040.0
+              ],
+              [
+                767.0,
+                1040.0
+              ],
+              [
+                767.0,
+                1145.0
+              ],
+              [
+                133.0,
+                1145.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.5710070729255676,
+              "coordinate": [
+                136,
+                86,
+                152,
+                104
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  136.0,
+                  86.0
+                ],
+                [
+                  151.0,
+                  86.0
+                ],
+                [
+                  151.0,
+                  103.0
+                ],
+                [
+                  136.0,
+                  103.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.812343955039978,
+              "coordinate": [
+                194,
+                85,
+                296,
+                106
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  194.0,
+                  85.0
+                ],
+                [
+                  295.0,
+                  85.0
+                ],
+                [
+                  295.0,
+                  105.0
+                ],
+                [
+                  194.0,
+                  105.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9615921974182129,
+              "coordinate": [
+                132,
+                156,
+                768,
+                519
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  132.0,
+                  156.0
+                ],
+                [
+                  768.0,
+                  156.0
+                ],
+                [
+                  768.0,
+                  519.0
+                ],
+                [
+                  132.0,
+                  519.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9681477546691895,
+              "coordinate": [
+                132,
+                520,
+                768,
+                1039
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  132.0,
+                  520.0
+                ],
+                [
+                  768.0,
+                  520.0
+                ],
+                [
+                  768.0,
+                  1039.0
+                ],
+                [
+                  132.0,
+                  1039.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9474536776542664,
+              "coordinate": [
+                133,
+                1040,
+                767,
+                1145
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  133.0,
+                  1040.0
+                ],
+                [
+                  767.0,
+                  1040.0
+                ],
+                [
+                  767.0,
+                  1145.0
+                ],
+                [
+                  133.0,
+                  1145.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.4",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 21,
+      "bookPage": 22,
+      "pdfPage": 22,
+      "printPage": 5,
+      "printPageLabel": "5",
+      "detectedPage": 5,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "known in public. It derived, he argues, from a strong sense, not felt by members of this group in earlier eras, of the intolerabi lity of donning different selves in different settings. 11 Similarly , concealment of ethnic background was once regarded as a prudential measure to facilitate get12",
+          "x": 111,
+          "bbox": [
+            111,
+            156,
+            746,
+            441
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Although I frequently mention Rousseau in this book, as is almost inevitable when discussing the culture of eighteenth-century France, the segmentation of the self that obsessed Jean-Jacques is not my topic ting ahead in America. But current mores pl acing a higher premium on here. My chief concern is rather a third type of fragmentation of the self, authenticity now shun such segmentation of the self. Thus the celewhich I will call horizontal fragmentation. Unlike the much betterknown vertical variety , it is not defined in terms of the depth, inaccessibrated architect Frank Gehry , born Frank Goldberg to Jewish workingbility , and unconsciousness of mental contents. Instead, horizontal frag-",
+          "x": 111,
+          "bbox": [
+            111,
+            442,
+            746,
+            858
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "mentation refers to the status of the self in those psychological theories, class parents in Toronto, now bitterly regrets the new surname he adopted in Los Angeles in the 1950s. Musing about what a biography of",
+          "x": 111,
+          "bbox": [
+            111,
+            858,
+            747,
+            1144
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 121,
+      "textSource": "pdf",
+      "markdown": "known in public. It derived, he argues, from a strong sense, not felt by members of this group in earlier eras, of the intolerability of donning different selves in different settings. $ ^{11} $ Similarly, concealment of ethnic background was once regarded as a prudential measure to facilitate getting ahead in America. But current mores placing a higher premium on authenticity now shun such segmentation of the self. Thus the celebrated architect Frank Gehry, born Frank Goldberg to Jewish working-class parents in Toronto, now bitterly regrets the new surname he adopted in Los Angeles in the 1950s. Musing about what a biography of him might someday contain, he said, “I haven’t done anything bad, except for changing my name.” $ ^{12} $\n\nAlthough I frequently mention Rousseau in this book, as is almost inevitable when discussing the culture of eighteenth-century France, the segmentation of the self that obsessed Jean-Jacques is not my topic here. My chief concern is rather a third type of fragmentation of the self, which I will call horizontal fragmentation. Unlike the much better-known vertical variety, it is not defined in terms of the depth, inaccessibility, and unconsciousness of mental contents. Instead, horizontal fragmentation refers to the status of the self in those psychological theories, rooted in biology, that build up mind from an accumulation of discrete pieces and have no obvious resources for joining them together under central, unitary command. All of the pieces are, epistemologically, on the same plane; there is no variance in our ability to know them; nothing is more hidden than anything else: hence the suitability of “horizontal” to describe the axis on which they are arrayed. Still, the composite whole is decentered, giving rise to concern about whether it qualifies as a true self.\n\nAs will be discussed at length in Chapters 3 and 7, two psychological theories that had currency in eighteenth- and nineteenth-century France routinely prompted charges of endangerment of the self through horizontal fragmentation: sensationalism and phrenology. A theory of seventeenth-century English vintage, sensationalism depicted the mind at birth as a blank slate subsequently inscribed by sensory bombardment, or by the stimuli picked up by the sense organs. Conscious awareness of those inscriptions was assumed. By contrast to the dark pockets of unconsciousness that give Freudian psychoanalysis its characteristic flavor, lucid consciousness was emphatically the medium of sensationalism; John Locke's version of the theory even helped intro-",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "header",
+            "block_content": "Introduction",
+            "block_bbox": [
+              583,
+              85,
+              685,
+              107
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                583.0,
+                85.0
+              ],
+              [
+                684.0,
+                85.0
+              ],
+              [
+                684.0,
+                106.0
+              ],
+              [
+                583.0,
+                106.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "5",
+            "block_bbox": [
+              728,
+              86,
+              743,
+              105
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                728.0,
+                86.0
+              ],
+              [
+                742.0,
+                86.0
+              ],
+              [
+                742.0,
+                104.0
+              ],
+              [
+                728.0,
+                104.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "known in public. It derived, he argues, from a strong sense, not felt by members of this group in earlier eras, of the intolerability of donning different selves in different settings. $ ^{11} $ Similarly, concealment of ethnic background was once regarded as a prudential measure to facilitate getting ahead in America. But current mores placing a higher premium on authenticity now shun such segmentation of the self. Thus the celebrated architect Frank Gehry, born Frank Goldberg to Jewish working-class parents in Toronto, now bitterly regrets the new surname he adopted in Los Angeles in the 1950s. Musing about what a biography of him might someday contain, he said, “I haven’t done anything bad, except for changing my name.” $ ^{12} $",
+            "block_bbox": [
+              111,
+              156,
+              746,
+              441
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                111.0,
+                156.0
+              ],
+              [
+                746.0,
+                156.0
+              ],
+              [
+                746.0,
+                441.0
+              ],
+              [
+                111.0,
+                441.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Although I frequently mention Rousseau in this book, as is almost inevitable when discussing the culture of eighteenth-century France, the segmentation of the self that obsessed Jean-Jacques is not my topic here. My chief concern is rather a third type of fragmentation of the self, which I will call horizontal fragmentation. Unlike the much better-known vertical variety, it is not defined in terms of the depth, inaccessibility, and unconsciousness of mental contents. Instead, horizontal fragmentation refers to the status of the self in those psychological theories, rooted in biology, that build up mind from an accumulation of discrete pieces and have no obvious resources for joining them together under central, unitary command. All of the pieces are, epistemologically, on the same plane; there is no variance in our ability to know them; nothing is more hidden than anything else: hence the suitability of “horizontal” to describe the axis on which they are arrayed. Still, the composite whole is decentered, giving rise to concern about whether it qualifies as a true self.",
+            "block_bbox": [
+              111,
+              442,
+              746,
+              858
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                111.0,
+                442.0
+              ],
+              [
+                746.0,
+                442.0
+              ],
+              [
+                746.0,
+                858.0
+              ],
+              [
+                111.0,
+                858.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "As will be discussed at length in Chapters 3 and 7, two psychological theories that had currency in eighteenth- and nineteenth-century France routinely prompted charges of endangerment of the self through horizontal fragmentation: sensationalism and phrenology. A theory of seventeenth-century English vintage, sensationalism depicted the mind at birth as a blank slate subsequently inscribed by sensory bombardment, or by the stimuli picked up by the sense organs. Conscious awareness of those inscriptions was assumed. By contrast to the dark pockets of unconsciousness that give Freudian psychoanalysis its characteristic flavor, lucid consciousness was emphatically the medium of sensationalism; John Locke's version of the theory even helped intro-",
+            "block_bbox": [
+              111,
+              858,
+              747,
+              1144
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                111.0,
+                858.0
+              ],
+              [
+                747.0,
+                858.0
+              ],
+              [
+                747.0,
+                1144.0
+              ],
+              [
+                111.0,
+                1144.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8459861874580383,
+              "coordinate": [
+                583,
+                85,
+                685,
+                107
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  583.0,
+                  85.0
+                ],
+                [
+                  684.0,
+                  85.0
+                ],
+                [
+                  684.0,
+                  106.0
+                ],
+                [
+                  583.0,
+                  106.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.6599764227867126,
+              "coordinate": [
+                728,
+                86,
+                743,
+                105
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  728.0,
+                  86.0
+                ],
+                [
+                  742.0,
+                  86.0
+                ],
+                [
+                  742.0,
+                  104.0
+                ],
+                [
+                  728.0,
+                  104.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9597898125648499,
+              "coordinate": [
+                111,
+                156,
+                746,
+                441
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  111.0,
+                  156.0
+                ],
+                [
+                  746.0,
+                  156.0
+                ],
+                [
+                  746.0,
+                  441.0
+                ],
+                [
+                  111.0,
+                  441.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9653095006942749,
+              "coordinate": [
+                111,
+                442,
+                746,
+                858
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  111.0,
+                  442.0
+                ],
+                [
+                  746.0,
+                  442.0
+                ],
+                [
+                  746.0,
+                  858.0
+                ],
+                [
+                  111.0,
+                  858.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9632169008255005,
+              "coordinate": [
+                111,
+                858,
+                747,
+                1144
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  111.0,
+                  858.0
+                ],
+                [
+                  747.0,
+                  858.0
+                ],
+                [
+                  747.0,
+                  1144.0
+                ],
+                [
+                  111.0,
+                  1144.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.5",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 22,
+      "bookPage": 23,
+      "pdfPage": 23,
+      "printPage": 6,
+      "printPageLabel": "6",
+      "detectedPage": 6,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "duce the noun “consciousness” into English. 13 But consciousness alone does not necessarily safeguard the integrity of the self. The starkly combinatorial logic on which the sensationalist model of mind rested riled its critics. They charged that such a mind contained no force or power",
+          "x": 133,
+          "bbox": [
+            133,
+            157,
+            767,
+            311
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "that could overcome its fragmentary origins and subsume countless atomistic sensations into that active, holistic entity rightfully called a self. Phrenology met with anal ogous criticism. A late eighteenth-century Viennese creation, it postulated an equi valence of mind and brain, further specifying that the brain was composed of some two or three dozen (the exact number varied accord ing to the theorist) discrete organs,",
+          "x": 133,
+          "bbox": [
+            133,
+            314,
+            768,
+            675
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "each responsible for governing an intellectual ability , an emotion, or a behavioral propensity . The relative size of the organs, which could be inferred from the contours of the skull , determined the particular psychological profile of the individual. All the or gans were unproblematically knowable, just as all the sensations in sensationalism were",
+          "x": 133,
+          "bbox": [
+            133,
+            678,
+            768,
+            1145
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 143,
+      "textSource": "pdf",
+      "markdown": "duce the noun “consciousness” into English. $ ^{13} $ But consciousness alone does not necessarily safeguard the integrity of the self. The starkly combinatorial logic on which the sensationalist model of mind rested riled its critics. They charged that such a mind contained no force or power that could overcome its fragmentary origins and subsume countless atomistic sensations into that active, holistic entity rightfully called a self.\n\nPhrenology met with analogous criticism. A late eighteenth-century Viennese creation, it postulated an equivalence of mind and brain, further specifying that the brain was composed of some two or three dozen (the exact number varied according to the theorist) discrete organs, each responsible for governing an intellectual ability, an emotion, or a behavioral propensity. The relative size of the organs, which could be inferred from the contours of the skull, determined the particular psychological profile of the individual. All the organs were unproblematically knowable, just as all the sensations in sensationalism were conscious. Yet, critics alleged, the divided brain that phrenologists featured as the material basis of mind provided no support for the unifying agency called the self. An organ devoted to selfhood was conspicuously absent from the roster. Nor was there any logical place for it, given the lack of functional hierarchy among the organs.\n\nThe French critics who noted and bemoaned the fragmentation of the self-entailed by sensationalism and phrenology were also the group who introduced self-talk into the culture of nineteenth-century France and who lent the category of the self its particular salience in that historical context. They were Victor Cousin, at once philosopher, philosophy professor, and academic administrator, and his large and well-organized cohort of disciples. They constructed their psychology around an immaterial self, or moi, that (they insisted) was given to its possessor whole and a priori. Such a construction avoided the insidious undermining of the self that, in their opinion, resulted from hitching psychology to biology: after all, spirit, unlike matter, was not susceptible of division. Cousin's stunning success in institutionalizing his doctrine in the national educational system vastly magnified the influence of his school. In fact, that institutionalization outlived by more than a half-century Cousin's roughly thirty-five years of personal power (1815–51) at the lectern and in the state educational bureaucracy. In more diluted form, it even continued well into the twentieth century.",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "number",
+            "block_content": "6",
+            "block_bbox": [
+              136,
+              86,
+              151,
+              104
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                136.0,
+                86.0
+              ],
+              [
+                150.0,
+                86.0
+              ],
+              [
+                150.0,
+                103.0
+              ],
+              [
+                136.0,
+                103.0
+              ]
+            ]
+          },
+          {
+            "block_label": "header",
+            "block_content": "Introduction",
+            "block_bbox": [
+              194,
+              85,
+              296,
+              107
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                194.0,
+                85.0
+              ],
+              [
+                295.0,
+                85.0
+              ],
+              [
+                295.0,
+                106.0
+              ],
+              [
+                194.0,
+                106.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "duce the noun “consciousness” into English. $ ^{13} $ But consciousness alone does not necessarily safeguard the integrity of the self. The starkly combinatorial logic on which the sensationalist model of mind rested riled its critics. They charged that such a mind contained no force or power that could overcome its fragmentary origins and subsume countless atomistic sensations into that active, holistic entity rightfully called a self.",
+            "block_bbox": [
+              133,
+              157,
+              767,
+              311
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                133.0,
+                157.0
+              ],
+              [
+                767.0,
+                157.0
+              ],
+              [
+                767.0,
+                311.0
+              ],
+              [
+                133.0,
+                311.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Phrenology met with analogous criticism. A late eighteenth-century Viennese creation, it postulated an equivalence of mind and brain, further specifying that the brain was composed of some two or three dozen (the exact number varied according to the theorist) discrete organs, each responsible for governing an intellectual ability, an emotion, or a behavioral propensity. The relative size of the organs, which could be inferred from the contours of the skull, determined the particular psychological profile of the individual. All the organs were unproblematically knowable, just as all the sensations in sensationalism were conscious. Yet, critics alleged, the divided brain that phrenologists featured as the material basis of mind provided no support for the unifying agency called the self. An organ devoted to selfhood was conspicuously absent from the roster. Nor was there any logical place for it, given the lack of functional hierarchy among the organs.",
+            "block_bbox": [
+              133,
+              314,
+              768,
+              675
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                133.0,
+                314.0
+              ],
+              [
+                768.0,
+                314.0
+              ],
+              [
+                768.0,
+                675.0
+              ],
+              [
+                133.0,
+                675.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "The French critics who noted and bemoaned the fragmentation of the self-entailed by sensationalism and phrenology were also the group who introduced self-talk into the culture of nineteenth-century France and who lent the category of the self its particular salience in that historical context. They were Victor Cousin, at once philosopher, philosophy professor, and academic administrator, and his large and well-organized cohort of disciples. They constructed their psychology around an immaterial self, or moi, that (they insisted) was given to its possessor whole and a priori. Such a construction avoided the insidious undermining of the self that, in their opinion, resulted from hitching psychology to biology: after all, spirit, unlike matter, was not susceptible of division. Cousin's stunning success in institutionalizing his doctrine in the national educational system vastly magnified the influence of his school. In fact, that institutionalization outlived by more than a half-century Cousin's roughly thirty-five years of personal power (1815–51) at the lectern and in the state educational bureaucracy. In more diluted form, it even continued well into the twentieth century.",
+            "block_bbox": [
+              133,
+              678,
+              768,
+              1145
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                133.0,
+                678.0
+              ],
+              [
+                768.0,
+                678.0
+              ],
+              [
+                768.0,
+                1145.0
+              ],
+              [
+                133.0,
+                1145.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.6096053719520569,
+              "coordinate": [
+                136,
+                86,
+                151,
+                104
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  136.0,
+                  86.0
+                ],
+                [
+                  150.0,
+                  86.0
+                ],
+                [
+                  150.0,
+                  103.0
+                ],
+                [
+                  136.0,
+                  103.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8246426582336426,
+              "coordinate": [
+                194,
+                85,
+                296,
+                107
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  194.0,
+                  85.0
+                ],
+                [
+                  295.0,
+                  85.0
+                ],
+                [
+                  295.0,
+                  106.0
+                ],
+                [
+                  194.0,
+                  106.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9522547125816345,
+              "coordinate": [
+                133,
+                157,
+                767,
+                311
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  133.0,
+                  157.0
+                ],
+                [
+                  767.0,
+                  157.0
+                ],
+                [
+                  767.0,
+                  311.0
+                ],
+                [
+                  133.0,
+                  311.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9650084376335144,
+              "coordinate": [
+                133,
+                314,
+                768,
+                675
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  133.0,
+                  314.0
+                ],
+                [
+                  768.0,
+                  314.0
+                ],
+                [
+                  768.0,
+                  675.0
+                ],
+                [
+                  133.0,
+                  675.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9658113121986389,
+              "coordinate": [
+                133,
+                678,
+                768,
+                1145
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  133.0,
+                  678.0
+                ],
+                [
+                  768.0,
+                  678.0
+                ],
+                [
+                  768.0,
+                  1145.0
+                ],
+                [
+                  133.0,
+                  1145.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.6",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 23,
+      "bookPage": 24,
+      "pdfPage": 24,
+      "printPage": 7,
+      "printPageLabel": "7",
+      "detectedPage": 7,
+      "imgW": 882,
+      "imgH": 1332,
+      "blocks": [
+        {
+          "text": "While the proponents of sensationalism, phrenology , and Cousinianism all offered versions of “the post-Revolutionary self” (to cite the title of this book), the Cousinian moi emerged as the definitive version. It did so both because its institutional success swept the field and because, alone among the three, the Cousinians engaged extensively in self-talk. They persuaded people—ordinary people as well as the guardians of the French state—that the self, meaning the unitary self, was an urgent sociopolitical necessity; and that fragmented selves, which in their view were not selves at all, wrought sociopolitical havoc. A major purpose of this book is to show how they carried out their program and to examine",
+          "x": 111,
+          "bbox": [
+            111,
+            155,
+            746,
+            441
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "the broad consequences that flowed from it. A related purpose of the book is precisely to make and to operational- 14 This book suggests that cultures reveal a lot about ize an analytic distinction between psychological discourses in general themselves by the kind of psycho logical discourses they adopt and, in particular, by whether or not those discourses generate self-talk.",
+          "x": 111,
+          "bbox": [
+            111,
+            443,
+            747,
+            780
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "The period 1750 to 1850, which forms the canvas of this study , has not, of course, been innocently or randomly chosen. It is the period, bridging the French Revolution, that marks the transition from the Old Regime to an ill-defined “modernity ,” or from early modern Europe to and those psychological discourses, li ke Cousinianism, that feature the self. The wide diffusion of sensationalism in France, I argue, produced a modern Europe properly so called. The period, and particularly its Rev-",
+          "x": 111,
+          "bbox": [
+            111,
+            781,
+            746,
+            1145
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 121,
+      "textSource": "pdf",
+      "markdown": "While the proponents of sensationalism, phrenology, and Cousinianism all offered versions of “the post-Revolutionary self” (to cite the title of this book), the Cousinian moi emerged as the definitive version. It did so both because its institutional success swept the field and because, alone among the three, the Cousinians engaged extensively in self-talk. They persuaded people—ordinary people as well as the guardians of the French state—that the self, meaning the unitary self, was an urgent sociopolitical necessity; and that fragmented selves, which in their view were not selves at all, wrought sociopolitical havoc. A major purpose of this book is to show how they carried out their program and to examine the broad consequences that flowed from it.\n\nA related purpose of the book is precisely to make and to operationalize an analytic distinction between psychological discourses in general and those psychological discourses, like Cousinianism, that feature the self. The wide diffusion of sensationalism in France, I argue, produced a heightened and systematic awareness of mental interiority without thereby encouraging people to dwell upon a single tight-knit unit comprising the sum total of mental states and processes. Less widely diffused, phrenology in France opened up a psychological realm while refusing to entertain a concept of the self. Psychological interiority can, in other words, assume a pointillist attitude; it is not necessarily tantamount to self-talk. $ ^{14} $ This book suggests that cultures reveal a lot about themselves by the kind of psychological discourses they adopt and, in particular, by whether or not those discourses generate self-talk.\n\nThe period 1750 to 1850, which forms the canvas of this study, has not, of course, been innocently or randomly chosen. It is the period, bridging the French Revolution, that marks the transition from the Old Regime to an ill-defined “modernity,” or from early modern Europe to modern Europe properly so called. The period, and particularly its Revolutionary pivot, have been frequently, even obsessively narrated. Historians have methodically traced its major economic changes (from guild restrictions to laissez-faire), political changes (from monarchical absolutism to national sovereignty), and social changes (from corporate organization to the career open to talents). The self has figured incidentally in these narratives. Broad-gauged assertions about the transformations it presumably underwent when everything around it was in flux have become old saws: the individual as the subject of rights was born; the era of modern bourgeois individualism was decisively inaugurated.",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 882,
+        "height": 1332,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "header",
+            "block_content": "Introduction",
+            "block_bbox": [
+              583,
+              84,
+              685,
+              107
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                583.0,
+                84.0
+              ],
+              [
+                684.0,
+                84.0
+              ],
+              [
+                684.0,
+                106.0
+              ],
+              [
+                583.0,
+                106.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "7",
+            "block_bbox": [
+              729,
+              85,
+              742,
+              105
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                729.0,
+                85.0
+              ],
+              [
+                741.0,
+                85.0
+              ],
+              [
+                741.0,
+                104.0
+              ],
+              [
+                729.0,
+                104.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "While the proponents of sensationalism, phrenology, and Cousinianism all offered versions of “the post-Revolutionary self” (to cite the title of this book), the Cousinian moi emerged as the definitive version. It did so both because its institutional success swept the field and because, alone among the three, the Cousinians engaged extensively in self-talk. They persuaded people—ordinary people as well as the guardians of the French state—that the self, meaning the unitary self, was an urgent sociopolitical necessity; and that fragmented selves, which in their view were not selves at all, wrought sociopolitical havoc. A major purpose of this book is to show how they carried out their program and to examine the broad consequences that flowed from it.",
+            "block_bbox": [
+              111,
+              155,
+              746,
+              441
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                111.0,
+                155.0
+              ],
+              [
+                746.0,
+                155.0
+              ],
+              [
+                746.0,
+                441.0
+              ],
+              [
+                111.0,
+                441.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "A related purpose of the book is precisely to make and to operationalize an analytic distinction between psychological discourses in general and those psychological discourses, like Cousinianism, that feature the self. The wide diffusion of sensationalism in France, I argue, produced a heightened and systematic awareness of mental interiority without thereby encouraging people to dwell upon a single tight-knit unit comprising the sum total of mental states and processes. Less widely diffused, phrenology in France opened up a psychological realm while refusing to entertain a concept of the self. Psychological interiority can, in other words, assume a pointillist attitude; it is not necessarily tantamount to self-talk. $ ^{14} $ This book suggests that cultures reveal a lot about themselves by the kind of psychological discourses they adopt and, in particular, by whether or not those discourses generate self-talk.",
+            "block_bbox": [
+              111,
+              443,
+              747,
+              780
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                111.0,
+                443.0
+              ],
+              [
+                747.0,
+                443.0
+              ],
+              [
+                747.0,
+                780.0
+              ],
+              [
+                111.0,
+                780.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "The period 1750 to 1850, which forms the canvas of this study, has not, of course, been innocently or randomly chosen. It is the period, bridging the French Revolution, that marks the transition from the Old Regime to an ill-defined “modernity,” or from early modern Europe to modern Europe properly so called. The period, and particularly its Revolutionary pivot, have been frequently, even obsessively narrated. Historians have methodically traced its major economic changes (from guild restrictions to laissez-faire), political changes (from monarchical absolutism to national sovereignty), and social changes (from corporate organization to the career open to talents). The self has figured incidentally in these narratives. Broad-gauged assertions about the transformations it presumably underwent when everything around it was in flux have become old saws: the individual as the subject of rights was born; the era of modern bourgeois individualism was decisively inaugurated.",
+            "block_bbox": [
+              111,
+              781,
+              746,
+              1145
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                111.0,
+                781.0
+              ],
+              [
+                746.0,
+                781.0
+              ],
+              [
+                746.0,
+                1145.0
+              ],
+              [
+                111.0,
+                1145.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8506193161010742,
+              "coordinate": [
+                583,
+                84,
+                685,
+                107
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  583.0,
+                  84.0
+                ],
+                [
+                  684.0,
+                  84.0
+                ],
+                [
+                  684.0,
+                  106.0
+                ],
+                [
+                  583.0,
+                  106.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.6688221096992493,
+              "coordinate": [
+                729,
+                85,
+                742,
+                105
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  729.0,
+                  85.0
+                ],
+                [
+                  741.0,
+                  85.0
+                ],
+                [
+                  741.0,
+                  104.0
+                ],
+                [
+                  729.0,
+                  104.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9582118391990662,
+              "coordinate": [
+                111,
+                155,
+                746,
+                441
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  111.0,
+                  155.0
+                ],
+                [
+                  746.0,
+                  155.0
+                ],
+                [
+                  746.0,
+                  441.0
+                ],
+                [
+                  111.0,
+                  441.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9636709094047546,
+              "coordinate": [
+                111,
+                443,
+                747,
+                780
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  111.0,
+                  443.0
+                ],
+                [
+                  747.0,
+                  443.0
+                ],
+                [
+                  747.0,
+                  780.0
+                ],
+                [
+                  111.0,
+                  780.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9632486701011658,
+              "coordinate": [
+                111,
+                781,
+                746,
+                1145
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  111.0,
+                  781.0
+                ],
+                [
+                  746.0,
+                  781.0
+                ],
+                [
+                  746.0,
+                  1145.0
+                ],
+                [
+                  111.0,
+                  1145.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.7",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    }
+  ]
+}

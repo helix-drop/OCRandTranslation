@@ -294,7 +294,7 @@ fn audit_note_items_rust_vs_golden() {
     let summary = serde_json::json!({
         "rust_count": rust_count,
         "golden_count": py_count,
-        "diff": if rust_count >= py_count { rust_count - py_count } else { py_count - rust_count },
+        "diff": rust_count.abs_diff(py_count),
         "rust_by_kind": rust_by_kind,
         "golden_by_kind": py_by_kind,
         "extra_count": extra.len(),

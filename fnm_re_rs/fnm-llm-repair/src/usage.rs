@@ -19,7 +19,8 @@ use std::collections::BTreeMap;
 
 /// ←→ Python `_safe_float` (llm_repair.py:93-107)
 ///
-/// 安全转换 float，处理 MiMo 返回的非数字字符串（如 'high', 'medium'）。
+/// 安全转换 float，只接受数值类型和可解析为数值的字符串。
+/// 文字标签（如 "high", "medium"）不再转换为数值，直接返回 default。
 pub fn safe_float(value: &Value, default: f64) -> f64 {
     if let Some(f) = value.as_f64() {
         return f;
@@ -36,13 +37,6 @@ pub fn safe_float(value: &Value, default: f64) -> f64 {
     if let Some(text) = value.as_str() {
         if let Ok(f) = text.trim().parse::<f64>() {
             return f;
-        }
-        let lowered = text.trim().to_lowercase();
-        match lowered.as_str() {
-            "high" | "very_high" | "strong" => return 0.9,
-            "medium" | "moderate" => return 0.7,
-            "low" | "weak" => return 0.4,
-            _ => {}
         }
     }
     default
@@ -192,10 +186,11 @@ mod tests {
     }
 
     #[test]
-    fn test_safe_float_string_label() {
-        assert_eq!(safe_float(&json!("high"), 0.0), 0.9);
-        assert_eq!(safe_float(&json!("Medium"), 0.0), 0.7);
-        assert_eq!(safe_float(&json!("low"), 0.0), 0.4);
+    fn test_safe_float_string_label_returns_default() {
+        // 文字标签不再转换为数值，直接返回 default
+        assert_eq!(safe_float(&json!("high"), 0.42), 0.42);
+        assert_eq!(safe_float(&json!("Medium"), 0.42), 0.42);
+        assert_eq!(safe_float(&json!("low"), 0.42), 0.42);
     }
 
     #[test]

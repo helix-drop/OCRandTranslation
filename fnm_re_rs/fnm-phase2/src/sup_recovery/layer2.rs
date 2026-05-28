@@ -60,7 +60,7 @@ pub fn find_markers_in_blocks(
 
     // 按 marker 长度降序排列（Python: sorted(missing, key=lambda x: -len(x))）
     let mut sorted = missing_markers.to_vec();
-    sorted.sort_by(|a, b| b.len().cmp(&a.len()));
+    sorted.sort_by_key(|x| std::cmp::Reverse(x.len()));
 
     for block_text in blocks_texts {
         if block_text.chars().count() < 3 {

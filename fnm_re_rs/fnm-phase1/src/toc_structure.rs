@@ -92,7 +92,7 @@ pub fn build_phase1_structure(
     let total_pages = pages.len() as i64;
 
     // 0. TOC 乱码检测
-    let toc_garbled = toc_items.map_or(false, |items| toc_items_look_garbled(items));
+    let toc_garbled = toc_items.is_some_and(toc_items_look_garbled);
 
     // 1. LLM book-type 校验：Rust 端 LLM 客户端尚未接入主入口（FNM_PHASE12_AUDIT G5）。
     //    config.skip_llm_verify=false 时显式 bail 防误用（AGENTS.md §9）。

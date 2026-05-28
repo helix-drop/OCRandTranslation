@@ -2,16 +2,23 @@
 //!
 //! ←→ Python `FNM_RE/stages/export_audit.py` (688 行 / 25 函数)
 
+mod audit_logic;
 mod file_audit;
 pub mod helpers;
+mod zip_read;
 
 /// 在 export audit 中检查 structure_reviews 里哪些 review_type 应视为 blocker。
 /// 不属于此列表的类型即使 severity="error" 也不阻塞导出。
-const BLOCKING_STRUCTURE_REVIEW_TYPES: &[&str] = &["freeze_matched_ref_not_injected"];
+const BLOCKING_STRUCTURE_REVIEW_TYPES: &[&str] = &[
+    "freeze_matched_ref_not_injected",
+    "merge_local_refs_unclosed",
+    "merge_frozen_ref_leak",
+    "merge_raw_marker_leak",
+    "merge_chapter_file_missing",
+];
 
 use std::collections::{HashMap, HashSet};
 
-use anyhow::Result;
 use fnm_core::records::{
     ExportAuditFileRecord, ExportAuditReportRecord, ExportChapterRecord, Phase6Structure,
 };
@@ -19,28 +26,8 @@ use fnm_core::records::{
 #[cfg(test)]
 use fnm_core::records::StructureReviewRecord;
 
-pub use file_audit::audit_markdown_file;
-
-/// 从 ZIP 字节中读取 Markdown 文件。
-///
-/// ←→ Python `_read_zip_markdown_files()` (export_audit.py:479)
-pub fn read_zip_markdown_files(zip_bytes: &[u8]) -> Result<HashMap<String, String>> {
-    let reader = std::io::Cursor::new(zip_bytes);
-    let mut archive = zip::ZipArchive::new(reader)?;
-    let mut payload = HashMap::new();
-
-    for i in 0..archive.len() {
-        let mut file = archive.by_index(i)?;
-        let name = file.name().to_string();
-        if name.ends_with(".md") {
-            let mut content = String::new();
-            std::io::Read::read_to_string(&mut file, &mut content)?;
-            payload.insert(name, content);
-        }
-    }
-
-    Ok(payload)
-}
+pub use file_audit::{audit_markdown_file, AuditFileParams};
+pub use zip_read::read_zip_markdown_files;
 
 /// 按章节收集注释标记。
 ///
@@ -80,6 +67,7 @@ pub fn chapter_by_path(chapters: &[ExportChapterRecord]) -> HashMap<String, &Exp
 pub fn audit_phase6_export(
     phase6: &Phase6Structure,
     slug: &str,
+    doc_id: &str,
     zip_bytes: Option<&[u8]>,
 ) -> (ExportAuditReportRecord, serde_json::Value) {
     let summary = &phase6.summary;
@@ -109,16 +97,7 @@ pub fn audit_phase6_export(
     }
 
     // 读取 Markdown 文件
-    let markdown_files = if let Some(bytes) = zip_bytes {
-        read_zip_markdown_files(bytes).unwrap_or_default()
-    } else {
-        bundle
-            .files
-            .iter()
-            .filter(|(path, _)| path.ends_with(".md"))
-            .map(|(path, content)| (path.clone(), content.clone()))
-            .collect::<HashMap<String, String>>()
-    };
+    let (markdown_files, zip_read_error) = audit_logic::read_markdown_files(phase6, zip_bytes);
 
     let chapter_rows_owned: Vec<ExportChapterRecord> =
         chapter_rows.iter().map(|&ch| ch.clone()).collect();
@@ -126,6 +105,23 @@ pub fn audit_phase6_export(
     let chapter_note_markers = chapter_note_markers_by_section(phase6);
 
     let mut file_reports: Vec<ExportAuditFileRecord> = Vec::new();
+    if let Some(err_msg) = zip_read_error {
+        file_reports.push(ExportAuditFileRecord {
+            path: "__book__/zip".to_string(),
+            title: "ZIP read error".to_string(),
+            issue_codes: vec!["zip_read_failed".to_string()],
+            issue_summary: vec![format!("zip_read_failed: {err_msg}")],
+            severity: "blocking".to_string(),
+            ..Default::default()
+        });
+    }
+
+    // 比对 bundle 应有路径 vs ZIP 实际路径
+    file_reports.extend(audit_logic::audit_file_paths(
+        phase6,
+        &markdown_files,
+        zip_bytes.is_some(),
+    ));
 
     for path in markdown_files.keys().collect::<Vec<_>>() {
         let chapter = path_to_chapter.get(path.as_str());
@@ -161,195 +157,67 @@ pub fn audit_phase6_export(
             .map(|ch| ch.title.trim().to_string())
             .unwrap_or_default();
 
-        file_reports.push(audit_markdown_file(
+        file_reports.push(audit_markdown_file(&AuditFileParams {
             path,
-            &title,
+            title: &title,
             content,
-            &chapter_titles,
+            chapter_titles: &chapter_titles,
             expected_role,
-            &expected_title,
-            &page_span,
-            Some(&manual_toc_titles),
-            chapter_note_markers.get(&section_id).map(|s| s as &_),
-        ));
+            expected_title: &expected_title,
+            page_span: &page_span,
+            manual_toc_titles: Some(&manual_toc_titles),
+            chapter_note_markers: chapter_note_markers.get(&section_id).map(|s| s as &_),
+        }));
     }
 
-    // 检查缺失的 post_body 标题
+    // 检查章节组织
     let exported_title_keys: HashSet<String> = chapter_rows
         .iter()
         .map(|ch| helpers::alphanumeric_key(&ch.title))
         .filter(|k| !k.is_empty())
         .collect();
+    file_reports.extend(audit_logic::audit_chapter_organization(
+        phase6,
+        &chapter_rows,
+        &exported_title_keys,
+        slug,
+    ));
 
-    let missing_post_body_titles: Vec<String> = summary
-        .post_body_titles
-        .iter()
-        .filter(|t| {
-            let key = helpers::alphanumeric_key(t);
-            !key.is_empty() && !exported_title_keys.contains(&key)
-        })
-        .cloned()
-        .collect();
-
-    if !missing_post_body_titles.is_empty() {
-        file_reports.push(ExportAuditFileRecord {
-            path: "__book__/post_body".to_string(),
-            title: missing_post_body_titles.join(", "),
-            issue_codes: vec![
-                "missing_post_body_export".to_string(),
-                "toc_organization_mismatch".to_string(),
-            ],
-            issue_summary: vec![
-                format!(
-                    "missing_post_body_export: {}",
-                    missing_post_body_titles.join(", ")
-                ),
-                "toc_organization_mismatch: post_body_titles_missing_from_export".to_string(),
-            ],
-            severity: "blocking".to_string(),
-            ..Default::default()
-        });
-    }
-
-    // 检查导出的 container 标题
-    let exported_container_titles: Vec<String> = summary
-        .container_titles
-        .iter()
-        .filter(|t| {
-            let key = helpers::alphanumeric_key(t);
-            !key.is_empty() && exported_title_keys.contains(&key)
-        })
-        .cloned()
-        .collect();
-
-    if !exported_container_titles.is_empty() {
-        file_reports.push(ExportAuditFileRecord {
-            path: "__book__/container".to_string(),
-            title: exported_container_titles.join(", "),
-            issue_codes: vec![
-                "container_exported_as_chapter".to_string(),
-                "toc_organization_mismatch".to_string(),
-            ],
-            issue_summary: vec![
-                format!(
-                    "container_exported_as_chapter: {}",
-                    exported_container_titles.join(", ")
-                ),
-                "toc_organization_mismatch: container_titles_present_in_export".to_string(),
-            ],
-            severity: "blocking".to_string(),
-            ..Default::default()
-        });
-    }
-
-    // 检查导出深度
-    let expected_export_count = summary
-        .toc_role_summary
-        .get("chapter")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0)
-        + summary
-            .toc_role_summary
-            .get("post_body")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(0);
-    let actual_export_count = chapter_rows.len() as i64;
-
-    if expected_export_count > 0
-        && actual_export_count > 0
-        && actual_export_count < expected_export_count
-    {
-        file_reports.push(ExportAuditFileRecord {
-            path: "__book__/organization_depth".to_string(),
-            title: if slug.is_empty() {
-                "phase6".to_string()
-            } else {
-                slug.to_string()
-            },
-            issue_codes: vec![
-                "export_depth_too_shallow".to_string(),
-                "toc_organization_mismatch".to_string(),
-            ],
-            issue_summary: vec![
-                format!(
-                    "export_depth_too_shallow: expected>={}, actual={}",
-                    expected_export_count, actual_export_count
-                ),
-                "toc_organization_mismatch: export_chapter_count_below_toc_depth".to_string(),
-            ],
-            severity: "blocking".to_string(),
-            ..Default::default()
-        });
-    }
-
-    // 检查 structure_reviews 中的 blocker 类型（如 freeze_matched_ref_not_injected）
-    let mut freeze_blocking_reasons: Vec<String> = Vec::new();
-    for review in &phase6.structure_reviews {
-        if BLOCKING_STRUCTURE_REVIEW_TYPES.contains(&review.review_type.as_str()) {
-            freeze_blocking_reasons.push(format!(
-                "{}: {}",
-                review.review_type,
-                review
-                    .payload
-                    .get("message")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or(&review.review_type)
-            ));
-        }
-    }
+    // 收集 structure_review blockers
+    let structure_review_blockers =
+        audit_logic::collect_structure_review_blockers(phase6, BLOCKING_STRUCTURE_REVIEW_TYPES);
 
     // 统计
     let mut blocking_issue_count = file_reports
         .iter()
         .filter(|r| r.severity == "blocking")
         .count() as i64;
-    blocking_issue_count += freeze_blocking_reasons.len() as i64;
+    blocking_issue_count += structure_review_blockers.len() as i64;
     let major_issue_count = file_reports
         .iter()
         .filter(|r| r.severity == "major")
         .count() as i64;
 
+    // Semantic gates
+    let semantic_gate_reasons = audit_logic::compute_semantic_gates(phase6, &file_reports);
+    let semantic_gate_blockers = semantic_gate_reasons.len() as i64;
+
     // 合并 blocking_reasons
-    let mut combined_blocking_reasons: Vec<String> = phase6.status.blocking_reasons.clone();
-    combined_blocking_reasons.extend(freeze_blocking_reasons);
+    let final_blocking_reasons = audit_logic::build_blocking_reasons(
+        phase6,
+        &file_reports,
+        &structure_review_blockers,
+        &semantic_gate_reasons,
+    );
+    let total_blocking_issue_count = blocking_issue_count + semantic_gate_blockers;
 
-    let mut issue_counts: HashMap<String, i64> = HashMap::new();
-    for row in &file_reports {
-        for code in &row.issue_codes {
-            *issue_counts.entry(code.clone()).or_insert(0) += 1;
-        }
-    }
-
-    let mut recommended_followups: Vec<serde_json::Value> = issue_counts
-        .iter()
-        .map(|(code, count)| {
-            serde_json::json!({
-                "issue_code": code,
-                "count": count,
-            })
-        })
-        .collect();
-    recommended_followups.sort_by(|a, b| {
-        let count_a = a.get("count").and_then(|v| v.as_i64()).unwrap_or(0);
-        let count_b = b.get("count").and_then(|v| v.as_i64()).unwrap_or(0);
-        count_b.cmp(&count_a)
-    });
-    recommended_followups.truncate(8);
-
-    let must_fix: Vec<serde_json::Value> = file_reports
-        .iter()
-        .filter(|r| r.severity == "blocking")
-        .map(|row| {
-            serde_json::json!({
-                "path": row.path,
-                "issue_codes": row.issue_codes,
-            })
-        })
-        .collect();
+    // 构建 followups 和 must_fix
+    let (recommended_followups, must_fix) =
+        audit_logic::build_followups_and_must_fix(&file_reports);
 
     let report = ExportAuditReportRecord {
         slug: slug.to_string(),
-        doc_id: slug.to_string(),
+        doc_id: doc_id.to_string(),
         zip_path: format!(
             "{}.zip",
             if slug.is_empty() {
@@ -360,15 +228,15 @@ pub fn audit_phase6_export(
         ),
         applicable: true,
         structure_state: phase6.status.structure_state.clone(),
-        blocking_reasons: combined_blocking_reasons,
+        blocking_reasons: final_blocking_reasons,
         manual_toc_summary: serde_json::to_value(&phase6.status.manual_toc_summary)
             .unwrap_or_default(),
         toc_role_summary: serde_json::to_value(&summary.toc_role_summary).unwrap_or_default(),
         chapter_titles,
         files: file_reports,
-        blocking_issue_count,
+        blocking_issue_count: total_blocking_issue_count,
         major_issue_count,
-        can_ship: blocking_issue_count == 0,
+        can_ship: total_blocking_issue_count == 0,
         must_fix_before_next_book: must_fix,
         recommended_followups,
     };
@@ -412,7 +280,7 @@ mod tests {
     #[test]
     fn test_audit_phase6_export_empty() {
         let phase6 = Phase6Structure::default();
-        let (report, _summary) = audit_phase6_export(&phase6, "test", None);
+        let (report, _summary) = audit_phase6_export(&phase6, "test", "test", None);
         assert_eq!(report.slug, "test");
         assert!(report.can_ship);
         assert!(report.files.is_empty());
@@ -434,7 +302,7 @@ mod tests {
             }],
             ..Default::default()
         };
-        let (report, _summary) = audit_phase6_export(&phase6, "test", None);
+        let (report, _summary) = audit_phase6_export(&phase6, "test", "test", None);
         assert!(!report.can_ship, "freeze error should block export");
         assert_eq!(report.blocking_issue_count, 1);
         assert!(report
@@ -457,8 +325,99 @@ mod tests {
             }],
             ..Default::default()
         };
-        let (report, _summary) = audit_phase6_export(&phase6, "test", None);
+        let (report, _summary) = audit_phase6_export(&phase6, "test", "test", None);
         assert!(report.can_ship, "non-freeze error should not block export");
         assert_eq!(report.blocking_issue_count, 0);
+    }
+
+    /// ZIP 缺文件 → blocking
+    #[test]
+    fn test_audit_zip_missing_file_blocks() {
+        use crate::export::zip::build_export_zip;
+        use fnm_core::records::ExportBundleRecord;
+        use std::collections::HashMap;
+
+        // 创建一个正常 ZIP（含 expected.md）
+        let bundle = ExportBundleRecord {
+            chapters_dir: "chapters".to_string(),
+            files: {
+                let mut f = HashMap::new();
+                f.insert("chapters/expected.md".into(), "Content.".into());
+                f.insert("index.md".into(), "# Index".into());
+                f
+            },
+            ..Default::default()
+        };
+        let zip_bytes = build_export_zip(&bundle).expect("build_zip");
+
+        // 构造 Phase6Structure，它的 bundle 声称应有更多文件
+        let mut files_claim = HashMap::new();
+        files_claim.insert("chapters/expected.md".into(), "Content.".into());
+        files_claim.insert("chapters/missing.md".into(), "Should be missing.".into());
+        files_claim.insert("index.md".into(), "# Index".into());
+        let phase6 = Phase6Structure {
+            export_bundle: ExportBundleRecord {
+                chapters_dir: "chapters".to_string(),
+                files: files_claim,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        let (report, _summary) = audit_phase6_export(&phase6, "test", "test", Some(&zip_bytes));
+        assert!(!report.can_ship, "missing ZIP file should block export");
+        assert!(
+            report
+                .blocking_reasons
+                .iter()
+                .any(|r| r.starts_with("zip_missing_file")),
+            "blocking_reasons must include zip_missing_file"
+        );
+    }
+
+    /// ZIP 多文件 → blocking
+    #[test]
+    fn test_audit_zip_extra_file_blocks() {
+        use crate::export::zip::build_export_zip;
+        use fnm_core::records::ExportBundleRecord;
+        use std::collections::HashMap;
+
+        // 创建一个 ZIP，含一个不应出现的文件
+        let bundle = ExportBundleRecord {
+            chapters_dir: "chapters".to_string(),
+            files: {
+                let mut f = HashMap::new();
+                f.insert("chapters/expected.md".into(), "Content.".into());
+                f.insert(
+                    "chapters/extra.md".into(),
+                    "Extra content not in bundle.".into(),
+                );
+                f.insert("index.md".into(), "# Index".into());
+                f
+            },
+            ..Default::default()
+        };
+        let zip_bytes = build_export_zip(&bundle).expect("build_zip");
+
+        // 构造 Phase6Structure，它的 bundle 声称应有更少的文件
+        let mut files_claim = HashMap::new();
+        files_claim.insert("chapters/expected.md".into(), "Content.".into());
+        files_claim.insert("index.md".into(), "# Index".into());
+        let phase6 = Phase6Structure {
+            export_bundle: ExportBundleRecord {
+                chapters_dir: "chapters".to_string(),
+                files: files_claim,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        let (report, _summary) = audit_phase6_export(&phase6, "test", "test", Some(&zip_bytes));
+        assert!(!report.can_ship, "extra ZIP file should block export");
+        assert!(
+            report
+                .blocking_reasons
+                .iter()
+                .any(|r| r.starts_with("zip_extra_file")),
+            "blocking_reasons must include zip_extra_file"
+        );
     }
 }

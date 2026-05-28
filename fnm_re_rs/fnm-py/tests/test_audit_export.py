@@ -123,3 +123,24 @@ def test_audit_export_nonexistent_doc():
             assert "not found" in err_str or "no pages" in err_str, f"unexpected error: {err_str}"
     finally:
         Path(db_path).unlink(missing_ok=True)
+
+
+def test_audit_export_nonexistent_zip_path():
+    """不存在的 zip_path 应报错，不能静默退回结构审计。"""
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
+        db_path = f.name
+
+    try:
+        _seed_db(db_path)
+
+        try:
+            fnm_re_rs.audit_export_for_doc_json(
+                str(db_path), "biopolitics-seed", "biopolitics",
+                "/nonexistent/path/to/file.zip", None,
+            )
+            assert False, "expected exception for nonexistent zip_path"
+        except Exception as exc:
+            err_str = str(exc)
+            assert "does not exist" in err_str, f"unexpected error: {err_str}"
+    finally:
+        Path(db_path).unlink(missing_ok=True)

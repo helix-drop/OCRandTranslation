@@ -902,8 +902,8 @@ pub fn infer_back_matter_start_page(
             }
             let role_hint = item.role_hint.trim().to_lowercase().replace('-', "_");
             let family = guess_title_family(&item.title, resolved_page, total_pages);
-            let family_str: &str = &family;
-            if role_hint == "back_matter" || BACK_MATTER_FAMILIES.iter().any(|f| *f == family_str) {
+            let family_str: &str = family;
+            if role_hint == "back_matter" || BACK_MATTER_FAMILIES.contains(&family_str) {
                 candidate_pages.push(resolved_page);
             }
         }

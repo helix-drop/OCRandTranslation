@@ -161,6 +161,11 @@ pub fn build_page_partitions(
 }
 
 /// 应用手工 page override。
+///
+/// 消费 `ManualPageOverride` 的三个字段：
+/// - `page_role`：覆盖 `record.page_role`，设置 `confidence=1.0`
+/// - `section_hint`：覆盖 `record.section_hint`
+/// - `reason`：覆盖 `record.reason`；若未提供且 role 被覆盖，使用 `"manual_override"`
 fn apply_manual_overrides(
     records: &mut [PagePartitionRecord],
     overrides: &HashMap<String, ManualPageOverride>,
@@ -168,12 +173,28 @@ fn apply_manual_overrides(
     for record in records.iter_mut() {
         let key = record.page_no.to_string();
         if let Some(ov) = overrides.get(&key) {
-            if let Some(ref role_str) = ov.page_role {
+            let role_changed = if let Some(ref role_str) = ov.page_role {
                 if let Ok(role) = role_str.parse() {
                     record.page_role = role;
                     record.confidence = 1.0;
-                    record.reason = "manual_override".into();
+                    true
+                } else {
+                    false
                 }
+            } else {
+                false
+            };
+            if let Some(ref hint) = ov.section_hint {
+                if !hint.is_empty() {
+                    record.section_hint = hint.clone();
+                }
+            }
+            if role_changed {
+                record.reason = ov
+                    .reason
+                    .clone()
+                    .filter(|r| !r.is_empty())
+                    .unwrap_or_else(|| "manual_override".into());
             }
         }
     }

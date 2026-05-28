@@ -21,19 +21,10 @@ pub struct ChapterStructureModel {
     pub has_explicit_notes_heading: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct OCRProfile {
     pub placeholder: bool, // 占位字段（与 Python OCRProfile() 默认对齐）
     pub unrecovered_marker_ids: Vec<String>, // ←→ Python `ocr_profile.unrecovered_marker_ids`
-}
-
-impl Default for OCRProfile {
-    fn default() -> Self {
-        Self {
-            placeholder: false,
-            unrecovered_marker_ids: Vec::new(),
-        }
-    }
 }
 
 #[derive(Debug, Clone)]

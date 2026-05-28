@@ -2,25 +2,24 @@
 //!
 //! ←→ Python:
 //! - `FNM_RE/modules/chapter_merge.py` (~827 行) → 本 crate
-//! - `FNM_RE/stages/export_contract.py` (via fnm-phase6)
-//! - `FNM_RE/stages/export_footnote.py` (via fnm-phase6)
+//!
+//! 不依赖 fnm-phase6。章节 markdown 渲染移至 render/ 模块。
 
 #![deny(unused_must_use)]
 
 mod convert;
+mod diagnostic_helpers;
 mod diagnostics;
 mod marker_rewrite;
 mod phase5_shadow;
+mod render;
 
 use std::collections::{HashMap, HashSet};
 
 use anyhow::Result;
-use fnm_core::export_constants::TRAILING_IMAGE_ONLY_BLOCK_RE;
 use fnm_core::records::{ChapterMarkdownEntry, ChapterMarkdownSet, FrozenUnits, SectionHeadRecord};
 use fnm_phase2::chapter_split::ChapterLayers;
 use fnm_phase3::note_linking::NoteLinkTable;
-use fnm_phase6::export::contract::build_export_chapters;
-use fnm_phase6::export_audit::helpers::{detect_mid_paragraph_heading, split_body_and_definitions};
 
 /// 构建章 markdown 集合。
 ///
@@ -77,7 +76,7 @@ pub fn build_chapter_markdown_set(
     };
 
     let (export_chapters, export_summary) =
-        build_export_chapters(&phase5, include_diagnostic_entries, skip_ids)?;
+        render::merge::build_export_chapters(&phase5, include_diagnostic_entries, skip_ids)?;
 
     let mut chapters: Vec<ChapterMarkdownEntry> = export_chapters
         .into_iter()
@@ -102,9 +101,6 @@ pub fn build_chapter_markdown_set(
             }
         })
         .collect();
-
-    // 重写章节以供合稿
-    chapters = marker_rewrite::rewrite_chapters_for_merge(&chapters, frozen_units, chapter_layers);
 
     // 工单 #7：NOTES 块格式
     chapters = chapters
@@ -142,7 +138,7 @@ pub fn build_chapter_markdown_set(
         .cloned()
         .unwrap_or(serde_json::Value::Null);
 
-    let (_chapter_issue_summary, chapter_issue_counts) =
+    let (chapter_issue_summary, chapter_issue_counts) =
         diagnostics::build_chapter_issue_diagnostics(&chapters, &chapter_contract_summary);
 
     let local_refs_closed = chapter_issue_counts
@@ -161,19 +157,109 @@ pub fn build_chapter_markdown_set(
         .unwrap_or(0)
         == 0;
 
-    let _chapter_files_emitted = !chapters.is_empty()
+    let chapter_files_emitted = !chapters.is_empty()
         && chapters.len() == expected_chapters.len()
         && chapters.iter().all(|row| row.path.trim().ends_with(".md"));
 
-    let image_tail_warn = chapters.is_empty()
-        || chapters
+    // 生成 merge reviews (结构化 blocker)
+    let mut merge_reviews: Vec<fnm_core::records::StructureReviewRecord> = Vec::new();
+    if !chapter_files_emitted {
+        let expected_ids: Vec<&str> = expected_chapters
             .iter()
-            .all(|row| !TRAILING_IMAGE_ONLY_BLOCK_RE.is_match(&row.markdown_text));
+            .map(|c| c.chapter_id.as_str())
+            .collect();
+        let got_ids: Vec<&str> = chapters.iter().map(|c| c.chapter_id.as_str()).collect();
+        merge_reviews.push(fnm_core::records::StructureReviewRecord {
+            review_id: format!(
+                "{}-merge_chapter_file_missing",
+                expected_chapters
+                    .first()
+                    .map(|c| c.chapter_id.as_str())
+                    .unwrap_or("__book__")
+            ),
+            review_type: "merge_chapter_file_missing".to_string(),
+            chapter_id: String::new(),
+            page_start: 0,
+            page_end: 0,
+            severity: "error".to_string(),
+            payload: serde_json::json!({
+                "message": format!("chapter count mismatch: expected {} ({}), got {} ({})",
+                    expected_chapters.len(), expected_ids.join(", "),
+                    chapters.len(), got_ids.join(", ")),
+            }),
+        });
+    }
+    for issue in &chapter_issue_summary {
+        let ch_id = issue
+            .get("chapter_id")
+            .and_then(|v| v.as_str())
+            .unwrap_or("");
+        if issue
+            .get("frozen_ref_leak")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
+            merge_reviews.push(fnm_core::records::StructureReviewRecord {
+                review_id: format!("{ch_id}-merge_frozen_ref_leak"),
+                review_type: "merge_frozen_ref_leak".to_string(),
+                chapter_id: ch_id.to_string(),
+                page_start: 0,
+                page_end: 0,
+                severity: "error".to_string(),
+                payload: serde_json::json!({
+                    "message": "frozen ref leak detected in chapter body",
+                    "chapter_id": ch_id,
+                }),
+            });
+        }
+        if issue
+            .get("raw_marker_leak")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false)
+        {
+            merge_reviews.push(fnm_core::records::StructureReviewRecord {
+                review_id: format!("{ch_id}-merge_raw_marker_leak"),
+                review_type: "merge_raw_marker_leak".to_string(),
+                chapter_id: ch_id.to_string(),
+                page_start: 0,
+                page_end: 0,
+                severity: "error".to_string(),
+                payload: serde_json::json!({
+                    "message": "raw note marker leak detected in chapter body",
+                    "chapter_id": ch_id,
+                }),
+            });
+        }
+        if !issue
+            .get("local_refs_closed")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(true)
+        {
+            merge_reviews.push(fnm_core::records::StructureReviewRecord {
+                review_id: format!("{ch_id}-merge_local_refs_unclosed"),
+                review_type: "merge_local_refs_unclosed".to_string(),
+                chapter_id: ch_id.to_string(),
+                page_start: 0,
+                page_end: 0,
+                severity: "error".to_string(),
+                payload: serde_json::json!({
+                    "message": "local ref contract broken: missing/orphan definitions",
+                    "missing_definition_count": issue.get("missing_definition_count"),
+                    "orphan_definition_count": issue.get("orphan_definition_count"),
+                }),
+            });
+        }
+    }
+
+    let image_tail_warn = chapters.is_empty()
+        || chapters.iter().all(|row| {
+            !fnm_core::export_constants::TRAILING_IMAGE_ONLY_BLOCK_RE.is_match(&row.markdown_text)
+        });
 
     let section_heading_warn = chapters.is_empty()
         || chapters.iter().all(|row| {
-            let body = split_body_and_definitions(&row.markdown_text).0;
-            !detect_mid_paragraph_heading(&body)
+            let body = diagnostic_helpers::split_body_and_definitions(&row.markdown_text).0;
+            !diagnostic_helpers::detect_mid_paragraph_heading(&body)
         });
 
     let merge_summary = serde_json::json!({
@@ -200,5 +286,7 @@ pub fn build_chapter_markdown_set(
         merge_summary,
         diagnostic_pages: phase5.diagnostic_pages,
         diagnostic_notes: phase5.diagnostic_notes,
+        merge_reviews,
+        note_items: chapter_layers.note_items.clone(),
     })
 }

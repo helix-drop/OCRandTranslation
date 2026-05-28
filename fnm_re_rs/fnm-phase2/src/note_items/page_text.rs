@@ -1,11 +1,11 @@
 //! ←→ FNM_RE/stages/note_items.py
 //! 多源页文本归一化 + 章共享页切分 + section title fuzzy 匹配。
 //!
-//! Python 端这些 helper 让 build_note_items 在面对：
+//! Python 端这些 helper 让 build_note_items 在面对以下情况时仍能正确切出区段：
+//!
 //! 1. 多章共享同一物理页（章末 + 下章首页 + endnote heading 都在一页）
 //! 2. OCR 截断的 section_title（用 fuzzy 前缀匹配兜底）
 //! 3. footnote/endnote/PDF 多源文本（先 page_text_map → footnotes → markdown → pdf_text）
-//! 时仍能正确切出区段。
 
 use fnm_core::note_marker::normalize_note_marker;
 use fnm_core::records::{ChapterRecord, NoteRegionRecord};

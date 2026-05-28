@@ -5,7 +5,7 @@
 use anyhow::Result;
 use fnm_core::db::{
     Phase1Products, Phase2Products, Phase3Products, Phase4Products, Phase5Products, Phase6Products,
-    Repository,
+    Repository, UpdateFnmRunParams,
 };
 use fnm_core::records::*;
 use fnm_core::types::*;
@@ -78,17 +78,7 @@ impl Repository for StubRepo {
     fn create_fnm_run(&self, _doc_id: &str, _page_count: i64) -> Result<i64> {
         anyhow::bail!("not implemented")
     }
-    fn update_fnm_run(
-        &self,
-        _run_id: i64,
-        _status: &str,
-        _section_count: i64,
-        _note_count: i64,
-        _unit_count: i64,
-        _structure_state: &str,
-        _blocking_reasons_json: &str,
-        _error_msg: &str,
-    ) -> Result<()> {
+    fn update_fnm_run(&self, _params: UpdateFnmRunParams<'_>) -> Result<()> {
         anyhow::bail!("not implemented")
     }
     fn replace_fnm_phase1_products(&self, _doc_id: &str, _payload: &Phase1Products) -> Result<()> {
@@ -332,4 +322,111 @@ fn test_run_llm_repair_params_defaults() {
     assert!(params.clear_materialized_overrides);
     assert!(params.cluster_limit.is_none());
     assert!(params.trace_callback.is_none());
+}
+
+/// 验证 prefiltered duplicate anchor 生成 ignore_ref override 落入 DB。
+///
+/// 场景：matched link L1(n1→a1, marker="1") + orphan anchor a2(marker="1") 与 a1 重复
+///       + unmatched note item n2 → prefilter 移除 a2，剩余 n2 触发 note_only 跳过 LLM。
+/// 预期：a2 被 prefilter 后生成 ignore_ref override 写入 StubRepo.saved。
+#[tokio::test]
+async fn test_prefilter_duplicate_anchor_writes_ignore_ref_override() {
+    let mut repo = StubRepo::new();
+    repo.chapters.push(make_chapter("c1", "Ch1", 1, 10));
+
+    // matched link: n1 → a1
+    repo.note_items.push(NoteItemRecord {
+        note_item_id: "n1".to_string(),
+        chapter_id: "c1".to_string(),
+        page_no: 5,
+        marker: "1".to_string(),
+        text: "note 1".to_string(),
+        ..Default::default()
+    });
+    repo.body_anchors.push(BodyAnchorRecord {
+        anchor_id: "a1".to_string(),
+        chapter_id: "c1".to_string(),
+        page_no: 5,
+        normalized_marker: "1".to_string(),
+        ..Default::default()
+    });
+    repo.note_links.push(NoteLinkRecord {
+        link_id: "L1".to_string(),
+        chapter_id: "c1".to_string(),
+        region_id: "r1".to_string(),
+        note_kind: NoteKind::Endnote,
+        status: LinkStatus::Matched,
+        note_item_id: "n1".to_string(),
+        anchor_id: "a1".to_string(),
+        marker: "1".to_string(),
+        ..Default::default()
+    });
+
+    // duplicate orphan anchor: a2, same marker "1", page 5
+    repo.body_anchors.push(BodyAnchorRecord {
+        anchor_id: "a2".to_string(),
+        chapter_id: "c1".to_string(),
+        page_no: 5,
+        normalized_marker: "1".to_string(),
+        ..Default::default()
+    });
+    repo.note_links.push(NoteLinkRecord {
+        link_id: "L2".to_string(),
+        chapter_id: "c1".to_string(),
+        region_id: "r1".to_string(),
+        note_kind: NoteKind::Endnote,
+        status: LinkStatus::OrphanAnchor,
+        note_item_id: "".to_string(),
+        anchor_id: "a2".to_string(),
+        marker: "1".to_string(),
+        ..Default::default()
+    });
+
+    // unmatched note item: n2 (无对应 anchor) → 确保 prefilter 后 cluster 不被跳过
+    repo.note_items.push(NoteItemRecord {
+        note_item_id: "n2".to_string(),
+        chapter_id: "c1".to_string(),
+        page_no: 6,
+        marker: "3".to_string(),
+        text: "note 3".to_string(),
+        ..Default::default()
+    });
+
+    // 无 raw_pages → chapter_body_text 为空 → request_mode="note_only" → 跳过 LLM
+    let renderer = NoopRenderer;
+    let params = RunLlmRepairParams::new("test-prefilter", &repo, &[], "", &renderer);
+    let report = run_llm_repair(params).await.unwrap();
+
+    // 应有 1 个 cluster
+    assert_eq!(report.cluster_count, 1, "expected 1 cluster");
+
+    // 验证 ignore_ref override 被写入
+    let saved = repo.saved.lock().unwrap();
+    let ignore_ref_overrides: Vec<_> = saved
+        .iter()
+        .filter(|(doc, _scope, _target_id, payload)| {
+            doc == "test-prefilter"
+                && payload.get("action").and_then(|v| v.as_str()) == Some("ignore_ref")
+                && payload.get("anchor_id").and_then(|v| v.as_str()) == Some("a2")
+        })
+        .collect();
+
+    assert!(
+        !ignore_ref_overrides.is_empty(),
+        "expected ignore_ref override for a2 in saved overrides, got: {:?}",
+        saved.iter().collect::<Vec<_>>()
+    );
+
+    // 验证 override 关联到正确的 link
+    let (_, scope, target_id, _payload) = &ignore_ref_overrides[0];
+    assert_eq!(
+        scope, "link",
+        "override scope should be 'link', got scope={} target_id={}",
+        scope, target_id
+    );
+    assert_eq!(
+        target_id, "L2",
+        "override target_id should be 'L2', got scope={} target_id={}",
+        scope, target_id
+    );
 }

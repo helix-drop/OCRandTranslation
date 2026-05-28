@@ -64,19 +64,22 @@ fn has_reclassified_endnotes(page: &RawPage) -> bool {
         .unwrap_or(false)
 }
 
-#[allow(clippy::too_many_arguments)]
+struct RegionRecordParams<'a> {
+    pages: &'a [i64],
+    chapter_id: &'a str,
+    scope: &'a str,
+    heading_text: &'a str,
+    start_reason: &'a str,
+    end_reason: &'a str,
+}
+
 fn build_region_record(
     region_counter: &mut usize,
-    pages: &[i64],
-    chapter_id: &str,
-    scope: &str,
-    heading_text: &str,
-    start_reason: &str,
-    end_reason: &str,
+    params: &RegionRecordParams,
     page_by_no: &HashMap<i64, &RawPage>,
 ) -> NoteRegionRecord {
-    let start_page = *pages.first().unwrap_or(&0);
-    let end_page = *pages.last().unwrap_or(&0);
+    let start_page = *params.pages.first().unwrap_or(&0);
+    let end_page = *params.pages.last().unwrap_or(&0);
     *region_counter += 1;
 
     let first_source_marker = page_by_no
@@ -86,39 +89,39 @@ fn build_region_record(
 
     NoteRegionRecord {
         region_id: format!("region-endnote-{:04}", region_counter),
-        chapter_id: chapter_id.to_string(),
+        chapter_id: params.chapter_id.to_string(),
         page_start: start_page,
         page_end: end_page,
-        pages: pages.to_vec(),
+        pages: params.pages.to_vec(),
         note_kind: {
             // 由 endnote_regions_raw 构建的 region 已通过 is_endnote_candidate_page 验证，
             // 因此始终标记为 endnote_collection 上下文。
             let scan_page_kind = "endnote_collection";
             crate::note_kind_resolver::resolve_note_kind(
                 &crate::note_kind_resolver::NoteRegionContext {
-                    heading_text,
+                    heading_text: params.heading_text,
                     has_footnote_band: false,
                     is_post_body_region: false,
-                    is_book_scope: scope == "book",
+                    is_book_scope: params.scope == "book",
                     explicit_markers: &[],
                     scan_page_kind,
                 },
             )
             .note_kind
         },
-        scope: if scope == "book" {
+        scope: if params.scope == "book" {
             RegionScope::Book
         } else {
             RegionScope::Chapter
         },
         source: RegionSource::HeadingScan,
-        heading_text: heading_text.to_string(),
-        start_reason: start_reason.to_string(),
-        end_reason: end_reason.to_string(),
+        heading_text: params.heading_text.to_string(),
+        start_reason: params.start_reason.to_string(),
+        end_reason: params.end_reason.to_string(),
         region_marker_alignment_ok: true,
         region_start_first_source_marker: first_source_marker,
         region_first_note_item_marker: String::new(),
-        review_required: heading_text.is_empty(),
+        review_required: params.heading_text.is_empty(),
     }
 }
 
@@ -208,12 +211,14 @@ pub fn build_endnote_regions_raw(
         }
         let r = build_region_record(
             region_counter,
-            current_pages,
-            current_chapter_id,
-            current_scope,
-            current_heading,
-            current_start_reason,
-            end_reason,
+            &RegionRecordParams {
+                pages: current_pages,
+                chapter_id: current_chapter_id,
+                scope: current_scope,
+                heading_text: current_heading,
+                start_reason: current_start_reason,
+                end_reason,
+            },
             page_by_no,
         );
         current_pages.clear();

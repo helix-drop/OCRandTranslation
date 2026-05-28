@@ -28,12 +28,15 @@ pub use request::request_llm_repair_actions;
 /// Trace 回调（用户可注入观测点）
 ///
 /// ←→ Python `trace_callback` 参数（llm_repair.py:1347-1353）
-pub type TraceCallback<'a> = &'a dyn Fn(Value);
+pub type TraceCallback<'a> = &'a dyn Fn(Value) -> Result<(), String>;
 
 /// ←→ Python `_emit_llm_trace` (llm_repair.py:1347-1353)
 pub fn emit_llm_trace(trace_callback: Option<TraceCallback<'_>>, trace: &Value) {
     let Some(cb) = trace_callback else { return };
-    cb(trace.clone());
+    if let Err(e) = cb(trace.clone()) {
+        // trace callback 失败时记录到 stderr，不阻断主流程
+        eprintln!("trace callback error: {}", e);
+    }
 }
 
 /// `request_llm_repair_actions` 返回的结果
@@ -331,8 +334,9 @@ mod tests {
     fn test_emit_llm_trace_invokes_callback() {
         use std::cell::RefCell;
         let captured: RefCell<Option<Value>> = RefCell::new(None);
-        let cb = |t: Value| {
+        let cb = |t: Value| -> Result<(), String> {
             *captured.borrow_mut() = Some(t);
+            Ok(())
         };
         emit_llm_trace(Some(&cb), &json!({"stage": "test"}));
         assert_eq!(captured.borrow().as_ref().unwrap()["stage"], "test");

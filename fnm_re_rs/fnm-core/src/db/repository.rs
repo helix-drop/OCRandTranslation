@@ -67,6 +67,7 @@ pub struct Phase5Products {
     pub chapter_markdowns: Vec<ChapterMarkdownEntry>,
     pub diagnostic_pages: Vec<DiagnosticPageRecord>,
     pub diagnostic_notes: Vec<DiagnosticNoteRecord>,
+    pub merge_reviews: Vec<StructureReviewRecord>,
 }
 
 #[derive(Debug, Clone)]
@@ -198,17 +199,19 @@ pub trait Repository {
     /// 更新 fnm_runs 记录的状态和统计字段。
     ///
     /// ←→ Python `UPDATE fnm_runs` in `fnm-py/src/lib.rs:611`
-    fn update_fnm_run(
-        &self,
-        run_id: i64,
-        status: &str,
-        section_count: i64,
-        note_count: i64,
-        unit_count: i64,
-        structure_state: &str,
-        blocking_reasons_json: &str,
-        error_msg: &str,
-    ) -> Result<()>;
+    fn update_fnm_run(&self, params: UpdateFnmRunParams<'_>) -> Result<()>;
+}
+
+/// `update_fnm_run` 的参数集合。
+pub struct UpdateFnmRunParams<'a> {
+    pub run_id: i64,
+    pub status: &'a str,
+    pub section_count: i64,
+    pub note_count: i64,
+    pub unit_count: i64,
+    pub structure_state: &'a str,
+    pub blocking_reasons_json: &'a str,
+    pub error_msg: &'a str,
 }
 
 /// 把 Rust 端 heading_family_guess 映射到 schema CHECK 允许的 6 个值之一。
@@ -1722,22 +1725,12 @@ impl Repository for SqliteRepository {
         Ok(conn.last_insert_rowid())
     }
 
-    fn update_fnm_run(
-        &self,
-        run_id: i64,
-        status: &str,
-        section_count: i64,
-        note_count: i64,
-        unit_count: i64,
-        structure_state: &str,
-        blocking_reasons_json: &str,
-        error_msg: &str,
-    ) -> Result<()> {
+    fn update_fnm_run(&self, params: UpdateFnmRunParams<'_>) -> Result<()> {
         let conn = self.get_conn()?;
         let now = Self::now_ts();
         conn.execute(
             "UPDATE fnm_runs SET status = ?1, section_count = ?2, note_count = ?3, unit_count = ?4, structure_state = ?5, blocking_reasons_json = ?6, error_msg = ?7, updated_at = ?8 WHERE id = ?9",
-            rusqlite::params![status, section_count, note_count, unit_count, structure_state, blocking_reasons_json, error_msg, now, run_id],
+            rusqlite::params![params.status, params.section_count, params.note_count, params.unit_count, params.structure_state, params.blocking_reasons_json, params.error_msg, now, params.run_id],
         )?;
         Ok(())
     }
@@ -2112,8 +2105,17 @@ mod tests {
 
         let run_id = repo.create_fnm_run("run-doc-2", 10).unwrap();
 
-        repo.update_fnm_run(run_id, "done", 3, 15, 8, "needs_review", "[]", "")
-            .unwrap();
+        repo.update_fnm_run(UpdateFnmRunParams {
+            run_id,
+            status: "done",
+            section_count: 3,
+            note_count: 15,
+            unit_count: 8,
+            structure_state: "needs_review",
+            blocking_reasons_json: "[]",
+            error_msg: "",
+        })
+        .unwrap();
 
         // 读回来验证
         let run = repo
@@ -2178,6 +2180,24 @@ mod tests {
         assert!(
             result.unwrap().is_empty(),
             "invalid JSON should produce no pages"
+        );
+    }
+
+    #[test]
+    fn load_raw_pages_propagates_db_row_error() {
+        let repo = setup_repo();
+        let conn = repo.get_conn().unwrap();
+        // 插入 blob 类型的 payload_json，触发 DB 行读取错误
+        conn.execute(
+            "INSERT INTO pages (doc_id, book_page, payload_json) VALUES ('row-err', 1, ?1)",
+            [rusqlite::types::Value::Blob(vec![0xFF, 0xFE])],
+        )
+        .unwrap();
+
+        let result = repo.load_raw_pages_for_doc("row-err");
+        assert!(
+            result.is_err(),
+            "DB row read error (type mismatch) should propagate as error"
         );
     }
 

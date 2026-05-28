@@ -246,13 +246,8 @@ pub fn chapter_end_boundary_pages(profile: &BookStructureProfile) -> Vec<i64> {
         return Vec::new();
     }
     let n = chapter_regions.len();
-    let sample_n = std::cmp::max(
-        CHAPTER_END_MIN_REGIONS,
-        std::cmp::min(
-            CHAPTER_END_MAX_REGIONS,
-            ((n as f64 * CHAPTER_END_SAMPLE_RATE).ceil()) as usize,
-        ),
-    );
+    let sample_n = ((n as f64 * CHAPTER_END_SAMPLE_RATE).ceil() as usize)
+        .clamp(CHAPTER_END_MIN_REGIONS, CHAPTER_END_MAX_REGIONS);
     let sampled: Vec<&EndnoteRegionInfo> = if n <= sample_n {
         chapter_regions.clone()
     } else {

@@ -163,7 +163,7 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
     let mut token_accounting_log: Vec<Value> = Vec::new();
 
     // 3. 预缓存页面角色（跨 cluster 不变）
-    let cached_page_roles = fnm_page_role_by_no(doc_id, repo);
+    let cached_page_roles = fnm_page_role_by_no(doc_id, repo)?;
 
     let cluster_count = clusters.len();
     let mut clusters_completed: usize = 0;
@@ -185,6 +185,37 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
 
         // 4b. 启发式预过滤同页同 marker 重复 anchor
         prefilter_duplicate_anchors(&mut cluster);
+
+        // ←→ 为预过滤的重复 anchor 立即生成 ignore_ref override（P1-2）
+        // 必须在 LLM 调用前完成，避免 LLM 失败时丢失预过滤结果
+        if let Some(prefiltered) = cluster
+            .get("_prefiltered_anchors")
+            .and_then(|v| v.as_array())
+        {
+            let mut prefilter_overrides: Vec<(String, String, Value)> = Vec::new();
+            for anchor in prefiltered {
+                let anchor_id = str_field(anchor, "anchor_id");
+                if anchor_id.is_empty() {
+                    continue;
+                }
+                let link_id = find_link_id_for_ignore(&links_plain, &anchor_id);
+                if !link_id.is_empty() {
+                    prefilter_overrides.push((
+                        "link".to_string(),
+                        link_id.clone(),
+                        json!({
+                            "action": "ignore_ref",
+                            "anchor_id": anchor_id,
+                            "source": "prefilter",
+                        }),
+                    ));
+                }
+            }
+            if !prefilter_overrides.is_empty() {
+                repo.batch_save_fnm_review_overrides_v2(doc_id, &prefilter_overrides)?;
+            }
+        }
+
         let has_anchors = cluster
             .get("unmatched_anchors")
             .and_then(|v| v.as_array())
@@ -375,40 +406,17 @@ pub async fn run_llm_repair(params: RunLlmRepairParams<'_>) -> Result<LlmRepairR
         for action in &auto_actions {
             apply_action(
                 action,
-                &cluster,
-                &chapters_plain,
-                &note_items_by_id,
-                &links_plain,
-                &note_system,
-                &mut used_synth_positions,
-                &mut cluster_overrides,
-                &mut auto_applied,
+                &mut ActionContext {
+                    cluster: &cluster,
+                    chapters_plain: &chapters_plain,
+                    note_items_by_id: &note_items_by_id,
+                    links_plain: &links_plain,
+                    note_system: &note_system,
+                    used_synth_positions: &mut used_synth_positions,
+                    cluster_overrides: &mut cluster_overrides,
+                    auto_applied: &mut auto_applied,
+                },
             );
-        }
-
-        // ←→ 为预过滤的重复 anchor 生成 ignore_ref override（P1-2）
-        if let Some(prefiltered) = cluster
-            .get("_prefiltered_anchors")
-            .and_then(|v| v.as_array())
-        {
-            for anchor in prefiltered {
-                let anchor_id = str_field(anchor, "anchor_id");
-                if anchor_id.is_empty() {
-                    continue;
-                }
-                let link_id = find_link_id_for_ignore(&links_plain, &anchor_id);
-                if !link_id.is_empty() {
-                    cluster_overrides.push((
-                        "link".to_string(),
-                        link_id.clone(),
-                        json!({
-                            "action": "ignore_ref",
-                            "anchor_id": anchor_id,
-                            "source": "llm",
-                        }),
-                    ));
-                }
-            }
         }
 
         // 4h. 批量提交本 cluster overrides
@@ -458,30 +466,31 @@ fn build_suggestion_payload(cluster: &Value, action: &RepairAction, auto_selecte
     })
 }
 
+/// 物化 auto action 的共享上下文。
+struct ActionContext<'a> {
+    cluster: &'a Value,
+    chapters_plain: &'a [Value],
+    note_items_by_id: &'a HashMap<String, Value>,
+    links_plain: &'a [Value],
+    note_system: &'a str,
+    used_synth_positions: &'a mut HashSet<(String, i64, i64, i64)>,
+    cluster_overrides: &'a mut Vec<(String, String, Value)>,
+    auto_applied: &'a mut Vec<Value>,
+}
+
 /// 物化单个 auto action 为 override（match / ignore_ref / synthesize_anchor）。
 ///
 /// ←→ Python `run_llm_repair` 行 1959-2071 的 match 主体
-#[allow(clippy::too_many_arguments)]
-fn apply_action(
-    action: &RepairAction,
-    cluster: &Value,
-    chapters_plain: &[Value],
-    note_items_by_id: &HashMap<String, Value>,
-    links_plain: &[Value],
-    note_system: &str,
-    used_synth_positions: &mut HashSet<(String, i64, i64, i64)>,
-    cluster_overrides: &mut Vec<(String, String, Value)>,
-    auto_applied: &mut Vec<Value>,
-) {
+fn apply_action(action: &RepairAction, ctx: &mut ActionContext) {
     match action.action.as_str() {
         "match" => {
             let note_item_id = action.note_item_id.trim();
             let anchor_id = action.anchor_id.trim();
-            let link_id = find_link_id_for_match(links_plain, note_item_id, anchor_id);
+            let link_id = find_link_id_for_match(ctx.links_plain, note_item_id, anchor_id);
             if link_id.is_empty() {
                 return;
             }
-            cluster_overrides.push((
+            ctx.cluster_overrides.push((
                 "link".to_string(),
                 link_id.clone(),
                 json!({
@@ -490,32 +499,24 @@ fn apply_action(
                     "anchor_id": anchor_id,
                 }),
             ));
-            auto_applied.push(merge_action_with(action, json!({"link_id": link_id})));
+            ctx.auto_applied
+                .push(merge_action_with(action, json!({"link_id": link_id})));
         }
         "ignore_ref" => {
             let anchor_id = action.anchor_id.trim();
-            let link_id = find_link_id_for_ignore(links_plain, anchor_id);
+            let link_id = find_link_id_for_ignore(ctx.links_plain, anchor_id);
             if link_id.is_empty() {
                 return;
             }
-            cluster_overrides.push((
+            ctx.cluster_overrides.push((
                 "link".to_string(),
                 link_id.clone(),
                 json!({"action": "ignore"}),
             ));
-            auto_applied.push(merge_action_with(action, json!({"link_id": link_id})));
+            ctx.auto_applied
+                .push(merge_action_with(action, json!({"link_id": link_id})));
         }
-        "synthesize_anchor" => apply_synthesize_anchor(
-            action,
-            cluster,
-            chapters_plain,
-            note_items_by_id,
-            links_plain,
-            note_system,
-            used_synth_positions,
-            cluster_overrides,
-            auto_applied,
-        ),
+        "synthesize_anchor" => apply_synthesize_anchor(action, ctx),
         // synthesize_note_item 已被移除（P0-2）——Phase3.5 无权创建 note item。
         // 即使 LLM 返回了此 action，也不物化 override，仅记录 warning。
         "synthesize_note_item" => {
@@ -529,20 +530,9 @@ fn apply_action(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-fn apply_synthesize_anchor(
-    action: &RepairAction,
-    cluster: &Value,
-    chapters_plain: &[Value],
-    note_items_by_id: &HashMap<String, Value>,
-    links_plain: &[Value],
-    note_system: &str,
-    used_synth_positions: &mut HashSet<(String, i64, i64, i64)>,
-    cluster_overrides: &mut Vec<(String, String, Value)>,
-    auto_applied: &mut Vec<Value>,
-) {
+fn apply_synthesize_anchor(action: &RepairAction, ctx: &mut ActionContext) {
     let note_item_id = action.note_item_id.trim().to_string();
-    let Some(note_item) = note_items_by_id.get(&note_item_id) else {
+    let Some(note_item) = ctx.note_items_by_id.get(&note_item_id) else {
         return;
     };
     let page_no_value = if action.page_no > 0 {
@@ -551,7 +541,7 @@ fn apply_synthesize_anchor(
         i64_field(note_item, "page_no")
     };
     let chapter_id = {
-        let from_cluster = str_field(cluster, "chapter_id");
+        let from_cluster = str_field(ctx.cluster, "chapter_id");
         if !from_cluster.is_empty() {
             from_cluster
         } else {
@@ -559,7 +549,7 @@ fn apply_synthesize_anchor(
             if !from_note.is_empty() {
                 from_note
             } else {
-                resolve_chapter_id_for_page(chapters_plain, page_no_value)
+                resolve_chapter_id_for_page(ctx.chapters_plain, page_no_value)
             }
         }
     };
@@ -593,10 +583,10 @@ fn apply_synthesize_anchor(
         char_start.max(0),
         char_end.max(char_start + 1),
     );
-    if used_synth_positions.contains(&pos_key) {
+    if ctx.used_synth_positions.contains(&pos_key) {
         return;
     }
-    used_synth_positions.insert(pos_key);
+    ctx.used_synth_positions.insert(pos_key);
     let matched_text = if !action.matched_text.trim().is_empty() {
         action.matched_text.trim().to_string()
     } else {
@@ -605,7 +595,7 @@ fn apply_synthesize_anchor(
     if matched_text.is_empty() {
         return;
     }
-    cluster_overrides.push((
+    ctx.cluster_overrides.push((
         "anchor".to_string(),
         anchor_id.clone(),
         json!({
@@ -619,15 +609,15 @@ fn apply_synthesize_anchor(
             "source_text": matched_text,
             "source_marker": marker,
             "normalized_marker": marker,
-            "anchor_kind": note_system,
+            "anchor_kind": ctx.note_system,
             "certainty": safe_float(&json!(action.confidence), 0.8),
             "source": "llm",
             "synthetic": false,
         }),
     ));
-    let link_id = find_link_id_for_match(links_plain, &note_item_id, "");
+    let link_id = find_link_id_for_match(ctx.links_plain, &note_item_id, "");
     if !link_id.is_empty() {
-        cluster_overrides.push((
+        ctx.cluster_overrides.push((
             "link".to_string(),
             link_id.clone(),
             json!({
@@ -637,7 +627,7 @@ fn apply_synthesize_anchor(
             }),
         ));
     }
-    auto_applied.push(merge_action_with(
+    ctx.auto_applied.push(merge_action_with(
         action,
         json!({"link_id": link_id, "anchor_id": anchor_id}),
     ));

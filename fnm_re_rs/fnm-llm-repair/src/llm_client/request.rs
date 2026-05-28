@@ -473,8 +473,11 @@ fn validate_glm46v_text_budget(system_prompt: &str, user_content: &[Value]) -> R
     let user_text = user_content
         .iter()
         .filter_map(|content| {
-            (content.get("type").and_then(|v| v.as_str()) == Some("text"))
-                .then(|| content.get("text").and_then(|v| v.as_str()).unwrap_or(""))
+            if content.get("type").and_then(|v| v.as_str()) == Some("text") {
+                content.get("text").and_then(|v| v.as_str())
+            } else {
+                None
+            }
         })
         .collect::<Vec<_>>()
         .join("\n");
@@ -764,7 +767,9 @@ mod tests {
 
     #[test]
     fn glm_repair_reserves_small_output_budget_inside_context_window() {
-        assert!(LLM_REPAIR_MAX_OUTPUT_TOKENS < GLM46V_CONTEXT_TOKENS);
+        let max_output = LLM_REPAIR_MAX_OUTPUT_TOKENS;
+        let context = GLM46V_CONTEXT_TOKENS;
+        assert!(max_output < context);
     }
 
     #[test]

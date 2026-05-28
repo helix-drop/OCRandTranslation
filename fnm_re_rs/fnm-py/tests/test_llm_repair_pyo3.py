@@ -56,7 +56,7 @@ def test_llm_repair_returns_report(tmp_path):
     _seed_small_db(db_path)
 
     result = json.loads(fnm_re_rs.run_llm_repair_json(
-        db_path, "llm-test", "", None, "llm-test", False, 0.9, None,
+        db_path, "llm-test", "", None, json.dumps({"slug": "llm-test", "auto_apply": False}),
     ))
     assert isinstance(result, dict)
     assert "cluster_count" in result
@@ -68,7 +68,7 @@ def test_llm_repair_with_auto_apply(tmp_path):
     _seed_small_db(db_path)
 
     result = json.loads(fnm_re_rs.run_llm_repair_json(
-        db_path, "llm-test", "", None, "llm-test", True, 0.9, None,
+        db_path, "llm-test", "", None, json.dumps({"slug": "llm-test", "auto_apply": True}),
     ))
     assert isinstance(result, dict)
     assert result["cluster_count"] >= 0

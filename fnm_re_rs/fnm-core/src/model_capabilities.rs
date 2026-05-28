@@ -106,32 +106,35 @@ fn mt_model(
     }
 }
 
-fn vision_model(
-    id: &str,
-    label: &str,
-    provider: &str,
+/// vision_model 的参数集合。
+struct VisionModelParams<'a> {
+    id: &'a str,
+    label: &'a str,
+    provider: &'a str,
     selectable: bool,
     translation_selectable: bool,
     thinking: bool,
-    companion: Option<&str>,
+    companion: Option<&'a str>,
     supports_translation: bool,
-) -> ModelSpec {
+}
+
+fn vision_model(params: VisionModelParams<'_>) -> ModelSpec {
     ModelSpec {
-        id: id.to_string(),
-        label: label.to_string(),
-        provider: provider.to_string(),
+        id: params.id.to_string(),
+        label: params.label.to_string(),
+        provider: params.provider.to_string(),
         api_family: ApiFamily::Vision,
-        supports_translation,
+        supports_translation: params.supports_translation,
         supports_vision: true,
         supports_stream: true,
         stream_mode: "chat_json".into(),
-        companion_chat_model_key: companion.unwrap_or(id).to_string(),
-        translation_selectable,
-        fnm_selectable: selectable,
-        visual_selectable: selectable,
-        supports_thinking_toggle: thinking,
-        thinking_request_format: if thinking {
-            if provider == "qwen" {
+        companion_chat_model_key: params.companion.unwrap_or(params.id).to_string(),
+        translation_selectable: params.translation_selectable,
+        fnm_selectable: params.selectable,
+        visual_selectable: params.selectable,
+        supports_thinking_toggle: params.thinking,
+        thinking_request_format: if params.thinking {
+            if params.provider == "qwen" {
                 "qwen_enable_thinking".into()
             } else {
                 "thinking_type".into()
@@ -182,57 +185,57 @@ pub static MODEL_SPECS: Lazy<HashMap<String, ModelSpec>> = Lazy::new(|| {
     );
     m.insert(
         "qwen3.6-plus".into(),
-        vision_model(
-            "qwen3.6-plus",
-            "Qwen3.6 Plus",
-            "qwen",
-            true,
-            true,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen3.6-plus",
+            label: "Qwen3.6 Plus",
+            provider: "qwen",
+            selectable: true,
+            translation_selectable: true,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
     m.insert(
         "qwen3.6-flash".into(),
-        vision_model(
-            "qwen3.6-flash",
-            "Qwen3.6 Flash",
-            "qwen",
-            true,
-            true,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen3.6-flash",
+            label: "Qwen3.6 Flash",
+            provider: "qwen",
+            selectable: true,
+            translation_selectable: true,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
 
     // Qwen 3.5 系列
     m.insert(
         "qwen3.5-plus".into(),
-        vision_model(
-            "qwen3.5-plus",
-            "Qwen3.5 Plus",
-            "qwen",
-            true,
-            true,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen3.5-plus",
+            label: "Qwen3.5 Plus",
+            provider: "qwen",
+            selectable: true,
+            translation_selectable: true,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
     m.insert(
         "qwen3.5-flash".into(),
-        vision_model(
-            "qwen3.5-flash",
-            "Qwen3.5 Flash",
-            "qwen",
-            true,
-            true,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen3.5-flash",
+            label: "Qwen3.5 Flash",
+            provider: "qwen",
+            selectable: true,
+            translation_selectable: true,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
 
     // Qwen 经典
@@ -301,68 +304,68 @@ pub static MODEL_SPECS: Lazy<HashMap<String, ModelSpec>> = Lazy::new(|| {
     // Qwen VL
     m.insert(
         "qwen3-vl-plus".into(),
-        vision_model(
-            "qwen3-vl-plus",
-            "Qwen3 VL Plus",
-            "qwen",
-            true,
-            false,
-            true,
-            Some("qwen3.6-plus"),
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen3-vl-plus",
+            label: "Qwen3 VL Plus",
+            provider: "qwen",
+            selectable: true,
+            translation_selectable: false,
+            thinking: true,
+            companion: Some("qwen3.6-plus"),
+            supports_translation: true,
+        }),
     );
     m.insert(
         "qwen3-vl-flash".into(),
-        vision_model(
-            "qwen3-vl-flash",
-            "Qwen3 VL Flash",
-            "qwen",
-            true,
-            false,
-            true,
-            Some("qwen3.6-flash"),
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen3-vl-flash",
+            label: "Qwen3 VL Flash",
+            provider: "qwen",
+            selectable: true,
+            translation_selectable: false,
+            thinking: true,
+            companion: Some("qwen3.6-flash"),
+            supports_translation: true,
+        }),
     );
     m.insert(
         "qwen-vl-plus".into(),
-        vision_model(
-            "qwen-vl-plus",
-            "Qwen-VL-Plus",
-            "qwen",
-            false,
-            false,
-            false,
-            Some("qwen-plus"),
-            false,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen-vl-plus",
+            label: "Qwen-VL-Plus",
+            provider: "qwen",
+            selectable: false,
+            translation_selectable: false,
+            thinking: false,
+            companion: Some("qwen-plus"),
+            supports_translation: false,
+        }),
     );
     m.insert(
         "qwen-vl-max".into(),
-        vision_model(
-            "qwen-vl-max",
-            "Qwen-VL-Max",
-            "qwen",
-            false,
-            false,
-            false,
-            Some("qwen-plus"),
-            false,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen-vl-max",
+            label: "Qwen-VL-Max",
+            provider: "qwen",
+            selectable: false,
+            translation_selectable: false,
+            thinking: false,
+            companion: Some("qwen-plus"),
+            supports_translation: false,
+        }),
     );
     m.insert(
         "qwen-vl-ocr".into(),
-        vision_model(
-            "qwen-vl-ocr",
-            "Qwen-VL-OCR",
-            "qwen",
-            false,
-            false,
-            false,
-            Some("qwen-plus"),
-            false,
-        ),
+        vision_model(VisionModelParams {
+            id: "qwen-vl-ocr",
+            label: "Qwen-VL-OCR",
+            provider: "qwen",
+            selectable: false,
+            translation_selectable: false,
+            thinking: false,
+            companion: Some("qwen-plus"),
+            supports_translation: false,
+        }),
     );
 
     // MiMo
@@ -380,29 +383,29 @@ pub static MODEL_SPECS: Lazy<HashMap<String, ModelSpec>> = Lazy::new(|| {
     );
     m.insert(
         "mimo-v2.5".into(),
-        vision_model(
-            "mimo-v2.5",
-            "MiMo V2.5",
-            "mimo",
-            true,
-            false,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "mimo-v2.5",
+            label: "MiMo V2.5",
+            provider: "mimo",
+            selectable: true,
+            translation_selectable: false,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
     m.insert(
         "mimo-v2-omni".into(),
-        vision_model(
-            "mimo-v2-omni",
-            "MiMo V2 Omni",
-            "mimo",
-            true,
-            false,
-            true,
-            Some("mimo-v2.5"),
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "mimo-v2-omni",
+            label: "MiMo V2 Omni",
+            provider: "mimo",
+            selectable: true,
+            translation_selectable: false,
+            thinking: true,
+            companion: Some("mimo-v2.5"),
+            supports_translation: true,
+        }),
     );
 
     // GLM
@@ -448,70 +451,70 @@ pub static MODEL_SPECS: Lazy<HashMap<String, ModelSpec>> = Lazy::new(|| {
     );
     m.insert(
         "glm-5v-turbo".into(),
-        vision_model(
-            "glm-5v-turbo",
-            "GLM-5V-Turbo",
-            "glm",
-            true,
-            false,
-            true,
-            Some("glm-5.1"),
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "glm-5v-turbo",
+            label: "GLM-5V-Turbo",
+            provider: "glm",
+            selectable: true,
+            translation_selectable: false,
+            thinking: true,
+            companion: Some("glm-5.1"),
+            supports_translation: true,
+        }),
     );
     m.insert(
         "glm-4.6v".into(),
-        vision_model(
-            "glm-4.6v",
-            "GLM-4.6V",
-            "glm",
-            true,
-            false,
-            true,
-            Some("glm-4.6"),
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "glm-4.6v",
+            label: "GLM-4.6V",
+            provider: "glm",
+            selectable: true,
+            translation_selectable: false,
+            thinking: true,
+            companion: Some("glm-4.6"),
+            supports_translation: true,
+        }),
     );
     m.insert(
         "glm-4.5v".into(),
-        vision_model(
-            "glm-4.5v",
-            "GLM-4.5V",
-            "glm",
-            false,
-            false,
-            true,
-            Some("glm-4.5"),
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "glm-4.5v",
+            label: "GLM-4.5V",
+            provider: "glm",
+            selectable: false,
+            translation_selectable: false,
+            thinking: true,
+            companion: Some("glm-4.5"),
+            supports_translation: true,
+        }),
     );
 
     // Kimi
     m.insert(
         "kimi-k2.6".into(),
-        vision_model(
-            "kimi-k2.6",
-            "Kimi K2.6",
-            "kimi",
-            true,
-            true,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "kimi-k2.6",
+            label: "Kimi K2.6",
+            provider: "kimi",
+            selectable: true,
+            translation_selectable: true,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
     m.insert(
         "kimi-k2.5".into(),
-        vision_model(
-            "kimi-k2.5",
-            "Kimi K2.5",
-            "kimi",
-            true,
-            true,
-            true,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "kimi-k2.5",
+            label: "Kimi K2.5",
+            provider: "kimi",
+            selectable: true,
+            translation_selectable: true,
+            thinking: true,
+            companion: None,
+            supports_translation: true,
+        }),
     );
     m.insert(
         "kimi-k2-0905-preview".into(),
@@ -603,55 +606,55 @@ pub static MODEL_SPECS: Lazy<HashMap<String, ModelSpec>> = Lazy::new(|| {
     );
     m.insert(
         "moonshot-v1-8k-vision-preview".into(),
-        vision_model(
-            "moonshot-v1-8k-vision-preview",
-            "Moonshot V1 8K Vision Preview",
-            "kimi",
-            false,
-            false,
-            false,
-            Some("moonshot-v1-8k"),
-            false,
-        ),
+        vision_model(VisionModelParams {
+            id: "moonshot-v1-8k-vision-preview",
+            label: "Moonshot V1 8K Vision Preview",
+            provider: "kimi",
+            selectable: false,
+            translation_selectable: false,
+            thinking: false,
+            companion: Some("moonshot-v1-8k"),
+            supports_translation: false,
+        }),
     );
     m.insert(
         "moonshot-v1-32k-vision-preview".into(),
-        vision_model(
-            "moonshot-v1-32k-vision-preview",
-            "Moonshot V1 32K Vision Preview",
-            "kimi",
-            false,
-            false,
-            false,
-            Some("moonshot-v1-32k"),
-            false,
-        ),
+        vision_model(VisionModelParams {
+            id: "moonshot-v1-32k-vision-preview",
+            label: "Moonshot V1 32K Vision Preview",
+            provider: "kimi",
+            selectable: false,
+            translation_selectable: false,
+            thinking: false,
+            companion: Some("moonshot-v1-32k"),
+            supports_translation: false,
+        }),
     );
     m.insert(
         "moonshot-v1-128k-vision-preview".into(),
-        vision_model(
-            "moonshot-v1-128k-vision-preview",
-            "Moonshot V1 128K Vision Preview",
-            "kimi",
-            false,
-            false,
-            false,
-            Some("moonshot-v1-128k"),
-            false,
-        ),
+        vision_model(VisionModelParams {
+            id: "moonshot-v1-128k-vision-preview",
+            label: "Moonshot V1 128K Vision Preview",
+            provider: "kimi",
+            selectable: false,
+            translation_selectable: false,
+            thinking: false,
+            companion: Some("moonshot-v1-128k"),
+            supports_translation: false,
+        }),
     );
     m.insert(
         "gemini-3.1-flash-lite".into(),
-        vision_model(
-            "gemini-3.1-flash-lite",
-            "Gemini 3.1 Flash Lite",
-            "gemini",
-            true,
-            true,
-            false,
-            None,
-            true,
-        ),
+        vision_model(VisionModelParams {
+            id: "gemini-3.1-flash-lite",
+            label: "Gemini 3.1 Flash Lite",
+            provider: "gemini",
+            selectable: true,
+            translation_selectable: true,
+            thinking: false,
+            companion: None,
+            supports_translation: true,
+        }),
     );
 
     m

@@ -37,7 +37,7 @@ def test_build_doc_status_returns_valid_json():
         pipeline_result = json.loads(fnm_re_rs.run_doc_pipeline_json(db_path, "test-doc"))
         assert pipeline_result.get("structure_state") == "done", f"Pipeline failed: {pipeline_result}"
 
-        result_json = fnm_re_rs.build_doc_status_json(db_path, "test-doc", "toc")
+        result_json = fnm_re_rs.build_doc_status_json(db_path, "test-doc")
         result = json.loads(result_json)
 
         assert isinstance(result, dict)

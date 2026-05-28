@@ -65,23 +65,22 @@ def run_llm_repair(*args, **kwargs):
     doc_id = args[0] if args else kwargs.get("doc_id", "")
     pdf_path = kwargs.get("pdf_path", "")
     renderer = kwargs.get("renderer")
-    slug = kwargs.get("slug", "")
-    auto_apply = kwargs.get("auto_apply", True)
-    confidence_threshold = kwargs.get("confidence_threshold", 0.9)
-    cluster_limit = kwargs.get("cluster_limit")
     trace_callback = kwargs.get("trace_callback")
+    options = {
+        "slug": kwargs.get("slug", ""),
+        "auto_apply": kwargs.get("auto_apply", True),
+        "confidence_threshold": kwargs.get("confidence_threshold", 0.9),
+        "cluster_limit": kwargs.get("cluster_limit"),
+    }
+    import json as _json
     result_json = fnm_re_rs.run_llm_repair_json(
         _resolve_db_path(kwargs.get("db_path"), kwargs.get("repo")),
         doc_id,
         pdf_path,
         renderer,
-        slug,
-        auto_apply,
-        confidence_threshold,
-        cluster_limit,
+        _json.dumps(options),
         trace_callback,
     )
-    import json as _json
     return _json.loads(result_json)
 
 
@@ -362,12 +361,13 @@ def has_explicit_sup(markdown, marker):
     return fnm_re_rs.has_explicit_sup_json(markdown, marker)
 
 
-def recover_book(pages, pdf_path=""):
+def recover_book(pages, pdf_path="", chapter_markers=None):
     """←→ Rust fnm_re_rs.recover_book_json"""
     import json as _json
     import fnm_re_rs
 
-    return _json.loads(fnm_re_rs.recover_book_json(_json.dumps(pages, ensure_ascii=False), pdf_path))
+    markers_json = _json.dumps(chapter_markers, ensure_ascii=False) if chapter_markers else None
+    return _json.loads(fnm_re_rs.recover_book_json(_json.dumps(pages, ensure_ascii=False), pdf_path, markers_json))
 
 
 def format_fnm_unit_label(unit):
@@ -619,9 +619,12 @@ def build_module_pipeline_snapshot_rust(
     if enable_llm_repair:
         if not db_path:
             raise ValueError("enable_llm_repair=True 需要传 db_path（LLM repair 通过 DB 中转）")
+        config["pages"] = pages
+        config["toc_items"] = toc_items or []
+        config["pdf_path"] = pdf_path
+        llm_config_json = _json.dumps(config)
         result_json = fnm_re_rs.run_pipeline_for_doc_with_llm_repair_json(
-            db_path, doc_id, pages_json, toc_json, config_json,
-            pdf_path, renderer, auto_apply, float(confidence_threshold),
+            db_path, llm_config_json, renderer, auto_apply, float(confidence_threshold),
         )
     elif db_path:
         result_json = fnm_re_rs.run_pipeline_for_doc_json(

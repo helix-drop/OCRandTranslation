@@ -727,7 +727,8 @@ mod footnote_note_only_with_body {
 
     #[test]
     fn test_repair_image_scale_keeps_small_note_markers_legible() {
-        assert!(LLM_REPAIR_IMAGE_SCALE >= 1.2);
+        let scale = LLM_REPAIR_IMAGE_SCALE;
+        assert!(scale >= 1.2);
     }
 
     #[test]

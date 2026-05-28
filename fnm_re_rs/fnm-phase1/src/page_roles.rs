@@ -77,25 +77,20 @@ pub fn build_page_roles(
 
         // 12 条件分支，按优先级
         let (role, chapter_id) = if source_role == "note" {
-            (
-                "note".into(),
-                chapter.map(|s| s.clone()).unwrap_or_default(),
-            )
+            ("note".into(), chapter.cloned().unwrap_or_default())
         } else if let Some(ch) = chapter {
             // 章节内的页面 → chapter role
             ("chapter".into(), ch.clone())
-        } else if page_no > 0 && back_matter_start > 0 && page_no >= back_matter_start {
-            ("back_matter".into(), String::new())
-        } else if back_matter_start == 0
-            && BACK_MATTER_REASON_HINTS.contains(&row.reason.as_str())
-            && page_no >= rear_page_role_min_page
+        } else if (page_no > 0 && back_matter_start > 0 && page_no >= back_matter_start)
+            || (back_matter_start == 0
+                && BACK_MATTER_REASON_HINTS.contains(&row.reason.as_str())
+                && page_no >= rear_page_role_min_page)
         {
             ("back_matter".into(), String::new())
-        } else if source_role == "other" {
-            ("front_matter".into(), String::new())
-        } else if first_chapter_start > 0 && page_no < first_chapter_start {
-            ("front_matter".into(), String::new())
-        } else if source_role == "front_matter" {
+        } else if source_role == "other"
+            || (first_chapter_start > 0 && page_no < first_chapter_start)
+            || source_role == "front_matter"
+        {
             ("front_matter".into(), String::new())
         } else {
             ("other".into(), String::new())
@@ -110,7 +105,7 @@ pub fn build_page_roles(
         });
     }
 
-    rows.sort_by(|a, b| a.page_no.cmp(&b.page_no));
+    rows.sort_by_key(|a| a.page_no);
     rows
 }
 

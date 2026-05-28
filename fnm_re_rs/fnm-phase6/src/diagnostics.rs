@@ -9,7 +9,7 @@ use fnm_core::records::{
     NoteRegionRecord, Phase4Structure, TranslationUnitRecord, UnitPageSegmentRecord,
     UnitParagraphRecord,
 };
-use fnm_core::refs::{extract_note_refs, replace_frozen_refs, EndnoteMode};
+use fnm_core::refs::{extract_note_refs, replace_frozen_refs};
 
 /// 错误翻译状态集合
 static _ERROR_TRANSLATION_STATUSES: &[&str] =
@@ -231,9 +231,9 @@ pub fn build_diagnostic_entry(
     };
 
     let entry_text = if !translated_text.is_empty() {
-        replace_frozen_refs(&translated_text, EndnoteMode::Legacy)
+        replace_frozen_refs(&translated_text)
     } else {
-        replace_frozen_refs(&source_text, EndnoteMode::Legacy)
+        replace_frozen_refs(&source_text)
     };
 
     let mut refs: Vec<serde_json::Value> = Vec::new();
@@ -261,7 +261,7 @@ pub fn build_diagnostic_entry(
     }
 
     DiagnosticEntryRecord {
-        original: replace_frozen_refs(&source_text, EndnoteMode::Legacy),
+        original: replace_frozen_refs(&source_text),
         translation: entry_text.clone(),
         footnotes: String::new(),
         footnotes_translation: String::new(),

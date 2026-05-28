@@ -381,7 +381,8 @@ mod tests {
             r#"[{"action":"match","note_item_id":"n1","anchor_id":"a1","confidence":"high"}]"#;
         let actions = parse_llm_repair_actions(text);
         assert_eq!(actions.len(), 1);
-        assert!((actions[0].confidence - 0.9).abs() < 1e-9);
+        // 文字置信度不再转换为数值，使用默认值 0.8
+        assert!((actions[0].confidence - 0.8).abs() < 1e-9);
         // 文字置信度 marked as non-numeric → 不进入 auto-apply（P2-5）
         assert!(!actions[0].confidence_numeric);
     }
@@ -443,7 +444,6 @@ mod tests {
         );
         assert!(selected.is_empty(), "fuzzy < 88 must be rejected");
 
-        let mut action = action;
         action.fuzzy_score = 92.0;
         let selected = select_auto_applicable_actions(
             &[action],

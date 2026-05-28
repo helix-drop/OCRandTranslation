@@ -35,15 +35,19 @@ fn normalize_toc_node_role(value: &str) -> String {
     String::new()
 }
 
+struct TocRoleKeySets<'a> {
+    container_keys: &'a HashSet<String>,
+    endnotes_keys: &'a HashSet<String>,
+    post_body_keys: &'a HashSet<String>,
+    back_matter_keys: &'a HashSet<String>,
+    chapter_keys: &'a HashSet<String>,
+}
+
 fn map_toc_role(
     title: &str,
     explicit_role: &str,
     title_key: &str,
-    container_keys: &HashSet<String>,
-    endnotes_keys: &HashSet<String>,
-    post_body_keys: &HashSet<String>,
-    back_matter_keys: &HashSet<String>,
-    chapter_keys: &HashSet<String>,
+    keys: &TocRoleKeySets,
     is_likely_chapter: bool,
 ) -> String {
     let normalized = normalize_toc_node_role(explicit_role);
@@ -53,19 +57,19 @@ fn map_toc_role(
     if title_key.is_empty() {
         return "section".into();
     }
-    if container_keys.contains(title_key) {
+    if keys.container_keys.contains(title_key) {
         return "container".into();
     }
-    if endnotes_keys.contains(title_key) {
+    if keys.endnotes_keys.contains(title_key) {
         return "endnotes".into();
     }
-    if post_body_keys.contains(title_key) {
+    if keys.post_body_keys.contains(title_key) {
         return "post_body".into();
     }
-    if back_matter_keys.contains(title_key) {
+    if keys.back_matter_keys.contains(title_key) {
         return "back_matter".into();
     }
-    if chapter_keys.contains(title_key) {
+    if keys.chapter_keys.contains(title_key) {
         return if is_likely_chapter {
             "chapter"
         } else {
@@ -138,7 +142,7 @@ pub fn build_toc_tree(
     let normalized_rows: Vec<serde_json::Value> = meta
         .get("normalized_toc_rows")
         .and_then(|v| v.as_array())
-        .map(|a| a.clone())
+        .cloned()
         .unwrap_or_default();
 
     // 构建 page/hint fallback 映射
@@ -221,12 +225,11 @@ pub fn build_toc_tree(
                 eh
             };
             // skeleton "chapter" with visual_toc "content" → discard
-            if er.trim().to_lowercase() == "chapter" {
-                if hint_lower == "content"
-                    || hint_by_key.get(&title_key).map(|s| s.as_str()) == Some("content")
-                {
-                    er = "content".into();
-                }
+            if er.trim().to_lowercase() == "chapter"
+                && (hint_lower == "content"
+                    || hint_by_key.get(&title_key).map(|s| s.as_str()) == Some("content"))
+            {
+                er = "content".into();
             }
             er
         } else {
@@ -248,19 +251,20 @@ pub fn build_toc_tree(
         ]
         .iter()
         .any(|kw| nl.contains(kw));
-        let page_changed =
-            target_pdf_page > 0 && prev_page.map_or(true, |pp| pp != target_pdf_page);
+        let page_changed = target_pdf_page > 0 && (prev_page != Some(target_pdf_page));
         let is_likely_chapter = has_number_prefix || has_chapter_kw || page_changed;
 
         let role = map_toc_role(
             &title,
             &explicit_role,
             &title_key,
-            &container_keys,
-            &endnotes_keys,
-            &post_body_keys,
-            &back_matter_keys,
-            &title_keys,
+            &TocRoleKeySets {
+                container_keys: &container_keys,
+                endnotes_keys: &endnotes_keys,
+                post_body_keys: &post_body_keys,
+                back_matter_keys: &back_matter_keys,
+                chapter_keys: &title_keys,
+            },
             is_likely_chapter,
         );
 

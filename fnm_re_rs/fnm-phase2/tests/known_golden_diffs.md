@@ -9,14 +9,20 @@
 
 ---
 
-## §1 note_items 数量 -20 差距
+## §1 note_items 历史数量差距（需重新归因）
 
-**当前状态**：
+**历史状态**：
 
 | 维度 | Rust 实际 | Golden | 差距 |
 |---|---:|---:|---:|
 | `phase2.note_regions.len()` | ~basically aligned | — | gap ≤ 5 |
 | `phase2.note_items.len()` | 564 | 584 | **-20** |
+
+**2026-05-27 更新**：当前执行
+`cargo test -p fnm-phase2 --test biopolitics_phase2_parity` 已通过；
+上述数字不再可直接作为当前 Phase2 失败结论。Phase3 的 ignored parity
+在同日显式执行仍失败，因此必须重新定位其输入/fixture 分叉，不能继续仅以
+本节历史 `-20` 解释下游差异。
 
 **审计工具**：`tests/audit_note_items_against_golden.rs` 输出逐条 extra/missing 列表到
 `/tmp/audit_note_items/`。
@@ -50,8 +56,9 @@
 ## §3 sup_recovery（chapter-scoped）
 
 - **位置**：`src/sup_recovery/{layer1,layer2,layer3}.rs`
-- **状态**：✅ Layer 1 (markdown 直匹配) + Layer 2 (4 种 OCR surrogate) + Layer 3
-  (vision LLM, 需 pdf + API key) 全部实现
+- **状态**：Layer 1 和部分 Layer 2 单元测试可运行；但 2026-05-27 显式执行
+  `test_phase2_spec -- --ignored` 后，OCR punctuation surrogate 与 OCR suffix
+  两项失败。Layer 2 不能标为全部实现。Layer 3 仍需 pdf + API key 验证。
 - **设计**：参 `../fnm-phase3/tests/known_golden_diffs.md §3` 的 OCR repair 三循环对应
 
 ---

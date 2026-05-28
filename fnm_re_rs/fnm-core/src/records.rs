@@ -1235,6 +1235,12 @@ pub struct ChapterMarkdownSet {
     pub diagnostic_pages: Vec<DiagnosticPageRecord>,
     #[serde(default)]
     pub diagnostic_notes: Vec<DiagnosticNoteRecord>,
+    /// Phase5 merge gate 产出的结构化 review (merge_local_refs_unclosed 等)
+    #[serde(default)]
+    pub merge_reviews: Vec<StructureReviewRecord>,
+    /// Phase2 note items, 供 Phase6 audit 做正向 marker 检测
+    #[serde(default)]
+    pub note_items: Vec<NoteItemRecord>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

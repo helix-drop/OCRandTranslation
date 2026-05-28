@@ -23,11 +23,10 @@
 //! 双向转换的复杂度。后续可加 PyDict 直通版本（如 `run_pipeline_dict`）。
 
 use std::path::Path;
-use std::sync::{Arc, Mutex};
 
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
-use pyo3::types::{PyBytes, PyTuple};
+use pyo3::types::PyBytes;
 
 use fnm_core::db::{open_pool, Repository, SqliteRepository};
 use fnm_llm_repair::page_context::{NoopRenderer, RepairImageRenderer};
@@ -36,52 +35,11 @@ use fnm_orchestrator::mainline::LlmRepairOptions;
 use fnm_orchestrator::types::PipelineConfig;
 use fnm_phase1::input::{RawPage, TocItem};
 
-/// 包装 Python callable 实现 `RepairImageRenderer`。
-///
-/// Python 端签名：`(pdf_path: str, file_idx: int) -> Optional[str]`
-/// 返回 `data:image/...;base64,...` 形式的 URL 或 None。
-///
-/// 错误先收集到 `errors`，不 panic（P1-7）。
-struct PyRepairRenderer {
-    callback: Py<PyAny>,
-    errors: Arc<Mutex<Vec<String>>>,
-}
+mod helpers;
+mod translate;
 
-impl PyRepairRenderer {
-    fn new(callback: Py<PyAny>) -> Self {
-        Self {
-            callback,
-            errors: Arc::new(Mutex::new(Vec::new())),
-        }
-    }
-
-    fn take_errors(&self) -> Vec<String> {
-        std::mem::take(&mut *self.errors.lock().unwrap())
-    }
-}
-
-impl RepairImageRenderer for PyRepairRenderer {
-    fn render_page_data_url(&self, pdf_path: &str, file_idx: i64) -> Option<String> {
-        Python::with_gil(|py| -> Option<String> {
-            let args = PyTuple::new_bound(py, &[pdf_path.into_py(py), file_idx.into_py(py)]);
-            match self.callback.call1(py, args) {
-                Ok(result) => result.extract::<Option<String>>(py).ok().flatten(),
-                Err(e) => {
-                    let msg = format!(
-                        "renderer callback failed for page {}: {}",
-                        file_idx,
-                        e.value_bound(py)
-                            .str()
-                            .map(|s| s.to_string())
-                            .unwrap_or_default(),
-                    );
-                    self.errors.lock().unwrap().push(msg);
-                    None
-                }
-            }
-        })
-    }
-}
+use helpers::{parse_pipeline_config, PyRepairRenderer};
+pub use translate::*;
 
 /// Pipeline 入口（JSON 字符串边界）。
 ///
@@ -113,46 +71,6 @@ fn run_pipeline_json(
 
     serde_json::to_string(&snapshot)
         .map_err(|e| PyRuntimeError::new_err(format!("snapshot serialize: {}", e)))
-}
-
-fn parse_pipeline_config(value: &serde_json::Value) -> PyResult<PipelineConfig> {
-    let obj = value
-        .as_object()
-        .ok_or_else(|| PyValueError::new_err("config_json must be a JSON object"))?;
-
-    let get_str = |k: &str| -> String {
-        obj.get(k)
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string()
-    };
-    let get_i64 = |k: &str| -> i64 { obj.get(k).and_then(|v| v.as_i64()).unwrap_or(0) };
-    let get_bool = |k: &str| -> bool { obj.get(k).and_then(|v| v.as_bool()).unwrap_or(false) };
-
-    let start_phase = fnm_orchestrator::StartPhase::from_str(&get_str("start_phase"))
-        .map_err(|e| PyValueError::new_err(format!("invalid start_phase: {}", e)))?;
-
-    Ok(PipelineConfig {
-        doc_id: get_str("doc_id"),
-        slug: get_str("slug"),
-        pdf_path: get_str("pdf_path"),
-        toc_offset: get_i64("toc_offset"),
-        max_body_chars: get_i64("max_body_chars"),
-        include_diagnostic_entries: get_bool("include_diagnostic_entries"),
-        manual_toc_ready: get_bool("manual_toc_ready"),
-        pipeline_state: get_str("pipeline_state"),
-        start_phase,
-        review_overrides: obj.get("review_overrides").cloned(),
-        visual_toc_bundle: obj.get("visual_toc_bundle").cloned(),
-        skip_sup_recovery: obj
-            .get("skip_sup_recovery")
-            .and_then(|v| v.as_bool())
-            .unwrap_or(true),
-        skip_llm_verify: obj
-            .get("skip_llm_verify")
-            .and_then(|v| v.as_bool())
-            .unwrap_or(true),
-    })
 }
 
 /// DB-driven pipeline 入口（每个 phase 持久化到 SQLite）。
@@ -207,29 +125,45 @@ fn run_pipeline_for_doc_json(
 ///
 /// 返回：`ModulePipelineSnapshot` JSON（含 run_meta.llm_repair 子段）
 ///
+/// `config_json` 必须包含 `doc_id`/`slug`/`pdf_path`，以及可选的 `pages`/`toc_items` 字段。
+/// 当 `pages`/`toc_items` 存在时，优先使用 config 内的值而非单独的 JSON 参数。
+///
 /// ←→ Python `FNM_RE/modules/llm_repair.py::run_llm_repair` 嵌入式调用
 #[pyfunction]
-#[pyo3(signature = (db_path, doc_id, pages_json, toc_items_json, config_json, pdf_path, renderer=None, auto_apply=true, confidence_threshold=0.9))]
+#[pyo3(signature = (db_path, config_json, renderer=None, auto_apply=true, confidence_threshold=0.9))]
 fn run_pipeline_for_doc_with_llm_repair_json(
     py: Python<'_>,
     db_path: &str,
-    doc_id: &str,
-    pages_json: &str,
-    toc_items_json: &str,
     config_json: &str,
-    pdf_path: &str,
     renderer: Option<Py<PyAny>>,
     auto_apply: bool,
     confidence_threshold: f64,
 ) -> PyResult<String> {
-    let pages: Vec<RawPage> = serde_json::from_str(pages_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
-    let toc_items: Vec<TocItem> = serde_json::from_str(toc_items_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid toc_items_json: {}", e)))?;
-
     let config_value: serde_json::Value = serde_json::from_str(config_json)
         .map_err(|e| PyValueError::new_err(format!("invalid config_json: {}", e)))?;
     let config = parse_pipeline_config(&config_value)?;
+
+    let pages: Vec<RawPage> = serde_json::from_value(
+        config_value
+            .get("pages")
+            .cloned()
+            .unwrap_or(serde_json::json!([])),
+    )
+    .map_err(|e| PyValueError::new_err(format!("invalid pages in config: {}", e)))?;
+    let toc_items: Vec<TocItem> = serde_json::from_value(
+        config_value
+            .get("toc_items")
+            .cloned()
+            .unwrap_or(serde_json::json!([])),
+    )
+    .map_err(|e| PyValueError::new_err(format!("invalid toc_items in config: {}", e)))?;
+    let pdf_path = config_value
+        .get("pdf_path")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    let doc_id = config.doc_id.clone();
 
     let pool = open_pool(Path::new(db_path))
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
@@ -245,13 +179,13 @@ fn run_pipeline_for_doc_with_llm_repair_json(
         };
         let llm_opts = LlmRepairOptions {
             renderer: renderer_ref,
-            pdf_path,
+            pdf_path: &pdf_path,
             auto_apply,
             confidence_threshold,
         };
         fnm_orchestrator::run_pipeline_for_doc(
             &repo,
-            doc_id,
+            &doc_id,
             pages,
             toc_items,
             config,
@@ -324,20 +258,25 @@ fn audit_export_for_doc_json(
         Some(bytes.to_vec())
     } else if let Some(path_str) = zip_path {
         let p = Path::new(path_str);
-        if !path_str.is_empty() && p.exists() {
+        if path_str.is_empty() {
+            None
+        } else if p.exists() {
             Some(
                 std::fs::read(p)
                     .map_err(|e| PyRuntimeError::new_err(format!("read zip file: {}", e)))?,
             )
         } else {
-            None
+            return Err(PyRuntimeError::new_err(format!(
+                "zip_path does not exist: {}",
+                path_str
+            )));
         }
     } else {
         None
     };
 
     let (report, _summary) =
-        fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, payload.as_deref());
+        fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, doc_id, payload.as_deref());
 
     serde_json::to_string(&report).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
@@ -389,7 +328,7 @@ fn build_export_zip_for_doc_json(py: Python, db_path: &str, doc_id: &str) -> PyR
             ))
         })?;
 
-    let zip_bytes = fnm_phase6::export::zip::build_export_zip(&bundle)
+    let zip_bytes = fnm_phase6::build_export_zip(&bundle)
         .map_err(|e| PyRuntimeError::new_err(format!("build_export_zip: {}", e)))?;
 
     Ok(PyBytes::new_bound(py, &zip_bytes).into())
@@ -510,10 +449,9 @@ fn run_doc_pipeline_json(
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
-    let start_phase_parsed =
-        fnm_orchestrator::types::StartPhase::from_str(start_phase).map_err(|e| {
-            PyRuntimeError::new_err(format!("invalid start_phase '{}': {}", start_phase, e))
-        })?;
+    let start_phase_parsed: fnm_orchestrator::StartPhase = start_phase.parse().map_err(|e| {
+        PyRuntimeError::new_err(format!("invalid start_phase '{}': {}", start_phase, e))
+    })?;
 
     let mut config = PipelineConfig {
         doc_id: doc_id.to_string(),
@@ -648,7 +586,7 @@ fn replay_phase4_to6_json(
             slug.to_string()
         },
         max_body_chars,
-        start_phase: fnm_orchestrator::StartPhase::FrozenUnits,
+        start_phase: fnm_orchestrator::StartPhase::Toc,
         skip_sup_recovery: true,
         skip_llm_verify: true,
         pipeline_state: "downstream_replay".to_string(),
@@ -684,22 +622,44 @@ fn replay_phase4_to6_json(
 ///
 /// 从 DB 拉 pages + phase1-3 → build unresolved clusters → 调 LLM → 物化 overrides。
 ///
+/// `options_json` 可选字段：`slug`/`auto_apply`/`confidence_threshold`/`cluster_limit`/`trace_callback`。
+///
 /// ←→ Python `FNM_RE/__init__.py::run_llm_repair`
 #[pyfunction]
-#[pyo3(signature = (db_path, doc_id, pdf_path, renderer=None, slug="",
-                   auto_apply=true, confidence_threshold=0.9, cluster_limit=None, trace_callback=None))]
+#[pyo3(signature = (db_path, doc_id, pdf_path, renderer=None, options_json=None, trace_callback=None))]
 fn run_llm_repair_json(
     py: Python<'_>,
     db_path: &str,
     doc_id: &str,
     pdf_path: &str,
     renderer: Option<Py<PyAny>>,
-    slug: &str,
-    auto_apply: bool,
-    confidence_threshold: f64,
-    cluster_limit: Option<usize>,
+    options_json: Option<&str>,
     trace_callback: Option<Py<PyAny>>,
 ) -> PyResult<String> {
+    let opts: serde_json::Value = options_json
+        .map(serde_json::from_str)
+        .transpose()
+        .map_err(|e| PyValueError::new_err(format!("invalid options_json: {}", e)))?
+        .unwrap_or(serde_json::json!({}));
+
+    let slug = opts
+        .get("slug")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+    let auto_apply = opts
+        .get("auto_apply")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(true);
+    let confidence_threshold = opts
+        .get("confidence_threshold")
+        .and_then(|v| v.as_f64())
+        .unwrap_or(0.9);
+    let cluster_limit = opts
+        .get("cluster_limit")
+        .and_then(|v| v.as_u64())
+        .map(|v| v as usize);
+
     let pool = open_pool(Path::new(db_path))
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
@@ -715,27 +675,29 @@ fn run_llm_repair_json(
                 Some(ref r) => r,
                 None => &noop,
             };
-            let trace_bridge = |trace: serde_json::Value| {
+            let trace_bridge = |trace: serde_json::Value| -> Result<(), String> {
                 let Some(callback) = &trace_callback else {
-                    return;
+                    return Ok(());
                 };
                 Python::with_gil(|py| {
-                    let Ok(trace_json) = serde_json::to_string(&trace) else {
-                        return;
-                    };
-                    let Ok(json_mod) = py.import_bound("json") else {
-                        return;
-                    };
-                    let Ok(trace_obj) = json_mod.call_method1("loads", (trace_json,)) else {
-                        return;
-                    };
-                    let _ = callback.call1(py, (trace_obj,));
-                });
+                    let trace_json = serde_json::to_string(&trace)
+                        .map_err(|e| format!("serialize trace: {}", e))?;
+                    let json_mod = py
+                        .import_bound("json")
+                        .map_err(|e| format!("import json: {}", e))?;
+                    let trace_obj = json_mod
+                        .call_method1("loads", (trace_json,))
+                        .map_err(|e| format!("json.loads: {}", e))?;
+                    callback
+                        .call1(py, (trace_obj,))
+                        .map_err(|e| format!("callback: {}", e))?;
+                    Ok(())
+                })
             };
 
             let mut params =
                 RunLlmRepairParams::new(doc_id, &repo, &raw_pages, pdf_path, renderer_ref);
-            params.slug = slug;
+            params.slug = &slug;
             params.auto_apply = auto_apply;
             params.confidence_threshold = confidence_threshold;
             params.cluster_limit = cluster_limit;
@@ -772,10 +734,12 @@ fn run_llm_repair_json(
 
 /// 构建文档状态摘要（含 Phase4/6 gate 字段）。
 ///
+/// 构建文档状态 JSON。
+///
 /// ←→ Python `FNM_RE/__init__.py::build_doc_status`
 #[pyfunction]
-#[pyo3(signature = (db_path, doc_id, _start_phase="toc"))]
-fn build_doc_status_json(db_path: &str, doc_id: &str, _start_phase: &str) -> PyResult<String> {
+#[pyo3(signature = (db_path, doc_id))]
+fn build_doc_status_json(db_path: &str, doc_id: &str) -> PyResult<String> {
     let pool = open_pool(Path::new(db_path))
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
@@ -961,36 +925,6 @@ fn build_unit_progress_json(
     serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
-/// 准备翻译任务（页级）。
-///
-/// 返回 JSON 数组 `[ctx, jobs, meta]`，Python wrapper 端 unpack 为 tuple。
-///
-/// ←→ Python `FNM_RE/__init__.py::prepare_page_translate_jobs`
-#[pyfunction]
-#[pyo3(signature = (pages_json, target_bp, t_args_json, doc_id, db_path))]
-fn prepare_page_translate_jobs_json(
-    pages_json: &str,
-    target_bp: i64,
-    t_args_json: &str,
-    doc_id: &str,
-    db_path: &str,
-) -> PyResult<String> {
-    // t_args_json 当前暂不解析 model args，但保留在签名中供 Python 端透传。
-    // 用 `_t_args_json` 前缀（而非 `let _ = …`）确保 PyO3 仍按 signature 接收实参。
-    let _t_args_json = t_args_json;
-    let pages: Vec<RawPage> = serde_json::from_str(pages_json)
-        .map_err(|e| PyRuntimeError::new_err(format!("parse pages_json: {}", e)))?;
-
-    let pool = open_pool(Path::new(db_path))
-        .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
-    let repo = SqliteRepository::new(pool);
-
-    let result = fnm_orchestrator::prepare_page_translate_jobs(&pages, target_bp, doc_id, &repo)
-        .map_err(|e| PyRuntimeError::new_err(format!("prepare_page_translate_jobs: {}", e)))?;
-
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
 /// 翻译后导出检查 + 自修复循环。
 ///
 /// ←→ Python `FNM_RE/__init__.py::run_post_translate_export_checks_for_doc`
@@ -1052,8 +986,9 @@ fn run_post_translate_export_checks_for_doc_json(
 /// ←→ Python `FNM_RE/shared/token_counter.py::dump_traces`
 #[pyfunction]
 #[pyo3(signature = (example_dir, doc_id=""))]
-fn dump_traces_json(example_dir: &str, doc_id: &str) -> i64 {
+fn dump_traces_json(example_dir: &str, doc_id: &str) -> PyResult<i64> {
     fnm_llm_repair::trace::dump::dump_traces(example_dir, doc_id)
+        .map_err(|e| PyRuntimeError::new_err(format!("dump_traces: {}", e)))
 }
 
 /// 将 usage_summary 按阶段写入 llm_traces/ 目录。
@@ -1064,7 +999,8 @@ fn write_summary_traces_json(example_dir: &str, usage_summary_json: &str) -> PyR
     let usage_summary: serde_json::Value = serde_json::from_str(usage_summary_json)
         .map_err(|e| PyValueError::new_err(format!("invalid usage_summary_json: {}", e)))?;
     let written =
-        fnm_llm_repair::trace::dump::write_summary_traces(example_dir, &usage_summary, "");
+        fnm_llm_repair::trace::dump::write_summary_traces(example_dir, &usage_summary, "")
+            .map_err(|e| PyRuntimeError::new_err(format!("write_summary_traces: {}", e)))?;
     serde_json::to_string(&serde_json::json!({"written": written}))
         .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
@@ -1077,44 +1013,24 @@ fn has_explicit_sup_json(markdown: &str, marker: &str) -> bool {
     fnm_phase2::sup_recovery::has_explicit_sup(markdown, marker)
 }
 
-/// 恢复入口：pages + pdf_path → 恢复缺失上标。
+/// 恢复入口：pages + pdf_path + chapter_markers → 恢复缺失上标。
+///
+/// `chapter_markers_json` 必须提供逐章 marker map（格式：`{"ch-1": ["1","2"], ...}`）。
 ///
 /// ←→ Python `FNM_RE/modules/sup_recovery.py::recover_book_chapter_scoped`
 #[pyfunction]
-fn recover_book_json(pages_json: &str, pdf_path: &str) -> PyResult<String> {
+#[pyo3(signature = (pages_json, pdf_path, chapter_markers_json))]
+fn recover_book_json(
+    pages_json: &str,
+    pdf_path: &str,
+    chapter_markers_json: &str,
+) -> PyResult<String> {
     let pages: Vec<fnm_phase1::input::RawPage> = serde_json::from_str(pages_json)
         .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
 
-    let chapter_markers: std::collections::HashMap<String, Vec<String>> = {
-        let mut markers: std::collections::HashMap<String, std::collections::HashSet<String>> =
-            std::collections::HashMap::new();
-        for page in &pages {
-            if let Some(blocks) = page.fn_blocks.as_array() {
-                for block in blocks {
-                    let marker = block
-                        .get("marker")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .trim()
-                        .to_string();
-                    if !marker.is_empty() {
-                        markers
-                            .entry("auto".to_string())
-                            .or_default()
-                            .insert(marker);
-                    }
-                }
-            }
-        }
-        markers
-            .into_iter()
-            .map(|(k, v)| {
-                let mut sorted: Vec<String> = v.into_iter().collect();
-                sorted.sort();
-                (k, sorted)
-            })
-            .collect()
-    };
+    let chapter_markers: std::collections::HashMap<String, Vec<String>> =
+        serde_json::from_str(chapter_markers_json)
+            .map_err(|e| PyValueError::new_err(format!("invalid chapter_markers_json: {}", e)))?;
 
     let pdf_opt = if pdf_path.is_empty() {
         None
@@ -1159,175 +1075,6 @@ fn split_body_and_definitions_json(markdown: &str) -> PyResult<String> {
     serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
 }
 
-/// 把文本中的 NOTE_REF/FN_REF/EN_REF token 改写为 markdown 脚注 `[^id]`。
-///
-/// - `text`: 含 frozen ref token 的文本
-/// - `endnote_mode`: `"standard"` 或 `"legacy"`（默认 `"standard"`）
-///
-/// ←→ Python `FNM_RE/shared/refs.py::replace_frozen_refs`
-#[pyfunction]
-#[pyo3(signature = (text, endnote_mode="standard"))]
-fn replace_frozen_refs_json(text: &str, endnote_mode: &str) -> PyResult<String> {
-    let mode: fnm_core::refs::EndnoteMode = endnote_mode
-        .parse()
-        .map_err(|e| PyValueError::new_err(format!("{}. Use 'standard' or 'legacy'", e)))?;
-    Ok(fnm_core::refs::replace_frozen_refs(text, mode))
-}
-
-/// 压缩序列化 page_segments 列表（JSON 入/出）。
-///
-/// ←→ Python `FNM_RE/shared/segment_codec.py::serialize_segments`
-#[pyfunction]
-fn serialize_segments_json(segments_json: &str) -> PyResult<String> {
-    let segments: Vec<serde_json::Value> = serde_json::from_str(segments_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid segments_json: {}", e)))?;
-    let result = fnm_core::segment_codec::serialize_segments(&segments);
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 反序列化 page_segments 列表为完整 dict（JSON 入/出）。
-///
-/// ←→ Python `FNM_RE/shared/segment_codec.py::deserialize_segments_to_dicts`
-#[pyfunction]
-fn deserialize_segments_to_dicts_json(payload: &str) -> PyResult<String> {
-    let raw: Vec<serde_json::Value> = serde_json::from_str(payload)
-        .map_err(|e| PyValueError::new_err(format!("invalid payload_json: {}", e)))?;
-    let result = fnm_core::segment_codec::deserialize_segments_to_dicts(&raw);
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 格式化 unit 标签（纯 JSON dict 入/出）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::format_fnm_unit_label`
-#[pyfunction]
-fn format_fnm_unit_label_json(unit_json: &str) -> PyResult<String> {
-    let unit: serde_json::Value = serde_json::from_str(unit_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
-    let label = fnm_orchestrator::format_unit_label_value(&unit);
-    Ok(label)
-}
-
-/// 格式化 unit 页码范围（纯 JSON dict 入/出）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::format_fnm_unit_pages`
-#[pyfunction]
-fn format_fnm_unit_pages_json(unit_json: &str) -> PyResult<String> {
-    let unit: serde_json::Value = serde_json::from_str(unit_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
-    let pages = fnm_orchestrator::format_unit_pages_value(&unit);
-    Ok(pages)
-}
-
-/// 收集 unit 内失败段落位置（纯 JSON dict 入/出）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::collect_fnm_unit_failed_locations`
-#[pyfunction]
-fn collect_fnm_unit_failed_locations_json(unit_json: &str) -> PyResult<String> {
-    let unit: serde_json::Value = serde_json::from_str(unit_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
-    let locations = fnm_orchestrator::collect_unit_failed_locations_value(&unit);
-    serde_json::to_string(&locations)
-        .map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 列出所有翻译单元（DB 驱动）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::list_fnm_units_with_indices`
-#[pyfunction]
-fn list_fnm_units_with_indices_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = fnm_core::db::open_pool(std::path::Path::new(db_path))
-        .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
-    let repo = fnm_core::db::SqliteRepository::new(pool);
-    let result = fnm_orchestrator::list_fnm_units_with_indices(&repo, doc_id)
-        .map_err(|e| PyRuntimeError::new_err(format!("list_fnm_units_with_indices: {}", e)))?;
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 同步 retry 状态（返回 retry summary）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::sync_fnm_retry_state`
-#[pyfunction]
-fn sync_fnm_retry_state_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = fnm_core::db::open_pool(std::path::Path::new(db_path))
-        .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
-    let repo = fnm_core::db::SqliteRepository::new(pool);
-    let result = fnm_orchestrator::sync_fnm_retry_state(&repo, doc_id)
-        .map_err(|e| PyRuntimeError::new_err(format!("sync_fnm_retry_state: {}", e)))?;
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 从 DB 读取 diagnostic pages BPs。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::rebuild_fnm_diagnostic_page_entries`
-#[pyfunction]
-fn rebuild_fnm_diagnostic_page_entries_json(
-    db_path: &str,
-    doc_id: &str,
-    pages_json: &str,
-) -> PyResult<String> {
-    let _pages: Vec<serde_json::Value> = serde_json::from_str(pages_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
-    let pool = fnm_core::db::open_pool(std::path::Path::new(db_path))
-        .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
-    let repo = fnm_core::db::SqliteRepository::new(pool);
-    let result =
-        fnm_orchestrator::rebuild_fnm_diagnostic_page_entries(&repo, doc_id).map_err(|e| {
-            PyRuntimeError::new_err(format!("rebuild_fnm_diagnostic_page_entries: {}", e))
-        })?;
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 从 body unit 构建段级翻译任务（JSON 入/出）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::build_fnm_body_unit_jobs`
-#[pyfunction]
-fn build_fnm_body_unit_jobs_json(unit_json: &str, pages_json: &str) -> PyResult<String> {
-    let unit: serde_json::Value = serde_json::from_str(unit_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
-    let pages: Vec<serde_json::Value> = serde_json::from_str(pages_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
-    let result = fnm_orchestrator::build_fnm_body_unit_jobs(&unit, &pages);
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 将译文注入 body unit（JSON 入/出）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::apply_body_unit_translations`
-#[pyfunction]
-fn apply_body_unit_translations_json(
-    unit_json: &str,
-    translated_paragraphs_json: &str,
-) -> PyResult<String> {
-    let unit: serde_json::Value = serde_json::from_str(unit_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
-    let translated_paragraphs: Vec<serde_json::Value> =
-        serde_json::from_str(translated_paragraphs_json).map_err(|e| {
-            PyValueError::new_err(format!("invalid translated_paragraphs_json: {}", e))
-        })?;
-    let result = fnm_orchestrator::apply_body_unit_translations(&unit, &translated_paragraphs)
-        .map_err(|e| PyRuntimeError::new_err(format!("apply_body_unit_translations: {}", e)))?;
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
-/// 将流式翻译结果合并到 unit（JSON 入/出）。
-///
-/// ←→ Python `FNM_RE/app/page_translate.py::apply_body_unit_entry_result`
-#[pyfunction]
-#[pyo3(signature = (unit_json, entry_json, apply_only_unresolved=false))]
-fn apply_body_unit_entry_result_json(
-    unit_json: &str,
-    entry_json: &str,
-    apply_only_unresolved: bool,
-) -> PyResult<String> {
-    let unit: serde_json::Value = serde_json::from_str(unit_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid unit_json: {}", e)))?;
-    let entry: serde_json::Value = serde_json::from_str(entry_json)
-        .map_err(|e| PyValueError::new_err(format!("invalid entry_json: {}", e)))?;
-    let result =
-        fnm_orchestrator::apply_body_unit_entry_result(&unit, &entry, apply_only_unresolved);
-    serde_json::to_string(&result).map_err(|e| PyRuntimeError::new_err(format!("serialize: {}", e)))
-}
-
 /// 解析主模型参数（取 fnm pool 第一个 spec）。
 ///
 /// ←→ Python `FNM_RE/modules/llm_repair.py::_resolve_repair_model_args`
@@ -1350,12 +1097,6 @@ fn render_repair_page_data_url_json(
 ) -> PyResult<String> {
     fnm_core::vision::pdfium::render_page_to_data_url(pdf_path, page_index, scale)
         .map_err(|e| PyRuntimeError::new_err(format!("render_page: {}", e)))
-}
-
-/// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
-#[pyfunction]
-fn version() -> &'static str {
-    env!("CARGO_PKG_VERSION")
 }
 
 /// Python 模块入口。

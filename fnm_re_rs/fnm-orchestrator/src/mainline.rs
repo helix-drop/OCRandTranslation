@@ -11,15 +11,16 @@ use crate::error::{OrchestratorError, Result};
 use crate::pipeline;
 use crate::types::{
     ModulePipelineSnapshot, Phase1Snapshot, Phase2Snapshot, Phase3Snapshot, PipelineConfig,
-    SerPhase1, SerPhase2, SerPhase3, SerPhase4, SerPhase5, SerPhase6, StartPhase,
+    SerPhase1, SerPhase2, SerPhase3, SerPhase4, SerPhase5, SerPhase6,
 };
 
 use fnm_core::db::{
     Phase1Products, Phase2Products, Phase3Products, Phase4Products, Phase5Products, Phase6Products,
-    Repository,
+    Repository, UpdateFnmRunParams,
 };
 use fnm_core::records::{
     Phase1Structure, Phase1Summary, Phase2Structure, Phase2Summary, Phase3Structure, Phase3Summary,
+    StructureReviewRecord,
 };
 use fnm_core::types::NoteKind;
 use fnm_llm_repair::page_context::RepairImageRenderer;
@@ -202,9 +203,22 @@ pub fn run_pipeline_for_doc<R: Repository>(
         chapter_markdowns: phase5.chapter_markdowns.chapters.clone(),
         diagnostic_pages: phase5.chapter_markdowns.diagnostic_pages.clone(),
         diagnostic_notes: phase5.chapter_markdowns.diagnostic_notes.clone(),
+        merge_reviews: phase5.chapter_markdowns.merge_reviews.clone(),
     };
     repo.replace_fnm_phase5_products(doc_id, &phase5_products)
         .map_err(|e| OrchestratorError::Phase5(anyhow::anyhow!("persist phase5: {}", e)))?;
+    // 合并 Phase4 + Phase5 structure reviews，不覆盖
+    {
+        let mut all_reviews: Vec<StructureReviewRecord> = phase4.structure_reviews.clone();
+        all_reviews.extend(phase5.chapter_markdowns.merge_reviews.clone());
+        repo.replace_fnm_structure_reviews(doc_id, &all_reviews)
+            .map_err(|e| {
+                OrchestratorError::Phase5(anyhow::anyhow!(
+                    "persist merged structure reviews: {}",
+                    e
+                ))
+            })?;
+    }
     snapshot.phase5 = Some(SerPhase5 {
         chapter_count: phase5.chapter_markdowns.chapters.len() as i64,
         merge_summary: phase5.chapter_markdowns.merge_summary.clone(),
@@ -255,7 +269,6 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
     mut config: PipelineConfig,
 ) -> Result<ModulePipelineSnapshot> {
     config.doc_id = doc_id.to_string();
-    config.start_phase = StartPhase::FrozenUnits;
     let pipeline_run_id = pipeline::generate_run_id(doc_id);
 
     let raw_pages = repo
@@ -417,9 +430,21 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
             chapter_markdowns: phase5.chapter_markdowns.chapters.clone(),
             diagnostic_pages: phase5.chapter_markdowns.diagnostic_pages.clone(),
             diagnostic_notes: phase5.chapter_markdowns.diagnostic_notes.clone(),
+            merge_reviews: phase5.chapter_markdowns.merge_reviews.clone(),
         },
     )
     .map_err(|e| OrchestratorError::Phase5(anyhow::anyhow!("persist phase5: {}", e)))?;
+    {
+        let mut all_reviews: Vec<StructureReviewRecord> = phase4.structure_reviews.clone();
+        all_reviews.extend(phase5.chapter_markdowns.merge_reviews.clone());
+        repo.replace_fnm_structure_reviews(doc_id, &all_reviews)
+            .map_err(|e| {
+                OrchestratorError::Phase5(anyhow::anyhow!(
+                    "persist merged structure reviews: {}",
+                    e
+                ))
+            })?;
+    }
 
     let phase6 = pipeline::run_phase6(&phase5, &phase4, &phase1, &config)?;
     repo.replace_fnm_phase6_products(
@@ -465,7 +490,7 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
         }),
         run_meta: serde_json::json!({
             "pipeline_run_id": pipeline_run_id,
-            "start_phase": "FrozenUnits",
+            "start_phase": "Toc",
             "phase_state": "done",
             "persisted": true,
             "replay_source": "persisted_phase1_to_phase3",
@@ -517,13 +542,6 @@ pub fn run_pipeline_from_db<R: Repository>(
     config: PipelineConfig,
     llm_repair: Option<LlmRepairOptions<'_>>,
 ) -> Result<ModulePipelineSnapshot> {
-    // start_phase != Toc 且未实现真实续跑 → 直接报错
-    if config.start_phase != StartPhase::Toc {
-        return Err(OrchestratorError::Phase1(anyhow::anyhow!(
-            "start_phase={:?} 续跑未实现，仅支持 start_phase=Toc",
-            config.start_phase
-        )));
-    }
     let pages = repo
         .load_raw_pages_for_doc(doc_id)
         .map_err(|e| OrchestratorError::Phase1(anyhow::anyhow!("load pages: {}", e)))?;
@@ -574,16 +592,16 @@ pub fn run_pipeline_from_db<R: Repository>(
             let blocking_reasons_json =
                 serde_json::to_string(&blocking_reasons).unwrap_or_default();
 
-            repo.update_fnm_run(
+            repo.update_fnm_run(UpdateFnmRunParams {
                 run_id,
-                "done",
+                status: "done",
                 section_count,
                 note_count,
                 unit_count,
-                &structure_state,
-                &blocking_reasons_json,
-                "",
-            )
+                structure_state: &structure_state,
+                blocking_reasons_json: &blocking_reasons_json,
+                error_msg: "",
+            })
             .map_err(|e| {
                 OrchestratorError::Phase1(anyhow::anyhow!("finalize fnm_run done: {}", e))
             })?;
@@ -592,9 +610,16 @@ pub fn run_pipeline_from_db<R: Repository>(
         }
         Err(e) => {
             let err_msg = format!("{:#}", e);
-            if let Err(finalize_err) =
-                repo.update_fnm_run(run_id, "error", 0, 0, 0, "", "[]", &err_msg)
-            {
+            if let Err(finalize_err) = repo.update_fnm_run(UpdateFnmRunParams {
+                run_id,
+                status: "error",
+                section_count: 0,
+                note_count: 0,
+                unit_count: 0,
+                structure_state: "",
+                blocking_reasons_json: "[]",
+                error_msg: &err_msg,
+            }) {
                 // TODO: replace with tracing::warn! when subscriber is initialized
                 eprintln!(
                     "[WARN] mainline::finalize: failed to finalize fnm_run {} as error: {}",

@@ -53,61 +53,65 @@ pub(crate) fn safe_float(v: &Value) -> Option<f64> {
 
 // ── append_heading_candidate ────────────────────────────────
 
-/// 去重感知的 heading candidate 追加/替换。
-/// ←→ Python `_append_heading_candidate`
-#[allow(clippy::too_many_arguments)]
-fn append_heading_candidate(
-    candidates: &mut Vec<HeadingCandidate>,
-    dedupe: &mut HashMap<(i64, String, String, String), usize>,
+/// 去重感知的 heading candidate 追加/替换的参数。
+struct HeadingCandidateParams<'a> {
     page_no: i64,
-    text: &str,
-    source: &str,
-    block_label: &str,
+    text: &'a str,
+    source: &'a str,
+    block_label: &'a str,
     top_band: bool,
     confidence: f64,
-    family: &str,
+    family: &'a str,
     font_height: Option<f64>,
     x: Option<f64>,
     y: Option<f64>,
     width_estimate: Option<f64>,
-    font_name: &str,
-    font_weight_hint: &str,
-    align_hint: &str,
+    font_name: &'a str,
+    font_weight_hint: &'a str,
+    align_hint: &'a str,
     width_ratio_val: Option<f64>,
     heading_level_hint_val: i64,
+}
+
+/// 去重感知的 heading candidate 追加/替换。
+/// ←→ Python `_append_heading_candidate`
+fn append_heading_candidate(
+    candidates: &mut Vec<HeadingCandidate>,
+    dedupe: &mut HashMap<(i64, String, String, String), usize>,
+    params: &HeadingCandidateParams,
 ) {
-    let normalized_text = normalize_title(text);
+    let normalized_text = normalize_title(params.text);
     if normalized_text.is_empty() {
         return;
     }
     let key = (
-        page_no,
-        source.to_lowercase(),
+        params.page_no,
+        params.source.to_lowercase(),
         chapter_title_match_key(&normalized_text),
-        block_label.to_lowercase(),
+        params.block_label.to_lowercase(),
     );
 
     let candidate = HeadingCandidate {
         heading_id: String::new(),
-        page_no,
+        page_no: params.page_no,
         text: normalized_text.clone(),
         normalized_text,
-        source: source.to_string(),
-        block_label: block_label.to_string(),
-        top_band,
-        confidence,
-        heading_family_guess: family.to_string(),
+        source: params.source.to_string(),
+        block_label: params.block_label.to_string(),
+        top_band: params.top_band,
+        confidence: params.confidence,
+        heading_family_guess: params.family.to_string(),
         suppressed_as_chapter: false,
         reject_reason: String::new(),
-        font_height,
-        x,
-        y,
-        width_estimate,
-        font_name: font_name.to_string(),
-        font_weight_hint: font_weight_hint.to_string(),
-        align_hint: align_hint.to_string(),
-        width_ratio: width_ratio_val,
-        heading_level_hint: heading_level_hint_val,
+        font_height: params.font_height,
+        x: params.x,
+        y: params.y,
+        width_estimate: params.width_estimate,
+        font_name: params.font_name.to_string(),
+        font_weight_hint: params.font_weight_hint.to_string(),
+        align_hint: params.align_hint.to_string(),
+        width_ratio: params.width_ratio_val,
+        heading_level_hint: params.heading_level_hint_val,
     };
 
     use std::collections::hash_map::Entry;
@@ -115,7 +119,7 @@ fn append_heading_candidate(
         Entry::Occupied(e) => {
             let idx = *e.get();
             let existing = &candidates[idx];
-            if confidence > existing.confidence || (top_band && !existing.top_band) {
+            if params.confidence > existing.confidence || (params.top_band && !existing.top_band) {
                 candidates[idx] = candidate;
             }
         }
@@ -212,22 +216,24 @@ pub fn extract_heading_candidates_from_page(
         append_heading_candidate(
             &mut candidates,
             &mut dedupe,
-            page_no,
-            &text,
-            "ocr_block",
-            &label,
-            top_band,
-            confidence,
-            &family,
-            font_height,
-            left,
-            top,
-            width_estimate,
-            "",
-            "unknown",
-            font_features::align_hint(left, width_estimate, page_w),
-            font_features::width_ratio(width_estimate, page_w),
-            level_hint,
+            &HeadingCandidateParams {
+                page_no,
+                text: &text,
+                source: "ocr_block",
+                block_label: &label,
+                top_band,
+                confidence,
+                family: &family,
+                font_height,
+                x: left,
+                y: top,
+                width_estimate,
+                font_name: "",
+                font_weight_hint: "unknown",
+                align_hint: font_features::align_hint(left, width_estimate, page_w),
+                width_ratio_val: font_features::width_ratio(width_estimate, page_w),
+                heading_level_hint_val: level_hint,
+            },
         );
     }
 
@@ -254,22 +260,24 @@ pub fn extract_heading_candidates_from_page(
             append_heading_candidate(
                 &mut candidates,
                 &mut dedupe,
-                page_no,
-                line,
-                "note_heading",
-                "",
-                index <= 3,
-                0.96,
-                &family,
-                None,
-                None,
-                None,
-                None,
-                "",
-                "unknown",
-                "unknown",
-                None,
-                level_hint,
+                &HeadingCandidateParams {
+                    page_no,
+                    text: line,
+                    source: "note_heading",
+                    block_label: "",
+                    top_band: index <= 3,
+                    confidence: 0.96,
+                    family: &family,
+                    font_height: None,
+                    x: None,
+                    y: None,
+                    width_estimate: None,
+                    font_name: "",
+                    font_weight_hint: "unknown",
+                    align_hint: "unknown",
+                    width_ratio_val: None,
+                    heading_level_hint_val: level_hint,
+                },
             );
             continue;
         }
@@ -305,22 +313,24 @@ pub fn extract_heading_candidates_from_page(
             append_heading_candidate(
                 &mut candidates,
                 &mut dedupe,
-                page_no,
-                &heading,
-                "markdown_heading",
-                "",
-                index <= 2,
-                conf,
-                &family,
-                None,
-                None,
-                None,
-                None,
-                "",
-                "unknown",
-                "unknown",
-                None,
-                level_hint,
+                &HeadingCandidateParams {
+                    page_no,
+                    text: &heading,
+                    source: "markdown_heading",
+                    block_label: "",
+                    top_band: index <= 2,
+                    confidence: conf,
+                    family: &family,
+                    font_height: None,
+                    x: None,
+                    y: None,
+                    width_estimate: None,
+                    font_name: "",
+                    font_weight_hint: "unknown",
+                    align_hint: "unknown",
+                    width_ratio_val: None,
+                    heading_level_hint_val: level_hint,
+                },
             );
         }
     }

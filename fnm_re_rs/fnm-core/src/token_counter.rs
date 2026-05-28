@@ -34,28 +34,9 @@ pub fn count_tokens(text: &str) -> usize {
 }
 
 /// 记录一次 LLM 用量。与 Python `record_usage` 一致。
-#[allow(clippy::too_many_arguments)]
-pub fn record_usage(
-    stage: &str,
-    model_id: &str,
-    provider: &str,
-    prompt_tokens: i64,
-    completion_tokens: i64,
-    total_tokens: i64,
-    request_count: i64,
-    dur_ms: i64,
-) {
+pub fn record_usage(record: UsageRecord) {
     if let Ok(mut records) = USAGE_RECORDS.lock() {
-        records.push(UsageRecord {
-            stage: stage.to_string(),
-            model_id: model_id.to_string(),
-            provider: provider.to_string(),
-            prompt_tokens,
-            completion_tokens,
-            total_tokens,
-            request_count,
-            dur_ms,
-        });
+        records.push(record);
     }
 }
 
@@ -188,7 +169,16 @@ mod tests {
     #[test]
     fn usage_recording() {
         clear_usage();
-        record_usage("test", "gpt-4o", "openai", 100, 50, 150, 1, 200);
+        record_usage(UsageRecord {
+            stage: "test".into(),
+            model_id: "gpt-4o".into(),
+            provider: "openai".into(),
+            prompt_tokens: 100,
+            completion_tokens: 50,
+            total_tokens: 150,
+            request_count: 1,
+            dur_ms: 200,
+        });
         let summary = get_usage_summary();
         let total = &summary["total"];
         assert_eq!(total["prompt_tokens"], 100);
@@ -205,16 +195,16 @@ mod tests {
     #[test]
     fn get_usage_records_after_record() {
         clear_usage();
-        record_usage(
-            "records_test_stage",
-            "gpt-4o",
-            "openai",
-            200,
-            100,
-            300,
-            2,
-            500,
-        );
+        record_usage(UsageRecord {
+            stage: "records_test_stage".into(),
+            model_id: "gpt-4o".into(),
+            provider: "openai".into(),
+            prompt_tokens: 200,
+            completion_tokens: 100,
+            total_tokens: 300,
+            request_count: 2,
+            dur_ms: 500,
+        });
         let records = get_usage_records();
         // 可能有并行测试污染，至少 1 条
         assert!(!records.is_empty());
@@ -230,9 +220,36 @@ mod tests {
     #[test]
     fn usage_summary_by_stage() {
         clear_usage();
-        record_usage("summary_stage_a", "model1", "openai", 10, 5, 15, 1, 100);
-        record_usage("summary_stage_a", "model1", "openai", 20, 10, 30, 1, 200);
-        record_usage("summary_stage_b", "model2", "anthropic", 5, 5, 10, 1, 50);
+        record_usage(UsageRecord {
+            stage: "summary_stage_a".into(),
+            model_id: "model1".into(),
+            provider: "openai".into(),
+            prompt_tokens: 10,
+            completion_tokens: 5,
+            total_tokens: 15,
+            request_count: 1,
+            dur_ms: 100,
+        });
+        record_usage(UsageRecord {
+            stage: "summary_stage_a".into(),
+            model_id: "model1".into(),
+            provider: "openai".into(),
+            prompt_tokens: 20,
+            completion_tokens: 10,
+            total_tokens: 30,
+            request_count: 1,
+            dur_ms: 200,
+        });
+        record_usage(UsageRecord {
+            stage: "summary_stage_b".into(),
+            model_id: "model2".into(),
+            provider: "anthropic".into(),
+            prompt_tokens: 5,
+            completion_tokens: 5,
+            total_tokens: 10,
+            request_count: 1,
+            dur_ms: 50,
+        });
         let summary = get_usage_summary();
         let by_stage = summary.get("by_stage").unwrap();
         assert!(by_stage.is_object());
@@ -247,7 +264,16 @@ mod tests {
     #[test]
     fn clear_usage_resets() {
         clear_usage();
-        record_usage("clear_test_stage", "m", "p", 1, 1, 2, 1, 10);
+        record_usage(UsageRecord {
+            stage: "clear_test_stage".into(),
+            model_id: "m".into(),
+            provider: "p".into(),
+            prompt_tokens: 1,
+            completion_tokens: 1,
+            total_tokens: 2,
+            request_count: 1,
+            dur_ms: 10,
+        });
         assert!(!get_usage_records().is_empty());
         clear_usage();
         assert!(get_usage_records().is_empty());

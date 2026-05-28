@@ -48,6 +48,7 @@ fn tail_blocking_summary(
     }
 }
 
+#[expect(clippy::too_many_arguments)]
 fn run_one_repair_round(
     repo: &dyn Repository,
     doc_id: &str,
@@ -198,10 +199,13 @@ pub fn run_post_translate_export_checks(
     let trans_blockers = translation_blockers(repo, doc_id)?;
 
     let mut phase6 = load_phase6_structure(repo, doc_id, false).context("load phase6 structure")?;
-    let (audit_report, _) = fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, None);
+    let (audit_report, _) =
+        fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, doc_id, None);
     let mut can_ship = audit_report.can_ship;
-    let mut blocking_reasons: Vec<String> =
-        phase6.status.blocking_reasons.iter().cloned().collect();
+    let mut blocking_reasons: Vec<String> = audit_report.blocking_reasons.clone();
+    if audit_report.files.is_empty() {
+        blocking_reasons.push("export_audit_incomplete: no file-level audit results".to_string());
+    }
 
     let mut repair_rounds: Vec<Value> = Vec::new();
     let mut attempted_rounds: i64 = 0;
@@ -246,9 +250,9 @@ pub fn run_post_translate_export_checks(
                 Ok(new_phase6) => {
                     phase6 = new_phase6;
                     let (new_audit, _) =
-                        fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, None);
+                        fnm_phase6::export_audit::audit_phase6_export(&phase6, slug, doc_id, None);
                     can_ship = new_audit.can_ship;
-                    blocking_reasons = phase6.status.blocking_reasons.iter().cloned().collect();
+                    blocking_reasons = new_audit.blocking_reasons.clone();
                 }
                 Err(e) => {
                     round_record["error"] = json!(format!("reload phase6: {}", e));
@@ -284,10 +288,10 @@ pub fn run_post_translate_export_checks(
         "final_blocking_reasons": final_blocking_reasons,
         "translation_blockers": trans_blockers,
         "repair_rounds": repair_rounds,
-        "repair_applied_but_not_reexported": repair_applied,
+        "repair_applied_export_stale": repair_applied,
     });
 
-    let blocking_summary = tail_blocking_summary(&trans_blockers, &blocking_reasons);
+    let blocking_summary = tail_blocking_summary(&trans_blockers, &final_blocking_reasons);
 
     Ok(json!({
         "ok": true,
@@ -297,7 +301,7 @@ pub fn run_post_translate_export_checks(
         "tail_blocking_summary": blocking_summary,
         "fnm_tail_state": "done",
         "structure_state": phase6.status.structure_state,
-        "blocking_reasons": blocking_reasons,
+        "blocking_reasons": final_blocking_reasons,
         "translation_blockers": trans_blockers,
         "repair_rounds": repair_rounds,
         "post_translate_export_check": repair_payload,

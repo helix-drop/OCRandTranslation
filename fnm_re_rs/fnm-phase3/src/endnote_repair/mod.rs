@@ -54,23 +54,18 @@ pub fn suppress_endnote_residual_orphans(
     let mut updated: Vec<NoteLinkRecord> = links.to_vec();
     let mut suppressed_orphan_note_count: i64 = 0;
     let mut suppressed_orphan_anchor_count: i64 = 0;
-    #[allow(clippy::needless_range_loop)]
-    for index in 0..updated.len() {
-        if updated[index].note_kind != NoteKind::Endnote {
+    for link in updated.iter_mut() {
+        if link.note_kind != NoteKind::Endnote {
             continue;
         }
-        match updated[index].status {
+        match link.status {
             LinkStatus::OrphanNote => suppressed_orphan_note_count += 1,
             LinkStatus::OrphanAnchor => suppressed_orphan_anchor_count += 1,
             _ => continue,
         }
-        let existing = std::mem::take(&mut updated[index]);
-        updated[index] = NoteLinkRecord {
-            status: LinkStatus::Ignored,
-            resolver: LinkResolver::Fallback,
-            confidence: 1.0,
-            ..existing
-        };
+        link.status = LinkStatus::Ignored;
+        link.resolver = LinkResolver::Fallback;
+        link.confidence = 1.0;
     }
     let mut summary = HashMap::new();
     summary.insert(

@@ -1672,19 +1672,6 @@ fn spec_mixed_footnote_endnote_contract_separate_counts() {
     use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
     use fnm_core::types::NoteKind;
 
-    let mut layer = fnm_phase2::chapter_split::ChapterLayer::default();
-    layer.chapter_id = "ch-1".to_string();
-    layer.start_page = 1;
-    layer.end_page = 2;
-    layer.footnote_items = vec![
-        make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1"),
-        make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2"),
-    ];
-    layer.endnote_items = vec![
-        make_item("en-1", "rg-en", "ch-1", 2, "101"),
-        make_item("en-2", "rg-en", "ch-1", 2, "102"),
-        make_item("en-3", "rg-en", "ch-1", 2, "103"),
-    ];
     let mut policy = std::collections::HashMap::new();
     policy.insert(
         "book_type".to_string(),
@@ -1694,7 +1681,22 @@ fn spec_mixed_footnote_endnote_contract_separate_counts() {
         "note_mode".to_string(),
         serde_json::Value::String("footnote_primary".to_string()),
     );
-    layer.policy_applied = policy;
+    let layer = fnm_phase2::chapter_split::ChapterLayer {
+        chapter_id: "ch-1".to_string(),
+        start_page: 1,
+        end_page: 2,
+        footnote_items: vec![
+            make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1"),
+            make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2"),
+        ],
+        endnote_items: vec![
+            make_item("en-1", "rg-en", "ch-1", 2, "101"),
+            make_item("en-2", "rg-en", "ch-1", 2, "102"),
+            make_item("en-3", "rg-en", "ch-1", 2, "103"),
+        ],
+        policy_applied: policy,
+        ..Default::default()
+    };
 
     let layers = fnm_phase2::chapter_split::ChapterLayers {
         chapter_layers: vec![layer],
@@ -1798,15 +1800,6 @@ fn spec_endnote_marker_gap_not_masked_by_footnote() {
     use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
     use fnm_core::types::NoteKind;
 
-    let mut layer = fnm_phase2::chapter_split::ChapterLayer::default();
-    layer.chapter_id = "ch-1".to_string();
-    layer.start_page = 1;
-    layer.end_page = 2;
-    layer.footnote_items = vec![make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2")];
-    layer.endnote_items = vec![
-        make_item("en-1", "rg-en", "ch-1", 2, "1"),
-        make_item("en-3", "rg-en", "ch-1", 2, "3"),
-    ];
     let mut policy = std::collections::HashMap::new();
     policy.insert(
         "book_type".to_string(),
@@ -1816,7 +1809,18 @@ fn spec_endnote_marker_gap_not_masked_by_footnote() {
         "note_mode".to_string(),
         serde_json::Value::String("footnote_primary".to_string()),
     );
-    layer.policy_applied = policy;
+    let layer = fnm_phase2::chapter_split::ChapterLayer {
+        chapter_id: "ch-1".to_string(),
+        start_page: 1,
+        end_page: 2,
+        footnote_items: vec![make_footnote_item("fn-2", "rg-fn", "ch-1", 1, "2")],
+        endnote_items: vec![
+            make_item("en-1", "rg-en", "ch-1", 2, "1"),
+            make_item("en-3", "rg-en", "ch-1", 2, "3"),
+        ],
+        policy_applied: policy,
+        ..Default::default()
+    };
 
     let layers = fnm_phase2::chapter_split::ChapterLayers {
         chapter_layers: vec![layer],
@@ -1870,16 +1874,6 @@ fn spec_endnote_first_marker_not_polluted_by_footnote_one() {
     use fnm_core::records::{BodyAnchorRecord, NoteLinkRecord};
     use fnm_core::types::NoteKind;
 
-    let mut layer = fnm_phase2::chapter_split::ChapterLayer::default();
-    layer.chapter_id = "ch-1".to_string();
-    layer.start_page = 1;
-    layer.end_page = 2;
-    layer.footnote_items = vec![make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1")];
-    layer.endnote_items = vec![
-        make_item("en-2", "rg-en", "ch-1", 2, "2"),
-        make_item("en-3", "rg-en", "ch-1", 2, "3"),
-        make_item("en-4", "rg-en", "ch-1", 2, "4"),
-    ];
     let mut policy = std::collections::HashMap::new();
     policy.insert(
         "book_type".to_string(),
@@ -1889,7 +1883,19 @@ fn spec_endnote_first_marker_not_polluted_by_footnote_one() {
         "note_mode".to_string(),
         serde_json::Value::String("footnote_primary".to_string()),
     );
-    layer.policy_applied = policy;
+    let layer = fnm_phase2::chapter_split::ChapterLayer {
+        chapter_id: "ch-1".to_string(),
+        start_page: 1,
+        end_page: 2,
+        footnote_items: vec![make_footnote_item("fn-1", "rg-fn", "ch-1", 1, "1")],
+        endnote_items: vec![
+            make_item("en-2", "rg-en", "ch-1", 2, "2"),
+            make_item("en-3", "rg-en", "ch-1", 2, "3"),
+            make_item("en-4", "rg-en", "ch-1", 2, "4"),
+        ],
+        policy_applied: policy,
+        ..Default::default()
+    };
 
     let layers = fnm_phase2::chapter_split::ChapterLayers {
         chapter_layers: vec![layer],

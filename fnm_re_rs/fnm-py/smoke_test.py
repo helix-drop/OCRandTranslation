@@ -126,11 +126,7 @@ try:
     # 仅验证调用链通畅（不抛错、产出 llm_repair 子段）
     result_json = fnm_re_rs.run_pipeline_for_doc_with_llm_repair_json(
         db_path,
-        "biopolitics-llm",
-        json.dumps(pages),
-        json.dumps(toc_items),
-        json.dumps(config),
-        "",  # pdf_path 空
+        json.dumps({**config, "pages": pages, "toc_items": toc_items, "pdf_path": ""}),
         None,  # renderer 用默认 Noop
         True,  # auto_apply
         0.9,  # confidence_threshold

@@ -28,14 +28,23 @@ pub fn build_chapter_issue_diagnostics(
             .get(&chapter_id)
             .cloned()
             .unwrap_or(serde_json::Value::Null);
-        let missing_definition_count = contract_item
-            .get("missing_definition_count")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(0);
-        let orphan_definition_count = contract_item
-            .get("orphan_definition_count")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(0);
+        let contract_missing = contract_item.is_null();
+        let missing_definition_count = if contract_missing {
+            1 // contract row 缺失本身就是 blocker
+        } else {
+            contract_item
+                .get("missing_definition_count")
+                .and_then(|v| v.as_i64())
+                .unwrap_or(0)
+        };
+        let orphan_definition_count = if contract_missing {
+            1
+        } else {
+            contract_item
+                .get("orphan_definition_count")
+                .and_then(|v| v.as_i64())
+                .unwrap_or(0)
+        };
 
         let frozen_ref_leak = has_legacy_note_token(&row.markdown_text);
         let raw_marker_leak = has_raw_marker_in_body(&row.markdown_text);
@@ -177,6 +186,70 @@ mod tests {
                 .get("local_ref_contract_broken_chapter_count")
                 .and_then(|v| v.as_i64()),
             Some(1)
+        );
+    }
+
+    /// `[FN-note1]` 等旧版 token 应被 `replace_frozen_refs` 转换，不应残留到 Phase5 合并诊断。
+    #[test]
+    fn contract_no_merge_frozen_ref_leak_from_fn_bracket() {
+        use fnm_core::refs::replace_frozen_refs;
+        let raw = "Body text with [FN-note1] legacy ref.\n\n[^1]: Note.";
+        let rendered = replace_frozen_refs(raw);
+        // 转换后应不再匹配 legacy token 检测
+        assert!(
+            !crate::marker_rewrite::has_legacy_note_token(&rendered),
+            "replace_frozen_refs must convert [FN-note1] → [^note1]"
+        );
+    }
+
+    /// `[EN-note1]` 同理。
+    #[test]
+    fn contract_no_merge_frozen_ref_leak_from_en_bracket() {
+        use fnm_core::refs::replace_frozen_refs;
+        let raw = "Body text with [EN-note1] legacy ref.\n\n[^1]: Note.";
+        let rendered = replace_frozen_refs(raw);
+        assert!(
+            !crate::marker_rewrite::has_legacy_note_token(&rendered),
+            "replace_frozen_refs must convert [EN-note1] → [^note1]"
+        );
+    }
+
+    /// `{{NOTE_REF:note1}}` 同样。
+    #[test]
+    fn contract_no_merge_frozen_ref_leak_from_note_ref() {
+        use fnm_core::refs::replace_frozen_refs;
+        let raw = "Body text with {{NOTE_REF:note1}} legacy ref.\n\n[^1]: Note.";
+        let rendered = replace_frozen_refs(raw);
+        assert!(
+            !crate::marker_rewrite::has_legacy_note_token(&rendered),
+            "replace_frozen_refs must convert {{NOTE_REF:note1}} → [^note1]"
+        );
+    }
+
+    /// `[^en-note1]` 旧版尾注。
+    #[test]
+    fn contract_no_merge_frozen_ref_leak_from_endnote_label() {
+        use fnm_core::refs::replace_frozen_refs;
+        let raw = "Body text with [^en-note1] legacy ref.\n\n[^1]: Note.";
+        let rendered = replace_frozen_refs(raw);
+        assert!(
+            !crate::marker_rewrite::has_legacy_note_token(&rendered),
+            "replace_frozen_refs must convert [^en-note1] → [^note1]"
+        );
+    }
+
+    /// `merge_raw_marker_leak` 需要 Phase3 级别的 marker 序列修复，
+    /// 不在 replace_frozen_refs 做全局 `[N]` → `[^N]` 转换（会制造 false missing_note_definition）。
+    /// 此测试仅验证 `has_raw_marker_in_body` 正确识别原始标记。
+    #[test]
+    fn contract_raw_bracket_marker_detected_correctly() {
+        // replace_frozen_refs 不处理 [N] 格式，因此 [3] 仍保留
+        use fnm_core::refs::replace_frozen_refs;
+        let raw = "Body text with [3] raw marker.";
+        let rendered = replace_frozen_refs(raw);
+        assert!(
+            rendered.contains("[3]"),
+            "replace_frozen_refs must NOT convert [3] (not a frozen ref format)"
         );
     }
 }

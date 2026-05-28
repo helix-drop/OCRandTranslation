@@ -12,7 +12,7 @@ use std::collections::HashSet;
 ///
 /// 返回：(links, link_serial_end, synthetic_serial_end, ocr_repaired_count)
 pub fn build_footnote_links(
-    anchors: &mut Vec<BodyAnchorRecord>,
+    anchors: &mut [BodyAnchorRecord],
     note_items: &[NoteItemRecord],
     used_anchor_ids: &mut HashSet<String>,
     link_serial_start: usize,

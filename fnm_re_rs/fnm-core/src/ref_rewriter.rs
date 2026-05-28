@@ -10,6 +10,19 @@ use std::collections::{HashMap, HashSet};
 
 static STAR_MARKER_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^\*{1,4}$").unwrap());
 
+/// 原始标记重写的共享上下文。
+///
+/// 将多个重写函数共享的参数集合为一个结构体，避免 `too_many_arguments`。
+pub struct MarkerRewriteContext<'a> {
+    pub marker_note_sequences: &'a HashMap<String, Vec<String>>,
+    pub marker_usage_index: &'a mut HashMap<String, usize>,
+    pub note_kind_by_id: &'a HashMap<String, String>,
+    pub local_ref_numbers: &'a mut HashMap<String, i64>,
+    pub ordered_note_ids: &'a mut Vec<String>,
+    pub footnote_ids_seen: Option<&'a mut Vec<String>>,
+    pub note_marker_by_id: Option<&'a HashMap<String, String>>,
+}
+
 /// 生成 marker 的规范化 key。与 Python `_marker_key` 一致。
 pub fn marker_key(raw: &str) -> String {
     let normalized: String = raw
@@ -223,13 +236,7 @@ pub fn replace_note_refs_with_local_labels(
 /// ←→ Python `replace_raw_bracket_refs_with_local_labels`
 pub fn replace_raw_bracket_refs_with_local_labels(
     text: &str,
-    marker_note_sequences: &HashMap<String, Vec<String>>,
-    marker_usage_index: &mut HashMap<String, usize>,
-    note_kind_by_id: &HashMap<String, String>,
-    local_ref_numbers: &mut HashMap<String, i64>,
-    ordered_note_ids: &mut Vec<String>,
-    mut footnote_ids_seen: Option<&mut Vec<String>>,
-    note_marker_by_id: Option<&HashMap<String, String>>,
+    ctx: &mut MarkerRewriteContext<'_>,
 ) -> String {
     use crate::export_constants::RAW_BRACKET_NOTE_REF_RE;
     RAW_BRACKET_NOTE_REF_RE
@@ -247,7 +254,8 @@ pub fn replace_raw_bracket_refs_with_local_labels(
                 }
             }
             let marker = caps.get(1).map(|m| m.as_str()).unwrap_or("");
-            let note_id = consume_marker_note_id(marker, marker_note_sequences, marker_usage_index);
+            let note_id =
+                consume_marker_note_id(marker, ctx.marker_note_sequences, ctx.marker_usage_index);
             if note_id.is_empty() {
                 return caps
                     .get(0)
@@ -256,15 +264,15 @@ pub fn replace_raw_bracket_refs_with_local_labels(
             }
             let ref_num = local_endnote_ref_number(
                 &note_id,
-                note_kind_by_id,
-                local_ref_numbers,
-                ordered_note_ids,
-                note_marker_by_id,
+                ctx.note_kind_by_id,
+                ctx.local_ref_numbers,
+                ctx.ordered_note_ids,
+                ctx.note_marker_by_id,
             );
             match ref_num {
                 Some(n) => format!("[^{}]", n),
                 None => {
-                    if let Some(ref mut ids) = footnote_ids_seen {
+                    if let Some(ref mut ids) = ctx.footnote_ids_seen {
                         if !ids.contains(&note_id) {
                             ids.push(note_id);
                         }
@@ -280,13 +288,7 @@ pub fn replace_raw_bracket_refs_with_local_labels(
 /// ←→ Python `replace_raw_superscript_refs_with_local_labels`
 pub fn replace_raw_superscript_refs_with_local_labels(
     text: &str,
-    marker_note_sequences: &HashMap<String, Vec<String>>,
-    marker_usage_index: &mut HashMap<String, usize>,
-    note_kind_by_id: &HashMap<String, String>,
-    local_ref_numbers: &mut HashMap<String, i64>,
-    ordered_note_ids: &mut Vec<String>,
-    mut footnote_ids_seen: Option<&mut Vec<String>>,
-    note_marker_by_id: Option<&HashMap<String, String>>,
+    ctx: &mut MarkerRewriteContext<'_>,
 ) -> String {
     use crate::export_constants::RAW_SUPERSCRIPT_NOTE_REF_RE;
     RAW_SUPERSCRIPT_NOTE_REF_RE
@@ -298,7 +300,8 @@ pub fn replace_raw_superscript_refs_with_local_labels(
                 .or_else(|| caps.get(4))
                 .map(|m| m.as_str())
                 .unwrap_or("");
-            let note_id = consume_marker_note_id(marker, marker_note_sequences, marker_usage_index);
+            let note_id =
+                consume_marker_note_id(marker, ctx.marker_note_sequences, ctx.marker_usage_index);
             if note_id.is_empty() {
                 return caps
                     .get(0)
@@ -307,15 +310,15 @@ pub fn replace_raw_superscript_refs_with_local_labels(
             }
             let ref_num = local_endnote_ref_number(
                 &note_id,
-                note_kind_by_id,
-                local_ref_numbers,
-                ordered_note_ids,
-                note_marker_by_id,
+                ctx.note_kind_by_id,
+                ctx.local_ref_numbers,
+                ctx.ordered_note_ids,
+                ctx.note_marker_by_id,
             );
             match ref_num {
                 Some(n) => format!("[^{}]", n),
                 None => {
-                    if let Some(ref mut ids) = footnote_ids_seen {
+                    if let Some(ref mut ids) = ctx.footnote_ids_seen {
                         if !ids.contains(&note_id) {
                             ids.push(note_id);
                         }
@@ -331,13 +334,7 @@ pub fn replace_raw_superscript_refs_with_local_labels(
 /// ←→ Python `replace_raw_unicode_superscript_refs_with_local_labels`
 pub fn replace_raw_unicode_superscript_refs_with_local_labels(
     text: &str,
-    marker_note_sequences: &HashMap<String, Vec<String>>,
-    marker_usage_index: &mut HashMap<String, usize>,
-    note_kind_by_id: &HashMap<String, String>,
-    local_ref_numbers: &mut HashMap<String, i64>,
-    ordered_note_ids: &mut Vec<String>,
-    mut footnote_ids_seen: Option<&mut Vec<String>>,
-    note_marker_by_id: Option<&HashMap<String, String>>,
+    ctx: &mut MarkerRewriteContext<'_>,
 ) -> String {
     use crate::export_constants::{
         unicode_superscript_to_ascii, RAW_UNICODE_SUPERSCRIPT_NOTE_REF_RE,
@@ -347,7 +344,7 @@ pub fn replace_raw_unicode_superscript_refs_with_local_labels(
             let raw = caps.get(1).map(|m| m.as_str()).unwrap_or("");
             let marker: String = raw.chars().map(unicode_superscript_to_ascii).collect();
             let note_id =
-                consume_marker_note_id(&marker, marker_note_sequences, marker_usage_index);
+                consume_marker_note_id(&marker, ctx.marker_note_sequences, ctx.marker_usage_index);
             if note_id.is_empty() {
                 return caps
                     .get(0)
@@ -356,15 +353,15 @@ pub fn replace_raw_unicode_superscript_refs_with_local_labels(
             }
             let ref_num = local_endnote_ref_number(
                 &note_id,
-                note_kind_by_id,
-                local_ref_numbers,
-                ordered_note_ids,
-                note_marker_by_id,
+                ctx.note_kind_by_id,
+                ctx.local_ref_numbers,
+                ctx.ordered_note_ids,
+                ctx.note_marker_by_id,
             );
             match ref_num {
                 Some(n) => format!("[^{}]", n),
                 None => {
-                    if let Some(ref mut ids) = footnote_ids_seen {
+                    if let Some(ref mut ids) = ctx.footnote_ids_seen {
                         if !ids.contains(&note_id) {
                             ids.push(note_id);
                         }
@@ -374,6 +371,76 @@ pub fn replace_raw_unicode_superscript_refs_with_local_labels(
             }
         })
         .to_string()
+}
+
+/// 生成 marker 的规范化 key（仅字母数字，小写）。
+///
+/// ←→ Python `_marker_key` (ref_rewriter.py)
+pub fn alphanumeric_key(text: &str) -> String {
+    let lower = text.trim().to_lowercase();
+    let mut result = String::new();
+    for c in lower.chars() {
+        if c.is_ascii_alphanumeric() {
+            result.push(c);
+        }
+    }
+    result
+}
+
+/// 检测正文中是否有原始注释标记泄漏（带数字边界检查）。
+///
+/// 与 `replace_raw_bracket_refs_with_local_labels` 的边界逻辑一致：
+/// 当 `[N]` 前后紧邻数字时（如 `[19]33` 表示年份 1933），不视为泄漏。
+///
+/// ←→ Python `_has_raw_marker_in_body()` + 数字边界守卫
+pub fn has_raw_marker_leak(body_text: &str, full_text: &str) -> bool {
+    use crate::export_constants::{LOCAL_FOOTNOTE_DEF_RE, RAW_BRACKET_NOTE_REF_RE};
+
+    let mut allowed_markers: HashSet<String> = HashSet::new();
+    for caps in LOCAL_FOOTNOTE_DEF_RE.captures_iter(full_text) {
+        if let Some(m) = caps.get(1) {
+            allowed_markers.insert(alphanumeric_key(m.as_str()));
+        }
+    }
+    // 正文中的 [^N] 引用也算 allowed
+    static LOCAL_REF_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\[\^([0-9]+)\]").unwrap());
+    for caps in LOCAL_REF_RE.captures_iter(body_text) {
+        if let Some(m) = caps.get(1) {
+            allowed_markers.insert(alphanumeric_key(m.as_str()));
+        }
+    }
+
+    if allowed_markers.is_empty() {
+        return false;
+    }
+
+    for caps in RAW_BRACKET_NOTE_REF_RE.captures_iter(body_text) {
+        let full_match = match caps.get(0) {
+            Some(m) => m,
+            None => continue,
+        };
+        let marker = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
+        if marker.is_empty() {
+            continue;
+        }
+        // 数字边界检查：前后是数字则跳过（如 [19]33）
+        let start = full_match.start();
+        let end = full_match.end();
+        let before = body_text[..start].chars().last();
+        if before.is_some_and(|c| c.is_ascii_digit()) {
+            continue;
+        }
+        let after = body_text[end..].chars().next();
+        if after.is_some_and(|c| c.is_ascii_digit()) {
+            continue;
+        }
+        let key = alphanumeric_key(marker);
+        if allowed_markers.contains(&key) {
+            return true;
+        }
+    }
+
+    false
 }
 
 #[cfg(test)]

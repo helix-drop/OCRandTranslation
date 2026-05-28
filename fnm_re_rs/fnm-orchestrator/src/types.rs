@@ -14,32 +14,21 @@ use serde_json::Value;
 
 /// Pipeline 启动阶段。
 ///
+/// 当前仅支持 `Toc`（完整运行）。未来可扩展续跑能力。
+///
 /// ←→ Python `build_module_pipeline_snapshot(start_phase=...)`
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum StartPhase {
     /// 完整运行（默认）
+    #[default]
     Toc,
-    /// 跳过 TOC + book_note_profile，从 chapter_layers 开始
-    ChapterLayers,
-    /// 跳过 Phase 1-2，从 DB 重建 ChapterLayers 后从 Phase 3 开始
-    NoteLinkTable,
-    /// 跳过 Phase 1-3，从 DB 重建 ChapterLayers + NoteLinkTable 后从 Phase 4 开始
-    FrozenUnits,
 }
 
-impl Default for StartPhase {
-    fn default() -> Self {
-        Self::Toc
-    }
-}
-
-impl StartPhase {
-    pub fn from_str(s: &str) -> crate::error::Result<Self> {
+impl std::str::FromStr for StartPhase {
+    type Err = crate::error::OrchestratorError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.trim().to_lowercase().as_str() {
             "toc" | "" => Ok(Self::Toc),
-            "chapter_layers" => Ok(Self::ChapterLayers),
-            "note_link_table" => Ok(Self::NoteLinkTable),
-            "frozen_units" => Ok(Self::FrozenUnits),
             other => Err(crate::error::OrchestratorError::InvalidStartPhase(
                 other.into(),
             )),

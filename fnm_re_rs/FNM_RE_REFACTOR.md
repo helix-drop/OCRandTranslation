@@ -1,5 +1,9 @@
 ## FNM_RE Rust 重构完成度报告
 
+> 历史记录说明（2026-05-27）：本文所写“全部完成”等结论已经失效，
+> 不得作为当前验收或实施依据。当前未闭合问题和验证要求统一见
+> `FNM_AUDIT_REMEDIATION_PLAN.md`；原始 crate 审计见 `FNM_*_AUDIT.md`。
+>
 > 报告日期：2026-05-19（phase4/phase5/phase6/llm-repair 全完成，M5 审计修复落地）
 > 审计方法：逐 Python 函数 1:1 对照 + cargo test --workspace 实测
 > 范围：fnm-core / fnm-phase1 / fnm-phase2 / fnm-phase3 / fnm-phase4 / fnm-phase5 / fnm-phase6 / fnm-llm-repair

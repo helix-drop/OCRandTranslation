@@ -38,10 +38,7 @@ def test_run_llm_repair_empty_db_does_not_panic():
             "test-bk",
             "",
             None,
-            "test-bk",
-            False,
-            0.9,
-            None,
+            json.dumps({"slug": "test-bk", "auto_apply": False}),
         )
         result = json.loads(result_json)
         assert isinstance(result, dict)

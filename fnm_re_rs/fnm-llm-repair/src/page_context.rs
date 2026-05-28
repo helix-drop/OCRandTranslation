@@ -246,19 +246,18 @@ pub fn trim_page_text(text: &str, limit: usize) -> String {
 
 /// ←→ Python `_fnm_page_role_by_no` (llm_repair.py:1067-1086)
 ///
-/// 从 DB 读取 page_role 索引；失败时 warn 并返回空 map（P2-3）。
-pub fn fnm_page_role_by_no(doc_id: &str, repo: &dyn Repository) -> HashMap<i64, String> {
-    let rows = match repo.list_fnm_pages(doc_id) {
-        Ok(rows) => rows,
-        Err(e) => {
-            // TODO: replace with tracing::warn! when subscriber is initialized
-            eprintln!(
-                "[WARN] page_context::fnm_page_role_by_no: DB read failed for doc {}: {}",
-                doc_id, e
-            );
-            return HashMap::new();
-        }
-    };
+/// 从 DB 读取 page_role 索引。失败时传播错误，不允许静默返回空 map。
+pub fn fnm_page_role_by_no(
+    doc_id: &str,
+    repo: &dyn Repository,
+) -> Result<HashMap<i64, String>, anyhow::Error> {
+    let rows = repo.list_fnm_pages(doc_id).map_err(|e| {
+        anyhow::anyhow!(
+            "fnm_page_role_by_no: DB read failed for doc {}: {}",
+            doc_id,
+            e
+        )
+    })?;
     let mut roles = HashMap::new();
     for row in rows {
         let page_no = row.page_no;
@@ -267,7 +266,7 @@ pub fn fnm_page_role_by_no(doc_id: &str, repo: &dyn Repository) -> HashMap<i64, 
             roles.insert(page_no, role);
         }
     }
-    roles
+    Ok(roles)
 }
 
 /// (page_no, char_start, char_end) span 三元组，单位均为 Python 字符索引。
@@ -792,5 +791,20 @@ mod tests {
         assert_eq!(out.len(), 1);
         assert_eq!(out[0]["byte_size"], 0);
         assert_eq!(out[0]["sha256"], "");
+    }
+
+    /// DB 读取成功但无数据时返回空 map（非错误）
+    #[test]
+    fn test_fnm_page_role_by_no_empty_doc_returns_empty() {
+        use fnm_core::db::{open_pool, SqliteRepository};
+        use std::path::Path;
+        let pool = open_pool(Path::new(":memory:")).expect("pool");
+        let repo = SqliteRepository::new(pool);
+        let result = super::fnm_page_role_by_no("nonexistent-doc", &repo);
+        assert!(result.is_ok(), "empty doc should return Ok");
+        assert!(
+            result.unwrap().is_empty(),
+            "empty doc should return empty map"
+        );
     }
 }

@@ -124,8 +124,7 @@ pub fn build_heading_graph(
                 local_start,
                 local_end,
                 *target_page,
-                prev_anchor_page,
-                next_target_page,
+                (prev_anchor_page, next_target_page),
                 false,
             )
         } else {
@@ -233,8 +232,7 @@ pub fn build_heading_graph(
             left,
             right,
             target_page,
-            prev_final_anchor,
-            next_anchor_or_target,
+            (prev_final_anchor, next_anchor_or_target),
             true,
         );
 

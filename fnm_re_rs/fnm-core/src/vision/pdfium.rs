@@ -12,6 +12,10 @@ use pdfium_render::prelude::*;
 use std::sync::Mutex;
 
 /// 全局 Pdfium 实例（懒加载、线程安全）。
+///
+/// **为什么用全局 Mutex**：PDFium 绑定的线程安全边界未知，其 C 库可能使用全局状态。
+/// 移除此锁可能导致并发崩溃。这是资源管理例外，不是普通业务状态 Mutex。
+/// 相关真实测试受 `FNM_PDFIUM_ENABLED=1` 环境变量控制。
 pub static PDFIUM: Lazy<Mutex<Pdfium>> = Lazy::new(|| {
     let bindings = Pdfium::bind_to_system_library()
         .or_else(|_| Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./")))

@@ -23,15 +23,13 @@ pub fn exact_matching_candidates<'a>(
 }
 
 /// 选择最优候选。
-#[allow(clippy::too_many_arguments)]
 pub fn best_candidate(
     title_key: &str,
     candidates: &[HeadingCandidate],
     start_page: i64,
     end_page: i64,
     target_page: i64,
-    prev_anchor_page: i64,
-    next_anchor_page: i64,
+    anchor_pages: (i64, i64),
     require_strong: bool,
 ) -> Option<HeadingCandidate> {
     let mut matched = exact_matching_candidates(title_key, candidates, start_page, end_page);
@@ -45,8 +43,8 @@ pub fn best_candidate(
     }
 
     matched.sort_by(|a, b| {
-        let ka = scoring::candidate_sort_key(a, target_page, prev_anchor_page, next_anchor_page);
-        let kb = scoring::candidate_sort_key(b, target_page, prev_anchor_page, next_anchor_page);
+        let ka = scoring::candidate_sort_key(a, target_page, anchor_pages.0, anchor_pages.1);
+        let kb = scoring::candidate_sort_key(b, target_page, anchor_pages.0, anchor_pages.1);
         kb.cmp(&ka)
     });
 

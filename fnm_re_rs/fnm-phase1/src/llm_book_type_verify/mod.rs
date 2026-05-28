@@ -119,14 +119,16 @@ pub async fn verify_book_type_with_llm(
         .collect();
     let mode_types: Vec<String> = profile.mode_types.iter().cloned().collect();
     let user_prompt = prompt::build_user_prompt(
-        &book_note_profile.book_type,
+        &prompt::BookPromptStats {
+            book_type: book_note_profile.book_type.clone(),
+            toc_has_notes_entry: profile.toc_has_notes_entry,
+            toc_notes_page: profile.toc_notes_printed_page,
+            chapter_count: profile.chapter_count,
+            mode_types,
+            endnote_region_count: profile.endnote_regions.len(),
+            endnote_item_count: profile.endnote_item_count,
+        },
         &page_infos,
-        profile.toc_has_notes_entry,
-        profile.toc_notes_printed_page,
-        profile.chapter_count,
-        &mode_types,
-        profile.endnote_regions.len(),
-        profile.endnote_item_count,
         &chapter_modes_by_page,
     );
 

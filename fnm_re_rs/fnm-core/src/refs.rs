@@ -14,6 +14,18 @@ pub static FN_REF_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{FN_REF:([^}]+)
 
 pub static EN_REF_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\{\{EN_REF:([^}]+)\}\}").unwrap());
 
+/// 匹配旧版 `[FN-note1]` 格式的冻结脚注引用。
+pub static LEGACY_FN_BRACKET_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\[FN-([^\]]+)\]").unwrap());
+
+/// 匹配旧版 `[EN-note1]` 格式的冻结尾注引用。
+pub static LEGACY_EN_BRACKET_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"\[EN-([^\]]+)\]").unwrap());
+
+/// 匹配旧版 `[^en-note1]` 格式的冻结尾注引用。
+pub static LEGACY_EN_SUPERSCRIPT_RE: Lazy<Regex> =
+    Lazy::new(|| Regex::new(r"(?i)\[\^en-([^\]]+)\]").unwrap());
+
 pub static VISIBLE_ENDNOTE_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)\[\^(en-[^\]]+)\]").unwrap());
 
@@ -122,30 +134,19 @@ fn normalize_endnote_label(note_id: &str) -> String {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum EndnoteMode {
-    Legacy,
-    Standard,
-}
-
-impl std::str::FromStr for EndnoteMode {
-    type Err = String;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s.trim().to_lowercase().as_str() {
-            "legacy" => Ok(Self::Legacy),
-            "standard" => Ok(Self::Standard),
-            other => Err(format!("unsupported endnote_mode: {other}")),
-        }
-    }
-}
-
 /// 把文本中的 NOTE_REF/FN_REF/EN_REF token 改写为 markdown 脚注 `[^id]`。
 /// 与 Python `replace_frozen_refs` 一致。
-///
-/// 注：`endnote_mode` 参数当前为兼容占位，`Legacy` 和 `Standard` 行为一致。
-/// 详见 FNM_CORE_AUDIT.md P2。
-pub fn replace_frozen_refs(text: &str, _mode: EndnoteMode) -> String {
+pub fn replace_frozen_refs(text: &str) -> String {
     let mut payload = text.to_string();
+
+    // 旧版 `[^en-note1]` → `[^note1]`（Phase3 遗留的未匹配尾注 token）
+    // 必须在 NOTE_REF_RE 之前运行，避免将 NOTE_REF_RE 生成的 [^en-...] 再次转换
+    payload = LEGACY_EN_SUPERSCRIPT_RE
+        .replace_all(&payload, |caps: &regex::Captures| {
+            let note_id = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
+            format!("[^{}]", note_id)
+        })
+        .to_string();
 
     // NOTE_REF
     payload = NOTE_REF_RE
@@ -175,6 +176,22 @@ pub fn replace_frozen_refs(text: &str, _mode: EndnoteMode) -> String {
         .replace_all(&payload, |caps: &regex::Captures| {
             let note_id = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
             format!("[^{}]", normalize_endnote_label(note_id))
+        })
+        .to_string();
+
+    // 旧版 `[FN-note1]` → `[^note1]`（Phase3 遗留的未匹配脚注 token）
+    payload = LEGACY_FN_BRACKET_RE
+        .replace_all(&payload, |caps: &regex::Captures| {
+            let note_id = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
+            format!("[^{}]", note_id)
+        })
+        .to_string();
+
+    // 旧版 `[EN-note1]` → `[^note1]`（Phase3 遗留的未匹配尾注 token）
+    payload = LEGACY_EN_BRACKET_RE
+        .replace_all(&payload, |caps: &regex::Captures| {
+            let note_id = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
+            format!("[^{}]", note_id)
         })
         .to_string();
 
@@ -281,7 +298,7 @@ mod tests {
     #[test]
     fn replace_to_markdown_footnote() {
         let text = "Some text {{NOTE_REF:fn-1}}.";
-        let result = replace_frozen_refs(text, EndnoteMode::Standard);
+        let result = replace_frozen_refs(text);
         assert!(result.contains("[^fn-1]"));
         assert!(!result.contains("{{NOTE_REF"));
     }
@@ -289,7 +306,7 @@ mod tests {
     #[test]
     fn replace_endnote_to_markdown() {
         let text = "Ref {{NOTE_REF:en-3}} here.";
-        let result = replace_frozen_refs(text, EndnoteMode::Standard);
+        let result = replace_frozen_refs(text);
         assert!(result.contains("[^en-3]"));
     }
 

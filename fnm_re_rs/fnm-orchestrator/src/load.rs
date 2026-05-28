@@ -19,7 +19,7 @@ pub fn load_phase6_structure(
 ) -> Result<Phase6Structure> {
     let pages = repo
         .list_fnm_pages(doc_id)
-        .map_err(|e| OrchestratorError::Phase1(e.into()))?;
+        .map_err(OrchestratorError::Phase1)?;
     if pages.is_empty() {
         return Err(OrchestratorError::Phase1(anyhow::anyhow!(
             "doc_id '{}' not found or has no pages",
@@ -28,61 +28,64 @@ pub fn load_phase6_structure(
     }
     let chapters = repo
         .list_fnm_chapters(doc_id)
-        .map_err(|e| OrchestratorError::Phase1(e.into()))?;
+        .map_err(OrchestratorError::Phase1)?;
     let heading_candidates = repo
         .list_fnm_heading_candidates(doc_id)
-        .map_err(|e| OrchestratorError::Phase1(e.into()))?;
+        .map_err(OrchestratorError::Phase1)?;
     let section_heads = repo
         .list_fnm_section_heads(doc_id)
-        .map_err(|e| OrchestratorError::Phase1(e.into()))?;
+        .map_err(OrchestratorError::Phase1)?;
 
     let note_regions = repo
         .list_fnm_note_regions(doc_id)
-        .map_err(|e| OrchestratorError::Phase2(e.into()))?;
+        .map_err(OrchestratorError::Phase2)?;
     let note_items = repo
         .list_fnm_note_items(doc_id)
-        .map_err(|e| OrchestratorError::Phase2(e.into()))?;
+        .map_err(OrchestratorError::Phase2)?;
     let chapter_note_modes = repo
         .list_fnm_chapter_note_modes(doc_id)
-        .map_err(|e| OrchestratorError::Phase2(e.into()))?;
+        .map_err(OrchestratorError::Phase2)?;
 
     let body_anchors = repo
         .list_fnm_body_anchors(doc_id)
-        .map_err(|e| OrchestratorError::Phase3(e.into()))?;
+        .map_err(OrchestratorError::Phase3)?;
     let note_links = repo
         .list_fnm_note_links(doc_id)
-        .map_err(|e| OrchestratorError::Phase3(e.into()))?;
+        .map_err(OrchestratorError::Phase3)?;
 
     let translation_units = repo
         .list_fnm_translation_units(doc_id)
-        .map_err(|e| OrchestratorError::Phase4(e.into()))?;
+        .map_err(OrchestratorError::Phase4)?;
     let structure_reviews = repo
         .list_fnm_structure_reviews(doc_id)
-        .map_err(|e| OrchestratorError::Phase4(e.into()))?;
+        .map_err(OrchestratorError::Phase4)?;
 
     let export_chapters = repo
         .list_fnm_export_chapters(doc_id)
-        .map_err(|e| OrchestratorError::Phase6(e.into()))?;
+        .map_err(OrchestratorError::Phase6)?;
     let export_bundle = repo
         .list_fnm_export_bundle(doc_id)
-        .map_err(|e| OrchestratorError::Phase6(e.into()))?
-        .unwrap_or_default();
+        .map_err(OrchestratorError::Phase6)?;
+    let has_export_bundle = export_bundle.is_some();
+    let export_bundle = export_bundle.unwrap_or_default();
     let export_audit = repo
         .list_fnm_export_audit(doc_id)
-        .map_err(|e| OrchestratorError::Phase6(e.into()))?
-        .unwrap_or_default();
+        .map_err(OrchestratorError::Phase6)?;
+    let has_export_audit = export_audit.is_some();
+    let export_audit = export_audit.unwrap_or_default();
 
-    let has_export_audit = !export_audit.structure_state.is_empty()
-        || !export_audit.blocking_reasons.is_empty()
-        || export_audit.can_ship;
+    let has_export_audit_content = has_export_audit
+        && (!export_audit.structure_state.is_empty()
+            || !export_audit.blocking_reasons.is_empty()
+            || export_audit.can_ship);
 
     let (diagnostic_pages, diagnostic_notes) = if include_diag {
         let diag_pages = repo
             .list_fnm_diagnostic_pages(doc_id)
-            .map_err(|e| OrchestratorError::Phase5(e.into()))?;
+            .map_err(OrchestratorError::Phase5)?;
         let diag_notes = repo
             .list_fnm_diagnostic_notes(doc_id)
-            .map_err(|e| OrchestratorError::Phase5(e.into()))?;
+            .map_err(OrchestratorError::Phase5)?;
         (diag_pages, diag_notes)
     } else {
         (vec![], vec![])
@@ -93,17 +96,22 @@ pub fn load_phase6_structure(
         .filter(|r| r.note_kind == NoteKind::Endnote)
         .all(|r| r.region_marker_alignment_ok);
 
-    let (structure_state, blocking_reasons) = if has_export_audit {
-        (
-            export_audit.structure_state.clone(),
-            export_audit.blocking_reasons.clone(),
-        )
+    // 旧 blocking_reasons 不再携带到 status.blocking_reasons（审计每次独立计算）
+    let structure_state: String = if has_export_audit_content {
+        export_audit.structure_state.clone()
     } else {
-        (
-            "phase6_not_available".into(),
-            vec!["export_audit_missing".into()],
-        )
+        "phase6_not_available".into()
     };
+    let mut blocking_reasons: Vec<String> = if has_export_audit_content {
+        vec![]
+    } else {
+        vec!["export_audit_missing".into()]
+    };
+    if !has_export_bundle {
+        blocking_reasons.push("export_bundle_missing".into());
+    }
+
+    let export_ready = has_export_bundle && has_export_audit_content;
 
     Ok(Phase6Structure {
         pages,
@@ -128,8 +136,8 @@ pub fn load_phase6_structure(
             blocking_reasons,
             chapter_endnote_region_alignment_ok,
             toc_semantic_contract_ok: true,
-            export_ready_test: true,
-            export_ready_real: true,
+            export_ready_test: export_ready,
+            export_ready_real: export_ready,
             ..Default::default()
         },
         summary: Phase6Summary::default(),

@@ -266,12 +266,13 @@ pub(crate) fn run_phase3(
     })
 }
 
+#[expect(clippy::too_many_arguments)]
 pub(crate) fn run_phase4(
     phase1: &Phase1Snapshot,
     phase2: &Phase2Snapshot,
     phase3: &Phase3Snapshot,
     chapter_layers: &ChapterLayers,
-    pages: &[RawPage],
+    raw_pages: &[RawPage],
     pipeline_run_id: &str,
     emit_upstream_gate_reviews: bool,
     config: &PipelineConfig,
@@ -285,7 +286,7 @@ pub(crate) fn run_phase4(
     let input = fnm_phase4::input::Phase4Input {
         chapter_layers,
         note_link_table: &phase3.note_link_table,
-        raw_pages: pages,
+        raw_pages,
         page_partitions: &phase1.structure.pages,
         chapters: &phase1.structure.chapters,
         body_anchors: &phase3.structure.body_anchors,

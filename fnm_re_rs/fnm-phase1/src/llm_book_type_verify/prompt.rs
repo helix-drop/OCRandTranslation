@@ -61,38 +61,49 @@ pub struct PageInfo {
     pub chapter_label: String,
 }
 
+/// 用户 prompt 的书级统计参数。
+pub struct BookPromptStats {
+    pub book_type: String,
+    pub toc_has_notes_entry: bool,
+    pub toc_notes_page: Option<i64>,
+    pub chapter_count: usize,
+    pub mode_types: Vec<String>,
+    pub endnote_region_count: usize,
+    pub endnote_item_count: i64,
+}
+
 /// ←→ Python `_build_user_prompt`
 pub fn build_user_prompt(
-    book_type: &str,
+    stats: &BookPromptStats,
     page_infos: &[PageInfo],
-    toc_has_notes_entry: bool,
-    toc_notes_page: Option<i64>,
-    chapter_count: usize,
-    mode_types: &[String],
-    endnote_region_count: usize,
-    endnote_item_count: i64,
     chapter_modes_by_page: &std::collections::HashMap<i64, String>,
 ) -> String {
     let mut lines = vec![
         "The automated pipeline classified this book as:".to_string(),
-        format!("  book_type = {book_type}"),
+        format!("  book_type = {}", stats.book_type),
         String::new(),
         "Book structure:".to_string(),
-        format!("  chapters: {chapter_count}"),
+        format!("  chapters: {}", stats.chapter_count),
         format!(
             "  chapter modes present: {}",
-            if mode_types.is_empty() {
+            if stats.mode_types.is_empty() {
                 "none".into()
             } else {
-                mode_types.join(", ")
+                stats.mode_types.join(", ")
             }
         ),
-        format!("  endnote regions detected: {endnote_region_count}"),
-        format!("  endnote items (from OCR scan): {endnote_item_count}"),
-        format!("  TOC has explicit 'Notes' / 'Endnotes' entry: {toc_has_notes_entry}"),
+        format!("  endnote regions detected: {}", stats.endnote_region_count),
+        format!(
+            "  endnote items (from OCR scan): {}",
+            stats.endnote_item_count
+        ),
+        format!(
+            "  TOC has explicit 'Notes' / 'Endnotes' entry: {}",
+            stats.toc_has_notes_entry
+        ),
     ];
-    if toc_has_notes_entry {
-        if let Some(p) = toc_notes_page {
+    if stats.toc_has_notes_entry {
+        if let Some(p) = stats.toc_notes_page {
             lines.push(format!("  TOC says Notes/Endnotes at PRINTED page {p}"));
         }
     }
@@ -184,14 +195,16 @@ mod tests {
         ];
         let modes = std::collections::HashMap::new();
         let prompt = build_user_prompt(
-            "endnote_only",
+            &BookPromptStats {
+                book_type: "endnote_only".into(),
+                toc_has_notes_entry: false,
+                toc_notes_page: None,
+                chapter_count: 5,
+                mode_types: vec!["chapter_endnote_primary".into()],
+                endnote_region_count: 3,
+                endnote_item_count: 42,
+            },
             &infos,
-            false,
-            None,
-            5,
-            &["chapter_endnote_primary".into()],
-            3,
-            42,
             &modes,
         );
         assert!(prompt.contains("[Ch1]"));

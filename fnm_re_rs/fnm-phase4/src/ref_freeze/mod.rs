@@ -414,7 +414,7 @@ pub fn build_frozen_units(
                 let text = row.get("text").and_then(|v| v.as_str()).unwrap_or("");
                 serde_json::json!({
                     "page_no": page_no,
-                    "text": refs::replace_frozen_refs(text, fnm_core::refs::EndnoteMode::Standard)
+                    "text": refs::replace_frozen_refs(text)
                 })
             })
             .collect();

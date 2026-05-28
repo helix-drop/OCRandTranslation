@@ -23,7 +23,7 @@ def test_has_explicit_sup_none():
 
 
 def test_recover_book_empty():
-    result = json.loads(fnm_re_rs.recover_book_json(json.dumps([]), ""))
+    result = json.loads(fnm_re_rs.recover_book_json(json.dumps([]), "", json.dumps({})))
     assert isinstance(result, dict)
     assert len(result) == 0
 
@@ -36,5 +36,6 @@ def test_recover_book_with_fblocks():
             "fnBlocks": [{"marker": "1"}, {"marker": "2"}],
         }
     ]
-    result = json.loads(fnm_re_rs.recover_book_json(json.dumps(pages), ""))
+    chapter_markers = {"ch-1": ["1", "2"]}
+    result = json.loads(fnm_re_rs.recover_book_json(json.dumps(pages), "", json.dumps(chapter_markers)))
     assert isinstance(result, dict)
