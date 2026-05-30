@@ -22,6 +22,10 @@ use crate::constants::{
     LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS,
 };
 use crate::page_context::endnote_synthesize_focus_pages;
+use crate::value_views::{
+    ClusterView, MatchedExampleView, PageContextView, RebindCandidateView, UnmatchedAnchorView,
+    UnmatchedNoteView,
+};
 
 static WHITESPACE_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\s+").unwrap());
 
@@ -211,6 +215,8 @@ fn slice_array(arr: Option<&Vec<Value>>, cap: usize) -> Vec<Value> {
 ///
 /// 对 cluster 切片到请求容量，计算 allowed_actions + request_mode + page_contexts。
 pub fn slice_cluster_for_request(cluster: &Value, caps: SliceCaps) -> Value {
+    let cv = ClusterView::new(cluster);
+
     let cap_matched = caps
         .max_matched_examples
         .unwrap_or(LLM_REPAIR_MAX_MATCHED_EXAMPLES);
@@ -222,51 +228,40 @@ pub fn slice_cluster_for_request(cluster: &Value, caps: SliceCaps) -> Value {
         .unwrap_or(LLM_REPAIR_MAX_UNMATCHED_REFS);
 
     let matched_examples = slice_array(
-        cluster.get("matched_examples").and_then(|v| v.as_array()),
+        cv.inner().get("matched_examples").and_then(|v| v.as_array()),
         cap_matched,
     );
     let unmatched_note_items = slice_array(
-        cluster
-            .get("unmatched_note_items")
-            .and_then(|v| v.as_array()),
+        cv.inner().get("unmatched_note_items").and_then(|v| v.as_array()),
         cap_notes,
     );
     let unmatched_anchors = slice_array(
-        cluster.get("unmatched_anchors").and_then(|v| v.as_array()),
+        cv.inner().get("unmatched_anchors").and_then(|v| v.as_array()),
         cap_anchors,
     );
     let rebind_candidates = slice_array(
-        cluster.get("rebind_candidates").and_then(|v| v.as_array()),
+        cv.inner().get("rebind_candidates").and_then(|v| v.as_array()),
         cap_notes,
     );
 
-    let body_text_raw = cluster
-        .get("chapter_body_text")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .trim()
-        .to_string();
+    let body_text_raw = cv.chapter_body_text().trim().to_string();
     let body_word_count = BODY_CONTEXT_WORD_RE.find_iter(&body_text_raw).count();
     let mut has_body_text = body_text_raw.chars().count() >= 30 && body_word_count >= 5;
     if !has_body_text {
-        let excerpts: Vec<String> = cluster
-            .get("page_contexts")
-            .and_then(|v| v.as_array())
-            .cloned()
-            .unwrap_or_default()
-            .into_iter()
-            .filter_map(|ctx| {
-                ctx.get("ocr_excerpt")
-                    .and_then(|v| v.as_str())
-                    .map(|s| s.trim().to_string())
-                    .filter(|s| !s.is_empty())
+        let excerpts: Vec<String> = cv
+            .page_contexts()
+            .map(PageContextView)
+            .filter_map(|pv| {
+                let s = pv.ocr_excerpt().trim();
+                if s.is_empty() { None } else { Some(s.to_string()) }
             })
             .collect();
         let excerpt_body = excerpts.join("\n");
         let excerpt_word_count = BODY_CONTEXT_WORD_RE.find_iter(&excerpt_body).count();
         has_body_text = excerpt_body.chars().count() >= 120 && excerpt_word_count >= 20;
     }
-    let has_page_context = cluster
+    let has_page_context = cv
+        .inner()
         .get("page_contexts")
         .and_then(|v| v.as_array())
         .map(|a| !a.is_empty())
@@ -347,26 +342,27 @@ fn derive_actions(
 /// 组装用户 prompt：JSON payload + allowed_actions hint + 模式相关额外规则。
 pub fn repair_user_prompt(cluster: &Value, caps: SliceCaps) -> String {
     let request_cluster = slice_cluster_for_request(cluster, caps);
-    let allowed_actions: Vec<String> = request_cluster
-        .get("allowed_actions")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_else(|| vec![Value::String("needs_review".to_string())])
-        .into_iter()
-        .filter_map(|v| v.as_str().map(|s| s.to_string()))
+    let rv = ClusterView::new(&request_cluster);
+
+    let allowed_actions: Vec<String> = rv
+        .allowed_actions()
+        .map(|s| s.to_string())
         .collect();
+    // fallback: if allowed_actions was empty, default to needs_review
+    let allowed_actions = if allowed_actions.is_empty() {
+        vec!["needs_review".to_string()]
+    } else {
+        allowed_actions
+    };
     let allowed_set: std::collections::HashSet<&str> =
         allowed_actions.iter().map(|s| s.as_str()).collect();
 
     let mut payload = json!({
-        "cluster_id": request_cluster.get("cluster_id").cloned().unwrap_or(Value::Null),
-        "chapter_title": request_cluster.get("chapter_title").cloned().unwrap_or(Value::Null),
-        "page_range": [
-            request_cluster.get("page_start").cloned().unwrap_or(Value::Null),
-            request_cluster.get("page_end").cloned().unwrap_or(Value::Null),
-        ],
-        "note_system": request_cluster.get("note_system").cloned().unwrap_or(Value::Null),
-        "request_mode": request_cluster.get("request_mode").cloned().unwrap_or(Value::Null),
+        "cluster_id": rv.cluster_id_val(),
+        "chapter_title": rv.chapter_title_val(),
+        "page_range": [rv.page_start_val(), rv.page_end_val()],
+        "note_system": rv.note_system_val(),
+        "request_mode": rv.request_mode_val(),
         "allowed_actions": allowed_actions.iter().map(|s| Value::String(s.clone())).collect::<Vec<_>>(),
         "page_contexts": page_contexts_payload(&request_cluster),
         "matched_examples": matched_examples_payload(&request_cluster),
@@ -375,24 +371,14 @@ pub fn repair_user_prompt(cluster: &Value, caps: SliceCaps) -> String {
         "rebind_candidates": rebind_candidates_payload(&request_cluster),
     });
 
-    let mut chapter_body_text = request_cluster
-        .get("chapter_body_text")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .trim()
-        .to_string();
+    let mut chapter_body_text = rv.chapter_body_text().trim().to_string();
     if chapter_body_text.is_empty() && allowed_set.contains("synthesize_anchor") {
-        let parts: Vec<String> = request_cluster
-            .get("page_contexts")
-            .and_then(|v| v.as_array())
-            .cloned()
-            .unwrap_or_default()
-            .into_iter()
-            .filter_map(|ctx| {
-                ctx.get("ocr_excerpt")
-                    .and_then(|v| v.as_str())
-                    .map(|s| s.trim().to_string())
-                    .filter(|s| !s.is_empty())
+        let parts: Vec<String> = rv
+            .page_contexts()
+            .map(PageContextView)
+            .filter_map(|pv| {
+                let s = pv.ocr_excerpt().trim();
+                if s.is_empty() { None } else { Some(s.to_string()) }
             })
             .collect();
         if !parts.is_empty() {
@@ -435,19 +421,14 @@ pub fn repair_user_prompt(cluster: &Value, caps: SliceCaps) -> String {
 }
 
 fn page_contexts_payload(request_cluster: &Value) -> Value {
-    let items: Vec<Value> = request_cluster
-        .get("page_contexts")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
-        .map(|item| {
+    let cv = ClusterView::new(request_cluster);
+    let items: Vec<Value> = cv
+        .page_contexts()
+        .map(|ctx| {
+            let pv = PageContextView(ctx);
             json!({
-                "page_no": item.get("page_no").cloned().unwrap_or(Value::Null),
-                "ocr_excerpt": trim_excerpt(
-                    item.get("ocr_excerpt").and_then(|v| v.as_str()).unwrap_or(""),
-                    LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS,
-                ),
+                "page_no": pv.page_no_val(),
+                "ocr_excerpt": trim_excerpt(pv.ocr_excerpt(), LLM_REPAIR_PAGE_CONTEXT_PROMPT_CHARS),
             })
         })
         .collect();
@@ -455,25 +436,17 @@ fn page_contexts_payload(request_cluster: &Value) -> Value {
 }
 
 fn matched_examples_payload(request_cluster: &Value) -> Value {
-    let items: Vec<Value> = request_cluster
-        .get("matched_examples")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
+    let cv = ClusterView::new(request_cluster);
+    let items: Vec<Value> = cv
+        .matched_examples()
         .map(|item| {
+            let ev = MatchedExampleView(item);
             json!({
-                "note_item_id": item.get("note_item_id").cloned().unwrap_or(Value::Null),
-                "anchor_id": item.get("anchor_id").cloned().unwrap_or(Value::Null),
-                "marker": item.get("marker").cloned().unwrap_or(Value::Null),
-                "note_excerpt": trim_excerpt(
-                    item.get("note_excerpt").and_then(|v| v.as_str()).unwrap_or(""),
-                    240,
-                ),
-                "anchor_excerpt": trim_excerpt(
-                    item.get("anchor_excerpt").and_then(|v| v.as_str()).unwrap_or(""),
-                    240,
-                ),
+                "note_item_id": ev.note_item_id(),
+                "anchor_id": ev.anchor_id(),
+                "marker": ev.marker(),
+                "note_excerpt": trim_excerpt(ev.note_excerpt(), 240),
+                "anchor_excerpt": trim_excerpt(ev.anchor_excerpt(), 240),
             })
         })
         .collect();
@@ -481,21 +454,16 @@ fn matched_examples_payload(request_cluster: &Value) -> Value {
 }
 
 fn unmatched_note_items_payload(request_cluster: &Value) -> Value {
-    let items: Vec<Value> = request_cluster
-        .get("unmatched_note_items")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
+    let cv = ClusterView::new(request_cluster);
+    let items: Vec<Value> = cv
+        .unmatched_note_items()
         .map(|item| {
+            let nv = UnmatchedNoteView(item);
             json!({
-                "note_item_id": item.get("note_item_id").cloned().unwrap_or(Value::Null),
-                "marker": item.get("marker").cloned().unwrap_or(Value::Null),
-                "page_no": item.get("page_no").cloned().unwrap_or(Value::Null),
-                "source_text": trim_excerpt(
-                    item.get("source_text").and_then(|v| v.as_str()).unwrap_or(""),
-                    240,
-                ),
+                "note_item_id": nv.note_item_id(),
+                "marker": nv.marker(),
+                "page_no": nv.page_no_val(),
+                "source_text": trim_excerpt(nv.source_text(), 240),
             })
         })
         .collect();
@@ -503,28 +471,17 @@ fn unmatched_note_items_payload(request_cluster: &Value) -> Value {
 }
 
 fn unmatched_anchors_payload(request_cluster: &Value) -> Value {
-    let items: Vec<Value> = request_cluster
-        .get("unmatched_anchors")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
+    let cv = ClusterView::new(request_cluster);
+    let items: Vec<Value> = cv
+        .unmatched_anchors()
         .map(|item| {
-            let marker = item
-                .get("normalized_marker")
-                .filter(|v| !matches!(v, Value::Null))
-                .cloned()
-                .or_else(|| item.get("source_marker").cloned())
-                .unwrap_or(Value::Null);
+            let av = UnmatchedAnchorView(item);
             json!({
-                "anchor_id": item.get("anchor_id").cloned().unwrap_or(Value::Null),
-                "marker": marker,
-                "page_no": item.get("page_no").cloned().unwrap_or(Value::Null),
-                "paragraph_index": item.get("paragraph_index").cloned().unwrap_or(Value::Null),
-                "source_text": trim_excerpt(
-                    item.get("source_text").and_then(|v| v.as_str()).unwrap_or(""),
-                    240,
-                ),
+                "anchor_id": av.anchor_id(),
+                "marker": av.marker(),
+                "page_no": av.page_no_val(),
+                "paragraph_index": av.paragraph_index(),
+                "source_text": trim_excerpt(av.source_text(), 240),
             })
         })
         .collect();
@@ -532,30 +489,22 @@ fn unmatched_anchors_payload(request_cluster: &Value) -> Value {
 }
 
 fn rebind_candidates_payload(request_cluster: &Value) -> Value {
-    let items: Vec<Value> = request_cluster
-        .get("rebind_candidates")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default()
-        .into_iter()
+    let cv = ClusterView::new(request_cluster);
+    let items: Vec<Value> = cv
+        .rebind_candidates()
         .map(|item| {
+            let rv = RebindCandidateView(item);
             json!({
-                "link_id": item.get("link_id").cloned().unwrap_or(Value::Null),
-                "note_item_id": item.get("note_item_id").cloned().unwrap_or(Value::Null),
-                "current_anchor_id": item.get("current_anchor_id").cloned().unwrap_or(Value::Null),
-                "marker": item.get("marker").cloned().unwrap_or(Value::Null),
-                "note_page_no": item.get("note_page_no").cloned().unwrap_or(Value::Null),
-                "anchor_page_no": item.get("anchor_page_no").cloned().unwrap_or(Value::Null),
-                "current_anchor_marker": item.get("current_anchor_marker").cloned().unwrap_or(Value::Null),
-                "current_anchor_synthetic": item.get("current_anchor_synthetic").cloned().unwrap_or(Value::Null),
-                "note_excerpt": trim_excerpt(
-                    item.get("note_excerpt").and_then(|v| v.as_str()).unwrap_or(""),
-                    240,
-                ),
-                "anchor_excerpt": trim_excerpt(
-                    item.get("anchor_excerpt").and_then(|v| v.as_str()).unwrap_or(""),
-                    240,
-                ),
+                "link_id": rv.link_id(),
+                "note_item_id": rv.note_item_id(),
+                "current_anchor_id": rv.current_anchor_id(),
+                "marker": rv.marker(),
+                "note_page_no": rv.note_page_no(),
+                "anchor_page_no": rv.anchor_page_no(),
+                "current_anchor_marker": rv.current_anchor_marker(),
+                "current_anchor_synthetic": rv.current_anchor_synthetic(),
+                "note_excerpt": trim_excerpt(rv.note_excerpt(), 240),
+                "anchor_excerpt": trim_excerpt(rv.anchor_excerpt(), 240),
             })
         })
         .collect();

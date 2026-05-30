@@ -31,6 +31,7 @@ pub mod run;
 pub mod strategies;
 pub mod trace;
 pub mod usage;
+pub mod value_views;
 
 mod constants;
 
