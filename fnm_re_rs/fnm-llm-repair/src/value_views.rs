@@ -200,6 +200,13 @@ impl<'a> UnmatchedNoteView<'a> {
         self.0.get("marker").cloned().unwrap_or(Value::Null)
     }
 
+    /// Returns `marker` if present, otherwise `normalized_marker`.
+    pub fn marker_or_normalized(&self) -> Option<&Value> {
+        self.0
+            .get("marker")
+            .or_else(|| self.0.get("normalized_marker"))
+    }
+
     pub fn page_no(&self) -> i64 {
         self.0.get("page_no").and_then(|v| v.as_i64()).unwrap_or(0)
     }
@@ -268,12 +275,27 @@ impl<'a> RebindCandidateView<'a> {
         self.0.get("marker").cloned().unwrap_or(Value::Null)
     }
 
+    /// Returns `marker` if present, otherwise `current_anchor_marker`.
+    pub fn marker_or_current_anchor(&self) -> Option<&Value> {
+        self.0
+            .get("marker")
+            .or_else(|| self.0.get("current_anchor_marker"))
+    }
+
     pub fn note_page_no(&self) -> Value {
         self.0.get("note_page_no").cloned().unwrap_or(Value::Null)
     }
 
     pub fn anchor_page_no(&self) -> Value {
         self.0.get("anchor_page_no").cloned().unwrap_or(Value::Null)
+    }
+
+    pub fn anchor_page_no_i64(&self) -> i64 {
+        self.0.get("anchor_page_no").and_then(|v| v.as_i64()).unwrap_or(0)
+    }
+
+    pub fn note_page_no_i64(&self) -> i64 {
+        self.0.get("note_page_no").and_then(|v| v.as_i64()).unwrap_or(0)
     }
 
     pub fn current_anchor_marker(&self) -> Value {

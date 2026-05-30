@@ -24,6 +24,8 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::collections::{HashMap, HashSet};
 
+use crate::value_views::{ClusterView, RebindCandidateView, UnmatchedAnchorView, UnmatchedNoteView};
+
 use crate::constants::{
     LLM_REPAIR_FOOTNOTE_PAGE_PADDING, LLM_REPAIR_MAX_FOCUS_PAGES, LLM_REPAIR_MAX_IMAGE_PAGES,
 };
@@ -48,52 +50,33 @@ pub fn marker_int(value: &Value) -> Option<i64> {
 ///
 /// 对 endnote 簇推断 LLM 截图聚焦页范围：根据已知 anchor 页码序列推断未匹配 marker 的临近页。
 pub fn endnote_synthesize_focus_pages(cluster: &Value) -> Vec<i64> {
-    let note_system = cluster
-        .get("note_system")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .trim()
-        .to_lowercase();
+    let cv = ClusterView::new(cluster);
+    let note_system = cv.note_system().trim().to_lowercase();
     if note_system != "endnote" {
         return Vec::new();
     }
-    let unmatched_markers: Vec<i64> = cluster
-        .get("unmatched_note_items")
-        .and_then(|v| v.as_array())
-        .map(|arr| {
-            arr.iter()
-                .filter_map(|item| {
-                    let marker_raw = item
-                        .get("marker")
-                        .or_else(|| item.get("normalized_marker"))
-                        .cloned()
-                        .unwrap_or(Value::Null);
-                    marker_int(&marker_raw)
-                })
-                .collect()
+    let unmatched_markers: Vec<i64> = cv
+        .unmatched_note_items()
+        .filter_map(|item| {
+            let nv = UnmatchedNoteView(item);
+            let marker_raw = nv
+                .marker_or_normalized()
+                .cloned()
+                .unwrap_or(Value::Null);
+            marker_int(&marker_raw)
         })
-        .unwrap_or_default();
+        .collect();
     if unmatched_markers.is_empty() {
         return Vec::new();
     }
     let mut known_pages_by_marker: HashMap<i64, Vec<i64>> = HashMap::new();
-    for item in cluster
-        .get("rebind_candidates")
-        .and_then(|v| v.as_array())
-        .unwrap_or(&Vec::new())
-    {
-        let marker_value = item
-            .get("marker")
-            .or_else(|| item.get("current_anchor_marker"))
-            .cloned()
-            .unwrap_or(Value::Null);
+    for item in cv.rebind_candidates() {
+        let rv = RebindCandidateView(item);
+        let marker_value = rv.marker_or_current_anchor().cloned().unwrap_or(Value::Null);
         let Some(marker) = marker_int(&marker_value) else {
             continue;
         };
-        let page_no = item
-            .get("anchor_page_no")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(0);
+        let page_no = rv.anchor_page_no_i64();
         if page_no > 0 {
             known_pages_by_marker
                 .entry(marker)
@@ -152,49 +135,28 @@ pub fn cluster_focus_pages(cluster: &Value) -> Vec<i64> {
     if !synth.is_empty() {
         return synth;
     }
-    let note_system = cluster
-        .get("note_system")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .trim()
-        .to_lowercase();
+    let cv = ClusterView::new(cluster);
+    let note_system = cv.note_system().trim().to_lowercase();
     let mut pages: Vec<i64> = Vec::new();
     if note_system != "endnote" {
-        for item in cluster
-            .get("unmatched_note_items")
-            .and_then(|v| v.as_array())
-            .unwrap_or(&Vec::new())
-        {
-            let p = item.get("page_no").and_then(|v| v.as_i64()).unwrap_or(0);
+        for item in cv.unmatched_note_items() {
+            let p = UnmatchedNoteView(item).page_no();
             if p > 0 {
                 pages.push(p);
             }
         }
     }
-    for item in cluster
-        .get("unmatched_anchors")
-        .and_then(|v| v.as_array())
-        .unwrap_or(&Vec::new())
-    {
-        let p = item.get("page_no").and_then(|v| v.as_i64()).unwrap_or(0);
+    for item in cv.unmatched_anchors() {
+        let p = UnmatchedAnchorView(item).page_no();
         if p > 0 {
             pages.push(p);
         }
     }
     let mut cross_page_rebind = false;
-    for item in cluster
-        .get("rebind_candidates")
-        .and_then(|v| v.as_array())
-        .unwrap_or(&Vec::new())
-    {
-        let note_page_no = item
-            .get("note_page_no")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(0);
-        let anchor_page_no = item
-            .get("anchor_page_no")
-            .and_then(|v| v.as_i64())
-            .unwrap_or(0);
+    for item in cv.rebind_candidates() {
+        let rv = RebindCandidateView(item);
+        let note_page_no = rv.note_page_no_i64();
+        let anchor_page_no = rv.anchor_page_no_i64();
         if note_page_no > 0 && note_system != "endnote" {
             pages.push(note_page_no);
         }
@@ -455,16 +417,7 @@ pub fn build_cluster_page_contexts(
 /// 与 prompt_builder 中的 `_should_attach_repair_images` 逻辑一致。在此 page_context
 /// 模块内部使用以避免循环依赖。
 fn should_attach_repair_images(request_cluster: &Value) -> bool {
-    let actions = request_cluster
-        .get("allowed_actions")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default();
-    let actions: Vec<String> = actions
-        .into_iter()
-        .filter_map(|v| v.as_str().map(|s| s.trim().to_string()))
-        .collect();
-    actions.iter().any(|a| a == "synthesize_anchor")
+    ClusterView::new(request_cluster).has_action("synthesize_anchor")
 }
 
 /// ←→ Python `_attach_repair_images_to_contexts` (llm_repair.py:1223-1240)
