@@ -13,15 +13,13 @@ pub(super) struct ChapterRow {
     pub(super) chapter_id: String,
     pub(super) chapter_title: String,
     pub(super) match_key: String,
-    #[allow(dead_code)]
-    pub(super) order_index: usize,
     pub(super) number_value: i64,
     pub(super) numbered_order_index: usize,
 }
 
 pub(super) fn build_chapter_rows(chapters: &[ChapterRecord]) -> Vec<ChapterRow> {
     let mut rows: Vec<ChapterRow> = Vec::new();
-    for (order_index, ch) in chapters.iter().enumerate() {
+    for ch in chapters.iter() {
         let title = normalize_title(&ch.title);
         let match_key = chapter_title_match_key(&title);
         if title.is_empty() || match_key.is_empty() {
@@ -32,7 +30,6 @@ pub(super) fn build_chapter_rows(chapters: &[ChapterRecord]) -> Vec<ChapterRow> 
             chapter_id: ch.chapter_id.clone(),
             chapter_title: title,
             match_key,
-            order_index: order_index + 1,
             number_value,
             numbered_order_index: 0,
         });
@@ -50,11 +47,7 @@ pub(super) fn build_chapter_rows(chapters: &[ChapterRecord]) -> Vec<ChapterRow> 
 
 #[derive(Debug, Clone)]
 pub(super) struct PageChapterSignal {
-    #[allow(dead_code)]
-    pub(super) page_no: i64,
     pub(super) chapter_id: String,
-    #[allow(dead_code)]
-    pub(super) chapter_title: String,
     pub(super) signal_title: String,
     pub(super) source: String,
     pub(super) score: f64,

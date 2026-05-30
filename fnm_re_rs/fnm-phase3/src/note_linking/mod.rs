@@ -78,6 +78,7 @@ pub struct NoteLinkTableResult {
 /// ←→ Python `FNM_RE/modules/note_linking.py:build_note_link_table`（行 1430-1658）
 ///
 /// 每一步对应 Python 行号，按铁律 §1 保真翻译，不合并步骤。
+#[allow(clippy::too_many_arguments)]
 pub fn build_note_link_table(
     chapter_layers: &ChapterLayers,
     pages: &[RawPage],
@@ -89,6 +90,7 @@ pub fn build_note_link_table(
     // 不依赖内部 phase2_rebuild 重建的值，确保 review_seed_summary 等内部
     // 诊断计数与上游一致。
     phase2_chapter_note_modes: &[ChapterNoteModeRecord],
+    skip_llm_verify: bool,
 ) -> NoteLinkTableResult {
     // Python 行 1437：_phase2_from_chapter_layers
     // 本函数只返回 note 数据，不输出退化的 Phase1/2 facts。
@@ -143,11 +145,8 @@ pub fn build_note_link_table(
     }
 
     // Python 行 1454-1460：bare_digit_verifier
-    // ←→ Python 行 1455-1459: LLM bare_digit 校验需要 vision 客户端。
-    // Rust 端初版不支持 skip_llm_verify=false——需要 fnm-llm-repair crate。
-    // 当前 pdf_path 仅做占位传参，bare_digit_verifier 永远为 None。
-    // 若将来启用 LLM 验证，需新增 bare_digit_verifier 参数并在此处调用。
-    let _pdf_path = pdf_path; // 初版：不使用 LLM bare digit verification
+    // skip_llm_verify=false 时，llm_candidates 将被传给 LLM 验证器裁决。
+    // skip_llm_verify=true 时，llm_candidates 按现状保守丢弃。
 
     // Python 行 1461：build_body_anchors
     let (body_anchors, base_anchor_summary) = crate::body_anchors::build_body_anchors(
@@ -156,6 +155,8 @@ pub fn build_note_link_table(
         &phase2_with_overrides.note_regions,
         &phase2_with_overrides.note_items,
         pages,
+        pdf_path,
+        skip_llm_verify,
     );
     // ←→ Python 行 1479：base_anchor_summary 在 materialize 后 merge 进 refresh 结果
     let base_anchor_summary_value =

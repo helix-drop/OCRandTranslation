@@ -144,6 +144,9 @@ pub fn explore_endnote_chapter_regions_full(
             if split_segments.len() > 1 {
                 summary.split_count += split_segments.len() - 1;
                 for (idx, (ch_id, pages)) in split_segments.into_iter().enumerate() {
+                    if pages.is_empty() {
+                        continue;
+                    }
                     summary.rebind_count += 1;
                     let mut r = region.clone();
                     r.region_id = format!("{}-chbound-{:02}", region.region_id, idx + 1);
@@ -216,6 +219,9 @@ pub fn explore_endnote_chapter_regions_full(
             if split_segments.len() > segments.len() {
                 summary.split_count += split_segments.len() - 1;
                 for (idx, (ch_id, pages)) in split_segments.into_iter().enumerate() {
+                    if pages.is_empty() {
+                        continue;
+                    }
                     summary.rebind_count += 1;
                     let mut r = region.clone();
                     r.region_id = format!("{}-chbound-{:02}", region.region_id, idx + 1);
@@ -266,6 +272,9 @@ pub fn explore_endnote_chapter_regions_full(
 
         summary.split_count += segments.len() - 1;
         for (idx, (chapter_id, heading_text, source, pages)) in segments.into_iter().enumerate() {
+            if pages.is_empty() {
+                continue;
+            }
             if !chapter_id.is_empty() && chapter_id != region.chapter_id {
                 summary.rebind_count += 1;
             }

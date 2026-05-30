@@ -211,11 +211,7 @@ pub fn build_chapter_layers(
             .map(|&page_no| {
                 let text = raw_page_by_no
                     .get(&page_no)
-                    .map(|p| {
-                        fnm_core::text::page_markdown_text(
-                            &serde_json::to_value(p).unwrap_or_default(),
-                        )
-                    })
+                    .map(|p| fnm_core::text::raw_page_markdown_text(p))
                     .unwrap_or_default();
                 BodyPageLayer {
                     page_no,

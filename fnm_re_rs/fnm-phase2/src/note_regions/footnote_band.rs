@@ -148,7 +148,6 @@ pub fn build_footnote_band_regions_excluding(
                         has_footnote_band: true,
                         is_post_body_region: false,
                         is_book_scope: false,
-                        explicit_markers: &[],
                         scan_page_kind: "",
                     },
                 )

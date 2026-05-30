@@ -371,7 +371,7 @@ pub fn collect_heading_candidate_rows(
     );
     candidates.extend(toc_candidates);
 
-    // 3. PDF font band candidates（当前 stub）
+    // 3. PDF font band candidates（完整实现：pdf_font_band.rs）
     let pdf_candidates = pdf_font_band::collect_pdf_font_band_candidates(
         page_rows,
         &candidates,

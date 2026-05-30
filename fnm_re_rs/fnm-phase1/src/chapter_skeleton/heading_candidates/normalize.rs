@@ -6,6 +6,7 @@ use fnm_core::records::HeadingCandidate;
 use fnm_core::title::normalize_title;
 
 /// 判断标题是否像句子（用于 reject 启发式）。
+/// 严格版：≥8 词 + 标点/小写词比例。与 fallback.rs 的宽松版有意不同。
 /// ←→ Python `_is_sentence_like_heading`
 pub fn is_sentence_like_heading(title: &str) -> bool {
     let text = normalize_title(title);
@@ -45,18 +46,6 @@ pub fn normalize_heading_candidates(
         }
     }
     candidates
-}
-
-/// 从 `HeadingCandidate` 列表构建 page_no → 角色映射。
-pub fn role_by_no(candidates: &[HeadingCandidate]) -> std::collections::HashMap<i64, String> {
-    let mut map: std::collections::HashMap<i64, String> = std::collections::HashMap::new();
-    for c in candidates {
-        if !c.heading_family_guess.is_empty() {
-            map.entry(c.page_no)
-                .or_insert_with(|| c.heading_family_guess.clone());
-        }
-    }
-    map
 }
 
 #[cfg(test)]

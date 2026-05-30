@@ -118,7 +118,7 @@ pub fn build_frozen_units(
         order_a
             .cmp(&order_b)
             .then_with(|| page_a.cmp(&page_b))
-            .then_with(|| (-char_a).cmp(&(-char_b)))
+            .then_with(|| char_b.cmp(&char_a))
             .then_with(|| a.link_id.cmp(&b.link_id))
     });
 
@@ -486,7 +486,8 @@ pub fn build_frozen_units(
                 status: "pending".to_string(),
                 error_msg: String::new(),
                 target_ref: String::new(),
-                page_segments: Vec::new(), // JSON → 暂不反序列化
+                page_segments: serde_json::from_value::<Vec<fnm_core::records::UnitPageSegmentRecord>>(segs)
+                    .unwrap_or_default(),
                 source_hash,
                 segment_plan_hash: plan_hash,
                 pipeline_run_id: pipeline_run_id.to_string(),
@@ -824,5 +825,134 @@ mod tests {
 
         assert_eq!(frozen.ref_map[0].decision, "injected");
         assert!(frozen.body_units[0].source_text.contains("{{NOTE_REF:n1}}"));
+    }
+
+    #[test]
+    fn frozen_units_sort_with_extreme_char_start_values() {
+        // B1-10: 旧代码 (-char_a).cmp(&(-char_b)) 在 char_start = i64::MIN 时溢出。
+        // 新代码 char_b.cmp(&char_a) 直接降序比较，无溢出风险。
+        // 构造两个 anchor，char_start 分别为 i64::MIN 和 i64::MAX，
+        // 验证 build_frozen_units 排序不 panic。
+        let layers = ChapterLayers {
+            chapter_layers: vec![
+                ChapterLayer {
+                    chapter_id: "body-ch".into(),
+                    title: "Body".into(),
+                    body_pages: vec![BodyPageLayer {
+                        page_no: 7,
+                        text: "Text [1] and [2].".into(),
+                        ..Default::default()
+                    }],
+                    note_mode: NoteMode::ChapterEndnotePrimary,
+                    ..Default::default()
+                },
+                ChapterLayer {
+                    chapter_id: "notes-ch".into(),
+                    title: "Notes".into(),
+                    note_mode: NoteMode::ChapterEndnotePrimary,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        let anchor_min = BodyAnchorRecord {
+            anchor_id: "a-min".into(),
+            chapter_id: "body-ch".into(),
+            page_no: 7,
+            char_start: i64::MIN,
+            source_marker: "[1]".into(),
+            normalized_marker: "1".into(),
+            anchor_kind: AnchorKind::Endnote,
+            ..Default::default()
+        };
+        let anchor_max = BodyAnchorRecord {
+            anchor_id: "a-max".into(),
+            chapter_id: "body-ch".into(),
+            page_no: 7,
+            char_start: i64::MAX,
+            source_marker: "[2]".into(),
+            normalized_marker: "2".into(),
+            anchor_kind: AnchorKind::Endnote,
+            ..Default::default()
+        };
+        let link1 = NoteLinkRecord {
+            link_id: "l1".into(),
+            chapter_id: "notes-ch".into(),
+            anchor_id: "a-min".into(),
+            note_item_id: "n1".into(),
+            status: LinkStatus::Matched,
+            resolver: LinkResolver::Rule,
+            note_kind: NoteKind::Endnote,
+            marker: "1".into(),
+            ..Default::default()
+        };
+        let link2 = NoteLinkRecord {
+            link_id: "l2".into(),
+            chapter_id: "notes-ch".into(),
+            anchor_id: "a-max".into(),
+            note_item_id: "n2".into(),
+            status: LinkStatus::Matched,
+            resolver: LinkResolver::Rule,
+            note_kind: NoteKind::Endnote,
+            marker: "2".into(),
+            ..Default::default()
+        };
+        let table = NoteLinkTable {
+            anchors: vec![anchor_min, anchor_max],
+            links: vec![link1, link2.clone()],
+            effective_links: vec![link2],
+            ..Default::default()
+        };
+
+        // 不 panic 即通过
+        let _frozen = build_frozen_units(&layers, &table, None, 6000, "test").unwrap();
+    }
+
+    #[test]
+    fn frozen_body_units_have_nonempty_page_segments() {
+        // B1-1: 验证 body unit 的 page_segments 不再恒空。
+        // 旧代码 page_segments: Vec::new()（注释「暂不反序列化」），
+        // 新代码 serde_json::from_value(segs).unwrap_or_default()。
+        let layers = ChapterLayers {
+            chapter_layers: vec![ChapterLayer {
+                chapter_id: "ch-body".into(),
+                title: "Chapter with body".into(),
+                body_pages: vec![
+                    BodyPageLayer {
+                        page_no: 1,
+                        text: "First paragraph of the chapter body text.".into(),
+                        ..Default::default()
+                    },
+                    BodyPageLayer {
+                        page_no: 2,
+                        text: "Second paragraph on the next page.".into(),
+                        ..Default::default()
+                    },
+                ],
+                ..Default::default()
+            }],
+            ..Default::default()
+        };
+        let table = NoteLinkTable::default();
+
+        let frozen = build_frozen_units(&layers, &table, None, 6000, "test").unwrap();
+
+        assert!(
+            !frozen.body_units.is_empty(),
+            "应有 body unit"
+        );
+        for bu in &frozen.body_units {
+            assert!(
+                !bu.page_segments.is_empty(),
+                "body unit 的 page_segments 不应为空（unit_id={})",
+                bu.unit_id
+            );
+            // 验证 page_segments 包含正确的页码
+            let page_nos: Vec<i64> = bu.page_segments.iter().map(|s| s.page_no).collect();
+            assert!(
+                page_nos.contains(&1) || page_nos.contains(&2),
+                "page_segments 应包含输入的页码"
+            );
+        }
     }
 }

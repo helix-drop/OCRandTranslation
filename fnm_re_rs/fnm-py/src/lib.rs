@@ -28,7 +28,7 @@ use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::PyBytes;
 
-use fnm_core::db::{open_pool, Repository, SqliteRepository};
+use fnm_core::db::{Repository, SqliteRepository};
 use fnm_llm_repair::page_context::{NoopRenderer, RepairImageRenderer};
 use fnm_llm_repair::run::{run_llm_repair, RunLlmRepairParams};
 use fnm_orchestrator::mainline::LlmRepairOptions;
@@ -37,6 +37,24 @@ use fnm_phase1::input::{RawPage, TocItem};
 
 mod helpers;
 mod translate;
+
+/// 进程级连接池缓存：按 db_path 复用池，避免每个 pyfunction 调用都新建池 + 跑 migrations。
+/// 与 B1-3 的 `with_init(foreign_keys)` 协同——池缓存后 FK 设置只需正确一次。
+fn get_or_create_pool(db_path: &str) -> Result<fnm_core::db::SqlitePool, String> {
+    use std::collections::HashMap;
+    use std::sync::Mutex;
+
+    static POOL_CACHE: once_cell::sync::Lazy<Mutex<HashMap<String, fnm_core::db::SqlitePool>>> =
+        once_cell::sync::Lazy::new(|| Mutex::new(HashMap::new()));
+
+    let mut cache = POOL_CACHE.lock().map_err(|e| format!("pool cache lock: {e}"))?;
+    if let Some(pool) = cache.get(db_path) {
+        return Ok(pool.clone());
+    }
+    let pool = fnm_core::db::open_pool(Path::new(db_path)).map_err(|e| format!("open_pool: {e}"))?;
+    cache.insert(db_path.to_string(), pool.clone());
+    Ok(pool)
+}
 
 use helpers::{parse_pipeline_config, PyRepairRenderer};
 pub use translate::*;
@@ -100,7 +118,7 @@ fn run_pipeline_for_doc_json(
         .map_err(|e| PyValueError::new_err(format!("invalid config_json: {}", e)))?;
     let config = parse_pipeline_config(&config_value)?;
 
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -165,7 +183,7 @@ fn run_pipeline_for_doc_with_llm_repair_json(
 
     let doc_id = config.doc_id.clone();
 
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -214,7 +232,7 @@ fn load_doc_structure_json(
     doc_id: &str,
     include_diagnostic_entries: bool,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -246,7 +264,7 @@ fn audit_export_for_doc_json(
     zip_path: Option<&str>,
     zip_bytes: Option<&[u8]>,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
     let slug = if slug.is_empty() { doc_id } else { slug };
@@ -290,7 +308,7 @@ fn audit_export_for_doc_json(
 /// ←→ Python `FNM_RE/__init__.py::build_export_bundle_for_doc`
 #[pyfunction]
 fn build_export_bundle_for_doc_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -314,7 +332,7 @@ fn build_export_bundle_for_doc_json(db_path: &str, doc_id: &str) -> PyResult<Str
 /// ←→ Python `FNM_RE/__init__.py::build_export_zip_for_doc`
 #[pyfunction]
 fn build_export_zip_for_doc_json(py: Python, db_path: &str, doc_id: &str) -> PyResult<Py<PyBytes>> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -346,7 +364,7 @@ fn list_diagnostic_entries_for_doc_json(
     doc_id: &str,
     visible_bps: Option<Vec<i64>>,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -376,7 +394,7 @@ fn get_diagnostic_entry_for_page_json(
     bp: i64,
     allow_fallback: bool,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -404,7 +422,7 @@ fn get_diagnostic_entry_for_page_json(
 /// ←→ Python `FNM_RE/__init__.py::list_diagnostic_notes_for_doc`
 #[pyfunction]
 fn list_diagnostic_notes_for_doc_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -424,7 +442,7 @@ fn list_diagnostic_notes_for_doc_json(db_path: &str, doc_id: &str) -> PyResult<S
 #[pyfunction]
 #[pyo3(signature = (db_path, doc_id))]
 fn load_toc_items_for_doc_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
     let items = repo
@@ -445,7 +463,7 @@ fn run_doc_pipeline_json(
     start_phase: &str,
     config_json: Option<&str>,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -575,7 +593,7 @@ fn replay_phase4_to6_json(
     slug: &str,
     max_body_chars: i64,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
     let config = PipelineConfig {
@@ -660,7 +678,7 @@ fn run_llm_repair_json(
         .and_then(|v| v.as_u64())
         .map(|v| v as usize);
 
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
     let raw_pages = repo
@@ -740,7 +758,7 @@ fn run_llm_repair_json(
 #[pyfunction]
 #[pyo3(signature = (db_path, doc_id))]
 fn build_doc_status_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -893,7 +911,7 @@ fn build_doc_status_json(db_path: &str, doc_id: &str) -> PyResult<String> {
 #[pyfunction]
 #[pyo3(signature = (db_path, doc_id))]
 fn build_retry_summary_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -914,7 +932,7 @@ fn build_unit_progress_json(
     snapshot_json: Option<&str>,
     use_lightweight: bool,
 ) -> PyResult<String> {
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool);
 
@@ -939,7 +957,7 @@ fn run_post_translate_export_checks_for_doc_json(
     max_repair_rounds: i64,
 ) -> PyResult<String> {
     let slug = if slug.is_empty() { doc_id } else { slug };
-    let pool = open_pool(Path::new(db_path))
+    let pool = get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = SqliteRepository::new(pool.clone());
 

@@ -64,6 +64,17 @@ pub fn page_markdown_text(page: &Value) -> String {
     String::new()
 }
 
+/// 从 `RawPage` 直接提取 markdown 文本，避免序列化为 `serde_json::Value`。
+/// 与 `page_markdown_text` 语义一致：优先 `enriched_markdown`，回退 `markdown`。
+pub fn raw_page_markdown_text(page: &crate::records::RawPage) -> String {
+    page.enriched_markdown
+        .as_deref()
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or(&page.markdown)
+        .trim()
+        .to_string()
+}
+
 /// 从 page 的 prunedResult 提取排序后的 block 列表。
 /// 与 Python `page_blocks` 一致。
 pub fn page_blocks(page: &Value) -> Vec<Value> {

@@ -2,7 +2,7 @@
 
 use crate::input::RawPage;
 use fnm_core::records::PagePartitionRecord;
-use fnm_core::text::{extract_page_headings, page_markdown_text};
+use fnm_core::text::extract_page_headings;
 use fnm_core::title::normalize_title;
 
 use super::title_utils::is_toc_force_export_title;
@@ -28,11 +28,11 @@ pub fn trim_exportable_chapter_pages(
         let role = page_role_by_no.get(&page_no).copied().unwrap_or("");
         let page = page_by_no.get(&page_no);
 
-        // 将 RawPage 转为 Value 以调用 fnm-core 函数
+        // 将 RawPage 转为 Value 以调用 fnm-core 函数（extract_page_headings 需要 Value）
         let page_value = page.map(|p| serde_json::to_value(p).unwrap_or_default());
-        let text = page_value
-            .as_ref()
-            .map_or_else(String::new, page_markdown_text);
+        let text = page
+            .map(|p| fnm_core::text::raw_page_markdown_text(p))
+            .unwrap_or_default();
         let headings: Vec<String> = page_value
             .as_ref()
             .map_or_else(Vec::new, extract_page_headings);

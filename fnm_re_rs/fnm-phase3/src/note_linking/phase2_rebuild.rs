@@ -137,7 +137,7 @@ pub fn phase2_from_chapter_layers(chapter_layers: &ChapterLayers) -> Phase2Build
             "no_notes" => NoteMode::NoNotes,
             "review_required" => NoteMode::ReviewRequired,
             _ => {
-                eprintln!("  [WARNING] 未知 note_mode={note_mode_str:?}，强制回退为 no_notes");
+                tracing::warn!("未知 note_mode={:?}，强制回退为 no_notes", note_mode_str);
                 NoteMode::NoNotes
             }
         };

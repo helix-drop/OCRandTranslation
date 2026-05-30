@@ -99,13 +99,6 @@ static YEAR_19XX_20XX_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"\b(?:19|20)\d{
 static NOTES_TO_SOMETHING_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)^\s*notes?\s+to\s+\S+").unwrap());
 
-static _CHAPTER_KEYWORD_RE: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(
-        r"(?i)\b(?:chapter|chapitre|lecture|leçon|prologue|epilogue|postambule|appendix|appendices|part)\b",
-    )
-    .unwrap()
-});
-
 static VISUAL_TOC_CHAPTER_KEYWORD_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(concat!(
         r"(?i)\b(chapter|chapitre|lecture|lesson|le[cç]on|prologue|epilogue)\b",
@@ -145,9 +138,6 @@ static ENDNOTE_NAMED_SUBENTRY_RE: Lazy<Regex> = Lazy::new(|| {
 
 static ENDNOTE_NUMBERED_SUBENTRY_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)^\s*(?:\d+|[ivxlcm]+)[\.\):\-]\s+\S+").unwrap());
-
-static _YEAR_RANGE_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?:\(|\b)(\d{4})\s*-\s*(\d{4})(?:\)|\b)").unwrap());
 
 // ── 标题规范化工具 ────────────────────────────────────────────────────────────
 

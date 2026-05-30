@@ -24,8 +24,7 @@ pub fn collect_unit_failed_locations_value(unit: &Value) -> Vec<Value> {
                         .and_then(|v| v.as_bool())
                         .unwrap_or(false)
                     {
-                        visible_idx += 1;
-                        continue;
+                        continue;  // consumed_by_prev 段落不计入 visible_idx
                     }
                     let status = para
                         .get("translation_status")

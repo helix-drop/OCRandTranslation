@@ -275,9 +275,7 @@ pub(super) fn toc_page_signal_candidates(
             let signal_title =
                 normalize_title(subentry.get("title").and_then(|v| v.as_str()).unwrap_or(""));
             ranked.push(PageChapterSignal {
-                page_no,
                 chapter_id: matched.0,
-                chapter_title: matched.1,
                 signal_title,
                 source: "toc_subentry".into(),
                 score: matched.2,

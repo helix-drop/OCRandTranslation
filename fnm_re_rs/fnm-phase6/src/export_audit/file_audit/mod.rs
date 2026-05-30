@@ -317,7 +317,10 @@ pub fn audit_markdown_file(params: &AuditFileParams) -> ExportAuditFileRecord {
                 &mut issue_codes,
                 &mut issue_summary,
                 "chapter_boundary_missing_tail",
-                &last.chars().rev().take(120).collect::<String>(),
+                &{
+                    let n = last.chars().count();
+                    last.chars().skip(n.saturating_sub(120)).collect::<String>()
+                },
             );
         }
     }

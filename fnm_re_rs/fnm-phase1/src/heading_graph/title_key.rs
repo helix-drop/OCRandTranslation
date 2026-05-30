@@ -8,8 +8,6 @@ static LATEX_NOTE_MARKER_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)\$?\^?\{?\d+\}?\$?").unwrap());
 static INLINE_NOTE_MARKER_RE: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)\[(?:\d{1,4}[a-z]?|[ivxlcdm]+)\]").unwrap());
-static _TRAILING_NOTE_MARKER_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)\s*(?:\d{1,4}[a-z]?|[ivxlcdm]+)\s*$").unwrap());
 static LEADING_QUOTES_RE: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r#"^[\s\u{0022}\u{0027}\u{00AB}\u{00BB}\u{201C}\u{201D}\u{2018}\u{2019}]+"#).unwrap()
 });

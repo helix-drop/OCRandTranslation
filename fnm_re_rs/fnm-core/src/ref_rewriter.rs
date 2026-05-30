@@ -172,11 +172,8 @@ pub fn local_endnote_ref_number(
             }
         }
     }
-    // ←→ Python: while 循环跳过已被占用的编号，防止编号序列空洞
-    let mut next_num = local_ref_numbers.values().max().copied().unwrap_or(0) + 1;
-    while local_ref_numbers.values().any(|&v| v == next_num) {
-        next_num += 1;
-    }
+    // max()+1 保证 next_num 不在已有值中，无需 while 循环跳过
+    let next_num = local_ref_numbers.values().max().copied().unwrap_or(0) + 1;
     local_ref_numbers.insert(note_id.to_string(), next_num);
     ordered_note_ids.push(note_id.to_string());
     Some(next_num)

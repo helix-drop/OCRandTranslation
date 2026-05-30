@@ -152,13 +152,6 @@ fn run_one_repair_round(
         }
     }
 
-    if repair_result.is_none() && !model_attempts.is_empty() {
-        // Mark as no repair model succeeded
-        if let Some(last) = model_attempts.last() {
-            let _ = last; // already recorded
-        }
-    }
-
     (model_attempts, repair_result)
 }
 

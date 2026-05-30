@@ -22,7 +22,6 @@ pub struct NoteRegionContext<'a> {
     pub has_footnote_band: bool,
     pub is_post_body_region: bool,
     pub is_book_scope: bool,
-    pub explicit_markers: &'a [&'a str],
     /// note_scan 检测的 page_kind，如 "endnote_collection"、"mixed_body_endnotes"。
     pub scan_page_kind: &'a str,
 }
@@ -122,7 +121,6 @@ mod tests {
             has_footnote_band: false,
             is_post_body_region: false,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
@@ -137,7 +135,6 @@ mod tests {
             has_footnote_band: false,
             is_post_body_region: false,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
@@ -151,7 +148,6 @@ mod tests {
             has_footnote_band: true,
             is_post_body_region: false,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
@@ -165,7 +161,6 @@ mod tests {
             has_footnote_band: false,
             is_post_body_region: true,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);
@@ -179,7 +174,6 @@ mod tests {
             has_footnote_band: false,
             is_post_body_region: false,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "endnote_collection",
         };
         let r = resolve_note_kind(&ctx);
@@ -194,7 +188,6 @@ mod tests {
             has_footnote_band: false,
             is_post_body_region: false,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "mixed_body_endnotes",
         };
         let r = resolve_note_kind(&ctx);
@@ -208,7 +201,6 @@ mod tests {
             has_footnote_band: false,
             is_post_body_region: false,
             is_book_scope: false,
-            explicit_markers: &[],
             scan_page_kind: "",
         };
         let r = resolve_note_kind(&ctx);

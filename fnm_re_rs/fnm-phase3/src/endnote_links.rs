@@ -427,12 +427,16 @@ fn find_marker_in_body(body_text: &str, marker: &str, patterns: &[Regex]) -> Opt
                     continue;
                 }
                 // 转换回字节偏移
-                let byte_start = body_text[..]
+                let byte_start = body_text
                     .char_indices()
                     .nth(start_idx)
                     .map(|(i, _)| i)
                     .unwrap_or(0);
-                let byte_end = byte_start + unicode_pat.len();
+                let byte_end = body_text
+                    .char_indices()
+                    .nth(end_idx)
+                    .map(|(i, _)| i)
+                    .unwrap_or(body_text.len());
                 return Some(BodyHit {
                     start: byte_start,
                     end: byte_end,
@@ -454,4 +458,52 @@ fn extract_context(text: &str, start: usize, end: usize) -> String {
         .take_while(|(i, _)| *i < ctx_end)
         .map(|(_, ch)| ch)
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_marker_unicode_superscript_offset_correct() {
+        // B1-9: 多位 Unicode 上标 marker（如 ¹²）匹配后 byte_end 必须在 char boundary 上。
+        // 旧代码 byte_end = byte_start + unicode_pat.len()，用 pattern 字节长度推算，
+        // 可能与 body_text 中实际匹配段的字节长度不一致。
+        // 新代码用 char_indices().nth(end_idx) 直接从 body_text 算 byte_end。
+        let patterns = build_patterns_for_marker("12");
+        // 正文含多字节字符（中文）+ Unicode 上标 ¹²
+        let body = "这是测试文本¹²后面还有更多内容";
+        let hit = find_marker_in_body(body, "12", &patterns);
+        assert!(hit.is_some(), "应匹配到 Unicode 上标 ¹²");
+        let hit = hit.unwrap();
+        // byte_end 必须在 char boundary 上
+        assert!(body.is_char_boundary(hit.start), "start 必须在 char boundary");
+        assert!(body.is_char_boundary(hit.end), "end 必须在 char boundary");
+        // matched_text 应为 "¹²"
+        assert_eq!(hit.matched_text, "¹²");
+        // 切片不应 panic
+        let _slice = &body[hit.start..hit.end];
+    }
+
+    #[test]
+    fn find_marker_unicode_superscript_single_digit() {
+        // 单位上标
+        let patterns = build_patterns_for_marker("3");
+        let body = "Text with superscript³ more text";
+        let hit = find_marker_in_body(body, "3", &patterns);
+        assert!(hit.is_some());
+        let hit = hit.unwrap();
+        assert!(body.is_char_boundary(hit.start));
+        assert!(body.is_char_boundary(hit.end));
+        assert_eq!(hit.matched_text, "³");
+    }
+
+    #[test]
+    fn find_marker_unicode_superscript_not_found() {
+        // marker 不在正文中
+        let patterns = build_patterns_for_marker("99");
+        let body = "No superscript here";
+        let hit = find_marker_in_body(body, "99", &patterns);
+        assert!(hit.is_none());
+    }
 }

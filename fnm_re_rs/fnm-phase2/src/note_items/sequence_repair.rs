@@ -226,50 +226,7 @@ mod tests {
 
     #[test]
     fn fix_backward_run() {
-        // 3, 1, 2, 4 → 从 1 开始的连续 run (1,2) 在 4 前结束 → 重编号 4,5
-        // 实际上序列是: 3, 1, 2, 4 → 1+2+1=4 matches after_marker → 变成 3, 4, 5, ...
-        // Wait, prev=3, curr=1. run at i=1: updated[1]=1, updated[2]=2 (consecutive). run_end=2, after=updated[3]=4.
-        // after_val=4, prev+run_len+1 = 3+2+1=6 ≠ 4. So this doesn't match.
-        // Let me think of a valid case:
-        // 2, 1, 1, 3 → prev=2, curr=1. run: [1]=1, [2]=1 (f=1, c=1 → 1≠1+1). So run_end=1, run_len=1.
-        // after=updated[2]=1, after_val=1. prev+run_len+1 = 2+1+1 = 4 ≠ 1. Doesn't match.
-        //
-        // Valid case: 6, 1, 2, 3, 7 → prev=6, curr=1. run: [1]=1,[2]=2 (seq), [3]=3 (seq). run_end=3, run_len=3.
-        // after=updated[4]=7, after_val=7. prev+run_len+1 = 6+3+1 = 10 ≠ 7. Doesn't match.
-        //
-        // Let me think again... The pattern is:
-        // prev_marker = N, curr_marker <= N (backward), and we find a run of consecutive markers starting from curr,
-        // then after_marker = prev + run_len + 1.
-        //
-        // So if we have: 5, 2, 3, 4, 8
-        // - prev=5 at i-1=0, curr=2 at i=1
-        // - run: [1]=2, [2]=3 (seq 2→3 yes), [3]=4 (seq 3→4 yes), run_end=3, run_len=3
-        // - after=updated[4]=8, after_val=8
-        // - prev+run_len+1 = 5+3+1 = 9. 9 ≠ 8. Doesn't match.
-        //
-        // Hmm, when would this trigger? Let me re-read the Python condition:
-        // `after_marker == prev_marker + run_len + 1 and curr_marker <= prev_marker`
-        //
-        // So after_marker should be prev + run_len + 1.
-        // Example: 5, 2, 3, 6 → prev=5, curr=2 ≤ 5. run: [1]=2, [2]=3 (seq), run_end=2, run_len=2.
-        // after=6, prev+run_len+1 = 5+2+1 = 8 ≠ 6. Still doesn't match.
-        //
-        // Maybe: 4, 1, 2, 5 → prev=4, curr=1 ≤ 4. run: [1]=1, [2]=2, run_end=2, run_len=2.
-        // after=5, prev+run_len+1 = 4+2+1 = 7. 7 ≠ 5.
-        //
-        // 3, 1, 2, 4 → prev=3, curr=1. run: [1]=1,[2]=2, run_end=2, run_len=2. after=4.
-        // prev+run_len+1 = 3+2+1 = 6. 6 ≠ 4.
-        //
-        // I think the formula is wrong in my reading. Let me look again:
-        // `after_marker == prev_marker + run_len + 1` — this means after = prev + (run_end-i+1) + 1
-        // So if prev=3, run_len=2, then after should be 3+2+1=6... but in the example I'd expect 4.
-        //
-        // Wait, maybe the run contains items that are ALREADY consecutive but started from the wrong number.
-        // Example: 3, 1, 2, 4 → The run 1,2 is consecutive (1→2), and after it is 4.
-        // The idea is: renumber run to be 4, 5, but 4 is already occupied. So this doesn't make sense.
-        //
-        // Let me try: 3, 1, 2, 6 → prev=3, run 1,2 consecutive, after=6.
-        // prev+run_len+1 = 3+2+1 = 6 = after! Yes! So renumber: 3, 4, 5, 6.
+        // 3, 1, 2, 6 → backward run (1,2) 被重编号为 (4,5)，与前后对齐
         let rows = vec![
             row(1, "3", "a"),
             row(1, "1", "b"),

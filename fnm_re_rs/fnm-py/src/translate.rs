@@ -3,8 +3,6 @@
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 
-use std::path::Path;
-
 /// 获取 crate 版本（供 Python 端验证 wheel 安装正确）。
 #[pyfunction]
 pub fn version() -> &'static str {
@@ -31,7 +29,7 @@ pub fn prepare_page_translate_jobs_json(
     let pages: Vec<fnm_phase1::input::RawPage> = serde_json::from_str(pages_json)
         .map_err(|e| PyRuntimeError::new_err(format!("parse pages_json: {}", e)))?;
 
-    let pool = fnm_core::db::open_pool(Path::new(db_path))
+    let pool = super::get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db pool: {}", e)))?;
     let repo = fnm_core::db::SqliteRepository::new(pool);
 
@@ -80,7 +78,7 @@ pub fn collect_fnm_unit_failed_locations_json(unit_json: &str) -> PyResult<Strin
 /// ←→ Python `FNM_RE/app/page_translate.py::list_fnm_units_with_indices`
 #[pyfunction]
 pub fn list_fnm_units_with_indices_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = fnm_core::db::open_pool(Path::new(db_path))
+    let pool = super::get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
     let repo = fnm_core::db::SqliteRepository::new(pool);
     let result = fnm_orchestrator::list_fnm_units_with_indices(&repo, doc_id)
@@ -93,7 +91,7 @@ pub fn list_fnm_units_with_indices_json(db_path: &str, doc_id: &str) -> PyResult
 /// ←→ Python `FNM_RE/app/page_translate.py::sync_fnm_retry_state`
 #[pyfunction]
 pub fn sync_fnm_retry_state_json(db_path: &str, doc_id: &str) -> PyResult<String> {
-    let pool = fnm_core::db::open_pool(Path::new(db_path))
+    let pool = super::get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
     let repo = fnm_core::db::SqliteRepository::new(pool);
     let result = fnm_orchestrator::sync_fnm_retry_state(&repo, doc_id)
@@ -112,7 +110,7 @@ pub fn rebuild_fnm_diagnostic_page_entries_json(
 ) -> PyResult<String> {
     let _pages: Vec<serde_json::Value> = serde_json::from_str(pages_json)
         .map_err(|e| PyValueError::new_err(format!("invalid pages_json: {}", e)))?;
-    let pool = fnm_core::db::open_pool(Path::new(db_path))
+    let pool = super::get_or_create_pool(db_path)
         .map_err(|e| PyRuntimeError::new_err(format!("open db: {}", e)))?;
     let repo = fnm_core::db::SqliteRepository::new(pool);
     let result =

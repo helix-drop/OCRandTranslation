@@ -406,7 +406,6 @@ fn spec_note_kind_resolver_endnote_heading() {
         has_footnote_band: false,
         is_post_body_region: false,
         is_book_scope: false,
-        explicit_markers: &[],
         scan_page_kind: "",
     };
     let result = resolve_note_kind(&ctx);
@@ -428,7 +427,6 @@ fn spec_note_kind_resolver_footnote_heading() {
         has_footnote_band: false,
         is_post_body_region: false,
         is_book_scope: false,
-        explicit_markers: &[],
         scan_page_kind: "",
     };
     let result = resolve_note_kind(&ctx);
@@ -444,7 +442,6 @@ fn spec_note_kind_resolver_fallback_review() {
         has_footnote_band: false,
         is_post_body_region: false,
         is_book_scope: false,
-        explicit_markers: &[],
         scan_page_kind: "",
     };
     let result = resolve_note_kind(&ctx);
