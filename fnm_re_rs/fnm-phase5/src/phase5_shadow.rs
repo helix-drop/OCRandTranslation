@@ -6,6 +6,7 @@ use std::collections::HashMap;
 
 use fnm_core::records::{
     ChapterNoteModeRecord, DiagnosticPageRecord, Phase5Structure, Phase5Summary, SectionHeadRecord,
+    SummaryNoteBase,
 };
 use fnm_phase2::chapter_split::ChapterLayers;
 use fnm_phase3::note_linking::NoteLinkTable;
@@ -84,7 +85,10 @@ pub fn build_phase5_shadow(
         translation_units: convert::to_translation_unit_records(frozen_units),
         diagnostic_pages,
         summary: Phase5Summary {
-            chapter_note_mode_summary,
+            note: SummaryNoteBase {
+                chapter_note_mode_summary,
+                ..Default::default()
+            },
             ..Default::default()
         },
         ..Default::default()

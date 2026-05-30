@@ -20,7 +20,7 @@ use fnm_core::db::{
 };
 use fnm_core::records::{
     Phase1Structure, Phase1Summary, Phase2Structure, Phase2Summary, Phase3Structure, Phase3Summary,
-    StructureReviewRecord, SummaryTocBase,
+    StructureReviewRecord, SummaryNoteBase, SummaryTocBase,
 };
 use fnm_core::types::NoteKind;
 use fnm_llm_repair::page_context::RepairImageRenderer;
@@ -386,7 +386,10 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
                     toc_semantic_contract_ok: false,
                     ..SummaryTocBase::default()
                 },
-                chapter_endnote_region_alignment_ok: endnote_alignment_ok,
+                note: SummaryNoteBase {
+                    chapter_endnote_region_alignment_ok: endnote_alignment_ok,
+                    ..SummaryNoteBase::default()
+                },
                 ..Phase2Summary::default()
             },
         },
@@ -416,7 +419,10 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
                     toc_semantic_contract_ok: false,
                     ..SummaryTocBase::default()
                 },
-                chapter_endnote_region_alignment_ok: endnote_alignment_ok,
+                note: SummaryNoteBase {
+                    chapter_endnote_region_alignment_ok: endnote_alignment_ok,
+                    ..SummaryNoteBase::default()
+                },
                 ..Phase3Summary::default()
             },
         },

@@ -79,6 +79,7 @@ pub fn build_export_chapters(
 
     let summary_book_type = phase5
         .summary
+        .note
         .chapter_note_mode_summary
         .get("book_type")
         .and_then(|v| v.as_str())

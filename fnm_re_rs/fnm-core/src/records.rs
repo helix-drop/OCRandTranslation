@@ -390,11 +390,9 @@ pub struct ChapterLinkContract {
     pub marker_sequence: Vec<i64>,
 }
 
+/// Summary L1-note 层：Phase2-6 共享的注释相关字段。
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct Phase2Summary {
-    #[serde(flatten)]
-    pub toc: SummaryTocBase,
-    // L1-note 层
+pub struct SummaryNoteBase {
     #[serde(default)]
     pub note_region_summary: Value,
     #[serde(default)]
@@ -405,6 +403,14 @@ pub struct Phase2Summary {
     pub chapter_endnote_region_alignment_ok: bool,
     #[serde(default)]
     pub chapter_endnote_start_page_map: HashMap<String, i64>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Phase2Summary {
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
+    #[serde(flatten)]
+    pub note: SummaryNoteBase,
     // 散落字段
     #[serde(default)]
     pub review_flags: Vec<String>,
@@ -570,17 +576,8 @@ impl Default for NoteLinkRecord {
 pub struct Phase3Summary {
     #[serde(flatten)]
     pub toc: SummaryTocBase,
-    // L1-note 层
-    #[serde(default)]
-    pub note_region_summary: Value,
-    #[serde(default)]
-    pub note_item_summary: Value,
-    #[serde(default)]
-    pub chapter_note_mode_summary: Value,
-    #[serde(default = "default_true")]
-    pub chapter_endnote_region_alignment_ok: bool,
-    #[serde(default)]
-    pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    #[serde(flatten)]
+    pub note: SummaryNoteBase,
     // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
@@ -788,17 +785,8 @@ pub struct StructureStatusRecord {
 pub struct Phase4Summary {
     #[serde(flatten)]
     pub toc: SummaryTocBase,
-    // L1-note 层
-    #[serde(default)]
-    pub note_region_summary: Value,
-    #[serde(default)]
-    pub note_item_summary: Value,
-    #[serde(default)]
-    pub chapter_note_mode_summary: Value,
-    #[serde(default = "default_true")]
-    pub chapter_endnote_region_alignment_ok: bool,
-    #[serde(default)]
-    pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    #[serde(flatten)]
+    pub note: SummaryNoteBase,
     // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
@@ -1180,17 +1168,8 @@ pub struct ChapterMarkdownSet {
 pub struct Phase5Summary {
     #[serde(flatten)]
     pub toc: SummaryTocBase,
-    // L1-note 层
-    #[serde(default)]
-    pub note_region_summary: Value,
-    #[serde(default)]
-    pub note_item_summary: Value,
-    #[serde(default)]
-    pub chapter_note_mode_summary: Value,
-    #[serde(default = "default_true")]
-    pub chapter_endnote_region_alignment_ok: bool,
-    #[serde(default)]
-    pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    #[serde(flatten)]
+    pub note: SummaryNoteBase,
     // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
@@ -1363,17 +1342,8 @@ pub struct ExportAuditReportRecord {
 pub struct Phase6Summary {
     #[serde(flatten)]
     pub toc: SummaryTocBase,
-    // L1-note 层
-    #[serde(default)]
-    pub note_region_summary: Value,
-    #[serde(default)]
-    pub note_item_summary: Value,
-    #[serde(default)]
-    pub chapter_note_mode_summary: Value,
-    #[serde(default = "default_true")]
-    pub chapter_endnote_region_alignment_ok: bool,
-    #[serde(default)]
-    pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    #[serde(flatten)]
+    pub note: SummaryNoteBase,
     // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,

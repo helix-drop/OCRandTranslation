@@ -208,11 +208,14 @@ pub(crate) fn run_phase2(
         note_items: output.note_items.clone(),
         chapter_note_modes: output.chapter_note_modes.clone(),
         summary: fnm_core::records::Phase2Summary {
-            chapter_endnote_region_alignment_ok: output
-                .note_regions
-                .iter()
-                .filter(|r| r.note_kind == fnm_core::types::NoteKind::Endnote)
-                .all(|r| r.region_marker_alignment_ok),
+            note: fnm_core::records::SummaryNoteBase {
+                chapter_endnote_region_alignment_ok: output
+                    .note_regions
+                    .iter()
+                    .filter(|r| r.note_kind == fnm_core::types::NoteKind::Endnote)
+                    .all(|r| r.region_marker_alignment_ok),
+                ..Default::default()
+            },
             ..Default::default()
         },
     };
