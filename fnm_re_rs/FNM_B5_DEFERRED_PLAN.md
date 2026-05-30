@@ -4,7 +4,7 @@
 > 隶属 `FNM_B5_REMAINING_PLAN.md` 的「留待单独 PR」清单。
 > 总验证主轴：行为不变（重构）→ `cargo test --workspace` 全绿 + clippy 0 + parity 不变。
 >
-> **执行进度**：2a ✅ (e8d6751) → 2b → 1 → 2c
+> **执行进度**：2a ✅ (e8d6751) → 2b ✅ (5e3e545) → B5-7 S0-S2 ✅ (cf1b305/d7ff75b/d15fdbb/5c3afa5) → S3 跳过（收益低）→ 2c 待定
 
 ---
 
@@ -12,9 +12,9 @@
 
 | # | 项 | 风险 | 工作量 | 独立 PR | 守护 |
 |---|---|---|---|---|---|
-| 1 | **B5-7 records flatten** | 高（数据契约） | 中 | 是 | parity + 新增 JSON 快照 |
+| 1 | **B5-7 records flatten** ✅ (S0-S2) | 高→中 | 中 | 是 | parity + 新增 JSON 快照 |
 | 2a | **B5-2 余 重复收敛** ✅ | 低–中 | 小 | 是 | 各调用点 parity |
-| 2b | **B5-1 余 弱类型** | 中 | 中 | 可拆多个 | 行为不变 |
+| 2b | **B5-1 余 弱类型** ✅ (首个示例) | 中 | 中 | 可拆多个 | 行为不变 |
 | 2c | **B5-6 核心深拆** | **最高**（状态交织） | 大 | 是 | 严格快照 |
 
 **建议顺序**：2a（最低风险、最快赢）→ 2b → 1（B5-7）→ 2c（最后，最难）。
@@ -102,11 +102,11 @@ Structure 同理抽 `StructureL0Base`（前4）→ `StructureNoteBase` → …
 
 ### 1.6 执行步骤
 
-- [ ] S0 写前置快照测试（6+6 个全非空实例）+ 往返幂等测试，生成基线。
-- [ ] S1 抽 `SummaryTocBase`（L0），改 P1–P6 flatten，跑守护。
-- [ ] S2 抽 `SummaryNoteBase`（L1）… 逐层，每层独立提交 + 跑守护。
-- [ ] S3 Structure 各 Base 同理。
-- [ ] S4 全量 + parity + clippy 最终验证。
+- [x] S0 写前置快照测试（12 roundtrip + 12 key-set），生成基线。cf1b305
+- [x] S1 抽 `SummaryTocBase`（L0），改 P1–P6 flatten，跑守护。d7ff75b
+- [x] S2 抽 `SummaryNoteBase`（L1），改 P2–P6 flatten，跑守护。d15fdbb/5c3afa5
+- [x] S3 Structure 各 Base — **跳过**（4 字段 × 6 phase 仅 24 行重复，且各 Structure 有不同 summary 类型，收益低）。
+- [x] S4 全量 + clippy 最终验证。core 166 / phase1 124 / phase4 110 / phase5 44 / llm-repair 16 全绿。
 
 ### 1.7 风险 / 回滚 / 工作量
 
@@ -166,13 +166,14 @@ Structure 同理抽 `StructureL0Base`（前4）→ `StructureNoteBase` → …
 - ⚠️ **本仓库目前无 accessor wrapper 先例**（`rg "struct \w+View|Accessor"` 为 0）→ 首次引入须先做 1 个最小示例验证模式（编译通过 + getter 默认值逐项对齐原 `.get`），再推广到其他热点。
 
 ### 2.3 执行步骤
-- [ ] 逐热点：先读该函数全貌，分清「内部中间结构」vs「签名传递 Value」。
-- [ ] 内部结构 → typed struct（参照 `ParagraphRow`）。
-- [ ] 签名 Value → accessor wrapper（getter 封装 `.get`，容错语义不变）。
+- [x] 首个示例：`value_views.rs`（ClusterView + 5 个 item view）+ `prompt_builder.rs` 迁移。5e3e545
+- [ ] 逐热点推广：page_context.rs / override_materializer.rs / orchestrator apply.rs
 - [ ] **不必全量**（05 原则）；优先 llm-repair prompt_builder（密度最高）。
 
 ### 2.4 守护
 行为不变；逐热点跑所在 crate `cargo test`（含 parity）。注意：accessor 必须逐字段复刻原 `.get(...).and_then(...).unwrap_or(default)` 的默认值，**diff 核对**。
+
+**实测结果**：prompt_builder 16 测试全绿，clippy 0。剩余热点待后续推广。
 
 ---
 
