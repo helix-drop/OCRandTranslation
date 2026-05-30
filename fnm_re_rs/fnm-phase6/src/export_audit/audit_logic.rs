@@ -85,6 +85,7 @@ pub(super) fn audit_chapter_organization(
 
     // 检查缺失的 post_body 标题
     let missing_post_body_titles: Vec<String> = summary
+        .toc
         .post_body_titles
         .iter()
         .filter(|t| {
@@ -116,6 +117,7 @@ pub(super) fn audit_chapter_organization(
 
     // 检查导出的 container 标题
     let exported_container_titles: Vec<String> = summary
+        .toc
         .container_titles
         .iter()
         .filter(|t| {
@@ -147,11 +149,13 @@ pub(super) fn audit_chapter_organization(
 
     // 检查导出深度
     let expected_export_count = summary
+        .toc
         .toc_role_summary
         .get("chapter")
         .and_then(|v| v.as_i64())
         .unwrap_or(0)
         + summary
+            .toc
             .toc_role_summary
             .get("post_body")
             .and_then(|v| v.as_i64())

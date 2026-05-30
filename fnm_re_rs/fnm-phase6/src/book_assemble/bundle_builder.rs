@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use fnm_core::records::{
     ExportAuditReportRecord, ExportBundleRecord, ExportChapterRecord, Phase6Structure,
-    Phase6Summary, StructureStatusRecord,
+    Phase6Summary, StructureStatusRecord, SummaryTocBase,
 };
 
 /// 构建 Phase6Structure 用于审计。
@@ -28,10 +28,13 @@ pub(super) fn build_phase6_for_audit(
             ..Default::default()
         },
         summary: Phase6Summary {
-            container_titles,
-            post_body_titles,
-            back_matter_titles,
-            toc_role_summary,
+            toc: SummaryTocBase {
+                container_titles,
+                post_body_titles,
+                back_matter_titles,
+                toc_role_summary,
+                ..Default::default()
+            },
             ..Default::default()
         },
         ..Default::default()

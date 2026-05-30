@@ -80,19 +80,19 @@ pub fn audit_phase6_export(
         .collect();
 
     let mut manual_toc_titles: Vec<String> = Vec::new();
-    manual_toc_titles.extend(summary.container_titles.iter().cloned());
+    manual_toc_titles.extend(summary.toc.container_titles.iter().cloned());
     manual_toc_titles.extend(chapter_titles.iter().cloned());
-    manual_toc_titles.extend(summary.post_body_titles.iter().cloned());
-    manual_toc_titles.extend(summary.back_matter_titles.iter().cloned());
+    manual_toc_titles.extend(summary.toc.post_body_titles.iter().cloned());
+    manual_toc_titles.extend(summary.toc.back_matter_titles.iter().cloned());
 
     let mut role_by_title_key: HashMap<String, String> = HashMap::new();
-    for title in &summary.container_titles {
+    for title in &summary.toc.container_titles {
         role_by_title_key.insert(helpers::alphanumeric_key(title), "container".to_string());
     }
-    for title in &summary.post_body_titles {
+    for title in &summary.toc.post_body_titles {
         role_by_title_key.insert(helpers::alphanumeric_key(title), "post_body".to_string());
     }
-    for title in &summary.back_matter_titles {
+    for title in &summary.toc.back_matter_titles {
         role_by_title_key.insert(helpers::alphanumeric_key(title), "back_matter".to_string());
     }
 
@@ -231,7 +231,7 @@ pub fn audit_phase6_export(
         blocking_reasons: final_blocking_reasons,
         manual_toc_summary: serde_json::to_value(&phase6.status.manual_toc_summary)
             .unwrap_or_default(),
-        toc_role_summary: serde_json::to_value(&summary.toc_role_summary).unwrap_or_default(),
+        toc_role_summary: serde_json::to_value(&summary.toc.toc_role_summary).unwrap_or_default(),
         chapter_titles,
         files: file_reports,
         blocking_issue_count: total_blocking_issue_count,

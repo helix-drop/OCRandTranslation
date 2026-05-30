@@ -111,9 +111,9 @@ pub fn build_module_export_bundle(
         toc_titles_and_summary(
             &phase1.toc_tree,
             &phase1.chapters,
-            &phase1.summary.container_titles,
-            &phase1.summary.post_body_titles,
-            &phase1.summary.back_matter_titles,
+            &phase1.summary.toc.container_titles,
+            &phase1.summary.toc.post_body_titles,
+            &phase1.summary.toc.back_matter_titles,
         );
 
     // 10. 构建 Phase6Structure 用于审计

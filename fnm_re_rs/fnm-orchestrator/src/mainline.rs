@@ -20,7 +20,7 @@ use fnm_core::db::{
 };
 use fnm_core::records::{
     Phase1Structure, Phase1Summary, Phase2Structure, Phase2Summary, Phase3Structure, Phase3Summary,
-    StructureReviewRecord,
+    StructureReviewRecord, SummaryTocBase,
 };
 use fnm_core::types::NoteKind;
 use fnm_llm_repair::page_context::RepairImageRenderer;
@@ -357,9 +357,12 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
             section_heads: section_heads.clone(),
             endnote_explorer_hints: serde_json::Value::Null,
             summary: Phase1Summary {
-                chapter_title_alignment_ok: false,
-                chapter_section_alignment_ok: false,
-                toc_semantic_contract_ok: false,
+                toc: SummaryTocBase {
+                    chapter_title_alignment_ok: false,
+                    chapter_section_alignment_ok: false,
+                    toc_semantic_contract_ok: false,
+                    ..SummaryTocBase::default()
+                },
                 ..Phase1Summary::default()
             },
             toc_tree: Vec::new(),
@@ -377,10 +380,13 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
             note_items: note_items.clone(),
             chapter_note_modes: chapter_note_modes.clone(),
             summary: Phase2Summary {
+                toc: SummaryTocBase {
+                    chapter_title_alignment_ok: false,
+                    chapter_section_alignment_ok: false,
+                    toc_semantic_contract_ok: false,
+                    ..SummaryTocBase::default()
+                },
                 chapter_endnote_region_alignment_ok: endnote_alignment_ok,
-                chapter_title_alignment_ok: false,
-                chapter_section_alignment_ok: false,
-                toc_semantic_contract_ok: false,
                 ..Phase2Summary::default()
             },
         },
@@ -404,10 +410,13 @@ pub fn replay_phase4_to6_from_db<R: Repository>(
             paragraph_endnotes: Vec::new(),
             chapter_anchor_alignments: Vec::new(),
             summary: Phase3Summary {
+                toc: SummaryTocBase {
+                    chapter_title_alignment_ok: false,
+                    chapter_section_alignment_ok: false,
+                    toc_semantic_contract_ok: false,
+                    ..SummaryTocBase::default()
+                },
                 chapter_endnote_region_alignment_ok: endnote_alignment_ok,
-                chapter_title_alignment_ok: false,
-                chapter_section_alignment_ok: false,
-                toc_semantic_contract_ok: false,
                 ..Phase3Summary::default()
             },
         },

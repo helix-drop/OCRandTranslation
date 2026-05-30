@@ -267,7 +267,7 @@ fn build_structure_reviews_with_policy(
 
     // 8. toc_alignment_review_required
     if summary_policy.emit_upstream_gate_reviews
-        && (!summary.chapter_title_alignment_ok || !summary.chapter_section_alignment_ok)
+        && (!summary.toc.chapter_title_alignment_ok || !summary.toc.chapter_section_alignment_ok)
     {
         append_review(
             &mut reviews,
@@ -276,15 +276,15 @@ fn build_structure_reviews_with_policy(
             0,
             0,
             serde_json::json!({
-                "chapter_title_alignment_ok": summary.chapter_title_alignment_ok,
-                "chapter_section_alignment_ok": summary.chapter_section_alignment_ok,
-                "toc_alignment_summary": summary.toc_alignment_summary,
+                "chapter_title_alignment_ok": summary.toc.chapter_title_alignment_ok,
+                "chapter_section_alignment_ok": summary.toc.chapter_section_alignment_ok,
+                "toc_alignment_summary": summary.toc.toc_alignment_summary,
             }),
         );
     }
 
     // 9. toc_semantic_review_required
-    if summary_policy.emit_upstream_gate_reviews && !summary.toc_semantic_contract_ok {
+    if summary_policy.emit_upstream_gate_reviews && !summary.toc.toc_semantic_contract_ok {
         append_review(
             &mut reviews,
             "toc_semantic_review_required",
@@ -292,9 +292,9 @@ fn build_structure_reviews_with_policy(
             0,
             0,
             serde_json::json!({
-                "toc_semantic_contract_ok": summary.toc_semantic_contract_ok,
-                "toc_semantic_summary": summary.toc_semantic_summary,
-                "toc_semantic_blocking_reasons": summary.toc_semantic_blocking_reasons,
+                "toc_semantic_contract_ok": summary.toc.toc_semantic_contract_ok,
+                "toc_semantic_summary": summary.toc.toc_semantic_summary,
+                "toc_semantic_blocking_reasons": summary.toc.toc_semantic_blocking_reasons,
             }),
         );
     }

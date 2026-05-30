@@ -169,6 +169,7 @@ pub(crate) fn run_phase2(
     let post_body_titles: std::collections::HashSet<String> = phase1
         .structure
         .summary
+        .toc
         .post_body_titles
         .iter()
         .cloned()

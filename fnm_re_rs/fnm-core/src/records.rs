@@ -180,8 +180,10 @@ pub struct SectionHeadRecord {
 
 // ── Phase 1 ────────────────────────────────────────────────────
 
+/// Summary L0 公共层：所有 PhaseNSummary 共享的前 15 个字段。
+/// ←→ Python 各 phase summary 的 TOC 相关字段。
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
-pub struct Phase1Summary {
+pub struct SummaryTocBase {
     #[serde(default)]
     pub page_partition_summary: Value,
     #[serde(default)]
@@ -212,6 +214,12 @@ pub struct Phase1Summary {
     pub toc_semantic_contract_ok: bool,
     #[serde(default)]
     pub toc_semantic_blocking_reasons: Vec<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct Phase1Summary {
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
     #[serde(default)]
     pub visual_toc_endnotes_summary: Value,
 }
@@ -384,36 +392,9 @@ pub struct ChapterLinkContract {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase2Summary {
-    #[serde(default)]
-    pub page_partition_summary: Value,
-    #[serde(default)]
-    pub heading_review_summary: Value,
-    #[serde(default)]
-    pub heading_graph_summary: Value,
-    #[serde(default)]
-    pub chapter_source_summary: Value,
-    #[serde(default)]
-    pub visual_toc_conflict_count: i64,
-    #[serde(default)]
-    pub toc_alignment_summary: Value,
-    #[serde(default)]
-    pub toc_semantic_summary: Value,
-    #[serde(default)]
-    pub toc_role_summary: Value,
-    #[serde(default)]
-    pub container_titles: Vec<String>,
-    #[serde(default)]
-    pub post_body_titles: Vec<String>,
-    #[serde(default)]
-    pub back_matter_titles: Vec<String>,
-    #[serde(default = "default_true")]
-    pub chapter_title_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub chapter_section_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub toc_semantic_contract_ok: bool,
-    #[serde(default)]
-    pub toc_semantic_blocking_reasons: Vec<String>,
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
+    // L1-note 层
     #[serde(default)]
     pub note_region_summary: Value,
     #[serde(default)]
@@ -424,6 +405,7 @@ pub struct Phase2Summary {
     pub chapter_endnote_region_alignment_ok: bool,
     #[serde(default)]
     pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    // 散落字段
     #[serde(default)]
     pub review_flags: Vec<String>,
     #[serde(default)]
@@ -586,36 +568,9 @@ impl Default for NoteLinkRecord {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase3Summary {
-    #[serde(default)]
-    pub page_partition_summary: Value,
-    #[serde(default)]
-    pub heading_review_summary: Value,
-    #[serde(default)]
-    pub heading_graph_summary: Value,
-    #[serde(default)]
-    pub chapter_source_summary: Value,
-    #[serde(default)]
-    pub visual_toc_conflict_count: i64,
-    #[serde(default)]
-    pub toc_alignment_summary: Value,
-    #[serde(default)]
-    pub toc_semantic_summary: Value,
-    #[serde(default)]
-    pub toc_role_summary: Value,
-    #[serde(default)]
-    pub container_titles: Vec<String>,
-    #[serde(default)]
-    pub post_body_titles: Vec<String>,
-    #[serde(default)]
-    pub back_matter_titles: Vec<String>,
-    #[serde(default = "default_true")]
-    pub chapter_title_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub chapter_section_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub toc_semantic_contract_ok: bool,
-    #[serde(default)]
-    pub toc_semantic_blocking_reasons: Vec<String>,
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
+    // L1-note 层
     #[serde(default)]
     pub note_region_summary: Value,
     #[serde(default)]
@@ -626,12 +581,14 @@ pub struct Phase3Summary {
     pub chapter_endnote_region_alignment_ok: bool,
     #[serde(default)]
     pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
     #[serde(default)]
     pub note_link_summary: Value,
     #[serde(default)]
     pub review_seed_summary: Value,
+    // 散落字段
     #[serde(default)]
     pub review_flags: Vec<String>,
     #[serde(default)]
@@ -829,36 +786,9 @@ pub struct StructureStatusRecord {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase4Summary {
-    #[serde(default)]
-    pub page_partition_summary: Value,
-    #[serde(default)]
-    pub heading_review_summary: Value,
-    #[serde(default)]
-    pub heading_graph_summary: Value,
-    #[serde(default)]
-    pub chapter_source_summary: Value,
-    #[serde(default)]
-    pub visual_toc_conflict_count: i64,
-    #[serde(default)]
-    pub toc_alignment_summary: Value,
-    #[serde(default)]
-    pub toc_semantic_summary: Value,
-    #[serde(default)]
-    pub toc_role_summary: Value,
-    #[serde(default)]
-    pub container_titles: Vec<String>,
-    #[serde(default)]
-    pub post_body_titles: Vec<String>,
-    #[serde(default)]
-    pub back_matter_titles: Vec<String>,
-    #[serde(default = "default_true")]
-    pub chapter_title_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub chapter_section_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub toc_semantic_contract_ok: bool,
-    #[serde(default)]
-    pub toc_semantic_blocking_reasons: Vec<String>,
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
+    // L1-note 层
     #[serde(default)]
     pub note_region_summary: Value,
     #[serde(default)]
@@ -869,16 +799,19 @@ pub struct Phase4Summary {
     pub chapter_endnote_region_alignment_ok: bool,
     #[serde(default)]
     pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
     #[serde(default)]
     pub note_link_summary: Value,
     #[serde(default)]
     pub review_seed_summary: Value,
+    // L3-review 层
     #[serde(default)]
     pub review_type_counts: HashMap<String, i64>,
     #[serde(default)]
     pub override_summary: Value,
+    // 散落字段
     #[serde(default)]
     pub review_flags: Vec<String>,
 }
@@ -1245,36 +1178,9 @@ pub struct ChapterMarkdownSet {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase5Summary {
-    #[serde(default)]
-    pub page_partition_summary: Value,
-    #[serde(default)]
-    pub heading_review_summary: Value,
-    #[serde(default)]
-    pub heading_graph_summary: Value,
-    #[serde(default)]
-    pub chapter_source_summary: Value,
-    #[serde(default)]
-    pub visual_toc_conflict_count: i64,
-    #[serde(default)]
-    pub toc_alignment_summary: Value,
-    #[serde(default)]
-    pub toc_semantic_summary: Value,
-    #[serde(default)]
-    pub toc_role_summary: Value,
-    #[serde(default)]
-    pub container_titles: Vec<String>,
-    #[serde(default)]
-    pub post_body_titles: Vec<String>,
-    #[serde(default)]
-    pub back_matter_titles: Vec<String>,
-    #[serde(default = "default_true")]
-    pub chapter_title_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub chapter_section_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub toc_semantic_contract_ok: bool,
-    #[serde(default)]
-    pub toc_semantic_blocking_reasons: Vec<String>,
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
+    // L1-note 层
     #[serde(default)]
     pub note_region_summary: Value,
     #[serde(default)]
@@ -1285,18 +1191,22 @@ pub struct Phase5Summary {
     pub chapter_endnote_region_alignment_ok: bool,
     #[serde(default)]
     pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
     #[serde(default)]
     pub note_link_summary: Value,
     #[serde(default)]
     pub review_seed_summary: Value,
+    // L3-review 层
     #[serde(default)]
     pub review_type_counts: HashMap<String, i64>,
     #[serde(default)]
     pub override_summary: Value,
+    // 散落字段
     #[serde(default)]
     pub review_flags: Vec<String>,
+    // L4-unit 层
     #[serde(default)]
     pub unit_planning_summary: Value,
     #[serde(default)]
@@ -1451,36 +1361,9 @@ pub struct ExportAuditReportRecord {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Phase6Summary {
-    #[serde(default)]
-    pub page_partition_summary: Value,
-    #[serde(default)]
-    pub heading_review_summary: Value,
-    #[serde(default)]
-    pub heading_graph_summary: Value,
-    #[serde(default)]
-    pub chapter_source_summary: Value,
-    #[serde(default)]
-    pub visual_toc_conflict_count: i64,
-    #[serde(default)]
-    pub toc_alignment_summary: Value,
-    #[serde(default)]
-    pub toc_semantic_summary: Value,
-    #[serde(default)]
-    pub toc_role_summary: Value,
-    #[serde(default)]
-    pub container_titles: Vec<String>,
-    #[serde(default)]
-    pub post_body_titles: Vec<String>,
-    #[serde(default)]
-    pub back_matter_titles: Vec<String>,
-    #[serde(default = "default_true")]
-    pub chapter_title_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub chapter_section_alignment_ok: bool,
-    #[serde(default = "default_true")]
-    pub toc_semantic_contract_ok: bool,
-    #[serde(default)]
-    pub toc_semantic_blocking_reasons: Vec<String>,
+    #[serde(flatten)]
+    pub toc: SummaryTocBase,
+    // L1-note 层
     #[serde(default)]
     pub note_region_summary: Value,
     #[serde(default)]
@@ -1491,18 +1374,22 @@ pub struct Phase6Summary {
     pub chapter_endnote_region_alignment_ok: bool,
     #[serde(default)]
     pub chapter_endnote_start_page_map: HashMap<String, i64>,
+    // L2-anchor 层
     #[serde(default)]
     pub body_anchor_summary: Value,
     #[serde(default)]
     pub note_link_summary: Value,
     #[serde(default)]
     pub review_seed_summary: Value,
+    // L3-review 层
     #[serde(default)]
     pub review_type_counts: HashMap<String, i64>,
     #[serde(default)]
     pub override_summary: Value,
+    // 散落字段
     #[serde(default)]
     pub review_flags: Vec<String>,
+    // L4-unit 层
     #[serde(default)]
     pub unit_planning_summary: Value,
     #[serde(default)]
@@ -1511,6 +1398,7 @@ pub struct Phase6Summary {
     pub diagnostic_page_summary: Value,
     #[serde(default)]
     pub diagnostic_note_summary: Value,
+    // L5-export 层
     #[serde(default)]
     pub export_bundle_summary: Value,
     #[serde(default)]
