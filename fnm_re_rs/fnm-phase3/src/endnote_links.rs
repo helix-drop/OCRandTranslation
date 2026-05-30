@@ -2,6 +2,7 @@
 //!
 //! 尾注 link 匹配：anchor → note_item 配对、orphan repair、正文搜索恢复。
 
+use crate::link_utils::extract_context;
 use fnm_core::records::{BodyAnchorRecord, NoteItemRecord, NoteRegionRecord};
 use fnm_core::text::byte_index_to_char_index;
 use fnm_core::types::{AnchorKind, LinkResolver, LinkStatus, NoteKind, RegionScope};
@@ -450,15 +451,7 @@ fn find_marker_in_body(body_text: &str, marker: &str, patterns: &[Regex]) -> Opt
     None
 }
 
-fn extract_context(text: &str, start: usize, end: usize) -> String {
-    let ctx_start = start.saturating_sub(30);
-    let ctx_end = (end + 30).min(text.len());
-    text.char_indices()
-        .skip_while(|(i, _)| *i < ctx_start)
-        .take_while(|(i, _)| *i < ctx_end)
-        .map(|(_, ch)| ch)
-        .collect()
-}
+// extract_context 已收敛至 crate::link_utils。
 
 #[cfg(test)]
 mod tests {

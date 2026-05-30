@@ -16,6 +16,7 @@ pub mod page_translate;
 pub mod pipeline;
 pub mod post_translate;
 pub mod types;
+pub mod visual_recovery;
 
 pub use error::{OrchestratorError, Result};
 pub use load::load_phase6_structure;

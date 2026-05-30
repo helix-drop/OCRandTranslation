@@ -6,6 +6,7 @@ pub mod endnote_chapter_explorer;
 pub mod endnote_repair;
 pub mod input;
 pub mod llm_bare_digit_verify;
+mod llm_json;
 pub mod note_items;
 pub mod note_kind_resolver;
 pub mod note_regions;
@@ -116,7 +117,9 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
 
     let total_recovered: usize = recovered_sup.values().map(|v| v.len()).sum();
 
-    // 7. LLM 路径诊断（llm_bare_digit_verify + visual_anchor_recovery 需 Phase 3 body_anchors）
+    // 7. LLM 路径诊断：仅记录 vision 是否就绪。
+    // 注：bare_digit 校验（S4）在 Phase 3 内执行，视觉锚点恢复（S2）在 orchestrator
+    // post-phase3 执行，均不在本 phase；故不再设 *_ready 占位标志。
     let llm_ready = vision_config.is_some() && input.pdf_path.is_some();
     let elapsed = start.elapsed();
     let note_region_count = note_regions.len();
@@ -132,8 +135,6 @@ pub fn build_phase2_structure_sync(input: Phase2Input) -> anyhow::Result<Phase2O
             "sup_recovery_recovered": total_recovered,
             "sup_recovery_num_chapters": recovered_sup.len(),
             "llm_vision_configured": llm_ready,
-            "llm_bare_digit_verify_ready": llm_ready,
-            "visual_anchor_recovery_ready": llm_ready,
             "note_item_count": note_item_count,
             "note_region_count": note_region_count,
             "elapsed_ms": elapsed.as_millis(),

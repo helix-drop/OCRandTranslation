@@ -11,7 +11,7 @@ pub use super::rules::PageScanContext;
 /// ←→ Python `_resolve_page_role`
 pub fn resolve_page_role(ctx: &PageScanContext<'_>) -> RuleMatch {
     // 1. 规则引擎子模块中的规则
-    for rule_fn in rules::all_rules() {
+    for rule_fn in rules::ALL_RULES {
         let m = rule_fn(ctx);
         if m.matched {
             return m;

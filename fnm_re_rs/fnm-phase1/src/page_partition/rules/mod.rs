@@ -55,17 +55,16 @@ pub struct PageScanContext<'a> {
 
 /// 所有规则按优先级排列。
 /// ←→ Python `_resolve_page_role` 的 rules tuple
-pub fn all_rules() -> Vec<fn(&PageScanContext<'_>) -> RuleMatch> {
-    vec![
-        archive_noise::rule,
-        course_listing::rule,
-        copyright::rule,
-        early_other::rule,
-        rear_toc::rule,
-        rear_author::rule,
-        note_scan::rule,
-        notes_heading::rule,
-        rear_sparse::rule,
-        title_page::rule,
-    ]
-}
+/// const 数组：避免每页调用时重建 Vec（函数指针表是编译期常量）。
+pub const ALL_RULES: &[fn(&PageScanContext<'_>) -> RuleMatch] = &[
+    archive_noise::rule,
+    course_listing::rule,
+    copyright::rule,
+    early_other::rule,
+    rear_toc::rule,
+    rear_author::rule,
+    note_scan::rule,
+    notes_heading::rule,
+    rear_sparse::rule,
+    title_page::rule,
+];

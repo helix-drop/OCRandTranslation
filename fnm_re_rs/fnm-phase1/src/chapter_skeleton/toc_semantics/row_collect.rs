@@ -269,6 +269,8 @@ fn resolve_visual_toc_page_by_heading_only(
     (candidates[0].2, true)
 }
 
+/// source 评分（visual_toc 行体系，**十级量纲**）。
+/// ⚠️ 与 `heading_graph/scoring.rs` 的同名 pub 函数**分值不同**，不可合并（§12）。
 fn candidate_source_score(source: &str, block_label: &str) -> i64 {
     match source {
         "ocr_block" if block_label == "doc_title" => 36,

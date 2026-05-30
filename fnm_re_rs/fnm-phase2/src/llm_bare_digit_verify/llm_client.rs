@@ -1,6 +1,7 @@
 //! bare digit vision API 调用。
 //! ←→ FNM_RE/modules/llm_bare_digit_verify.py 中的 API 调用部分
 
+use crate::llm_json::extract_json_block;
 use crate::llm_bare_digit_verify::prompt_builder::build_bare_digit_prompt;
 use crate::sup_recovery::layer3::VisionConfig;
 use crate::sup_recovery::pdf_render::render_page_to_base64_png;
@@ -90,14 +91,7 @@ fn parse_llm_response(
     }
 }
 
-fn extract_json_block(content: &str) -> String {
-    if let Some(start) = content.find('{') {
-        if let Some(end) = content.rfind('}') {
-            return content[start..=end].to_string();
-        }
-    }
-    content.to_string()
-}
+// JSON 块提取已收敛至 crate::llm_json。
 
 #[cfg(test)]
 mod tests {
