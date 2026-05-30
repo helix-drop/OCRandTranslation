@@ -171,6 +171,7 @@ mod tests {
         assert_eq!(
             result
                 .summary
+                .note
                 .chapter_note_mode_summary
                 .get("book_type")
                 .and_then(|v| v.as_str()),

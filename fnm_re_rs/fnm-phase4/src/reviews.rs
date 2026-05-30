@@ -5,7 +5,7 @@
 
 use fnm_core::records::{
     BodyAnchorRecord, ChapterRecord, FrozenRefEntry, NoteLinkRecord, Phase3Summary,
-    StructureReviewRecord,
+    StructureReviewRecord, SummaryTocBase,
 };
 use fnm_core::types::{AnchorKind, BoundaryState, LinkStatus, NoteKind};
 use once_cell::sync::Lazy;
@@ -423,9 +423,12 @@ mod tests {
 
     fn default_summary() -> Phase3Summary {
         Phase3Summary {
-            chapter_title_alignment_ok: true,
-            chapter_section_alignment_ok: true,
-            toc_semantic_contract_ok: true,
+            toc: SummaryTocBase {
+                chapter_title_alignment_ok: true,
+                chapter_section_alignment_ok: true,
+                toc_semantic_contract_ok: true,
+                ..Default::default()
+            },
             ..Default::default()
         }
     }
@@ -568,10 +571,8 @@ mod tests {
 
     #[test]
     fn test_toc_alignment_review_required() {
-        let summary = Phase3Summary {
-            chapter_title_alignment_ok: false,
-            ..default_summary()
-        };
+        let mut summary = default_summary();
+        summary.toc.chapter_title_alignment_ok = false;
         let (reviews, _) =
             build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
@@ -580,10 +581,8 @@ mod tests {
 
     #[test]
     fn test_toc_semantic_review_required() {
-        let summary = Phase3Summary {
-            toc_semantic_contract_ok: false,
-            ..default_summary()
-        };
+        let mut summary = default_summary();
+        summary.toc.toc_semantic_contract_ok = false;
         let (reviews, _) =
             build_structure_reviews(&[], &[], &[], &summary, 0, 0, &default_freeze_error_rows());
         assert_eq!(reviews.len(), 1);
