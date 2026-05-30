@@ -175,15 +175,20 @@ fn default_pool_slot() -> ModelPoolSlot {
     }
 }
 
+/// 默认 fnm pool：slot[0] builtin（key 非空），其余 empty。无用户配置时使用。
+fn default_fnm_model_pool() -> Vec<ModelPoolSlot> {
+    let mut slots = vec![default_pool_slot(); MODEL_POOL_SLOT_COUNT];
+    slots[0].mode = "builtin".into();
+    slots[0].builtin_key =
+        normalize_builtin_model_key(ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT, Some("fnm"));
+    slots
+}
+
 /// 返回当前 fnm pool（如未配置则给一个默认 builtin 槽 + 空槽位）。
 pub fn get_fnm_model_pool() -> Vec<ModelPoolSlot> {
     let cfg = load_config();
     if cfg.fnm_model_pool.is_empty() {
-        let mut slots = vec![default_pool_slot(); MODEL_POOL_SLOT_COUNT];
-        slots[0].mode = "builtin".into();
-        slots[0].builtin_key =
-            normalize_builtin_model_key(ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT, Some("fnm"));
-        return slots;
+        return default_fnm_model_pool();
     }
     cfg.fnm_model_pool
 }
@@ -285,10 +290,13 @@ mod tests {
 
     #[test]
     fn default_pool_has_4_slots_with_builtin_at_zero() {
-        invalidate_config_cache();
-        // 不依赖磁盘文件
-        let pool = get_fnm_model_pool();
-        assert!(!pool.is_empty());
+        // 直接验证默认 pool 构造逻辑，不依赖全局 config——用户可能已配置 custom
+        // pool，那时 get_fnm_model_pool 返回用户 pool（slot[0] 非 builtin）。
+        let pool = default_fnm_model_pool();
+        assert_eq!(pool.len(), MODEL_POOL_SLOT_COUNT);
+        assert_eq!(pool[0].mode, "builtin");
+        assert!(!pool[0].builtin_key.is_empty());
+        assert!(pool[1..].iter().all(|s| s.mode == "empty"));
     }
 
     #[test]

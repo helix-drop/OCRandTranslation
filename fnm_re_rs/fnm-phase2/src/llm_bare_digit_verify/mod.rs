@@ -1,6 +1,11 @@
 //! ←→ FNM_RE/modules/llm_bare_digit_verify.py (221 行)
 //! LLM 验证 bare digit marker：对 body_anchors 中 source = "bare_digit" 的候选，
 //! 用 vision LLM 二次确认，输出接受/拒绝。
+//!
+//! 【接入状态 B3/S3】本模块**未接入主流程**：bare_digit 的 LLM 裁决唯一发生在
+//! Phase 3（S4：`fnm-phase3` 的 `body_anchors::verify_bare_digit_anchors_with_llm`）。
+//! 在 post-phase3 再裁决一次会制造 note marker 的第二决策源，违反 CLAUDE.md §12
+//! 「分类源头唯一」。保留为库 API + 单测，供未来「高置信抽检」场景复用。
 
 pub mod llm_client;
 pub mod prompt_builder;

@@ -525,106 +525,16 @@ pub fn build_toc_semantics(
     }
 
     // 11. visual_toc_conflict_count
-    let mut visual_toc_conflict_count = 0i64;
-    for chapter in chapters.iter_mut() {
-        let chapter_page = chapter.start_page;
-        if title_utils::visual_toc_chapter_keyword_strength(&chapter.title) < 1 {
-            continue;
-        }
-        let chapter_key = chapter_title_match_key(&chapter.title);
-        let strong_candidates: Vec<&HeadingCandidate> = heading_candidates
-            .iter()
-            .filter(|c| {
-                matches!(c.source.as_str(), "ocr_block" | "pdf_font_band")
-                    && c.heading_family_guess == "chapter"
-                    && !c.suppressed_as_chapter
-                    && c.top_band
-                    && (c.source != "ocr_block" || c.block_label == "doc_title")
-                    && title_utils::visual_toc_chapter_keyword_strength(&c.text) >= 1
-                    && c.confidence >= 0.68
-                    && c.page_no == chapter_page
-            })
-            .collect();
-        if strong_candidates.len() != 1 {
-            continue;
-        }
-        let candidate_key = chapter_title_match_key(&strong_candidates[0].text);
-        if chapter_key.is_empty() || candidate_key.is_empty() {
-            continue;
-        }
-        if chapter_key == candidate_key
-            || chapter_key.contains(&candidate_key)
-            || candidate_key.contains(&chapter_key)
-        {
-            continue;
-        }
-        chapter.boundary_state = fnm_core::types::BoundaryState::ReviewRequired;
-        visual_toc_conflict_count += 1;
-    }
+    let visual_toc_conflict_count = detect_visual_toc_conflicts(&mut chapters, heading_candidates);
 
     // 12. section heads
-    let chapter_row_keys: std::collections::HashSet<(i64, String)> = exportable_chapter_rows
-        .iter()
-        .map(|r| title_utils::visual_toc_row_key(r.page_no, &r.title))
-        .collect();
-
-    let section_target_rows: Vec<&TocRow> = if has_explicit_organization {
-        rows.iter()
-            .filter(|r| {
-                r.page_no > 0
-                    && !r.non_body_title
-                    && r.body_candidate != Some(false)
-                    && !chapter_row_keys
-                        .contains(&title_utils::visual_toc_row_key(r.page_no, &r.title))
-                    && r.semantic_role == "section"
-            })
-            .collect()
-    } else {
-        rows.iter()
-            .filter(|r| {
-                row_collect::is_visual_toc_body_candidate(r)
-                    && r.page_no > 0
-                    && !r.non_body_title
-                    && !chapter_row_keys
-                        .contains(&title_utils::visual_toc_row_key(r.page_no, &r.title))
-                    && (matches!(r.semantic_role.as_str(), "section" | "part")
-                        || r.level > chapter_level)
-            })
-            .collect()
-    };
-
-    let mut section_heads: Vec<SectionHeadRecord> = Vec::new();
-    let mut seen_head_keys: std::collections::HashSet<(String, i64, String)> =
-        std::collections::HashSet::new();
-
-    for row in section_target_rows {
-        let chapter_id = find_chapter_by_page(&chapters, row.page_no);
-        let chapter_id = match chapter_id {
-            Some(id) => id,
-            None => continue,
-        };
-        let text = normalize_title(&row.title);
-        if text.is_empty() {
-            continue;
-        }
-        let key = (
-            chapter_id.clone(),
-            row.page_no,
-            chapter_title_match_key(&text),
-        );
-        if seen_head_keys.contains(&key) {
-            continue;
-        }
-        seen_head_keys.insert(key);
-        section_heads.push(SectionHeadRecord {
-            section_head_id: String::new(),
-            chapter_id,
-            page_no: row.page_no,
-            title: text,
-            level: row.level,
-            source: "visual_toc".into(),
-        });
-    }
+    let section_heads = build_visual_toc_section_heads(
+        &rows,
+        &exportable_chapter_rows,
+        &chapters,
+        has_explicit_organization,
+        chapter_level,
+    );
 
     // 13. blocking reasons
     let mut blocking_reasons: Vec<String> = Vec::new();
@@ -641,13 +551,7 @@ pub fn build_toc_semantics(
     let monotonic = monotonic::check_chapter_order_monotonic(&chapters);
 
     // 15. role summary
-    let mut final_role_summary = default_toc_role_summary();
-    for row in &rows {
-        let mapped = toc_role_from_semantic_role(&row.semantic_role);
-        if !mapped.is_empty() {
-            *final_role_summary.entry(mapped.to_string()).or_insert(0) += 1;
-        }
-    }
+    let final_role_summary = compute_final_role_summary(&rows);
 
     // 16. meta
     let meta = serde_json::json!({
@@ -761,6 +665,131 @@ fn is_misleveled_chapter_row(
         return true;
     }
     false
+}
+
+/// step 11：检测 visual TOC chapter 与正文 heading candidate 的冲突。
+/// 唯一强候选且 title key 不匹配时，该章标 ReviewRequired；返回冲突计数。
+fn detect_visual_toc_conflicts(
+    chapters: &mut [ChapterRecord],
+    heading_candidates: &[HeadingCandidate],
+) -> i64 {
+    let mut visual_toc_conflict_count = 0i64;
+    for chapter in chapters.iter_mut() {
+        let chapter_page = chapter.start_page;
+        if title_utils::visual_toc_chapter_keyword_strength(&chapter.title) < 1 {
+            continue;
+        }
+        let chapter_key = chapter_title_match_key(&chapter.title);
+        let strong_candidates: Vec<&HeadingCandidate> = heading_candidates
+            .iter()
+            .filter(|c| {
+                matches!(c.source.as_str(), "ocr_block" | "pdf_font_band")
+                    && c.heading_family_guess == "chapter"
+                    && !c.suppressed_as_chapter
+                    && c.top_band
+                    && (c.source != "ocr_block" || c.block_label == "doc_title")
+                    && title_utils::visual_toc_chapter_keyword_strength(&c.text) >= 1
+                    && c.confidence >= 0.68
+                    && c.page_no == chapter_page
+            })
+            .collect();
+        if strong_candidates.len() != 1 {
+            continue;
+        }
+        let candidate_key = chapter_title_match_key(&strong_candidates[0].text);
+        if chapter_key.is_empty() || candidate_key.is_empty() {
+            continue;
+        }
+        if chapter_key == candidate_key
+            || chapter_key.contains(&candidate_key)
+            || candidate_key.contains(&chapter_key)
+        {
+            continue;
+        }
+        chapter.boundary_state = fnm_core::types::BoundaryState::ReviewRequired;
+        visual_toc_conflict_count += 1;
+    }
+    visual_toc_conflict_count
+}
+
+/// step 12：从非章节 body rows 构建 section heads（按 (chapter,page,key) 去重，归属到所在章）。
+fn build_visual_toc_section_heads(
+    rows: &[TocRow],
+    exportable_chapter_rows: &[TocRow],
+    chapters: &[ChapterRecord],
+    has_explicit_organization: bool,
+    chapter_level: i64,
+) -> Vec<SectionHeadRecord> {
+    let chapter_row_keys: std::collections::HashSet<(i64, String)> = exportable_chapter_rows
+        .iter()
+        .map(|r| title_utils::visual_toc_row_key(r.page_no, &r.title))
+        .collect();
+
+    let section_target_rows: Vec<&TocRow> = if has_explicit_organization {
+        rows.iter()
+            .filter(|r| {
+                r.page_no > 0
+                    && !r.non_body_title
+                    && r.body_candidate != Some(false)
+                    && !chapter_row_keys
+                        .contains(&title_utils::visual_toc_row_key(r.page_no, &r.title))
+                    && r.semantic_role == "section"
+            })
+            .collect()
+    } else {
+        rows.iter()
+            .filter(|r| {
+                row_collect::is_visual_toc_body_candidate(r)
+                    && r.page_no > 0
+                    && !r.non_body_title
+                    && !chapter_row_keys
+                        .contains(&title_utils::visual_toc_row_key(r.page_no, &r.title))
+                    && (matches!(r.semantic_role.as_str(), "section" | "part")
+                        || r.level > chapter_level)
+            })
+            .collect()
+    };
+
+    let mut section_heads: Vec<SectionHeadRecord> = Vec::new();
+    let mut seen_head_keys: std::collections::HashSet<(String, i64, String)> =
+        std::collections::HashSet::new();
+
+    for row in section_target_rows {
+        let chapter_id = match find_chapter_by_page(chapters, row.page_no) {
+            Some(id) => id,
+            None => continue,
+        };
+        let text = normalize_title(&row.title);
+        if text.is_empty() {
+            continue;
+        }
+        let key = (chapter_id.clone(), row.page_no, chapter_title_match_key(&text));
+        if seen_head_keys.contains(&key) {
+            continue;
+        }
+        seen_head_keys.insert(key);
+        section_heads.push(SectionHeadRecord {
+            section_head_id: String::new(),
+            chapter_id,
+            page_no: row.page_no,
+            title: text,
+            level: row.level,
+            source: "visual_toc".into(),
+        });
+    }
+    section_heads
+}
+
+/// step 15：统计每个 toc role 的行数。
+fn compute_final_role_summary(rows: &[TocRow]) -> std::collections::HashMap<String, i64> {
+    let mut summary = default_toc_role_summary();
+    for row in rows {
+        let mapped = toc_role_from_semantic_role(&row.semantic_role);
+        if !mapped.is_empty() {
+            *summary.entry(mapped.to_string()).or_insert(0) += 1;
+        }
+    }
+    summary
 }
 
 #[cfg(test)]

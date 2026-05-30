@@ -166,8 +166,13 @@ mod tests {
         assert_eq!(n, 0);
     }
 
+    // 全局 USAGE_RECORDS 的测试合并为单函数：内部按段串行（每段先 clear_usage），
+    // 避免 cargo 并行执行下跨测试污染全局状态，从而恢复精确断言（不再用 >= / any
+    // 弹性绕过）。本 crate 内仅这些测试触碰全局用量状态——record_usage 的其他调用
+    // 在 fnm-llm-repair，属不同测试进程，不会干扰。
     #[test]
-    fn usage_recording() {
+    fn usage_records_global_state() {
+        // 1. record 后 summary.total 精确
         clear_usage();
         record_usage(UsageRecord {
             stage: "test".into(),
@@ -180,20 +185,14 @@ mod tests {
             dur_ms: 200,
         });
         let summary = get_usage_summary();
-        let total = &summary["total"];
-        assert_eq!(total["prompt_tokens"], 100);
-        assert_eq!(total["completion_tokens"], 50);
-    }
+        assert_eq!(summary["total"]["prompt_tokens"], 100);
+        assert_eq!(summary["total"]["completion_tokens"], 50);
 
-    #[test]
-    fn get_usage_records_empty() {
+        // 2. clear 后为空
         clear_usage();
-        let records = get_usage_records();
-        assert!(records.is_empty());
-    }
+        assert!(get_usage_records().is_empty());
 
-    #[test]
-    fn get_usage_records_after_record() {
+        // 3. record 后恰好 1 条，字段精确
         clear_usage();
         record_usage(UsageRecord {
             stage: "records_test_stage".into(),
@@ -206,63 +205,37 @@ mod tests {
             dur_ms: 500,
         });
         let records = get_usage_records();
-        // 可能有并行测试污染，至少 1 条
-        assert!(!records.is_empty());
-        let found = records
-            .iter()
-            .any(|r| r.stage == "records_test_stage" && r.prompt_tokens == 200);
-        assert!(
-            found,
-            "expected records_test_stage record with prompt_tokens=200"
-        );
-    }
+        assert_eq!(records.len(), 1);
+        assert_eq!(records[0].stage, "records_test_stage");
+        assert_eq!(records[0].prompt_tokens, 200);
 
-    #[test]
-    fn usage_summary_by_stage() {
+        // 4. by_stage 聚合精确
         clear_usage();
-        record_usage(UsageRecord {
-            stage: "summary_stage_a".into(),
-            model_id: "model1".into(),
-            provider: "openai".into(),
-            prompt_tokens: 10,
-            completion_tokens: 5,
-            total_tokens: 15,
-            request_count: 1,
-            dur_ms: 100,
-        });
-        record_usage(UsageRecord {
-            stage: "summary_stage_a".into(),
-            model_id: "model1".into(),
-            provider: "openai".into(),
-            prompt_tokens: 20,
-            completion_tokens: 10,
-            total_tokens: 30,
-            request_count: 1,
-            dur_ms: 200,
-        });
-        record_usage(UsageRecord {
-            stage: "summary_stage_b".into(),
-            model_id: "model2".into(),
-            provider: "anthropic".into(),
-            prompt_tokens: 5,
-            completion_tokens: 5,
-            total_tokens: 10,
-            request_count: 1,
-            dur_ms: 50,
-        });
+        for (stage, prompt, completion, total) in [
+            ("summary_stage_a", 10, 5, 15),
+            ("summary_stage_a", 20, 10, 30),
+            ("summary_stage_b", 5, 5, 10),
+        ] {
+            record_usage(UsageRecord {
+                stage: stage.into(),
+                model_id: "m".into(),
+                provider: "openai".into(),
+                prompt_tokens: prompt,
+                completion_tokens: completion,
+                total_tokens: total,
+                request_count: 1,
+                dur_ms: 100,
+            });
+        }
         let summary = get_usage_summary();
         let by_stage = summary.get("by_stage").unwrap();
-        assert!(by_stage.is_object());
-        // 弹性断言：并行测试可能污染全局状态，检查存在性而非精确值
         let sa = by_stage.get("summary_stage_a").unwrap();
-        assert!(sa["request_count"].as_i64().unwrap() >= 2);
-        assert!(sa["prompt_tokens"].as_i64().unwrap() >= 30);
+        assert_eq!(sa["request_count"].as_i64().unwrap(), 2);
+        assert_eq!(sa["prompt_tokens"].as_i64().unwrap(), 30);
         let sb = by_stage.get("summary_stage_b").unwrap();
-        assert!(sb["request_count"].as_i64().unwrap() >= 1);
-    }
+        assert_eq!(sb["request_count"].as_i64().unwrap(), 1);
 
-    #[test]
-    fn clear_usage_resets() {
+        // 5. clear 重置
         clear_usage();
         record_usage(UsageRecord {
             stage: "clear_test_stage".into(),

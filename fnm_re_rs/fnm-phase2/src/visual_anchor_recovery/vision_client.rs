@@ -1,6 +1,7 @@
 //! Vision LLM 客户端（复用 G2 的 HTTP_CLIENT 和 VisionConfig）。
 //! ←→ Python `visual_anchor_recovery._vision_verify_candidate()`
 
+use crate::llm_json::extract_json_block;
 use crate::sup_recovery::layer3::VisionConfig;
 use crate::sup_recovery::pdf_render::render_page_to_base64_png;
 use anyhow::{Context, Result};
@@ -82,37 +83,4 @@ pub async fn verify_candidate_page(
     })
 }
 
-fn extract_json_block(content: &str) -> String {
-    if let Some(start) = content.find('{') {
-        if let Some(end) = content.rfind('}') {
-            return content[start..=end].to_string();
-        }
-    }
-    content.to_string()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn extract_json_from_markdown() {
-        let resp = "```json\n{\"accepted\": true, \"confidence\": 0.9}\n```";
-        let extracted = extract_json_block(resp);
-        assert!(extracted.contains("\"accepted\": true"));
-    }
-
-    #[test]
-    fn extract_plain_json() {
-        let resp = r#"{"accepted": false, "confidence": 0.0}"#;
-        let extracted = extract_json_block(resp);
-        assert!(extracted.contains("accepted"));
-    }
-
-    #[test]
-    fn extract_empty_returns_content() {
-        let resp = "no json here";
-        let extracted = extract_json_block(resp);
-        assert_eq!(extracted, resp);
-    }
-}
+// JSON 块提取已收敛至 crate::llm_json（含其测试）。

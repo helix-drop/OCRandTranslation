@@ -4,6 +4,7 @@
 //!
 //! 已知章级 marker 序列有缺口时，从 page text 中启发式恢复缺失的 anchor。
 
+use crate::link_utils::extract_context;
 use fnm_core::records::{BodyAnchorRecord, NoteItemRecord};
 use fnm_core::text::byte_index_to_char_index;
 use once_cell::sync::Lazy;
@@ -480,13 +481,4 @@ pub fn recover_expected_gap_symbol_anchors(
 
 // ── 内部辅助 ────────────────────────────────────────────────────
 
-fn extract_context(text: &str, start: usize, end: usize) -> String {
-    // 使用 char_indices 避免 byte slice 截断多字节 UTF-8 字符
-    let ctx_start = start.saturating_sub(30);
-    let ctx_end = (end + 30).min(text.len());
-    text.char_indices()
-        .skip_while(|(i, _)| *i < ctx_start)
-        .take_while(|(i, _)| *i < ctx_end)
-        .map(|(_, ch)| ch)
-        .collect()
-}
+// extract_context 已收敛至 crate::link_utils。

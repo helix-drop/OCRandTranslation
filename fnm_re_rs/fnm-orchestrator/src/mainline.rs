@@ -137,32 +137,60 @@ pub fn run_pipeline_for_doc<R: Repository>(
         None
     };
 
-    // ── Phase 3.5 后：如 LLM repair 产生了物化 override，重建 Phase3 (P0-1) ──
-    // 让 Phase4-6 消费 repair 后的 link table，而不是 repair 前的 state。
-    let phase3 = if let Some(ref report) = llm_repair_report {
-        if report.auto_applied_count > 0 && report.error.is_none() {
-            let overrides = repo.list_fnm_review_overrides_v2(doc_id).map_err(|e| {
-                OrchestratorError::Phase3(anyhow::anyhow!("reload overrides: {}", e))
-            })?;
-            let mut config = config.clone();
-            config.review_overrides = Some(serde_json::Value::Array(overrides));
-            let phase3 = pipeline::run_phase3(&phase1, &phase2, &raw_pages, &config)?;
-            let phase3_products = Phase3Products {
-                body_anchors: phase3.body_anchors.clone(),
-                note_links: phase3.note_links.clone(),
-            };
-            repo.replace_fnm_phase3_products(doc_id, &phase3_products)
+    // ── Phase 3.6: 视觉锚点恢复（S2，可选）──
+    // 对比 Phase2 expected markers 与 Phase3 body_anchors 找缺口，调 vision LLM
+    // 恢复缺失 anchor，物化为 anchor `create` override 写 DB。
+    // 红线（CLAUDE.md §8/§12）：只产 synthetic anchor，不碰 note_kind。
+    let visual_recovery_count = if !config.skip_llm_verify && !config.pdf_path.is_empty() {
+        let rows = crate::visual_recovery::run_post_phase3_visual_recovery(
+            &phase1.structure.chapters,
+            &phase2.note_items,
+            &phase3.body_anchors,
+            &raw_pages,
+            &config.pdf_path,
+        );
+        if !rows.is_empty() {
+            repo.batch_save_fnm_review_overrides_v2(doc_id, &rows)
                 .map_err(|e| {
-                    OrchestratorError::Phase3(anyhow::anyhow!("re-persist phase3: {}", e))
+                    OrchestratorError::Phase3(anyhow::anyhow!(
+                        "save visual_recovery overrides: {}",
+                        e
+                    ))
                 })?;
-            snapshot.phase3 = Some(SerPhase3 {
-                body_anchors: phase3_products.body_anchors,
-                note_links: phase3_products.note_links,
-            });
-            phase3
-        } else {
-            phase3
         }
+        rows.len()
+    } else {
+        0
+    };
+
+    // ── Phase 3.5/3.6 后：如产生物化 override，重建 Phase3 (P0-1) ──
+    // 让 Phase4-6 消费 repair/recovery 后的 link table，而不是其前的 state。
+    // 向后兼容：skip_llm_verify=true 时 visual_recovery_count=0，逻辑退化为原「仅
+    // LLM repair 触发」行为。
+    let llm_repair_applied = llm_repair_report
+        .as_ref()
+        .map(|r| r.auto_applied_count > 0 && r.error.is_none())
+        .unwrap_or(false);
+    let phase3 = if llm_repair_applied || visual_recovery_count > 0 {
+        let overrides = repo.list_fnm_review_overrides_v2(doc_id).map_err(|e| {
+            OrchestratorError::Phase3(anyhow::anyhow!("reload overrides: {}", e))
+        })?;
+        let mut config = config.clone();
+        config.review_overrides = Some(serde_json::Value::Array(overrides));
+        let phase3 = pipeline::run_phase3(&phase1, &phase2, &raw_pages, &config)?;
+        let phase3_products = Phase3Products {
+            body_anchors: phase3.body_anchors.clone(),
+            note_links: phase3.note_links.clone(),
+        };
+        repo.replace_fnm_phase3_products(doc_id, &phase3_products)
+            .map_err(|e| {
+                OrchestratorError::Phase3(anyhow::anyhow!("re-persist phase3: {}", e))
+            })?;
+        snapshot.phase3 = Some(SerPhase3 {
+            body_anchors: phase3_products.body_anchors,
+            note_links: phase3_products.note_links,
+        });
+        phase3
     } else {
         phase3
     };

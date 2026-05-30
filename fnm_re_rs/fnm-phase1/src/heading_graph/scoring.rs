@@ -2,7 +2,10 @@
 
 use fnm_core::records::HeadingCandidate;
 
-/// source 类型优先级打分。
+/// source 类型优先级打分（heading_graph evidence 体系，**百级量纲**）。
+/// ⚠️ 与 `chapter_skeleton/toc_semantics/row_collect.rs` 的同名函数**分值体系不同**
+/// （那里是 visual_toc 行评分，十级量纲，相对顺序也不同）——同名巧合、语义各异，
+/// **不可合并**（CLAUDE.md §12：分值不同的重复不可盲目统一）。
 pub fn candidate_source_score(source: &str, block_label: &str) -> i64 {
     match source {
         "pdf_font_band_composite" => 320,

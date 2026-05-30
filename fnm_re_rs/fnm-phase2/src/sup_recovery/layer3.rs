@@ -1,6 +1,7 @@
 //! Layer 3：Vision LLM 验证（PDF 截图 → vision API → marker 校验）。
 //! ←→ FNM_RE/modules/sup_recovery.py 中的 Layer 3 部分（~250 行）
 
+use crate::llm_json::extract_json_block;
 use crate::sup_recovery::pdf_render::render_page_to_base64_png;
 use anyhow::{Context, Result};
 use fnm_core::vision::ResolvedModelSpec;
@@ -120,15 +121,6 @@ pub fn parse_layer3_response(content: &str, marker: &str, page_no: i64) -> Resul
         confidence: parsed["confidence"].as_f64().unwrap_or(0.0),
         reason: parsed["reason"].as_str().unwrap_or("").into(),
     })
-}
-
-fn extract_json_block(content: &str) -> String {
-    if let Some(start) = content.find('{') {
-        if let Some(end) = content.rfind('}') {
-            return content[start..=end].to_string();
-        }
-    }
-    content.to_string()
 }
 
 // ── ResolvedModelSpec 路径 ─────────────────────────────────────

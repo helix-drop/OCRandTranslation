@@ -202,6 +202,7 @@ mod tests {
         assert_eq!(LinkStatus::ALL.len(), 5);
         assert_eq!(LinkResolver::ALL.len(), 4);
         assert_eq!(PipelineState::ALL.len(), 4);
+        assert_eq!(BookType::ALL.len(), 4);
     }
 
     #[test]
@@ -238,6 +239,9 @@ mod tests {
         }
         for v in PipelineState::ALL {
             assert_eq!(PipelineState::from_str(v.as_str()).ok(), Some(*v));
+        }
+        for v in BookType::ALL {
+            assert_eq!(BookType::from_str(v.as_str()).ok(), Some(*v));
         }
     }
 }

@@ -18,6 +18,40 @@ use std::collections::{HashMap, HashSet};
 use crate::segments;
 use crate::segments::chunking;
 
+/// Phase 2 产物：每章 body pages（page_no → {page_no, text}）+ 页顺序。
+type ChapterBodyPages = (
+    HashMap<String, HashMap<i64, serde_json::Value>>,
+    HashMap<String, Vec<i64>>,
+);
+
+/// Phase 2：收集每章 body pages 与页顺序（输入单一、输出 owned，无借用）。
+fn collect_chapter_body_pages(chapter_layers: &ChapterLayers) -> ChapterBodyPages {
+    let mut chapter_body_pages: HashMap<String, HashMap<i64, serde_json::Value>> = HashMap::new();
+    let mut chapter_body_page_order: HashMap<String, Vec<i64>> = HashMap::new();
+
+    for chapter in &chapter_layers.chapter_layers {
+        let chapter_id = chapter.chapter_id.clone();
+        let mut page_map: HashMap<i64, serde_json::Value> = HashMap::new();
+        let mut page_order: Vec<i64> = Vec::new();
+        for page in &chapter.body_pages {
+            let page_no = page.page_no;
+            if page_no <= 0 {
+                continue;
+            }
+            page_map.insert(
+                page_no,
+                serde_json::json!({"page_no": page_no, "text": page.text}),
+            );
+            if !page_order.contains(&page_no) {
+                page_order.push(page_no);
+            }
+        }
+        chapter_body_pages.insert(chapter_id.clone(), page_map);
+        chapter_body_page_order.insert(chapter_id, page_order);
+    }
+    (chapter_body_pages, chapter_body_page_order)
+}
+
 /// 顶层编排：构建 frozen units（body + note）和 frozen refs。
 ///
 /// ←→ Python `ref_freeze.py::build_frozen_units` (L196-678)
@@ -123,30 +157,8 @@ pub fn build_frozen_units(
     });
 
     // ── Phase 2: chapter body pages 收集 (L247-261) ──────────
-    // chapter_body_pages[chapter_id][page_no] = {page_no, text}
-    let mut chapter_body_pages: HashMap<String, HashMap<i64, serde_json::Value>> = HashMap::new();
-    let mut chapter_body_page_order: HashMap<String, Vec<i64>> = HashMap::new();
-
-    for chapter in &chapter_layers.chapter_layers {
-        let chapter_id = chapter.chapter_id.clone();
-        let mut page_map: HashMap<i64, serde_json::Value> = HashMap::new();
-        let mut page_order: Vec<i64> = Vec::new();
-        for page in &chapter.body_pages {
-            let page_no = page.page_no;
-            if page_no <= 0 {
-                continue;
-            }
-            page_map.insert(
-                page_no,
-                serde_json::json!({"page_no": page_no, "text": page.text}),
-            );
-            if !page_order.contains(&page_no) {
-                page_order.push(page_no);
-            }
-        }
-        chapter_body_pages.insert(chapter_id.clone(), page_map);
-        chapter_body_page_order.insert(chapter_id, page_order);
-    }
+    let (mut chapter_body_pages, chapter_body_page_order) =
+        collect_chapter_body_pages(chapter_layers);
 
     // ── Phase 3: inject loop (L263-368) ──────────────────────
     let mut ref_map: Vec<FrozenRefEntry> = Vec::new();

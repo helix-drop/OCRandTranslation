@@ -8,6 +8,20 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::HashSet;
 
+// ── 文本工具 ─────────────────────────────────────────────────────
+
+/// 提取 [start, end) 附近 ±30 字符的上下文（char 边界安全，避免多字节截断）。
+/// B5-2：原 `body_anchors/gap_recovery` 与 `endnote_links` 各有一份相同副本，收敛至此。
+pub(crate) fn extract_context(text: &str, start: usize, end: usize) -> String {
+    let ctx_start = start.saturating_sub(30);
+    let ctx_end = (end + 30).min(text.len());
+    text.char_indices()
+        .skip_while(|(i, _)| *i < ctx_start)
+        .take_while(|(i, _)| *i < ctx_end)
+        .map(|(_, ch)| ch)
+        .collect()
+}
+
 // ── 章节类型判断 ─────────────────────────────────────────────────
 
 /// ←→ Python `_is_fallback_chapter_id`
