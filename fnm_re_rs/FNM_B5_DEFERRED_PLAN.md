@@ -1,8 +1,10 @@
 # B5 遗留项详细执行规划（B5-7 + B5-2余 / B5-1余 / B5-6核心深拆）
 
-> 编写日期：2026-05-30。**本文档只规划，不动手。** 全部结论基于源码实测（标 `file:line`）。
+> 编写日期：2026-05-30。全部结论基于源码实测（标 `file:line`）。
 > 隶属 `FNM_B5_REMAINING_PLAN.md` 的「留待单独 PR」清单。
 > 总验证主轴：行为不变（重构）→ `cargo test --workspace` 全绿 + clippy 0 + parity 不变。
+>
+> **执行进度**：2a ✅ (e8d6751) → 2b → 1 → 2c
 
 ---
 
@@ -11,7 +13,7 @@
 | # | 项 | 风险 | 工作量 | 独立 PR | 守护 |
 |---|---|---|---|---|---|
 | 1 | **B5-7 records flatten** | 高（数据契约） | 中 | 是 | parity + 新增 JSON 快照 |
-| 2a | **B5-2 余 重复收敛** | 低–中 | 小 | 可拆多个 | 各调用点 parity |
+| 2a | **B5-2 余 重复收敛** ✅ | 低–中 | 小 | 是 | 各调用点 parity |
 | 2b | **B5-1 余 弱类型** | 中 | 中 | 可拆多个 | 行为不变 |
 | 2c | **B5-6 核心深拆** | **最高**（状态交织） | 大 | 是 | 严格快照 |
 
@@ -131,15 +133,17 @@ Structure 同理抽 `StructureL0Base`（前4）→ `StructureNoteBase` → …
 
 ### 2.2 执行步骤（缩减后：实际只剩 `safe_int` 合并 + `build_chapter_by_page` 合并 + `looks_like_*` 注释）
 
-- [ ] **第一步（强制）**：对每对 `diff` 函数体——一致 → 合并；不一致 → 注释差异（参照 `candidate_source_score`）。
-- [ ] `safe_int`：**先决策 trim 差异**（convert.rs:188 无 trim）。若判定 3 处应统一行为 → 提 `fnm-core::safe_int`（phase3/phase5 都依赖 core）；若 convert 版有意无 trim → 保留并注释。
-- [ ] `build_chapter_by_page`：统一入参后合并（两处逻辑已确认相同）。注意 selection 版是 `pub`、book_note_type 版是私有——合并落点需 `pub`。
-- [ ] `looks_like_*`（4 函数）：diff page_resolve 简化版 vs front_matter 完整版，**有意不同则交叉注释、不合并**。
-- [ ] `compute_body_bounds`：**删除**（非重复）。
-- [ ] `WHITESPACE_RE`：**跳过**。
+- [x] **第一步（强制）**：对每对 `diff` 函数体——一致 → 合并；不一致 → 注释差异（参照 `candidate_source_score`）。
+- [x] `safe_int`：**先决策 trim 差异**（convert.rs:188 无 trim）。→ 统一加 `.trim()`（防御性，无行为变化）→ 提 `fnm_core::text::safe_int`（phase3/phase5 都依赖 core）。
+- [x] `build_chapter_by_page`：统一入参后合并（两处逻辑已确认相同）。→ `book_note_type::build_chapter_by_page` 改 `pub`，`selection.rs` 改为 `pub use` re-export。
+- [x] `looks_like_*`（4 函数）：diff page_resolve 简化版 vs front_matter 完整版，**有意不同→交叉注释，不合并**。
+- [x] `compute_body_bounds`：**删除**（非重复）。
+- [x] `WHITESPACE_RE`：**跳过**。
 
 ### 2.3 守护
 各调用点的现有单元/parity 测试；合并后跑相关 crate `cargo test`。低风险。
+
+**实测结果**：core 142 / phase1 124 / phase3 31 / phase5 44 全绿，clippy 0，parity 通过。
 
 ---
 
