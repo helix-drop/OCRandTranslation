@@ -4,7 +4,9 @@
 > 隶属 `FNM_B5_REMAINING_PLAN.md` 的「留待单独 PR」清单。
 > 总验证主轴：行为不变（重构）→ `cargo test --workspace` 全绿 + clippy 0 + parity 不变。
 >
-> **执行进度**：2a ✅ (e8d6751) → 2b ✅ (5e3e545) → B5-7 S0-S2 ✅ (cf1b305/d7ff75b/d15fdbb/5c3afa5) → S3 跳过（收益低）→ 2c 待定
+> **执行进度**：2a ✅ → 2b ✅（prompt_builder + page_context + override_materializer）→ B5-7 S0-S2 ✅ → 2c 按规划搁置
+>
+> 全部可执行项已完成。2c (B5-6 核心深拆) 按规划建议"需要再动这两个函数功能时顺带做"。
 
 ---
 
@@ -167,13 +169,14 @@ Structure 同理抽 `StructureL0Base`（前4）→ `StructureNoteBase` → …
 
 ### 2.3 执行步骤
 - [x] 首个示例：`value_views.rs`（ClusterView + 5 个 item view）+ `prompt_builder.rs` 迁移。5e3e545
-- [ ] 逐热点推广：page_context.rs / override_materializer.rs / orchestrator apply.rs
-- [ ] **不必全量**（05 原则）；优先 llm-repair prompt_builder（密度最高）。
+- [x] page_context.rs 迁移：endnote_synthesize_focus_pages / cluster_focus_pages / should_attach_repair_images。9e61fb9
+- [x] override_materializer.rs 迁移：enrich_synthesize_anchor_actions / chapter_for_cluster / prefilter_duplicate_anchors。0c042c7
+- [x] orchestrator apply.rs — **跳过**（pipeline 内部 unit/segment/paragraph 结构，view 不适用）。
 
 ### 2.4 守护
 行为不变；逐热点跑所在 crate `cargo test`（含 parity）。注意：accessor 必须逐字段复刻原 `.get(...).and_then(...).unwrap_or(default)` 的默认值，**diff 核对**。
 
-**实测结果**：prompt_builder 16 测试全绿，clippy 0。剩余热点待后续推广。
+**实测结果**：prompt_builder 16 / page_context 22 / override_materializer 17 全绿，clippy 0。
 
 ---
 
@@ -215,6 +218,8 @@ ref_freeze 同理：Phase 1 索引改为 `HashMap<String, usize>`（存 Vec 下�
 - **最大风险**：借用→索引改写引入下标错位（off-by-one / 排序后索引失效）。缓解：快照守护 + 小步提交。
 - **工作量**：大（toc 1-2 天，ref_freeze 1-2 天）。**纯可读性收益**——除非该文件后续要频繁改动，否则**性价比低，可长期搁置**。
 - 建议：仅在「需要再动这两个函数的功能」时，**顺带**做对应阶段的深拆，不为深拆而深拆。
+
+**决策**：按规划建议搁置。B5-6 是纯可读性收益，且需要借用→索引改写（高风险），不在本次执行范围内。
 
 ---
 
