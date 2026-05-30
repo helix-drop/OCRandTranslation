@@ -37,7 +37,7 @@ fn nearest_prior_chapter_id(chapters: &[ChapterRecord], page_no: i64) -> String 
 
 /// 构建 pages → chapter_id 映射。
 /// ←→ Python `_chapter_by_page`
-fn build_chapter_by_page(chapters: &[ChapterRecord]) -> std::collections::HashMap<i64, String> {
+pub fn build_chapter_by_page(chapters: &[ChapterRecord]) -> std::collections::HashMap<i64, String> {
     let mut mapped = std::collections::HashMap::new();
     for ch in chapters {
         if ch.chapter_id.is_empty() {

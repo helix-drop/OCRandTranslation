@@ -95,7 +95,7 @@ pub async fn verify_book_type_with_llm(
     }
 
     // 4. 构 prompt（按 chapter 分组）
-    let chapter_by_page = selection::chapter_by_page(structure);
+    let chapter_by_page = crate::book_note_type::build_chapter_by_page(&structure.chapters);
     let chapter_modes_by_page: HashMap<i64, String> = pages
         .iter()
         .filter_map(|&p| {

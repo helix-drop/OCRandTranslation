@@ -11,6 +11,8 @@ pub(crate) fn is_archive_noise(text: &str) -> bool {
     ARCHIVE_NOISE_RE.is_match(text)
 }
 
+/// 完整版：YEAR_RANGE_RE + COURS_CF_RE + 页码天花板。
+/// 简化版见 `chapter_skeleton::toc_semantics::page_resolve::looks_like_course_listing_page`（纯子串匹配）。
 pub(crate) fn looks_like_course_listing_page(text: &str, page_no: i64, total_pages: i64) -> bool {
     if page_no > (20).max(total_pages * 8 / 100) {
         return false;
@@ -28,6 +30,8 @@ pub(crate) fn looks_like_course_listing_page(text: &str, page_no: i64, total_pag
     year_range_count >= 3 && (course_hint || lines.len() >= 8)
 }
 
+/// 完整版：COPYRIGHT_RE 正则 + 页码天花板。
+/// 简化版见 `chapter_skeleton::toc_semantics::page_resolve::looks_like_copyright_front_matter_page`（纯子串匹配）。
 pub(crate) fn looks_like_copyright_front_matter_page(
     text: &str,
     page_no: i64,
@@ -81,6 +85,8 @@ pub(crate) fn looks_like_early_other_page(
     numbered_like >= 4
 }
 
+/// 完整版：FRONT_MATTER_PATTERNS + short_lines + uppercase_ratio + 页码天花板。
+/// 简化版见 `chapter_skeleton::toc_semantics::page_resolve::looks_like_title_page`（仅行数+heading 判断）。
 pub(crate) fn looks_like_title_page(
     text: &str,
     headings: &[String],
@@ -126,6 +132,8 @@ pub(crate) fn looks_like_title_page(
     false
 }
 
+/// 完整版：markdown_body_after_first_heading + note ref / SUP marker / 段落计数。
+/// 简化版见 `chapter_skeleton::toc_semantics::page_resolve::looks_like_prose_after_heading`（仅 heading + 2 行散文）。
 pub(crate) fn looks_like_prose_after_heading(text: &str) -> bool {
     let body = markdown_body_after_first_heading(text);
     if body.trim().is_empty() {

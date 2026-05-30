@@ -2,14 +2,10 @@
 
 use fnm_core::note_marker::normalize_note_marker;
 use fnm_core::records::{BodyAnchorRecord, ChapterLinkContract, NoteLinkRecord};
+use fnm_core::text::safe_int;
 use fnm_phase2::chapter_split::ChapterLayers;
 use serde_json::Value;
 use std::collections::{HashMap, HashSet};
-
-/// 安全地将字符串转为 i64。
-fn safe_int(text: &str) -> i64 {
-    text.trim().parse::<i64>().unwrap_or(0)
-}
 
 /// 计算 projection_mode 优先级。
 fn projection_priority(mode: &str) -> i64 {

@@ -15,6 +15,7 @@ use fnm_core::records::{
     BodyAnchorRecord, ChapterRecord, DiagnosticEntryRecord, DiagnosticPageRecord, NoteItemRecord,
     NoteLinkRecord, TranslationUnitRecord, UnitPageSegmentRecord, UnitParagraphRecord,
 };
+use fnm_core::text::safe_int;
 use fnm_core::types::ChapterSource;
 use fnm_phase2::chapter_split::{ChapterLayer, ChapterLayers};
 use fnm_phase3::note_linking::NoteLinkTable;
@@ -182,10 +183,6 @@ pub fn to_translation_unit_records(
         });
     }
     rows
-}
-
-fn safe_int(value: &str) -> i64 {
-    value.parse::<i64>().unwrap_or(0)
 }
 
 /// 从诊断页面映射转换为 DiagnosticPageRecord 列表。

@@ -229,6 +229,11 @@ pub fn plain_text_lines(text: &str) -> Vec<String> {
         .collect()
 }
 
+/// 安全地将字符串转为 i64，trim 后解析，失败返回 0。
+pub fn safe_int(text: &str) -> i64 {
+    text.trim().parse::<i64>().unwrap_or(0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

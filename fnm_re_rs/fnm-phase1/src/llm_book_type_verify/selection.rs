@@ -53,25 +53,8 @@ pub struct BookStructureProfile {
 // ── 章节查找 ───────────────────────────────────────────────────
 
 /// ←→ Python `_chapter_by_page`
-pub fn chapter_by_page(structure: &Phase1Structure) -> HashMap<i64, String> {
-    let mut mapped: HashMap<i64, String> = HashMap::new();
-    for chapter in &structure.chapters {
-        if chapter.chapter_id.is_empty() {
-            continue;
-        }
-        for &page_no in &chapter.pages {
-            if page_no > 0 {
-                mapped.insert(page_no, chapter.chapter_id.clone());
-            }
-        }
-        if chapter.start_page > 0 && chapter.end_page >= chapter.start_page {
-            for page_no in chapter.start_page..=chapter.end_page {
-                mapped.entry(page_no).or_insert(chapter.chapter_id.clone());
-            }
-        }
-    }
-    mapped
-}
+/// 委托 book_note_type::build_chapter_by_page（逻辑完全一致，已合并）。
+pub use crate::book_note_type::build_chapter_by_page as chapter_by_page;
 
 /// ←→ Python `_nearest_prior_chapter_id`
 pub fn nearest_prior_chapter_id(structure: &Phase1Structure, page_no: i64) -> String {

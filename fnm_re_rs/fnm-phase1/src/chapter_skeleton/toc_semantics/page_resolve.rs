@@ -77,6 +77,8 @@ pub fn trim_exportable_chapter_pages(
     }
 }
 
+/// 简化版：仅检测 heading + 2 行散文。
+/// 完整版见 `page_partition::role_heuristics::front_matter::looks_like_prose_after_heading`（含 note ref / SUP marker / 段落计数）。
 fn looks_like_prose_after_heading(text: &str) -> bool {
     let mut found_heading = false;
     let mut prose_lines = 0;
@@ -96,6 +98,8 @@ fn looks_like_prose_after_heading(text: &str) -> bool {
     false
 }
 
+/// 简化版：关键词子串匹配，忽略 page_no/total_pages。
+/// 完整版见 `page_partition::role_heuristics::front_matter::looks_like_copyright_front_matter_page`（含 COPYRIGHT_RE 正则 + 页码天花板）。
 fn looks_like_copyright_front_matter_page(text: &str, _page_no: i64, _total_pages: i64) -> bool {
     let lowered = text.to_lowercase();
     lowered.contains("copyright")
@@ -107,6 +111,8 @@ fn looks_like_copyright_front_matter_page(text: &str, _page_no: i64, _total_page
         || lowered.contains("code de la propriété intellectuelle")
 }
 
+/// 简化版：关键词子串匹配，忽略 page_no/total_pages。
+/// 完整版见 `page_partition::role_heuristics::front_matter::looks_like_course_listing_page`（含 YEAR_RANGE_RE + COURS_CF_RE + 页码天花板）。
 fn looks_like_course_listing_page(text: &str, _page_no: i64, _total_pages: i64) -> bool {
     let lowered = text.to_lowercase();
     lowered.contains("a dissertation")
@@ -115,6 +121,8 @@ fn looks_like_course_listing_page(text: &str, _page_no: i64, _total_pages: i64) 
         || lowered.contains("doctor of philosophy")
 }
 
+/// 简化版：仅检查行数 ≤5 + heading 存在 + body ≤2，忽略 page_no/total_pages。
+/// 完整版见 `page_partition::role_heuristics::front_matter::looks_like_title_page`（含 FRONT_MATTER_PATTERNS / short_lines / uppercase_ratio / 页码天花板）。
 fn looks_like_title_page(
     text: &str,
     headings: &[String],

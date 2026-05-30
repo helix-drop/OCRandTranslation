@@ -8,6 +8,7 @@ use fnm_core::marker_seq::build_raw_marker_note_sequences;
 use fnm_core::records::{
     BodyAnchorRecord, NoteItemRecord, NoteLinkRecord, SectionHeadRecord, TranslationUnitRecord,
 };
+use fnm_core::text::safe_int;
 use fnm_core::types::NoteKind;
 
 use super::chapter_pages;
@@ -46,10 +47,6 @@ pub struct SectionMarkdownInput<'a> {
 pub struct SectionMarkdownResult {
     pub content: String,
     pub contract_summary: HashMap<String, i64>,
-}
-
-fn safe_int(s: &str) -> i64 {
-    s.trim().parse::<i64>().unwrap_or(0)
 }
 
 fn emit_definitions(
