@@ -308,7 +308,7 @@ pub fn build_book_note_profile(
                     .rev()
                     .take(8)
                     .filter_map(|p| page_by_no.get(p))
-                    .map(|p| page_markdown_text(&serde_json::to_value(p).unwrap_or_default()))
+                    .map(|p| fnm_core::text::raw_page_markdown_text(p))
                     .collect();
                 if !ch_tail_texts.is_empty() {
                     let refs: Vec<&str> = ch_tail_texts.iter().map(|s| s.as_str()).collect();

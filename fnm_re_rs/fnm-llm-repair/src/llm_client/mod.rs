@@ -34,8 +34,8 @@ pub type TraceCallback<'a> = &'a dyn Fn(Value) -> Result<(), String>;
 pub fn emit_llm_trace(trace_callback: Option<TraceCallback<'_>>, trace: &Value) {
     let Some(cb) = trace_callback else { return };
     if let Err(e) = cb(trace.clone()) {
-        // trace callback 失败时记录到 stderr，不阻断主流程
-        eprintln!("trace callback error: {}", e);
+        // trace callback 失败时记录日志，不阻断主流程
+        tracing::warn!("trace callback error: {}", e);
     }
 }
 

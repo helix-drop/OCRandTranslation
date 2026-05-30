@@ -520,9 +520,8 @@ fn apply_action(action: &RepairAction, ctx: &mut ActionContext) {
         // synthesize_note_item 已被移除（P0-2）——Phase3.5 无权创建 note item。
         // 即使 LLM 返回了此 action，也不物化 override，仅记录 warning。
         "synthesize_note_item" => {
-            eprintln!(
-                "  [WARNING] synthesize_note_item action ignored: \
-                 note_item_id={}, anchor_id={}, reason={}",
+            tracing::warn!(
+                "synthesize_note_item action ignored: note_item_id={}, anchor_id={}, reason={}",
                 action.note_item_id, action.anchor_id, action.reason,
             );
         }

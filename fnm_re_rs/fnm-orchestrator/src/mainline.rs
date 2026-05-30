@@ -620,9 +620,8 @@ pub fn run_pipeline_from_db<R: Repository>(
                 blocking_reasons_json: "[]",
                 error_msg: &err_msg,
             }) {
-                // TODO: replace with tracing::warn! when subscriber is initialized
-                eprintln!(
-                    "[WARN] mainline::finalize: failed to finalize fnm_run {} as error: {}",
+                tracing::warn!(
+                    "mainline::finalize: failed to finalize fnm_run {} as error: {}",
                     run_id, finalize_err
                 );
             }

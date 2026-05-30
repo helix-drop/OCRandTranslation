@@ -1705,9 +1705,8 @@ impl Repository for SqliteRepository {
                 Some(ref s) if !s.trim().is_empty() => match serde_json::from_str(s) {
                     Ok(p) => p,
                     Err(e) => {
-                        eprintln!(
-                            "[WARNING] load_raw_pages_for_doc: book_page={} \
-                             invalid payload_json: {}",
+                        tracing::warn!(
+                            "load_raw_pages_for_doc: book_page={} invalid payload_json: {}",
                             book_page, e
                         );
                         return Ok(None);
