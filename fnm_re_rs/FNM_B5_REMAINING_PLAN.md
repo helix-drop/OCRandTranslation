@@ -91,3 +91,20 @@
 1. **B5-7（records flatten）**：做还是暂缓？（数据契约高风险，收益仅去重）
 2. **B5-6**：是否含 phase4 `ref_freeze`（A 档，958 行）？
 3. **B5 整体范围**：全做 6 项，还是只做低风险（B5-9/10/2）先交付？
+
+---
+
+## 执行结果（2026-05-30，commit 5c8aa20 / 5dd5fb2 / 256d7df）
+
+| 项 | 状态 | 实现 / 说明 |
+|---|---|---|
+| B5-9 测试隔离 | ✅ 完成 | token_counter 合并单测 + 精确断言；BookType 补 enum 测试；config 抽 `default_fnm_model_pool`（修了原断言依赖默认环境、在用户 custom pool 下误判的真问题）|
+| B5-10 性能 nit | ✅ 部分 | `all_rules()` → const 数组；continuation/segment_codec/note_marker 经评估按「不为重构而重构」跳过 |
+| B5-2 重复收敛 | ✅ 核心 3 对 | `extract_json_block`（3→`llm_json.rs`）、`extract_context`（2→`link_utils`）合并；`candidate_source_score` 两处分值体系不同→注释防误合并（§12）。余简单对留待 |
+| B5-1 弱类型 | ✅ 代表热点 | `build_fnm_body_unit_jobs` 的 `paragraph_rows`：`Vec<Value>` → typed `ParagraphRow`，7 处 `.get` 变字段访问。其余热点留待 |
+| B5-6 超长函数拆分 | ✅ 轻量 | toc_semantics 抽 step 11/12/15；ref_freeze 抽 Phase 2。**核心阶段状态/借用交织，全拆会参数爆炸/生命周期复杂，按发现的真实复杂度留待深拆**（见 commit 5dd5fb2）|
+| B5-7 records flatten | ⏸ 缓 | 决策点 1 = 暂缓（数据契约高风险）|
+
+**验证**：6 crate lib 589 passed / 0 failed；clippy 0 warning；phase1/phase4 集成 parity（真实书数据）守护拆分行为不变。
+
+**留待单独 PR**：B5-2 余简单对（safe_int/compute_body_bounds/build_chapter_by_page/looks_like_*）、B5-1 其余热点（llm-repair prompt_builder/action）、B5-6 核心阶段深拆、B5-7 records flatten。

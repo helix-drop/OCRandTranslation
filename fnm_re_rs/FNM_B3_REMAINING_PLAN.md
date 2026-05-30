@@ -147,3 +147,18 @@ if !config.skip_llm_verify && pdf_path 非空:
 - 回滚：每个改动独立提交，可单独回退。
 
 > **决策点 2**：S2 是否两条路径都接（in-memory + DB），还是只接 DB 主路径？（in-memory 多用于测试/单文档）
+
+---
+
+## 执行结果（2026-05-30，commit 5c8aa20）
+
+| 项 | 状态 | 实现 |
+|---|---|---|
+| S2 视觉锚点恢复 | ✅ 接入 | 新建 `visual_recovery.rs`（`build_chapter_anchor_gaps` + `run_post_phase3_visual_recovery` + anchor `create` override 回流）；`mainline.rs` Phase 3.6 步骤 + 扁平化重建条件（DB 主路径）|
+| S3 bare_digit verify | ✅ 不接入（决策点 1 = 方案 A）| `llm_bare_digit_verify/mod.rs` 加「未接入」注释；保留库函数 + 单测 |
+| ready 占位清理 | ✅ | 删除 `llm_bare_digit_verify_ready` / `visual_anchor_recovery_ready`（确认无下游消费）|
+| 红线守卫测试 | ✅ | +6 测试（含 `redline_override_never_touches_note_kind`）|
+
+**决策点 2 落地**：仅接 DB 主路径（mainline）。in-memory `pipeline.rs` 是 MVP 纯内存模式（无 LLM repair 回环），S2 不接，与现状一致。
+
+**验证**：B3 三 crate 213 passed / 0 failed；clippy 0 warning；mainline 集成测试向后兼容。
