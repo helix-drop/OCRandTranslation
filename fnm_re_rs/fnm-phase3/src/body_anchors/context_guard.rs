@@ -68,7 +68,9 @@ static BARE_DIGIT_VALID_SENTENCE_END: Lazy<HashSet<char>> = Lazy::new(|| {
 /// 守卫 2：左侧词是结构性前缀（"thesis"、"page"、"chapter"）-> 拒绝。
 /// 守卫 3：右侧标点后紧跟数字 -> 列表/日期/千分位 -> 拒绝。
 pub fn is_bare_digit_marker_context(content: &str, digit_start: usize, digit_end: usize) -> bool {
-    let left = content[..digit_start].trim_end();
+    // 防御：digit_start/digit_end 越界或非字符边界时 graceful 返回 ""（不 panic）。
+    // 当前唯一调用方（pattern_scan）传 regex 字节位置，正常路径与原切片等价。
+    let left = content.get(..digit_start).unwrap_or("").trim_end();
     if let Some(word_caps) = BARE_DIGIT_LEFT_WORD_RE.captures(left) {
         let word = word_caps.get(1).unwrap().as_str().to_lowercase();
         if word.len() < 3 {
@@ -81,7 +83,7 @@ pub fn is_bare_digit_marker_context(content: &str, digit_start: usize, digit_end
         return false;
     }
 
-    let right = content[digit_end..].trim_start();
+    let right = content.get(digit_end..).unwrap_or("").trim_start();
     let punctuation: &str = ",.;:)]}»\"\u{201D}\u{2019}";
     for c in right.chars() {
         if punctuation.contains(c) {
@@ -220,4 +222,20 @@ pub fn is_bare_digit_false_positive_context(anchor: &BodyAnchorRecord) -> bool {
     }
     let next_char = remainder.trim_start().chars().next().unwrap_or('\0');
     !BARE_DIGIT_VALID_SENTENCE_END.contains(&next_char)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// 加固守卫：越界 / 非字符边界索引不再 panic（加固前 `content[..i]` 会 panic）。
+    #[test]
+    fn bare_digit_context_tolerates_bad_indices() {
+        let content = "见 thesis 中文 5"; // 含多字节字符（"见" = 3 字节）
+        let n = content.len();
+        // 各种异常索引都不应 panic（仅验证不崩溃，返回值不重要）：
+        let _ = is_bare_digit_marker_context(content, n + 5, n + 10); // 双越界
+        let _ = is_bare_digit_marker_context(content, 1, 2); // 非字符边界（"见"内部）
+        let _ = is_bare_digit_marker_context(content, 0, n); // 边界值
+    }
 }
