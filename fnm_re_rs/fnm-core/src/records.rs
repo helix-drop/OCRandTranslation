@@ -22,7 +22,7 @@
 //! - **Phase 6 / Export** (行 ~1053-1361): `ExportChapterRecord`, `ExportBundleRecord`,
 //!   `ExportAuditFileRecord`, `ExportAuditReportRecord`, `Phase6Summary`, `Phase6Structure`
 //!
-//! 注：本文件长（1361 行）但全是数据声明，无业务逻辑。物理拆 7 个子模块
+//! 注：本文件长（1657 行）但全是数据声明，无业务逻辑。物理拆 7 个子模块
 //! 会让"按 phase 找 struct"需要在 8 个 tab 之间跳转，反而损害可维护性。
 //! 当前保持单文件 + 显式目录索引——按 § 4 精神实质更优。
 

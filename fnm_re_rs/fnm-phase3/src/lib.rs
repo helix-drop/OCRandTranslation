@@ -50,14 +50,6 @@ fn renumber_link_ids(mut links: Vec<NoteLinkRecord>) -> Vec<NoteLinkRecord> {
 /// 3. 将 NoteLinkTable 产物映射到 Phase3Structure
 /// 4. 按章构建 paragraph_footnotes / paragraph_endnotes / chapter_anchor_alignment
 pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Output> {
-    // ←→ Phase3Config::skip_llm_verify：初版强制 true。
-    // Rust 端无 vision LLM 客户端（属 Phase 3.5 fnm-llm-repair crate）。
-    if !input.config.skip_llm_verify {
-        anyhow::bail!(
-            "Phase3Config::skip_llm_verify=false 暂不支持——\
-             需 fnm-llm-repair crate（Phase 3.5）"
-        );
-    }
 
     // 1. 从输入重建 ChapterLayers
     let chapter_layers = build_chapter_layers_from_authoritative_phase2(
@@ -79,6 +71,7 @@ pub fn build_phase3_structure(input: Phase3Input<'_>) -> anyhow::Result<Phase3Ou
         input.phase1_chapters,
         input.phase1_pages,
         input.phase2_chapter_note_modes,
+        input.config.skip_llm_verify,
     );
 
     // 3. 按章产物：paragraph_footnotes / paragraph_endnotes / chapter_anchor_alignment

@@ -80,6 +80,8 @@ pub fn build_note_links_for_chapter(
         &ch_regions,
         &ch_items,
         &ch_pp,
+        "",
+        true, // for_chapter 不做 LLM 验证
     );
 
     let ch_modes: Vec<fnm_core::records::ChapterNoteModeRecord> = chapter_layers

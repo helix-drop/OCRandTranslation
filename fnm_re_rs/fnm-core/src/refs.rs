@@ -56,17 +56,10 @@ pub fn cleanup_nested_note_refs(text: &str) -> String {
         changed = false;
 
         // 处理 SPLIT pattern（NOTE_REF 被嵌套 NOTE_REF 分裂）
-        if let Some(split_match) = SPLIT_NOTE_REF_RE.find(&payload) {
-            let inner_token = SPLIT_NOTE_REF_RE
-                .captures(&payload)
-                .and_then(|caps| caps.get(1))
-                .map(|m| m.as_str().to_string())
-                .unwrap_or_default();
-            let outer_id = SPLIT_NOTE_REF_RE
-                .captures(&payload)
-                .and_then(|caps| caps.get(3))
-                .map(|m| m.as_str().to_string())
-                .unwrap_or_default();
+        if let Some(caps) = SPLIT_NOTE_REF_RE.captures(&payload) {
+            let split_match = caps.get(0).unwrap();
+            let inner_token = caps.get(1).map(|m| m.as_str()).unwrap_or_default();
+            let outer_id = caps.get(3).map(|m| m.as_str()).unwrap_or_default();
             let outer_token = format!("{{{{NOTE_REF:{}}}}}", outer_id);
             let replacement = format!("{} {}", outer_token, inner_token);
             let new_payload = payload.replacen(split_match.as_str(), &replacement, 1);
@@ -224,28 +217,27 @@ pub fn extract_note_refs(text: &str) -> Vec<NoteRef> {
     ];
 
     for (kind_label, pattern) in patterns {
-        for m in pattern.find_iter(content) {
-            if let Some(caps) = pattern.captures(m.as_str()) {
-                let note_id = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
-                if note_id.is_empty() {
-                    continue;
-                }
-                // VISIBLE_FOOTNOTE_RE 匹配所有 [^...]，需排除以 en- 开头的
-                if kind_label == "footnote"
-                    && pattern.as_str().contains("\\[\\^")
-                    && note_id.to_lowercase().starts_with("en-")
-                {
-                    continue;
-                }
-                let resolved_kind = if kind_label == "generic" {
-                    note_kind_from_id(note_id)
-                } else if kind_label == "endnote" {
-                    NoteKind::Endnote
-                } else {
-                    NoteKind::Footnote
-                };
-                matches.push((m.start(), resolved_kind, note_id.to_string()));
+        for caps in pattern.captures_iter(content) {
+            let m = caps.get(0).unwrap();
+            let note_id = caps.get(1).map(|m| m.as_str().trim()).unwrap_or("");
+            if note_id.is_empty() {
+                continue;
             }
+            // VISIBLE_FOOTNOTE_RE 匹配所有 [^...]，需排除以 en- 开头的
+            if kind_label == "footnote"
+                && pattern.as_str().contains("\\[\\^")
+                && note_id.to_lowercase().starts_with("en-")
+            {
+                continue;
+            }
+            let resolved_kind = if kind_label == "generic" {
+                note_kind_from_id(note_id)
+            } else if kind_label == "endnote" {
+                NoteKind::Endnote
+            } else {
+                NoteKind::Footnote
+            };
+            matches.push((m.start(), resolved_kind, note_id.to_string()));
         }
     }
 

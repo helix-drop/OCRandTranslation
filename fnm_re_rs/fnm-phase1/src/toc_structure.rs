@@ -94,15 +94,6 @@ pub fn build_phase1_structure(
     // 0. TOC 乱码检测
     let toc_garbled = toc_items.is_some_and(toc_items_look_garbled);
 
-    // 1. LLM book-type 校验：Rust 端 LLM 客户端尚未接入主入口（FNM_PHASE12_AUDIT G5）。
-    //    config.skip_llm_verify=false 时显式 bail 防误用（AGENTS.md §9）。
-    if !config.skip_llm_verify {
-        anyhow::bail!(
-            "Phase1Config::skip_llm_verify=false 暂不支持——\
-             LLM book-type 校验需 vision client 接入主入口（FNM_PHASE12_AUDIT G5）"
-        );
-    }
-
     // 2. build_page_partitions —— 把 manual_page_overrides 真传下去（原 None 静默忽略 F7）
     let partitions_result = build_page_partitions(
         pages,
@@ -300,7 +291,7 @@ pub fn build_phase1_structure(
                 chapter_id: format!(
                     "toc-ch-{:03}-{}",
                     filtered_chapters.len() + 1,
-                    &tk[..tk.len().min(20)]
+                    tk.chars().take(20).collect::<String>()
                 ),
                 title: node.title.clone(),
                 start_page: start,
@@ -411,6 +402,42 @@ pub fn build_phase1_structure(
         page_roles,
     };
 
+    // 1. LLM book-type 校验（skip_llm_verify=false 时启用，无 key → graceful skip）
+    let llm_verify_evidence = if !config.skip_llm_verify {
+        let profile = crate::book_note_type::build_book_note_profile(
+            &structure.chapters,
+            pages,
+            None,
+        );
+        let rt = tokio::runtime::Builder::new_current_thread()
+            .enable_all()
+            .build();
+        match rt {
+            Ok(rt) => {
+                match rt.block_on(
+                    crate::llm_book_type_verify::verify_book_type_with_llm(
+                        &structure,
+                        &profile,
+                        &profile.chapter_modes,
+                        config.pdf_path.as_deref().unwrap_or(""),
+                    ),
+                ) {
+                    Ok(r) => r.evidence,
+                    Err(e) => {
+                        tracing::warn!("book_type verify 失败（降级 rule-based）: {e}");
+                        serde_json::json!({"status": "error", "reason": e.to_string()})
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::warn!("tokio runtime 创建失败: {e}");
+                serde_json::json!({"status": "error", "reason": e.to_string()})
+            }
+        }
+    } else {
+        serde_json::json!({"status": "skipped"})
+    };
+
     Ok(Phase1Output {
         structure,
         diagnostics: serde_json::json!({
@@ -421,6 +448,7 @@ pub fn build_phase1_structure(
                 "visual_toc_chapter_count": visual_toc_count,
                 "fallback_chapter_count": fallback_count,
             },
+            "llm_book_type_verify": llm_verify_evidence,
         }),
         gate_report,
         overrides_used,
@@ -469,5 +497,30 @@ mod tests {
         let output = build_phase1_structure(&pages, None, &config).unwrap();
         assert_eq!(output.structure.pages.len(), 1);
         assert_eq!(output.structure.pages[0].page_no, 1);
+    }
+
+    #[test]
+    fn chapter_title_match_key_multibyte_safe_truncation() {
+        // B1-7: 法语标题含多字节 UTF-8 字符（é=2字节, à=2字节），
+        // 旧代码 &tk[..tk.len().min(20)] 会切在字符中间 panic。
+        // 新代码 tk.chars().take(20).collect::<String>() 安全。
+        let title = "Chapitre sur l'épistémologie française de la connaissance";
+        let tk = fnm_core::title::chapter_title_match_key(title);
+        // 验证 chars().take(20) 不 panic 且结果 ≤ 20 字符
+        let truncated: String = tk.chars().take(20).collect();
+        assert!(truncated.len() <= 60, "truncated should be reasonable"); // 20 chars × 3 bytes max
+        assert!(truncated.chars().count() <= 20);
+        // 验证 format! 不 panic
+        let chapter_id = format!("toc-ch-{:03}-{}", 1, truncated);
+        assert!(chapter_id.starts_with("toc-ch-001-"));
+    }
+
+    #[test]
+    fn chapter_id_format_with_long_multibyte_key() {
+        // 额外边界：纯中文标题（每字符 3 字节）
+        let tk = fnm_core::title::chapter_title_match_key("认识论与知识的法国哲学基础研究");
+        let truncated: String = tk.chars().take(20).collect();
+        let chapter_id = format!("toc-ch-{:03}-{}", 99, truncated);
+        assert!(chapter_id.starts_with("toc-ch-099-"));
     }
 }

@@ -6,12 +6,6 @@ use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, Se
 use fnm_core::title::{chapter_title_match_key, normalize_title};
 use std::collections::{HashMap, HashSet};
 
-/// 前导编号前缀剥离正则（章/节编号等）。
-static LEADING_NUMBER_PREFIX_RE: once_cell::sync::Lazy<regex::Regex> =
-    once_cell::sync::Lazy::new(|| {
-        regex::Regex::new(r"(?i)^\s*(?:\d+|[ivxlcdm]+)[\.\):\-–—]?\s+").unwrap()
-    });
-
 const SECTION_TITLE_MIN_WORDS: usize = 3;
 const SECTION_TITLE_MIN_CHARS: usize = 18;
 const OPENING_QUOTES: &[char] = &[
@@ -44,21 +38,6 @@ fn section_title_is_plausible(title: &str) -> bool {
     true
 }
 
-fn chapter_title_keys(chapters: &[ChapterRecord]) -> HashMap<String, HashSet<String>> {
-    let mut map = HashMap::new();
-    for ch in chapters {
-        let mut keys = HashSet::new();
-        let title = normalize_title(&ch.title);
-        keys.insert(chapter_title_match_key(&title));
-        let stripped = LEADING_NUMBER_PREFIX_RE.replace(&title, "").to_string();
-        if stripped != title {
-            keys.insert(chapter_title_match_key(&stripped));
-        }
-        map.insert(ch.chapter_id.clone(), keys);
-    }
-    map
-}
-
 pub fn build_section_heads(
     chapters: &[ChapterRecord],
     heading_candidates: &[HeadingCandidate],
@@ -71,8 +50,6 @@ pub fn build_section_heads(
             .cmp(&b.start_page)
             .then_with(|| a.chapter_id.cmp(&b.chapter_id))
     });
-
-    let _chapter_title_key_map = chapter_title_keys(&ordered_chapters);
 
     let page_role_map: HashMap<i64, String> = page_partitions
         .iter()

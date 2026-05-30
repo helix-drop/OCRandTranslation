@@ -150,8 +150,6 @@ pub fn build_page_partitions(
         apply_manual_overrides(&mut records, overrides);
     }
 
-    let _synthetic = build_synthetic_page_by_no(&page_info_cache);
-
     PagePartitionResult {
         partitions: records,
         pre_extracted_page_candidates: vec![],
@@ -206,51 +204,6 @@ pub struct PageInfo {
     pub headings: Vec<String>,
     pub page_role: String,
     pub role_reason: String,
-}
-
-fn build_synthetic_page_by_no(
-    cache: &HashMap<i64, PageInfo>,
-) -> HashMap<i64, serde_json::Map<String, serde_json::Value>> {
-    let mut result = HashMap::new();
-    for (page_no, info) in cache {
-        let mut page = serde_json::Map::new();
-        page.insert(
-            "markdown".into(),
-            serde_json::Value::String(info.markdown.clone()),
-        );
-        if !info.headings.is_empty() {
-            let parsing_res_list: Vec<serde_json::Value> = info
-                .headings
-                .iter()
-                .map(|h| serde_json::json!({"block_label": "doc_title", "block_content": h}))
-                .collect();
-            page.insert(
-                "prunedResult".into(),
-                serde_json::json!({
-                    "parsing_res_list": parsing_res_list,
-                    "height": 1200,
-                    "width": 1000,
-                }),
-            );
-        }
-        let mut row = serde_json::Map::new();
-        row.insert("_page".into(), serde_json::Value::Object(page));
-        row.insert(
-            "page_no".into(),
-            serde_json::Value::Number((*page_no).into()),
-        );
-        row.insert(
-            "page_role".into(),
-            serde_json::Value::String(info.page_role.clone()),
-        );
-        row.insert(
-            "section_hint".into(),
-            serde_json::Value::String(info.headings.first().cloned().unwrap_or_default()),
-        );
-        row.insert("has_note_heading".into(), serde_json::Value::Bool(false));
-        result.insert(*page_no, row);
-    }
-    result
 }
 
 #[derive(Debug, Clone)]

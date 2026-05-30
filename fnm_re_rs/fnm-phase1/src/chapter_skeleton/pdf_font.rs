@@ -62,7 +62,11 @@ pub fn extract_font_candidates(
     let page_idx_set: std::collections::HashSet<i64> = page_indices.iter().copied().collect();
 
     for idx in page_idx_set {
-        let page = match pages.get(idx as u16) {
+        let page_idx = match u16::try_from(idx) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        let page = match pages.get(page_idx) {
             Ok(p) => p,
             Err(_) => continue,
         };

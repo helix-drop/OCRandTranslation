@@ -32,9 +32,11 @@ pub fn render_page_to_data_url(pdf_path: &str, page_index: i64, scale: f64) -> R
         .load_pdf_from_file(pdf_path, None)
         .with_context(|| format!("加载 PDF 失败: {}", pdf_path))?;
 
+    let page_idx = u16::try_from(page_index)
+        .map_err(|_| anyhow::anyhow!("page_index {} 超出 u16 范围 (0..65535)", page_index))?;
     let page = document
         .pages()
-        .get(page_index as u16)
+        .get(page_idx)
         .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
 
     // PDF size ≈ 612pt wide (letter), scale to desired pixel width
@@ -67,9 +69,11 @@ pub fn render_page_to_base64_png(pdf_path: &str, page_index: i64, _dpi: u32) -> 
         .load_pdf_from_file(pdf_path, None)
         .with_context(|| format!("加载 PDF 失败: {}", pdf_path))?;
 
+    let page_idx = u16::try_from(page_index)
+        .map_err(|_| anyhow::anyhow!("page_index {} 超出 u16 范围 (0..65535)", page_index))?;
     let page = document
         .pages()
-        .get(page_index as u16)
+        .get(page_idx)
         .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
 
     let render_config = PdfRenderConfig::new()
@@ -98,9 +102,11 @@ pub fn extract_pdf_text_by_page(pdf_path: &str, page_index: i64) -> Result<Strin
         .load_pdf_from_file(pdf_path, None)
         .with_context(|| format!("加载 PDF 失败: {}", pdf_path))?;
 
+    let page_idx = u16::try_from(page_index)
+        .map_err(|_| anyhow::anyhow!("page_index {} 超出 u16 范围 (0..65535)", page_index))?;
     let page = document
         .pages()
-        .get(page_index as u16)
+        .get(page_idx)
         .with_context(|| format!("PDF 页 {} 不存在", page_index))?;
 
     let pdf_page_text = page

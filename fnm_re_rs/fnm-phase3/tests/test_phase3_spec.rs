@@ -148,7 +148,7 @@ fn spec_superscript_note_definition_lines_are_filtered() {
     let partitions = vec![make_partition(1, PageRole::Body)];
 
     let (anchors, _summary) =
-        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages);
+        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages, "", true);
 
     let markers: Vec<String> = anchors.into_iter().map(|a| a.normalized_marker).collect();
     assert!(
@@ -201,6 +201,8 @@ fn spec_expected_gap_recovery_keeps_weak_endnote_digits() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
 
     let by_marker: std::collections::HashMap<String, fnm_core::records::BodyAnchorRecord> = anchors
@@ -251,6 +253,8 @@ fn spec_gap_recovery_rejects_date_like_plain_bare_digit() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
 
     assert!(
@@ -287,6 +291,8 @@ fn spec_gap_recovery_promotes_quoted_expected_marker_to_injectable_anchor() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
     let recovered = anchors
         .iter()
@@ -347,6 +353,8 @@ fn spec_expected_gap_recovery_disambiguates_by_text() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
 
     let recovered: Vec<_> = anchors
@@ -385,7 +393,7 @@ fn spec_year_like_marker_is_filtered() {
     ];
 
     let (anchors, summary) =
-        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages);
+        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages, "", true);
 
     let markers: Vec<String> = anchors
         .iter()
@@ -454,6 +462,8 @@ fn spec_bracket_anchor_is_not_promoted_to_endnote_by_marker_set() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
 
     let bracket_anchor = anchors
@@ -479,7 +489,7 @@ fn spec_note_and_other_pages_do_not_generate_body_anchors() {
     ];
 
     let (anchors, _summary) =
-        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages);
+        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages, "", true);
 
     let anchor_pages: std::collections::HashSet<i64> = anchors.iter().map(|a| a.page_no).collect();
     assert!(
@@ -522,6 +532,8 @@ fn spec_enriched_markdown_dedupes_stale_ocr_superscript_block() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
 
     let markers: Vec<(String, String)> = anchors
@@ -556,7 +568,7 @@ fn spec_build_body_anchors_certainty_per_anchor() {
     let partitions = vec![make_partition(1, PageRole::Body)];
 
     let (anchors, _summary) =
-        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages);
+        fnm_phase3::body_anchors::build_body_anchors(&chapters, &partitions, &[], &[], &pages, "", true);
 
     let by_marker: std::collections::HashMap<String, f64> = anchors
         .iter()
@@ -1648,6 +1660,8 @@ fn spec_gap_recovery_respects_chapter_boundary() {
         &regions,
         &items,
         &pages,
+        "",
+        true,
     );
 
     // ch-1 的 anchor 应只有 marker 1（gap recovery 不应从 ch-2 页面捕获 marker 2）

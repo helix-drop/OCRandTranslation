@@ -1,8 +1,6 @@
 //! ←→ FNM_RE/stages/chapter_skeleton/toc_semantics.py
 //! TOC 语义对齐：TOC item → heading 匹配、role 推断、单调性校验。
 
-pub mod alignment;
-pub mod container_detection;
 pub mod lecture;
 pub mod monotonic;
 pub mod page_resolve;
@@ -168,11 +166,6 @@ pub fn build_toc_semantics(
     let chapter_level = match row_collect::choose_visual_toc_chapter_level(&rows) {
         Some(level) => level,
         None => {
-            let _missing: Vec<String> = rows
-                .iter()
-                .filter(|r| row_collect::is_visual_toc_body_candidate(r))
-                .map(|r| r.title.clone())
-                .collect();
             return empty_result(has_toc_items, None);
         }
     };
@@ -476,9 +469,6 @@ pub fn build_toc_semantics(
         .collect();
     chapter_boundary_pages.sort();
     chapter_boundary_pages.dedup();
-
-    let _page_row_by_no: std::collections::HashMap<i64, &RawPage> =
-        pages.iter().map(|p| (p.book_page, p)).collect();
 
     let mut chapters: Vec<ChapterRecord> = Vec::new();
     for (index, row) in exportable_chapter_rows.iter().enumerate() {

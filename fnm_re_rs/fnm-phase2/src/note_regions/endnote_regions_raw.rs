@@ -103,7 +103,6 @@ fn build_region_record(
                     has_footnote_band: false,
                     is_post_body_region: false,
                     is_book_scope: params.scope == "book",
-                    explicit_markers: &[],
                     scan_page_kind,
                 },
             )

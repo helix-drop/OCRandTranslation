@@ -14,13 +14,6 @@ pub fn apply_body_unit_translations(
         .map(|v| v.as_str().unwrap_or("").trim().to_string())
         .collect();
 
-    let _section_title = unit
-        .get("section_title")
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .trim()
-        .to_string();
-
     let mut cursor: usize = 0;
     let mut total_parts: usize = 0;
     let mut updated_segments: Vec<Value> = Vec::new();

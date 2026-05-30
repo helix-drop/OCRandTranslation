@@ -212,9 +212,14 @@ pub fn build_chapter_layers(
                 let text = raw_page_by_no
                     .get(&page_no)
                     .map(|p| {
-                        fnm_core::text::page_markdown_text(
-                            &serde_json::to_value(p).unwrap_or_default(),
-                        )
+                        let page_value = match serde_json::to_value(p) {
+                            Ok(v) => v,
+                            Err(e) => {
+                                tracing::warn!("RawPage 序列化失败 (page_no={}): {}", page_no, e);
+                                serde_json::Value::Null
+                            }
+                        };
+                        fnm_core::text::page_markdown_text(&page_value)
                     })
                     .unwrap_or_default();
                 BodyPageLayer {

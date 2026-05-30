@@ -7,9 +7,9 @@
 //!   3. _mark_suppressed_candidates — 标记被抑制的候选（mutate headings）
 //!   4. _build_fallback_chapters_and_sections — 构建章节+节头
 //!   5. _normalize_chapters / _normalize_sections — 标准化输出
-//!   6. _merge_section_heads — 合并节头
-//!   7. build_chapter_skeleton_fallback — 公开入口
+//!   6. build_chapter_skeleton_fallback — 测试入口（生产路径由 builder.rs 直接调子函数）
 
+#[cfg(test)]
 use crate::heading_graph::HeadingGraph;
 use crate::input::TocItem;
 use fnm_core::records::{ChapterRecord, HeadingCandidate, PagePartitionRecord, SectionHeadRecord};
@@ -82,15 +82,11 @@ const FAMILY_NONBODY: &[&str] = &[
 
 // ── 候选节行提取 ─────────────────────────────────────────────────
 
-#[allow(dead_code)]
 pub struct SectionRow {
     section_id: String,
     title: String,
     start_page: i64,
-    end_page: i64,
-    raw_pages: Vec<i64>,
     filtered_pages: Vec<i64>,
-    source: String,
 }
 
 pub fn candidate_section_rows(
@@ -160,10 +156,7 @@ pub fn candidate_section_rows(
             section_id: format!("sec-{:04}", idx + 1),
             title: title.clone(),
             start_page: filtered_pages[0],
-            end_page: *filtered_pages.last().unwrap(),
-            raw_pages,
             filtered_pages,
-            source: "fallback".to_string(),
         });
     }
     rows
@@ -219,12 +212,10 @@ fn classification_span_pages(
         .count()
 }
 
-#[allow(dead_code)]
 pub struct ClassifiedSection {
     section_id: String,
     title: String,
     start_page: i64,
-    span_pages: usize,
     filtered_pages: Vec<i64>,
     start_role: String,
     keep_as_chapter: bool,
@@ -356,7 +347,6 @@ pub fn classify_fallback_sections(
             section_id: section.section_id,
             title,
             start_page,
-            span_pages,
             filtered_pages: section.filtered_pages,
             start_role,
             keep_as_chapter: keep,
@@ -662,41 +652,6 @@ pub fn normalize_sections(sections: Vec<SectionHeadRecord>) -> Vec<SectionHeadRe
     normalized
 }
 
-#[allow(dead_code)]
-pub fn merge_section_heads(
-    mut primary: Vec<SectionHeadRecord>,
-    supplemental: Vec<SectionHeadRecord>,
-) -> Vec<SectionHeadRecord> {
-    primary.extend(supplemental);
-    let mut merged: Vec<SectionHeadRecord> = Vec::new();
-    let mut seen: HashSet<(String, i64, String)> = HashSet::new();
-    let mut serial = 1usize;
-    for row in primary {
-        let text = normalize_title(&row.title);
-        if text.is_empty() {
-            continue;
-        }
-        let key = (
-            row.chapter_id.clone(),
-            row.page_no,
-            chapter_title_match_key(&text),
-        );
-        if !seen.insert(key) {
-            continue;
-        }
-        merged.push(SectionHeadRecord {
-            section_head_id: format!("section-head-{:04}", serial),
-            chapter_id: row.chapter_id,
-            title: text.clone(),
-            page_no: row.page_no,
-            level: row.level,
-            source: row.source,
-        });
-        serial += 1;
-    }
-    merged
-}
-
 // ── 辅助函数 ─────────────────────────────────────────────────────
 
 fn chapter_keyword_strength(title: &str) -> f64 {
@@ -712,6 +667,8 @@ fn chapter_keyword_strength(title: &str) -> f64 {
     }
 }
 
+/// 宽松版：用于 fallback 章节分类，≥6 词或含逗号/冒号即视为句子型标题。
+/// 与 normalize.rs 的严格版有意不同（后者用于 heading candidate 筛选，阈值更高）。
 fn is_sentence_like_heading(title: &str) -> bool {
     let words: Vec<&str> = title.split_whitespace().collect();
     words.len() >= 6 || title.contains(',') || title.contains(':')
@@ -784,12 +741,13 @@ pub fn simple_fallback(page_partitions: &[PagePartitionRecord]) -> Vec<ChapterRe
     chapters
 }
 
-// ── 公开 API ─────────────────────────────────────────────────────
+// ── 测试入口 ───────────────────────────────────────────────────
 
 /// 无 TOC 时，从 heading_candidates + page_partitions 构建 fallback 章节。
 ///
 /// ←→ Python `_build_fallback_chapters_and_sections` + 上游所有步骤
-pub fn build_chapter_skeleton_fallback(
+#[cfg(test)]
+pub(crate) fn build_chapter_skeleton_fallback(
     page_partitions: &[PagePartitionRecord],
     heading_candidates: &mut Vec<HeadingCandidate>,
     _heading_graph: &HeadingGraph,
@@ -1198,17 +1156,4 @@ mod tests {
         assert!(result.is_empty());
     }
 
-    #[test]
-    fn merge_sections_dedupe() {
-        let s1 = SectionHeadRecord {
-            section_head_id: "s1".into(),
-            chapter_id: "ch1".into(),
-            title: "Section A".into(),
-            page_no: 5,
-            level: 2,
-            source: "fallback".into(),
-        };
-        let result = merge_section_heads(vec![s1.clone()], vec![s1]);
-        assert_eq!(result.len(), 1);
-    }
 }

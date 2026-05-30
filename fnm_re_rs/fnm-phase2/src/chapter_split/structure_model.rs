@@ -21,18 +21,11 @@ pub struct ChapterStructureModel {
     pub has_explicit_notes_heading: bool,
 }
 
-#[derive(Debug, Clone, Default)]
-pub struct OCRProfile {
-    pub placeholder: bool, // 占位字段（与 Python OCRProfile() 默认对齐）
-    pub unrecovered_marker_ids: Vec<String>, // ←→ Python `ocr_profile.unrecovered_marker_ids`
-}
-
 #[derive(Debug, Clone)]
 pub struct BookStructureModel {
     pub book_type: BookType,
     pub numbering_topology: String, // "book_continuous" / "per_chapter_reset"
     pub chapters: Vec<ChapterStructureModel>,
-    pub ocr_profile: OCRProfile,
 }
 
 // ── _infer_numbering_topology ──────────────────────────────────
@@ -250,7 +243,6 @@ pub fn build_book_structure_model(
         book_type,
         numbering_topology: infer_numbering_topology(chapter_note_modes),
         chapters: chapter_models,
-        ocr_profile: OCRProfile::default(),
     }
 }
 

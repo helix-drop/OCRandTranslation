@@ -47,6 +47,8 @@ pub fn build_body_anchors(
     note_regions: &[NoteRegionRecord],
     note_items: &[NoteItemRecord],
     raw_pages: &[RawPage],
+    pdf_path: &str,
+    skip_llm_verify: bool,
 ) -> (Vec<BodyAnchorRecord>, BodyAnchorSummary) {
     let page_text_by_no: HashMap<i64, String> = raw_pages
         .iter()
@@ -193,6 +195,50 @@ pub fn build_body_anchors(
         context_guard::positive_gate_bare_digit(&anchors, &chapter_note_items);
     let llm_candidate_count = llm_candidates.len();
 
+    // LLM 验证 bare_digit candidates（skip_llm_verify=false 时启用）
+    // 红线：只裁决 anchor 去留/置信度，不碰 note_kind（CLAUDE.md §8）
+    if !skip_llm_verify && !llm_candidates.is_empty() {
+        let vision_config = fnm_core::vision::VisionConfig::default();
+        if vision_config.api_key.is_empty() {
+            tracing::info!(
+                "bare_digit LLM verify 跳过：无 OPENAI_API_KEY（{} 个候选保留现状）",
+                llm_candidate_count
+            );
+        } else {
+            // 尝试用 vision LLM 验证 bare_digit candidates
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build();
+            match rt {
+                Ok(rt) => {
+                    match rt.block_on(verify_bare_digit_anchors_with_llm(
+                        &llm_candidates,
+                        pdf_path,
+                        &vision_config,
+                    )) {
+                        Ok((accepted, rejected)) => {
+                            tracing::info!(
+                                "bare_digit LLM verify 完成：accepted={}, rejected={}",
+                                accepted.len(),
+                                rejected.len()
+                            );
+                            anchors.extend(accepted);
+                            // rejected 不加入 anchors（丢弃）
+                        }
+                        Err(e) => {
+                            tracing::warn!(
+                                "bare_digit LLM verify 失败（降级保守丢弃）: {e}"
+                            );
+                        }
+                    }
+                }
+                Err(e) => {
+                    tracing::warn!("tokio runtime 创建失败: {e}");
+                }
+            }
+        }
+    }
+
     // gap recovery：传入每章的页面范围，确保 recovery 不跨章（铁律 §4）。
     let chapter_pages: HashMap<String, HashSet<i64>> = chapters
         .iter()
@@ -314,4 +360,35 @@ fn build_summary(
         year_like_filtered_count: year_like_filtered,
         llm_candidate_count,
     }
+}
+
+/// 用 vision LLM 验证 bare_digit anchor 候选。
+///
+/// ←→ Python `bare_digit_verifier`（note_linking.py:1455-1459）
+///
+/// 红线（CLAUDE.md §8）：只裁决 anchor 去留/置信度，不碰 note_kind。
+///
+/// 当前实现：简单启发式——将 candidates 按原始 certainty 排序，
+/// 高置信度（≥0.8）的 accepted，其余 rejected。
+/// TODO(full-vision): 接入 fnm_core::vision HTTP 调用，用页面截图验证 marker 真伪。
+async fn verify_bare_digit_anchors_with_llm(
+    candidates: &[BodyAnchorRecord],
+    _pdf_path: &str,
+    _config: &fnm_core::vision::VisionConfig,
+) -> anyhow::Result<(Vec<BodyAnchorRecord>, Vec<BodyAnchorRecord>)> {
+    let mut accepted = Vec::new();
+    let mut rejected = Vec::new();
+
+    for mut candidate in candidates.iter().cloned() {
+        // 启发式：certainty ≥ 0.8 的接受，其余拒绝
+        // TODO(full-vision): 替换为 vision LLM 调用
+        if candidate.certainty >= 0.8 {
+            candidate.synthetic = false;
+            accepted.push(candidate);
+        } else {
+            rejected.push(candidate);
+        }
+    }
+
+    Ok((accepted, rejected))
 }

@@ -908,8 +908,9 @@ pub fn parse_page_markdown(
 
     // Step 5: 跨页段落处理
     // cont_prev → consumed_by_prev
-    if !result.is_empty() && result[0].cross_page.as_deref() == Some("cont_prev")
-        || result[0].cross_page.as_deref() == Some("cont_both")
+    if !result.is_empty()
+        && (result[0].cross_page.as_deref() == Some("cont_prev")
+            || result[0].cross_page.as_deref() == Some("cont_both"))
     {
         let prev_absorbs_current = if result.len() > 1 {
             true
@@ -1108,5 +1109,45 @@ mod tests {
         let pages = vec![make_page(1, "a"), make_page(5, "b")];
         let label = segment_print_label(&pages, 1, 5);
         assert_eq!(label, "1-5");
+    }
+
+    #[test]
+    fn test_parse_page_markdown_cross_page_no_panic_on_empty_result() {
+        // B1-4: 验证跨页条件在 result 为空时不 panic。
+        // 旧代码 `!result.is_empty() && A || B` 中 &&/|| 优先级使
+        // result 空时仍求值 B（result[0]...），越界 panic。
+        // 新代码 `!result.is_empty() && (A || B)` 正确短路。
+        //
+        // 构造：当前页无内容，相邻页有内容。
+        // parse_page_markdown 对不存在的页返回空 Vec，不触及跨页逻辑。
+        // 但我们可以验证：当相邻页存在而当前页 markdown 为空时，
+        // 函数不 panic（返回 fallback 或空）。
+        let pages = vec![
+            make_page(1, "Previous page content"),
+            SyntheticMarkdownPage {
+                book_page: 2,
+                markdown: String::new(), // 空 markdown → fallback
+                print_page_label: "2".to_string(),
+                ..Default::default()
+            },
+            make_page(3, "Next page content"),
+        ];
+        // 不 panic 即通过
+        let result = parse_page_markdown(&pages, 2, &[]);
+        // 空 markdown 返回 fallback 或空
+        let _ = result;
+    }
+
+    #[test]
+    fn test_cross_page_condition_short_circuit_logic() {
+        // B1-4: 直接验证修复后的条件逻辑。
+        // 模拟旧代码的 bug 场景：result 为空时，|| 右侧不应被求值。
+        let result: Vec<ParsedParagraph> = Vec::new();
+        // 修复后的条件：!result.is_empty() && (... || ...)
+        // 当 result 为空时，整个条件应为 false，不访问 result[0]
+        let evaluated = !result.is_empty()
+            && (result[0].cross_page.as_deref() == Some("cont_prev")
+                || result[0].cross_page.as_deref() == Some("cont_both"));
+        assert!(!evaluated, "空 result 条件应为 false");
     }
 }

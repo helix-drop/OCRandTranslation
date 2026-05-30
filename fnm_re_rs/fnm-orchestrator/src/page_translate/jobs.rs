@@ -21,6 +21,20 @@ fn frozen_body_text_for_page(units: &[TranslationUnitRecord], bp: i64) -> String
             }
         }
     }
+    // fallback：page_segments 为空时退回 unit.source_text
+    if parts.is_empty() {
+        for unit in units {
+            if unit.kind != "body" {
+                continue;
+            }
+            if unit.page_start <= bp && bp <= unit.page_end.max(unit.page_start) {
+                let st = unit.source_text.trim();
+                if !st.is_empty() {
+                    parts.push(st);
+                }
+            }
+        }
+    }
     parts.join("\n\n")
 }
 

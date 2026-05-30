@@ -253,7 +253,7 @@ pub fn extract_candidates_from_pdf_pages(
         // 选 top 3 top-items + top 2 mid-items
         let mut selected: Vec<(&Value, bool)> = Vec::new();
         let mut top_sorted: Vec<&Value> = top_items;
-        top_sorted.sort_by(|a, b| rank_item(a, true).partial_cmp(&rank_item(b, true)).unwrap());
+        top_sorted.sort_by(|a, b| rank_item(a, true).partial_cmp(&rank_item(b, true)).unwrap_or(std::cmp::Ordering::Equal));
         for item in top_sorted.into_iter().rev().take(3) {
             selected.push((item, true));
         }
@@ -262,7 +262,7 @@ pub fn extract_candidates_from_pdf_pages(
         mid_sorted.sort_by(|a, b| {
             rank_item(a, false)
                 .partial_cmp(&rank_item(b, false))
-                .unwrap()
+                .unwrap_or(std::cmp::Ordering::Equal)
         });
         for item in mid_sorted.into_iter().rev().take(2) {
             selected.push((item, false));
@@ -410,5 +410,31 @@ mod tests {
     fn collect_empty_pdf_path() {
         let result = collect_pdf_font_band_candidates(&[], &[], "", None, 0, None, "");
         assert!(result.is_empty());
+    }
+
+    #[test]
+    fn sort_items_with_nan_y_value_no_panic() {
+        // B1-8: 验证 partial_cmp 遇 NaN 不 panic。
+        // 旧代码 partial_cmp().unwrap() 遇 NaN → None → unwrap panic。
+        // 新代码 partial_cmp().unwrap_or(Ordering::Equal) 安全降级。
+        // 构造含 "y": "NaN" 的 items，触发 extract_candidates_from_pdf_pages 排序。
+        let pages = vec![json!({
+            "pageIdx": 1,
+            "pdfW": 600.0,
+            "pdfH": 800.0,
+            "items": [
+                {"str": "Chapter 1", "y": "NaN", "x": 100.0, "height": 18.0, "width": 80.0, "font": "Times-Bold", "topBand": true},
+                {"str": "Chapter 2", "y": 50.0, "x": 100.0, "height": 18.0, "width": 80.0, "font": "Times-Bold", "topBand": true},
+                {"str": "Chapter 3", "y": 200.0, "x": 100.0, "height": 16.0, "width": 80.0, "font": "Regular", "topBand": true}
+            ]
+        })];
+        // 不 panic 即通过
+        let _result = extract_candidates_from_pdf_pages(
+            &pages,
+            &HashSet::new(),
+            &HashMap::new(),
+            &HashMap::new(),
+            100,
+        );
     }
 }

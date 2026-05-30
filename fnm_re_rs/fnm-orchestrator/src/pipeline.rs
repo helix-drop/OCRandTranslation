@@ -232,7 +232,7 @@ pub(crate) fn run_phase3(
     config: &PipelineConfig,
 ) -> Result<Phase3Snapshot> {
     let phase3_config = fnm_phase3::input::Phase3Config {
-        skip_llm_verify: true,
+        skip_llm_verify: config.skip_llm_verify,
     };
 
     let overrides_ref = config.review_overrides.as_ref();

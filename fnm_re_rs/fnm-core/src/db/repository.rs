@@ -264,126 +264,137 @@ impl SqliteRepository {
         heading_candidates: &[HeadingCandidate],
         section_heads: &[SectionHeadRecord],
     ) -> Result<()> {
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
 
-        conn.execute("DELETE FROM fnm_pages WHERE doc_id = ?1", [doc_id])?;
-        conn.execute("DELETE FROM fnm_chapters WHERE doc_id = ?1", [doc_id])?;
-        conn.execute("DELETE FROM fnm_section_heads WHERE doc_id = ?1", [doc_id])?;
-        conn.execute(
+        let tx = conn.transaction()?;
+
+        tx.execute("DELETE FROM fnm_pages WHERE doc_id = ?1", [doc_id])?;
+        tx.execute("DELETE FROM fnm_chapters WHERE doc_id = ?1", [doc_id])?;
+        tx.execute("DELETE FROM fnm_section_heads WHERE doc_id = ?1", [doc_id])?;
+        tx.execute(
             "DELETE FROM fnm_heading_candidates WHERE doc_id = ?1",
             [doc_id],
         )?;
 
         // 插入 pages
-        let mut stmt = conn.prepare(
-            "INSERT INTO fnm_pages (doc_id, page_no, target_pdf_page, page_role, role_confidence,
-             role_reason, section_hint, has_note_heading, note_scan_summary_json,
-             created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
-        )?;
-        for p in pages {
-            stmt.execute(rusqlite::params![
-                doc_id,
-                p.page_no,
-                p.target_pdf_page,
-                p.page_role.as_str(),
-                p.confidence,
-                p.reason,
-                p.section_hint,
-                p.has_note_heading as i64,
-                serde_json::to_string(&p.note_scan_summary).ok(),
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT INTO fnm_pages (doc_id, page_no, target_pdf_page, page_role, role_confidence,
+                 role_reason, section_hint, has_note_heading, note_scan_summary_json,
+                 created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            )?;
+            for p in pages {
+                stmt.execute(rusqlite::params![
+                    doc_id,
+                    p.page_no,
+                    p.target_pdf_page,
+                    p.page_role.as_str(),
+                    p.confidence,
+                    p.reason,
+                    p.section_hint,
+                    p.has_note_heading as i64,
+                    serde_json::to_string(&p.note_scan_summary).ok(),
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
         // 插入 chapters
-        let mut stmt = conn.prepare(
-            "INSERT INTO fnm_chapters (doc_id, chapter_id, title, start_page, end_page,
-             pages_json, source, boundary_state, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-        )?;
-        for ch in chapters {
-            stmt.execute(rusqlite::params![
-                doc_id,
-                ch.chapter_id,
-                ch.title,
-                ch.start_page,
-                ch.end_page,
-                serde_json::to_string(&ch.pages).ok(),
-                ch.source.as_str(),
-                ch.boundary_state.as_str(),
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT INTO fnm_chapters (doc_id, chapter_id, title, start_page, end_page,
+                 pages_json, source, boundary_state, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+            )?;
+            for ch in chapters {
+                stmt.execute(rusqlite::params![
+                    doc_id,
+                    ch.chapter_id,
+                    ch.title,
+                    ch.start_page,
+                    ch.end_page,
+                    serde_json::to_string(&ch.pages).ok(),
+                    ch.source.as_str(),
+                    ch.boundary_state.as_str(),
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
         // 插入 heading_candidates
-        let mut stmt = conn.prepare(
-            "INSERT INTO fnm_heading_candidates (doc_id, heading_id, page_no, text,
-             normalized_text, source, block_label, top_band, font_height, x, y, width_estimate, confidence,
-             heading_family_guess, suppressed_as_chapter, reject_reason,
-             font_name, font_weight_hint, align_hint, width_ratio, heading_level_hint,
-             created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)",
-        )?;
-        for hc in heading_candidates {
-            stmt.execute(rusqlite::params![
-                doc_id,
-                hc.heading_id,
-                hc.page_no,
-                hc.text,
-                hc.normalized_text,
-                hc.source,
-                hc.block_label,
-                hc.top_band as i64,
-                hc.font_height,
-                hc.x,
-                hc.y,
-                hc.width_estimate,
-                hc.confidence,
-                normalize_heading_family_guess(&hc.heading_family_guess),
-                hc.suppressed_as_chapter as i64,
-                hc.reject_reason,
-                hc.font_name,
-                hc.font_weight_hint,
-                hc.align_hint,
-                hc.width_ratio,
-                hc.heading_level_hint,
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT INTO fnm_heading_candidates (doc_id, heading_id, page_no, text,
+                 normalized_text, source, block_label, top_band, font_height, x, y, width_estimate, confidence,
+                 heading_family_guess, suppressed_as_chapter, reject_reason,
+                 font_name, font_weight_hint, align_hint, width_ratio, heading_level_hint,
+                 created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)",
+            )?;
+            for hc in heading_candidates {
+                stmt.execute(rusqlite::params![
+                    doc_id,
+                    hc.heading_id,
+                    hc.page_no,
+                    hc.text,
+                    hc.normalized_text,
+                    hc.source,
+                    hc.block_label,
+                    hc.top_band as i64,
+                    hc.font_height,
+                    hc.x,
+                    hc.y,
+                    hc.width_estimate,
+                    hc.confidence,
+                    normalize_heading_family_guess(&hc.heading_family_guess),
+                    hc.suppressed_as_chapter as i64,
+                    hc.reject_reason,
+                    hc.font_name,
+                    hc.font_weight_hint,
+                    hc.align_hint,
+                    hc.width_ratio,
+                    hc.heading_level_hint,
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
         // 插入 section_heads
-        let mut stmt = conn.prepare(
-            "INSERT INTO fnm_section_heads (doc_id, section_head_id, chapter_id, page_no,
-             text, normalized_text, level, source, confidence, heading_family_guess,
-             rejected_chapter_candidate, reject_reason, derived_from_heading_id,
-             created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
-        )?;
-        for sh in section_heads {
-            stmt.execute(rusqlite::params![
-                doc_id,
-                sh.section_head_id,
-                sh.chapter_id,
-                sh.page_no,
-                sh.title,
-                sh.title,
-                sh.level,
-                sh.source,
-                1.0_f64,
-                "section",
-                0_i64,
-                "",
-                "",
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT INTO fnm_section_heads (doc_id, section_head_id, chapter_id, page_no,
+                 text, normalized_text, level, source, confidence, heading_family_guess,
+                 rejected_chapter_candidate, reject_reason, derived_from_heading_id,
+                 created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
+            )?;
+            for sh in section_heads {
+                stmt.execute(rusqlite::params![
+                    doc_id,
+                    sh.section_head_id,
+                    sh.chapter_id,
+                    sh.page_no,
+                    sh.title,
+                    sh.title,
+                    sh.level,
+                    sh.source,
+                    1.0_f64,
+                    "section",
+                    0_i64,
+                    "",
+                    "",
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
+        tx.commit()?;
         Ok(())
     }
 }
@@ -402,7 +413,8 @@ impl Repository for SqliteRepository {
             Ok(PagePartitionRecord {
                 page_no: row.get(0)?,
                 target_pdf_page: row.get::<_, Option<i64>>(1)?.unwrap_or(0),
-                page_role: PageRole::from_str(&row.get::<_, String>(2)?).unwrap_or(PageRole::Other),
+                page_role: PageRole::from_str(&row.get::<_, String>(2)?)
+                    .map_err(|e| invalid_db_value(2, e))?,
                 confidence: row.get(3)?,
                 reason: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
                 section_hint: row.get::<_, Option<String>>(5)?.unwrap_or_default(),
@@ -432,11 +444,11 @@ impl Repository for SqliteRepository {
                 source: ChapterSource::from_str(
                     &row.get::<_, Option<String>>(5)?.unwrap_or_default(),
                 )
-                .unwrap_or(ChapterSource::Fallback),
+                .map_err(|e| invalid_db_value(5, e))?,
                 boundary_state: BoundaryState::from_str(
                     &row.get::<_, Option<String>>(6)?.unwrap_or_default(),
                 )
-                .unwrap_or(BoundaryState::Ready),
+                .map_err(|e| invalid_db_value(6, e))?,
             })
         })?;
         rows.collect::<Result<Vec<_>, _>>().map_err(Into::into)
@@ -530,7 +542,7 @@ impl Repository for SqliteRepository {
                 page_end: row.get(3)?,
                 pages: parse_required_json(row.get(4)?, 4)?,
                 note_kind: NoteKind::from_str(&row.get::<_, String>(5)?)
-                    .unwrap_or(NoteKind::Unknown),
+                    .map_err(|e| invalid_db_value(5, e))?,
                 scope,
                 source,
                 heading_text: row.get::<_, Option<String>>(8)?.unwrap_or_default(),
@@ -572,7 +584,7 @@ impl Repository for SqliteRepository {
                 is_reconstructed: row.get::<_, i64>(10)? != 0,
                 review_required: row.get::<_, i64>(11)? != 0,
                 note_kind: NoteKind::from_str(&row.get::<_, String>(6)?)
-                    .unwrap_or(NoteKind::Unknown),
+                    .map_err(|e| invalid_db_value(6, e))?,
                 projection_mode: row.get(12)?,
                 owner_chapter_id: row.get(13)?,
                 source_marker: row.get(14)?,
@@ -593,7 +605,7 @@ impl Repository for SqliteRepository {
             Ok(ChapterNoteModeRecord {
                 chapter_id: row.get(0)?,
                 note_mode: NoteMode::from_str(&row.get::<_, String>(1)?)
-                    .unwrap_or(NoteMode::ReviewRequired),
+                    .map_err(|e| invalid_db_value(1, e))?,
                 region_ids: parse_required_json(row.get(2)?, 2)?,
                 primary_region_scope: row.get(3)?,
                 has_footnote_band: row.get::<_, i64>(4)? != 0,
@@ -605,107 +617,116 @@ impl Repository for SqliteRepository {
 
     fn replace_fnm_phase2_products(&self, doc_id: &str, payload: &Phase2Products) -> Result<()> {
         // Phase 2 只写 Phase 2 表，不触碰 Phase 1 表（Phase 1 已持久化）。
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
 
-        conn.execute("DELETE FROM fnm_note_regions WHERE doc_id = ?1", [doc_id])?;
-        conn.execute(
+        let tx = conn.transaction()?;
+
+        tx.execute("DELETE FROM fnm_note_regions WHERE doc_id = ?1", [doc_id])?;
+        tx.execute(
             "DELETE FROM fnm_chapter_note_modes WHERE doc_id = ?1",
             [doc_id],
         )?;
-        conn.execute("DELETE FROM fnm_note_items WHERE doc_id = ?1", [doc_id])?;
+        tx.execute("DELETE FROM fnm_note_items WHERE doc_id = ?1", [doc_id])?;
 
-        let mut stmt_region = conn.prepare(
-            "INSERT INTO fnm_note_regions (doc_id, region_id, region_kind,
-             start_page, end_page, pages_json, title_hint, bound_chapter_id,
-             region_scope, region_source, start_reason, end_reason, review_required,
-             region_start_first_source_marker, region_first_note_item_marker,
-             region_marker_alignment_ok, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
-        )?;
-        for r in &payload.note_regions {
-            let pages_json = serde_json::to_string(&r.pages)?;
-            stmt_region.execute(rusqlite::params![
-                doc_id,
-                r.region_id,
-                r.note_kind.as_str(),
-                r.page_start,
-                r.page_end,
-                pages_json,
-                r.heading_text,
-                r.chapter_id,
-                r.scope.as_str(),
-                r.source.as_str(),
-                r.start_reason,
-                r.end_reason,
-                r.review_required as i64,
-                r.region_start_first_source_marker,
-                r.region_first_note_item_marker,
-                r.region_marker_alignment_ok as i64,
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_region = tx.prepare(
+                "INSERT INTO fnm_note_regions (doc_id, region_id, region_kind,
+                 start_page, end_page, pages_json, title_hint, bound_chapter_id,
+                 region_scope, region_source, start_reason, end_reason, review_required,
+                 region_start_first_source_marker, region_first_note_item_marker,
+                 region_marker_alignment_ok, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
+            )?;
+            for r in &payload.note_regions {
+                let pages_json = serde_json::to_string(&r.pages)?;
+                stmt_region.execute(rusqlite::params![
+                    doc_id,
+                    r.region_id,
+                    r.note_kind.as_str(),
+                    r.page_start,
+                    r.page_end,
+                    pages_json,
+                    r.heading_text,
+                    r.chapter_id,
+                    r.scope.as_str(),
+                    r.source.as_str(),
+                    r.start_reason,
+                    r.end_reason,
+                    r.review_required as i64,
+                    r.region_start_first_source_marker,
+                    r.region_first_note_item_marker,
+                    r.region_marker_alignment_ok as i64,
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
-        let mut stmt_mode = conn.prepare(
-            "INSERT INTO fnm_chapter_note_modes (doc_id, chapter_id, chapter_title,
-             note_mode, region_ids_json, primary_region_scope, has_footnote_band,
-             has_endnote_region, sampled_pages_json, detection_confidence, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
-        )?;
-        for cm in &payload.chapter_note_modes {
-            let region_ids_json = serde_json::to_string(&cm.region_ids)?;
-            stmt_mode.execute(rusqlite::params![
-                doc_id,
-                cm.chapter_id,
-                "",
-                cm.note_mode.as_str(),
-                region_ids_json,
-                cm.primary_region_scope,
-                cm.has_footnote_band as i64,
-                cm.has_endnote_region as i64,
-                "[]",
-                1.0_f64,
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_mode = tx.prepare(
+                "INSERT INTO fnm_chapter_note_modes (doc_id, chapter_id, chapter_title,
+                 note_mode, region_ids_json, primary_region_scope, has_footnote_band,
+                 has_endnote_region, sampled_pages_json, detection_confidence, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)",
+            )?;
+            for cm in &payload.chapter_note_modes {
+                let region_ids_json = serde_json::to_string(&cm.region_ids)?;
+                stmt_mode.execute(rusqlite::params![
+                    doc_id,
+                    cm.chapter_id,
+                    "",
+                    cm.note_mode.as_str(),
+                    region_ids_json,
+                    cm.primary_region_scope,
+                    cm.has_footnote_band as i64,
+                    cm.has_endnote_region as i64,
+                    "[]",
+                    1.0_f64,
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
-        let mut stmt_item = conn.prepare(
-            "INSERT INTO fnm_note_items (doc_id, note_item_id, note_kind,
-             chapter_id, region_id, marker, marker_type, normalized_marker, occurrence,
-             source_text, item_source, source_page_label, is_reconstructed, review_required,
-             projection_mode, owner_chapter_id, page_no, display_marker, source_marker, title_hint,
-             created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)",
-        )?;
-        for item in &payload.note_items {
-            stmt_item.execute(rusqlite::params![
-                doc_id,
-                item.note_item_id,
-                item.note_kind.as_str(),
-                item.chapter_id,
-                item.region_id,
-                item.marker,
-                item.marker_type,
-                item.normalized_marker,
-                1_i64,
-                item.text,
-                item.source,
-                item.source_page_label,
-                item.is_reconstructed as i64,
-                item.review_required as i64,
-                item.projection_mode,
-                item.owner_chapter_id,
-                item.page_no,
-                item.marker,
-                item.source_marker,
-                "",
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_item = tx.prepare(
+                "INSERT INTO fnm_note_items (doc_id, note_item_id, note_kind,
+                 chapter_id, region_id, marker, marker_type, normalized_marker, occurrence,
+                 source_text, item_source, source_page_label, is_reconstructed, review_required,
+                 projection_mode, owner_chapter_id, page_no, display_marker, source_marker, title_hint,
+                 created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)",
+            )?;
+            for item in &payload.note_items {
+                stmt_item.execute(rusqlite::params![
+                    doc_id,
+                    item.note_item_id,
+                    item.note_kind.as_str(),
+                    item.chapter_id,
+                    item.region_id,
+                    item.marker,
+                    item.marker_type,
+                    item.normalized_marker,
+                    1_i64,
+                    item.text,
+                    item.source,
+                    item.source_page_label,
+                    item.is_reconstructed as i64,
+                    item.review_required as i64,
+                    item.projection_mode,
+                    item.owner_chapter_id,
+                    item.page_no,
+                    item.marker,
+                    item.source_marker,
+                    "",
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
+        tx.commit()?;
         Ok(())
     }
 
@@ -738,7 +759,7 @@ impl Repository for SqliteRepository {
                 source_marker: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
                 normalized_marker: row.get::<_, Option<String>>(7)?.unwrap_or_default(),
                 anchor_kind: AnchorKind::from_str(&row.get::<_, String>(8)?)
-                    .unwrap_or(AnchorKind::Unknown),
+                    .map_err(|e| invalid_db_value(8, e))?,
                 certainty: row.get(9)?,
                 source_text: row.get::<_, Option<String>>(10)?.unwrap_or_default(),
                 source: row.get(11)?,
@@ -765,16 +786,16 @@ impl Repository for SqliteRepository {
                 note_item_id: row.get::<_, Option<String>>(3)?.unwrap_or_default(),
                 anchor_id: row.get::<_, Option<String>>(4)?.unwrap_or_default(),
                 status: LinkStatus::from_str(&row.get::<_, String>(5)?)
-                    .unwrap_or(LinkStatus::OrphanNote),
+                    .map_err(|e| invalid_db_value(5, e))?,
                 resolver: LinkResolver::from_str(
                     &row.get::<_, Option<String>>(6)?.unwrap_or_default(),
                 )
-                .unwrap_or(LinkResolver::Fallback),
+                .map_err(|e| invalid_db_value(6, e))?,
                 confidence: row.get(7)?,
                 note_kind: NoteKind::from_str(
                     &row.get::<_, Option<String>>(8)?.unwrap_or_default(),
                 )
-                .unwrap_or(NoteKind::Unknown),
+                .map_err(|e| invalid_db_value(8, e))?,
                 marker: row.get::<_, Option<String>>(9)?.unwrap_or_default(),
                 page_no_start: row.get::<_, Option<i64>>(10)?.unwrap_or(0),
                 page_no_end: row.get::<_, Option<i64>>(11)?.unwrap_or(0),
@@ -784,68 +805,75 @@ impl Repository for SqliteRepository {
     }
 
     fn replace_fnm_phase3_products(&self, doc_id: &str, payload: &Phase3Products) -> Result<()> {
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
 
-        conn.execute("DELETE FROM fnm_body_anchors WHERE doc_id = ?1", [doc_id])?;
-        conn.execute("DELETE FROM fnm_note_links WHERE doc_id = ?1", [doc_id])?;
+        let tx = conn.transaction()?;
 
-        let mut stmt_anchor = conn.prepare(
-            "INSERT INTO fnm_body_anchors (doc_id, anchor_id, chapter_id, page_no,
-             paragraph_index, char_start, char_end, source_marker, normalized_marker,
-             anchor_kind, certainty, source_text, anchor_source, synthetic,
-             ocr_repaired_from_marker, coordinate_unit, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
-        )?;
-        for ba in &payload.body_anchors {
-            stmt_anchor.execute(rusqlite::params![
-                doc_id,
-                ba.anchor_id,
-                ba.chapter_id,
-                ba.page_no,
-                ba.paragraph_index,
-                ba.char_start,
-                ba.char_end,
-                ba.source_marker,
-                ba.normalized_marker,
-                ba.anchor_kind.as_str(),
-                ba.certainty,
-                ba.source_text,
-                ba.source,
-                ba.synthetic as i64,
-                ba.ocr_repaired_from_marker,
-                "char",
-                ts,
-                ts,
-            ])?;
+        tx.execute("DELETE FROM fnm_body_anchors WHERE doc_id = ?1", [doc_id])?;
+        tx.execute("DELETE FROM fnm_note_links WHERE doc_id = ?1", [doc_id])?;
+
+        {
+            let mut stmt_anchor = tx.prepare(
+                "INSERT INTO fnm_body_anchors (doc_id, anchor_id, chapter_id, page_no,
+                 paragraph_index, char_start, char_end, source_marker, normalized_marker,
+                 anchor_kind, certainty, source_text, anchor_source, synthetic,
+                 ocr_repaired_from_marker, coordinate_unit, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18)",
+            )?;
+            for ba in &payload.body_anchors {
+                stmt_anchor.execute(rusqlite::params![
+                    doc_id,
+                    ba.anchor_id,
+                    ba.chapter_id,
+                    ba.page_no,
+                    ba.paragraph_index,
+                    ba.char_start,
+                    ba.char_end,
+                    ba.source_marker,
+                    ba.normalized_marker,
+                    ba.anchor_kind.as_str(),
+                    ba.certainty,
+                    ba.source_text,
+                    ba.source,
+                    ba.synthetic as i64,
+                    ba.ocr_repaired_from_marker,
+                    "char",
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
-        let mut stmt_link = conn.prepare(
-            "INSERT INTO fnm_note_links (doc_id, link_id, chapter_id, region_id,
-             note_item_id, anchor_id, status, resolver, confidence, note_kind, marker,
-             page_no_start, page_no_end, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
-        )?;
-        for link in &payload.note_links {
-            stmt_link.execute(rusqlite::params![
-                doc_id,
-                link.link_id,
-                link.chapter_id,
-                link.region_id,
-                link.note_item_id,
-                link.anchor_id,
-                link.status.as_str(),
-                link.resolver.as_str(),
-                link.confidence,
-                link.note_kind.as_str(),
-                link.marker,
-                link.page_no_start,
-                link.page_no_end,
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_link = tx.prepare(
+                "INSERT INTO fnm_note_links (doc_id, link_id, chapter_id, region_id,
+                 note_item_id, anchor_id, status, resolver, confidence, note_kind, marker,
+                 page_no_start, page_no_end, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
+            )?;
+            for link in &payload.note_links {
+                stmt_link.execute(rusqlite::params![
+                    doc_id,
+                    link.link_id,
+                    link.chapter_id,
+                    link.region_id,
+                    link.note_item_id,
+                    link.anchor_id,
+                    link.status.as_str(),
+                    link.resolver.as_str(),
+                    link.confidence,
+                    link.note_kind.as_str(),
+                    link.marker,
+                    link.page_no_start,
+                    link.page_no_end,
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
+        tx.commit()?;
         Ok(())
     }
 
@@ -1147,52 +1175,56 @@ impl Repository for SqliteRepository {
         doc_id: &str,
         units: &[TranslationUnitRecord],
     ) -> Result<()> {
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
-        conn.execute(
+        let tx = conn.transaction()?;
+        tx.execute(
             "DELETE FROM fnm_translation_units WHERE doc_id = ?1",
             rusqlite::params![doc_id],
         )?;
-        let mut stmt = conn.prepare(
-            "INSERT INTO fnm_translation_units
-             (doc_id, unit_id, kind, owner_kind, owner_id, section_id, section_title,
-              section_start_page, section_end_page, note_id, page_start, page_end,
-              char_count, source_text, translated_text, status, error_msg, target_ref,
-              page_segments_json, source_hash, segment_plan_hash, pipeline_run_id,
-              stale_reason, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
-                     ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)",
-        )?;
-        for unit in units {
-            let seg_json = serde_json::to_string(&unit.page_segments).unwrap_or_default();
-            stmt.execute(rusqlite::params![
-                doc_id,
-                unit.unit_id,
-                unit.kind,
-                unit.owner_kind,
-                unit.owner_id,
-                unit.section_id,
-                unit.section_title,
-                unit.section_start_page,
-                unit.section_end_page,
-                unit.note_id,
-                unit.page_start,
-                unit.page_end,
-                unit.char_count,
-                unit.source_text,
-                unit.translated_text,
-                unit.status,
-                unit.error_msg,
-                unit.target_ref,
-                seg_json,
-                unit.source_hash,
-                unit.segment_plan_hash,
-                unit.pipeline_run_id,
-                "", // stale_reason
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT INTO fnm_translation_units
+                 (doc_id, unit_id, kind, owner_kind, owner_id, section_id, section_title,
+                  section_start_page, section_end_page, note_id, page_start, page_end,
+                  char_count, source_text, translated_text, status, error_msg, target_ref,
+                  page_segments_json, source_hash, segment_plan_hash, pipeline_run_id,
+                  stale_reason, created_at, updated_at)
+                  VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16,
+                          ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)",
+            )?;
+            for unit in units {
+                let seg_json = serde_json::to_string(&unit.page_segments).unwrap_or_default();
+                stmt.execute(rusqlite::params![
+                    doc_id,
+                    unit.unit_id,
+                    unit.kind,
+                    unit.owner_kind,
+                    unit.owner_id,
+                    unit.section_id,
+                    unit.section_title,
+                    unit.section_start_page,
+                    unit.section_end_page,
+                    unit.note_id,
+                    unit.page_start,
+                    unit.page_end,
+                    unit.char_count,
+                    unit.source_text,
+                    unit.translated_text,
+                    unit.status,
+                    unit.error_msg,
+                    unit.target_ref,
+                    seg_json,
+                    unit.source_hash,
+                    unit.segment_plan_hash,
+                    unit.pipeline_run_id,
+                    "", // stale_reason
+                    ts,
+                    ts,
+                ])?;
+            }
         }
+        tx.commit()?;
         Ok(())
     }
 
@@ -1218,7 +1250,14 @@ impl Repository for SqliteRepository {
         let mut reviews = Vec::new();
         for row in rows {
             let mut review = row?;
-            // 重建 review_id
+            // 重建 review_id（纳入 payload hash 防止同坐标不同内容碰撞）
+            let payload_hash = {
+                use std::hash::{Hash, Hasher};
+                let s = serde_json::to_string(&review.payload).unwrap_or_default();
+                let mut hasher = std::collections::hash_map::DefaultHasher::new();
+                s.hash(&mut hasher);
+                format!("{:016x}", hasher.finish())
+            };
             review.review_id = format!(
                 "review-{}-{}-{}-{}-{}",
                 review
@@ -1229,7 +1268,7 @@ impl Repository for SqliteRepository {
                     .replace(|c: char| !c.is_alphanumeric(), "-"),
                 review.page_start,
                 review.page_end,
-                "na"
+                &payload_hash[..8],
             );
             reviews.push(review);
         }
@@ -1241,31 +1280,35 @@ impl Repository for SqliteRepository {
         doc_id: &str,
         reviews: &[StructureReviewRecord],
     ) -> Result<()> {
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
-        conn.execute(
+        let tx = conn.transaction()?;
+        tx.execute(
             "DELETE FROM fnm_structure_reviews WHERE doc_id = ?1",
             rusqlite::params![doc_id],
         )?;
-        let mut stmt = conn.prepare(
-            "INSERT INTO fnm_structure_reviews
-             (doc_id, review_type, chapter_id, page_start, page_end, payload_json, severity, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
-        )?;
-        for review in reviews {
-            let payload_json = serde_json::to_string(&review.payload).unwrap_or_default();
-            stmt.execute(rusqlite::params![
-                doc_id,
-                review.review_type,
-                review.chapter_id,
-                review.page_start,
-                review.page_end,
-                payload_json,
-                review.severity,
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt = tx.prepare(
+                "INSERT INTO fnm_structure_reviews
+                 (doc_id, review_type, chapter_id, page_start, page_end, payload_json, severity, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
+            )?;
+            for review in reviews {
+                let payload_json = serde_json::to_string(&review.payload).unwrap_or_default();
+                stmt.execute(rusqlite::params![
+                    doc_id,
+                    review.review_type,
+                    review.chapter_id,
+                    review.page_start,
+                    review.page_end,
+                    payload_json,
+                    review.severity,
+                    ts,
+                    ts,
+                ])?;
+            }
         }
+        tx.commit()?;
         Ok(())
     }
 
@@ -1358,92 +1401,101 @@ impl Repository for SqliteRepository {
     }
 
     fn replace_fnm_phase5_products(&self, doc_id: &str, payload: &Phase5Products) -> Result<()> {
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
 
-        conn.execute(
+        let tx = conn.transaction()?;
+
+        tx.execute(
             "DELETE FROM fnm_chapter_markdowns WHERE doc_id = ?1",
             [doc_id],
         )?;
-        conn.execute(
+        tx.execute(
             "DELETE FROM fnm_diagnostic_pages WHERE doc_id = ?1",
             [doc_id],
         )?;
-        conn.execute(
+        tx.execute(
             "DELETE FROM fnm_diagnostic_notes WHERE doc_id = ?1",
             [doc_id],
         )?;
 
-        let mut stmt_cm = conn.prepare(
-            "INSERT INTO fnm_chapter_markdowns
-             (doc_id, chapter_id, order_idx, title, path, markdown_text,
-              start_page, end_page, pages_json, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
-        )?;
-        for cm in &payload.chapter_markdowns {
-            stmt_cm.execute(rusqlite::params![
-                doc_id,
-                cm.chapter_id,
-                cm.order,
-                cm.title,
-                cm.path,
-                cm.markdown_text,
-                cm.start_page,
-                cm.end_page,
-                serde_json::to_string(&cm.pages).ok(),
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_cm = tx.prepare(
+                "INSERT INTO fnm_chapter_markdowns
+                 (doc_id, chapter_id, order_idx, title, path, markdown_text,
+                  start_page, end_page, pages_json, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            )?;
+            for cm in &payload.chapter_markdowns {
+                stmt_cm.execute(rusqlite::params![
+                    doc_id,
+                    cm.chapter_id,
+                    cm.order,
+                    cm.title,
+                    cm.path,
+                    cm.markdown_text,
+                    cm.start_page,
+                    cm.end_page,
+                    serde_json::to_string(&cm.pages).ok(),
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
-        let mut stmt_dp = conn.prepare(
-            "INSERT INTO fnm_diagnostic_pages
-             (doc_id, page_bp, status, pages, page_entries_json,
-              fnm_source_json, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-        )?;
-        for dp in &payload.diagnostic_pages {
-            stmt_dp.execute(rusqlite::params![
-                doc_id,
-                dp._page_bp,
-                dp._status,
-                dp.pages,
-                serde_json::to_string(&dp._page_entries).ok(),
-                serde_json::to_string(&dp._fnm_source).ok(),
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_dp = tx.prepare(
+                "INSERT INTO fnm_diagnostic_pages
+                 (doc_id, page_bp, status, pages, page_entries_json,
+                  fnm_source_json, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            )?;
+            for dp in &payload.diagnostic_pages {
+                stmt_dp.execute(rusqlite::params![
+                    doc_id,
+                    dp._page_bp,
+                    dp._status,
+                    dp.pages,
+                    serde_json::to_string(&dp._page_entries).ok(),
+                    serde_json::to_string(&dp._fnm_source).ok(),
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
-        let mut stmt_dn = conn.prepare(
-            "INSERT INTO fnm_diagnostic_notes
-             (doc_id, note_id, section_id, section_title, section_start_page,
-              section_end_page, kind, original_marker, start_page, pages_json,
-              source_text, translated_text, translate_status, region_id,
-              created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
-        )?;
-        for dn in &payload.diagnostic_notes {
-            stmt_dn.execute(rusqlite::params![
-                doc_id,
-                dn.note_id,
-                dn.section_id,
-                dn.section_title,
-                dn.section_start_page,
-                dn.section_end_page,
-                dn.kind,
-                dn.original_marker,
-                dn.start_page,
-                serde_json::to_string(&dn.pages).ok(),
-                dn.source_text,
-                dn.translated_text,
-                dn.translate_status,
-                dn.region_id,
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_dn = tx.prepare(
+                "INSERT INTO fnm_diagnostic_notes
+                 (doc_id, note_id, section_id, section_title, section_start_page,
+                  section_end_page, kind, original_marker, start_page, pages_json,
+                  source_text, translated_text, translate_status, region_id,
+                  created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16)",
+            )?;
+            for dn in &payload.diagnostic_notes {
+                stmt_dn.execute(rusqlite::params![
+                    doc_id,
+                    dn.note_id,
+                    dn.section_id,
+                    dn.section_title,
+                    dn.section_start_page,
+                    dn.section_end_page,
+                    dn.kind,
+                    dn.original_marker,
+                    dn.start_page,
+                    serde_json::to_string(&dn.pages).ok(),
+                    dn.source_text,
+                    dn.translated_text,
+                    dn.translate_status,
+                    dn.region_id,
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
+        tx.commit()?;
         Ok(())
     }
 
@@ -1491,52 +1543,57 @@ impl Repository for SqliteRepository {
     }
 
     fn replace_fnm_phase6_products(&self, doc_id: &str, payload: &Phase6Products) -> Result<()> {
-        let conn = self.get_conn()?;
+        let mut conn = self.get_conn()?;
         let ts = Self::now_ts();
 
-        conn.execute(
+        let tx = conn.transaction()?;
+
+        tx.execute(
             "DELETE FROM fnm_export_chapters WHERE doc_id = ?1",
             [doc_id],
         )?;
-        conn.execute("DELETE FROM fnm_export_audit WHERE doc_id = ?1", [doc_id])?;
-        conn.execute("DELETE FROM fnm_export_bundle WHERE doc_id = ?1", [doc_id])?;
+        tx.execute("DELETE FROM fnm_export_audit WHERE doc_id = ?1", [doc_id])?;
+        tx.execute("DELETE FROM fnm_export_bundle WHERE doc_id = ?1", [doc_id])?;
 
-        let mut stmt_ec = conn.prepare(
-            "INSERT INTO fnm_export_chapters
-             (doc_id, section_id, order_idx, title, path, content,
-              start_page, end_page, pages_json, created_at, updated_at)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
-        )?;
-        for ec in &payload.export_chapters {
-            stmt_ec.execute(rusqlite::params![
-                doc_id,
-                ec.section_id,
-                ec.order,
-                ec.title,
-                ec.path,
-                ec.content,
-                ec.start_page,
-                ec.end_page,
-                serde_json::to_string(&ec.pages).ok(),
-                ts,
-                ts,
-            ])?;
+        {
+            let mut stmt_ec = tx.prepare(
+                "INSERT INTO fnm_export_chapters
+                 (doc_id, section_id, order_idx, title, path, content,
+                  start_page, end_page, pages_json, created_at, updated_at)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            )?;
+            for ec in &payload.export_chapters {
+                stmt_ec.execute(rusqlite::params![
+                    doc_id,
+                    ec.section_id,
+                    ec.order,
+                    ec.title,
+                    ec.path,
+                    ec.content,
+                    ec.start_page,
+                    ec.end_page,
+                    serde_json::to_string(&ec.pages).ok(),
+                    ts,
+                    ts,
+                ])?;
+            }
         }
 
         let report_json = serde_json::to_string(&payload.export_audit)?;
-        conn.execute(
+        tx.execute(
             "INSERT INTO fnm_export_audit (doc_id, report_json, created_at, updated_at)
              VALUES (?1, ?2, ?3, ?4)",
             rusqlite::params![doc_id, report_json, ts, ts],
         )?;
 
         let bundle_json = serde_json::to_string(&payload.export_bundle)?;
-        conn.execute(
+        tx.execute(
             "INSERT INTO fnm_export_bundle (doc_id, bundle_json, created_at, updated_at)
              VALUES (?1, ?2, ?3, ?4)",
             rusqlite::params![doc_id, bundle_json, ts, ts],
         )?;
 
+        tx.commit()?;
         Ok(())
     }
 
@@ -2132,7 +2189,7 @@ mod tests {
     }
 
     #[test]
-    fn invalid_note_kind_reads_back_as_unknown() {
+    fn invalid_enum_values_fail_fast_on_readback() {
         let repo = setup_repo();
         seed_doc(&repo, "kind-test");
         let conn = repo.get_conn().unwrap();
@@ -2150,17 +2207,18 @@ mod tests {
             [],
         ).unwrap();
 
-        let regions = repo.list_fnm_note_regions("kind-test").unwrap();
-        assert_eq!(regions.len(), 1);
-        assert_eq!(regions[0].note_kind, NoteKind::Unknown);
-
-        let items = repo.list_fnm_note_items("kind-test").unwrap();
-        assert_eq!(items.len(), 1);
-        assert_eq!(items[0].note_kind, NoteKind::Unknown);
-
-        let links = repo.list_fnm_note_links("kind-test").unwrap();
-        assert_eq!(links.len(), 1);
-        assert_eq!(links[0].note_kind, NoteKind::Unknown);
+        assert!(
+            repo.list_fnm_note_regions("kind-test").is_err(),
+            "garbage region_kind should cause fail-fast"
+        );
+        assert!(
+            repo.list_fnm_note_items("kind-test").is_err(),
+            "garbage note_kind in note_items should cause fail-fast"
+        );
+        assert!(
+            repo.list_fnm_note_links("kind-test").is_err(),
+            "garbage note_kind in note_links should cause fail-fast"
+        );
     }
 
     #[test]
@@ -2216,5 +2274,125 @@ mod tests {
             result.is_err(),
             "BLOB in TOC col should cause row.get error to propagate"
         );
+    }
+
+    #[test]
+    fn transaction_rollback_on_insert_failure_preserves_old_data() {
+        // B1-2: 验证事务回滚——DELETE 后 INSERT 失败时，旧行应仍在。
+        let repo = setup_repo();
+        let doc_id = "tx-rollback-test";
+
+        // 先创建 document 记录（FK 约束要求）
+        {
+            let conn = repo.get_conn().unwrap();
+            conn.execute(
+                "INSERT INTO documents (id, slug) VALUES (?1, ?1)",
+                [doc_id],
+            )
+            .unwrap();
+        }
+
+        // 先写入 Phase1 数据
+        let pages = vec![crate::records::PagePartitionRecord {
+            page_no: 1,
+            target_pdf_page: 1,
+            page_role: crate::types::PageRole::Body,
+            confidence: 1.0,
+            reason: "test".into(),
+            section_hint: String::new(),
+            has_note_heading: false,
+            note_scan_summary: serde_json::json!([]),
+        }];
+        repo.replace_fnm_phase1_products(
+            doc_id,
+            &Phase1Products {
+                pages,
+                chapters: vec![],
+                heading_candidates: vec![],
+                section_heads: vec![],
+            },
+        )
+        .unwrap();
+
+        // 确认数据存在
+        let loaded = repo.list_fnm_pages(doc_id).unwrap();
+        assert_eq!(loaded.len(), 1, "应有 1 条 page 记录");
+
+        // 手动验证事务行为：DELETE + 故意失败的 INSERT → 数据应保留
+        {
+            let mut conn = repo.get_conn().unwrap();
+            let tx = conn.transaction().unwrap();
+            tx.execute("DELETE FROM fnm_pages WHERE doc_id = ?1", [doc_id])
+                .unwrap();
+            // 故意触发错误：插入到不存在的表
+            let insert_result = tx.execute(
+                "INSERT INTO nonexistent_table VALUES (1)",
+                [],
+            );
+            assert!(insert_result.is_err(), "应触发错误");
+            // 不 commit，tx drop 时自动 rollback
+            drop(tx);
+        }
+
+        // 验证 DELETE 被回滚，旧行仍在
+        let loaded_after = repo.list_fnm_pages(doc_id).unwrap();
+        assert_eq!(
+            loaded_after.len(),
+            1,
+            "事务回滚后旧行应仍在（DELETE 被回滚）"
+        );
+    }
+
+    #[test]
+    fn replace_fnm_translation_units_uses_transaction() {
+        // B1-2: 验证 replace_fnm_translation_units 正常工作（事务 commit）
+        let repo = setup_repo();
+        let doc_id = "tx-units-test";
+
+        // 需要先创建 document 记录
+        {
+            let conn = repo.get_conn().unwrap();
+            conn.execute(
+                "INSERT INTO documents (id, slug) VALUES (?1, ?1)",
+                [doc_id],
+            )
+            .unwrap();
+        }
+
+        let units = vec![crate::records::TranslationUnitRecord {
+            unit_id: "u1".into(),
+            kind: "body".into(),
+            owner_kind: "chapter".into(),
+            owner_id: "ch1".into(),
+            section_id: "ch1".into(),
+            section_title: "Chapter 1".into(),
+            section_start_page: 1,
+            section_end_page: 10,
+            page_start: 1,
+            page_end: 5,
+            char_count: 100,
+            source_text: "Hello world".into(),
+            status: "pending".into(),
+            ..Default::default()
+        }];
+        repo.replace_fnm_translation_units(doc_id, &units).unwrap();
+
+        let loaded = repo.list_fnm_translation_units(doc_id).unwrap();
+        assert_eq!(loaded.len(), 1);
+        assert_eq!(loaded[0].unit_id, "u1");
+        assert_eq!(loaded[0].source_text, "Hello world");
+
+        // 再次 replace（验证 DELETE + INSERT 在事务中）
+        let units2 = vec![crate::records::TranslationUnitRecord {
+            unit_id: "u2".into(),
+            kind: "body".into(),
+            source_text: "Updated".into(),
+            ..Default::default()
+        }];
+        repo.replace_fnm_translation_units(doc_id, &units2).unwrap();
+
+        let loaded2 = repo.list_fnm_translation_units(doc_id).unwrap();
+        assert_eq!(loaded2.len(), 1, "旧数据应被替换");
+        assert_eq!(loaded2[0].unit_id, "u2");
     }
 }

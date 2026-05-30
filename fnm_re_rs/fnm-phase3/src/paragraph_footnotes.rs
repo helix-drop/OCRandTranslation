@@ -192,10 +192,6 @@ pub fn build_paragraph_footnotes(
         }
 
         let item_count = fn_page_records.len();
-        let _anchor_matched_count = fn_page_records
-            .iter()
-            .filter(|r| r.attachment_kind == "anchor_matched")
-            .count();
 
         all_records.extend(fn_page_records);
 

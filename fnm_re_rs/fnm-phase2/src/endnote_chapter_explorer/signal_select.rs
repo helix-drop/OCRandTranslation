@@ -27,9 +27,7 @@ pub(super) fn best_page_signal(
     for (signal_title, source, bonus) in yield_page_signal_candidates(page_no, page, hcbp) {
         if let Some(matched) = match_signal_to_chapter(&signal_title, chapters) {
             page_ranked.push(PageChapterSignal {
-                page_no,
                 chapter_id: matched.0,
-                chapter_title: matched.1,
                 signal_title,
                 source,
                 score: matched.2 + bonus,

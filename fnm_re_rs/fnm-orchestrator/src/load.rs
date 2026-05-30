@@ -122,6 +122,8 @@ pub fn load_phase6_structure(
         note_items,
         chapter_note_modes,
         body_anchors,
+        // Phase 3 persist 时已将 review_overrides 物化到 note_links，
+        // DB 只存一份物化后的链接。load 阶段 note_links == effective_note_links。
         note_links: note_links.clone(),
         effective_note_links: note_links,
         structure_reviews,
