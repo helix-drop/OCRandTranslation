@@ -17,6 +17,7 @@ use std::collections::HashSet;
 use crate::page_context::{resolve_page_from_offset, resolve_page_span_from_range, BodySpan};
 use crate::response_parser::RepairAction;
 use crate::strategies::fuzzy::locate_anchor_phrase_in_body;
+use crate::value_views::ClusterView;
 
 /// ←→ Python `_NOTE_LINK_REPAIRABLE_STATUSES` (llm_repair.py:1644)
 const NOTE_LINK_REPAIRABLE_STATUSES: &[&str] = &["orphan_note", "ambiguous"];
@@ -142,7 +143,9 @@ pub fn slug_token(value: &str) -> String {
 
 /// ←→ Python `_chapter_for_cluster` (llm_repair.py:1727-1743)
 pub fn chapter_for_cluster(cluster: &Value, chapters: &[Value]) -> Value {
-    let cluster_chapter_id = cluster
+    let cv = ClusterView::new(cluster);
+    let cluster_chapter_id = cv
+        .inner()
         .get("chapter_id")
         .and_then(|v| v.as_str())
         .unwrap_or("")
@@ -158,14 +161,8 @@ pub fn chapter_for_cluster(cluster: &Value, chapters: &[Value]) -> Value {
             return chapter.clone();
         }
     }
-    let page_start = cluster
-        .get("page_start")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0);
-    let page_end_raw = cluster
-        .get("page_end")
-        .and_then(|v| v.as_i64())
-        .unwrap_or(0);
+    let page_start = cv.page_start();
+    let page_end_raw = cv.page_end();
     let page_end = if page_end_raw > 0 {
         page_end_raw
     } else {
@@ -182,11 +179,13 @@ pub fn chapter_for_cluster(cluster: &Value, chapters: &[Value]) -> Value {
             return chapter.clone();
         }
     }
-    let chapter_title = cluster
-        .get("chapter_title")
-        .and_then(|v| v.as_str())
-        .unwrap_or(&cluster_chapter_id)
-        .to_string();
+    let chapter_title = cv.chapter_title();
+    let chapter_title = if chapter_title.is_empty() {
+        &cluster_chapter_id
+    } else {
+        chapter_title
+    }
+    .to_string();
     json!({
         "chapter_id": cluster_chapter_id,
         "title": chapter_title,
@@ -204,10 +203,8 @@ pub fn enrich_synthesize_anchor_actions(
     cluster: &Value,
     spans: &[BodySpan],
 ) -> Vec<RepairAction> {
-    let body_text = cluster
-        .get("chapter_body_text")
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
+    let cv = ClusterView::new(cluster);
+    let body_text = cv.chapter_body_text();
     let mut enriched: Vec<RepairAction> = Vec::with_capacity(actions.len());
     for mut item in actions {
         if item.action != "synthesize_anchor" {
@@ -244,16 +241,9 @@ pub fn enrich_synthesize_anchor_actions(
 /// 被移除的 anchor 存入 `cluster["_prefiltered_anchors"]`，
 /// 调用方（run.rs）据此为每个移除的 anchor 生成 `ignore_ref` override —— P1-2。
 pub fn prefilter_duplicate_anchors(cluster: &mut Value) {
-    let matched: Vec<Value> = cluster
-        .get("matched_examples")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default();
-    let unmatched: Vec<Value> = cluster
-        .get("unmatched_anchors")
-        .and_then(|v| v.as_array())
-        .cloned()
-        .unwrap_or_default();
+    let cv = ClusterView::new(cluster);
+    let matched: Vec<Value> = cv.matched_examples().cloned().collect();
+    let unmatched: Vec<Value> = cv.unmatched_anchors().cloned().collect();
     if matched.is_empty() || unmatched.is_empty() {
         cluster["_prefiltered_anchors"] = Value::Array(vec![]);
         return;
