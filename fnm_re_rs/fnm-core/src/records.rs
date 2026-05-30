@@ -1654,4 +1654,191 @@ mod tests {
         assert_eq!(report.structure_state, "");
         assert!(!report.can_ship);
     }
+
+    // ── B5-7 flatten 守护测试 ──────────────────────────────────
+    // 这些测试在 flatten 重构前后必须保持不变。
+    // 如果 flatten 改变了 key 集合或反序列化行为，这些测试会失败。
+
+    /// 从 Value 中提取顶层 key 的有序列表。
+    fn keys_of(v: &serde_json::Value) -> Vec<&str> {
+        v.as_object()
+            .map(|m| m.keys().map(|k| k.as_str()).collect())
+            .unwrap_or_default()
+    }
+
+    /// 往返幂等：serialize → deserialize → serialize，两次 JSON 字符串必须相同。
+    /// 这是 flatten 反序列化不丢字段的最强守护。
+    macro_rules! roundtrip_test {
+        ($name:ident, $ty:ty) => {
+            #[test]
+            fn $name() {
+                let original = <$ty>::default();
+                let json1 = serde_json::to_string(&original).unwrap();
+                let back: $ty = serde_json::from_str(&json1).unwrap();
+                let json2 = serde_json::to_string(&back).unwrap();
+                assert_eq!(json1, json2, "round-trip failed for {}", stringify!($ty));
+            }
+        };
+    }
+
+    roundtrip_test!(roundtrip_phase1_summary, Phase1Summary);
+    roundtrip_test!(roundtrip_phase2_summary, Phase2Summary);
+    roundtrip_test!(roundtrip_phase3_summary, Phase3Summary);
+    roundtrip_test!(roundtrip_phase4_summary, Phase4Summary);
+    roundtrip_test!(roundtrip_phase5_summary, Phase5Summary);
+    roundtrip_test!(roundtrip_phase6_summary, Phase6Summary);
+    roundtrip_test!(roundtrip_phase1_structure, Phase1Structure);
+    roundtrip_test!(roundtrip_phase2_structure, Phase2Structure);
+    roundtrip_test!(roundtrip_phase3_structure, Phase3Structure);
+    roundtrip_test!(roundtrip_phase4_structure, Phase4Structure);
+    roundtrip_test!(roundtrip_phase5_structure, Phase5Structure);
+    roundtrip_test!(roundtrip_phase6_structure, Phase6Structure);
+
+    /// Summary key 集合守护：flatten 后 key 集合必须不变。
+    macro_rules! summary_key_test {
+        ($name:ident, $ty:ty, $expected:expr) => {
+            #[test]
+            fn $name() {
+                let s = <$ty>::default();
+                let v = serde_json::to_value(&s).unwrap();
+                let mut actual = keys_of(&v);
+                actual.sort();
+                let mut expected: Vec<&str> = $expected;
+                expected.sort();
+                assert_eq!(actual, expected, "key set mismatch for {}", stringify!($ty));
+            }
+        };
+    }
+
+    // L0 公共 15 key（P1 无 chapter_endnote_region_alignment_ok，其余 phase 有）
+    const SUMMARY_L0_KEYS: &[&str] = &[
+        "page_partition_summary", "heading_review_summary", "heading_graph_summary",
+        "chapter_source_summary", "visual_toc_conflict_count", "toc_alignment_summary",
+        "toc_semantic_summary", "toc_role_summary", "container_titles", "post_body_titles",
+        "back_matter_titles", "chapter_title_alignment_ok", "chapter_section_alignment_ok",
+        "toc_semantic_contract_ok", "toc_semantic_blocking_reasons",
+    ];
+
+    summary_key_test!(keys_phase1_summary, Phase1Summary, {
+        let mut k: Vec<&str> = SUMMARY_L0_KEYS.to_vec();
+        k.push("visual_toc_endnotes_summary");
+        k
+    });
+
+    summary_key_test!(keys_phase2_summary, Phase2Summary, {
+        let mut k: Vec<&str> = SUMMARY_L0_KEYS.to_vec();
+        k.extend_from_slice(&[
+            "note_region_summary", "note_item_summary", "chapter_note_mode_summary",
+            "chapter_endnote_region_alignment_ok", "chapter_endnote_start_page_map",
+            "review_flags", "visual_toc_endnotes_summary",
+        ]);
+        k
+    });
+
+    summary_key_test!(keys_phase3_summary, Phase3Summary, {
+        let mut k: Vec<&str> = SUMMARY_L0_KEYS.to_vec();
+        k.extend_from_slice(&[
+            "note_region_summary", "note_item_summary", "chapter_note_mode_summary",
+            "chapter_endnote_region_alignment_ok", "chapter_endnote_start_page_map",
+            "body_anchor_summary", "note_link_summary", "review_seed_summary",
+            "review_flags", "paragraph_footnote_summary", "paragraph_endnote_summary",
+            "chapter_anchor_alignment_summary",
+        ]);
+        k
+    });
+
+    summary_key_test!(keys_phase4_summary, Phase4Summary, {
+        let mut k: Vec<&str> = SUMMARY_L0_KEYS.to_vec();
+        k.extend_from_slice(&[
+            "note_region_summary", "note_item_summary", "chapter_note_mode_summary",
+            "chapter_endnote_region_alignment_ok", "chapter_endnote_start_page_map",
+            "body_anchor_summary", "note_link_summary", "review_seed_summary",
+            "review_type_counts", "override_summary", "review_flags",
+        ]);
+        k
+    });
+
+    summary_key_test!(keys_phase5_summary, Phase5Summary, {
+        let mut k: Vec<&str> = SUMMARY_L0_KEYS.to_vec();
+        k.extend_from_slice(&[
+            "note_region_summary", "note_item_summary", "chapter_note_mode_summary",
+            "chapter_endnote_region_alignment_ok", "chapter_endnote_start_page_map",
+            "body_anchor_summary", "note_link_summary", "review_seed_summary",
+            "review_type_counts", "override_summary", "review_flags",
+            "unit_planning_summary", "ref_materialization_summary",
+            "diagnostic_page_summary", "diagnostic_note_summary",
+        ]);
+        k
+    });
+
+    summary_key_test!(keys_phase6_summary, Phase6Summary, {
+        let mut k: Vec<&str> = SUMMARY_L0_KEYS.to_vec();
+        k.extend_from_slice(&[
+            "note_region_summary", "note_item_summary", "chapter_note_mode_summary",
+            "chapter_endnote_region_alignment_ok", "chapter_endnote_start_page_map",
+            "body_anchor_summary", "note_link_summary", "review_seed_summary",
+            "review_type_counts", "override_summary", "review_flags",
+            "unit_planning_summary", "ref_materialization_summary",
+            "diagnostic_page_summary", "diagnostic_note_summary",
+            "export_bundle_summary", "export_audit_summary",
+        ]);
+        k
+    });
+
+    /// Structure key 集合守护。
+    macro_rules! structure_key_test {
+        ($name:ident, $ty:ty, $expected:expr) => {
+            #[test]
+            fn $name() {
+                let s = <$ty>::default();
+                let v = serde_json::to_value(&s).unwrap();
+                let mut actual = keys_of(&v);
+                actual.sort();
+                let mut expected: Vec<&str> = $expected;
+                expected.sort();
+                assert_eq!(actual, expected, "key set mismatch for {}", stringify!($ty));
+            }
+        };
+    }
+
+    structure_key_test!(keys_phase1_structure, Phase1Structure, vec![
+        "pages", "heading_candidates", "chapters", "section_heads",
+        "endnote_explorer_hints", "summary", "toc_tree", "page_roles",
+    ]);
+
+    structure_key_test!(keys_phase2_structure, Phase2Structure, vec![
+        "pages", "heading_candidates", "chapters", "section_heads",
+        "note_regions", "note_items", "chapter_note_modes", "summary",
+    ]);
+
+    structure_key_test!(keys_phase3_structure, Phase3Structure, vec![
+        "pages", "heading_candidates", "chapters", "section_heads",
+        "note_regions", "note_items", "chapter_note_modes",
+        "body_anchors", "note_links", "paragraph_footnotes",
+        "paragraph_endnotes", "chapter_anchor_alignments", "summary",
+    ]);
+
+    structure_key_test!(keys_phase4_structure, Phase4Structure, vec![
+        "pages", "heading_candidates", "chapters", "section_heads",
+        "note_regions", "note_items", "chapter_note_modes",
+        "body_anchors", "note_links", "effective_note_links",
+        "structure_reviews", "status", "summary",
+    ]);
+
+    structure_key_test!(keys_phase5_structure, Phase5Structure, vec![
+        "pages", "heading_candidates", "chapters", "section_heads",
+        "note_regions", "note_items", "chapter_note_modes",
+        "body_anchors", "note_links", "effective_note_links",
+        "structure_reviews", "translation_units", "diagnostic_pages",
+        "diagnostic_notes", "status", "summary",
+    ]);
+
+    structure_key_test!(keys_phase6_structure, Phase6Structure, vec![
+        "pages", "heading_candidates", "chapters", "section_heads",
+        "note_regions", "note_items", "chapter_note_modes",
+        "body_anchors", "note_links", "effective_note_links",
+        "structure_reviews", "translation_units", "diagnostic_pages",
+        "diagnostic_notes", "export_chapters", "export_bundle",
+        "export_audit", "status", "summary",
+    ]);
 }
