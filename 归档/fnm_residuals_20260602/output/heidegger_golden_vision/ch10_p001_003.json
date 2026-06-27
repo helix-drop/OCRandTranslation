@@ -1,0 +1,27 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/chapters_pdf/10-Le retour du refoulé?.pdf",
+  "chapter": "ch10",
+  "pages": [
+    1,
+    2,
+    3
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch10 PDF page 1\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"10. Le retour du refoulé ?\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"C'est bien d'un scandale qu'il va s'agir, et d'un scandale médiatique.\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"C'est à la dernière objection qu'il est d'abord le plus logique de\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Puisque scandale il y eut, ce qui est incontestable, il faut d'abord\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"无可见脚注，正文段落清晰。\"]\n    },\n    {\n      \"label\": \"ch10 PDF page 2\",\n      \"printed_page\": \"348\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"LE FEU AUX POUDRES\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"Ce qui nous intéresse ici n'est pas la reprise de la discussion\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"En quoi ce livre a-t-il pu paraître à la fois neuf et dérangeant ?\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Ce qui a produit l'effet de choc, c'est le caractère radical et\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"1\", \"context\": \"1987¹\"},\n        {\"marker\": \"2\", \"context\": \"accablants : Heidegger dénonciateur à deux reprises²\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"1\", \"text_start\": \"Victor FARIAS, Heidegger et le nazisme, trad. de l'espagnol et de l'allemand par M. Benarroch et J.-B. Grasset, Préface de C. Jambet, Lagrasse, Verdier, 1987.\"},\n        {\"marker\": \"2\", \"text_start\": \"Dans les cas de Staudinger et de Baumgarten : voir ibid., pp. 130-132 et 234-237.\"}\n      ],\n      \"risks\": [\"脚注定义格式正常，与页底对齐。\"]\n    },\n    {\n      \"label\": \"ch10 PDF page 3\",\n      \"printed_page\": \"349\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"LE RETOUR DU REFOULÉ ?\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"jamais eu un mot pour les victimes de l'Extermination, n'a pas renié\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Dans sa Préface, Christian Jambet enfonce le clou en allant même\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Cette citation, révélatrice de certaines arrière-pensées excessive-\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Sous le tire « Heidegger était-il nazi ? », Roger-Pol Droit lui\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"3\", \"context\": \"mort³\"},\n        {\"marker\": \"4\", \"context\": \"telle⁴\"},\n        {\"marker\": \"5\", \"context\": \"Monde⁵\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"3\", \"text_start\": \"Ibid., préface à FARIAS, p. 8.\"},\n        {\"marker\": \"4\", \"text_start\": \"Ibid., pp. 13-14.\"},\n        {\"marker\": \"5\", \"text_start\": \"Le Monde, mercredi 14 octobre 1987, p. 2.\"}\n      ],\n      \"risks\": [\"正文中上标注释引用位置正确。\"]\n    }\n  ],\n  \"correction_guidance\": [\n    \"检查所有页面的脚注编号是否连续且在文中正确标注。\",\n    \"确保第2页和第3页的脚注定义没有被错误识别为正文段落。\",\n    \"核实页眉内容是否与章节标题逻辑匹配。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 3670,
+      "completion_tokens": 1194,
+      "total_tokens": 4864
+    }
+  }
+}

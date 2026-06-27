@@ -1,0 +1,71 @@
+{
+  "slug": "Neuropsychoanalysis_Introduction",
+  "folder": "Neuropsychoanalysis_Introduction",
+  "doc_id": "a3c9e1f7b284",
+  "verdict": "FAIL",
+  "batch_tag": "v6-post-fix",
+  "commit": "f37b345",
+  "pipeline": {
+    "ok": true,
+    "run_id": 8,
+    "page_count": 168,
+    "section_count": 2,
+    "note_count": 0,
+    "unit_count": 4,
+    "structure_state": "ready",
+    "manual_toc_required": false,
+    "blocking_reasons": [],
+    "review_counts": {},
+    "export_ready_real": true
+  },
+  "manual_toc_fallback": {},
+  "baseline": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 0,
+      "endnote_orphan_anchor": 0,
+      "ambiguous": 0
+    },
+    "link_count": 0,
+    "body_anchor_count": 0,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {}
+  },
+  "after": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 0,
+      "endnote_orphan_anchor": 0,
+      "ambiguous": 0
+    },
+    "link_count": 0,
+    "body_anchor_count": 0,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {}
+  },
+  "repair": {
+    "cluster_count": 0,
+    "suggestion_count": 0,
+    "auto_applied_count": 0,
+    "suggestions": [],
+    "auto_applied": [],
+    "request_metrics": [],
+    "action_counts": {},
+    "auto_action_counts": {},
+    "synth_suggestion_count": 0,
+    "synth_auto_applied_count": 0,
+    "fuzzy_hit_count": 0,
+    "fuzzy_ambiguous_count": 0,
+    "caps": {
+      "matched_examples": 2,
+      "unmatched_note_items": 24,
+      "unmatched_anchors": 24,
+      "cluster_limit": 0
+    }
+  },
+  "rebuild": {},
+  "blocking_reasons": [],
+  "manual_toc_required": false
+}

@@ -14,6 +14,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
+pytest.importorskip("playwright.sync_api", reason="Playwright is required for browser e2e tests")
+
 import app as app_module
 import config
 import persistence.storage as storage

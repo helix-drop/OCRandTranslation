@@ -250,53 +250,6 @@ def _save_quota_error_state(
 
 def _finalize_terminal_state(deps: dict, doc_id: str, worker_plan: dict):
     snapshot = deps["load_translate_state"](doc_id)
-    task_meta = worker_plan.get("task_meta") or {}
-    if str(task_meta.get("kind") or "") == "fnm":
-        from FNM_RE import build_unit_progress, list_diagnostic_entries_for_doc
-        from persistence.sqlite_store import SQLiteRepository
-
-        repo = SQLiteRepository()
-        unit_progress = build_unit_progress(doc_id, repo=repo, snapshot=snapshot)
-        translated_bps = []
-        for entry in list_diagnostic_entries_for_doc(doc_id, repo=repo):
-            bp = entry.get("_pageBP")
-            if bp is None:
-                continue
-            has_translated = any(
-                str(item.get("translation") or "").strip()
-                and str(item.get("_translation_source") or "") != "source"
-                for item in (entry.get("_page_entries") or [])
-                if isinstance(item, dict)
-            )
-            if has_translated:
-                translated_bps.append(int(bp))
-        final_phase = "partial_failed" if unit_progress.get("error_units", 0) else "done"
-        deps["save_translate_state"](
-            doc_id,
-            running=False,
-            stop_requested=False,
-            phase=final_phase,
-            total_pages=unit_progress.get("total_units", 0),
-            done_pages=unit_progress.get("done_units", 0),
-            processed_pages=unit_progress.get("processed_units", 0),
-            pending_pages=unit_progress.get("pending_units", 0),
-            current_bp=snapshot.get("current_bp"),
-            current_page_idx=snapshot.get("current_page_idx", unit_progress.get("processed_units", 0)),
-            translated_chars=snapshot.get("translated_chars", 0),
-            translated_paras=snapshot.get("translated_paras", 0),
-            request_count=snapshot.get("request_count", 0),
-            prompt_tokens=snapshot.get("prompt_tokens", 0),
-            completion_tokens=snapshot.get("completion_tokens", 0),
-            model=snapshot.get("model", worker_plan.get("model_key", "")),
-            partial_failed_bps=[],
-            last_error=snapshot.get("last_error", ""),
-        )
-        deps["translate_push"]("all_done", {
-            "total_pages": unit_progress.get("total_units", 0),
-            "total_entries": len(translated_bps),
-            "total_units": unit_progress.get("total_units", 0),
-        })
-        return
     total_pages = _safe_int(worker_plan.get("total_pages", 0))
     state_total, _state_done = deps["clamp_page_progress"](
         snapshot.get("total_pages", total_pages),

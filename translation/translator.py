@@ -176,7 +176,7 @@ def _normalize_optional_text(val) -> str:
     return str(val)
 
 
-def build_prompt(gloss_str: str, content_role: str = "body", is_fnm: bool = False) -> str:
+def build_prompt(gloss_str: str, content_role: str = "body") -> str:
     lines = [
         "你是一位专业的学术文献翻译专家，擅长将外文学术论文翻译为中文。",
         "硬性要求：所有翻译结果必须使用简体中文，不得输出繁体中文。",
@@ -213,14 +213,6 @@ def build_prompt(gloss_str: str, content_role: str = "body", is_fnm: bool = Fals
         '  "footnotes_translation": "脚注的简体中文翻译，无则空字符串"',
         "}",
     ]
-    if is_fnm:
-        lines.extend([
-            "",
-            "当前为 FNM（FootNoteMachine）模式，对正文中的脚注/尾注引用标记有额外硬约束：",
-            "- 正文中出现的注释引用标记必须原样保留 {{NOTE_REF:xxx}} 格式；若输入里仍有 {{FN_REF:xxx}} / {{EN_REF:xxx}} 旧标记，也必须原样保留。",
-            "- 禁止把这些标记转换为 [^xxx]、[EN-xxx]、[^1]、上标数字或任何其他形式。",
-            "- 这些标记是占位符，翻译后必须出现在 translation 字段的对应位置，禁止吞掉、改号、重写或改为上标数字。",
-        ])
     if content_role == "footnote":
         lines.extend([
             "",
@@ -267,7 +259,6 @@ def _build_translate_message(
     section_path: list[str] | None = None,
     cross_page: str | None = None,
     content_role: str = "body",
-    is_fnm: bool = False,
 ) -> str:
     parts = [f"页码：{para_pages}"]
     parts.append("导出契约：original=正文原文，translation=正文译文，footnotes=脚注原文，footnotes_translation=脚注译文；字段之间禁止串写")
@@ -282,8 +273,6 @@ def _build_translate_message(
         parts.append("这是脚注条目：不得正文化，不得吞号、改号、并号，脚注内容只写入 original/translation。")
     if content_role == "endnote":
         parts.append("这是尾注条目：不得正文化，不得吞号、改号、并号，尾注内容只写入 original/translation。")
-    if is_fnm:
-        parts.append("FNM 硬约束：正文中出现的 {{NOTE_REF:xxx}} 标记必须在 translation 字段中原样保留；若输入中出现 {{FN_REF:xxx}} / {{EN_REF:xxx}} 旧标记，也必须原样保留。")
     parts.append(f"段落类型：{'标题' if heading_level > 0 else '正文'}")
     if heading_level > 0:
         parts.append(f"标题级别：H{heading_level}")
@@ -584,31 +573,6 @@ def _build_mt_request_overrides(request_overrides: dict | None, glossary: list) 
     return base_overrides
 
 
-def _freeze_fnm_refs(text: str) -> tuple[str, dict[str, str]]:
-    pattern = re.compile(r"\{\{(?:NOTE|FN|EN)_REF:[^}]+\}\}")
-    mapping: dict[str, str] = {}
-
-    def _replace(match):
-        token = f"__FNM_REF_{len(mapping)}__"
-        mapping[token] = match.group(0)
-        return token
-
-    frozen = pattern.sub(_replace, str(text or "").strip())
-    return frozen, mapping
-
-
-def _restore_fnm_refs(text: str, mapping: dict[str, str]) -> str:
-    restored = str(text or "")
-    if not mapping:
-        return restored
-    for token, original in mapping.items():
-        restored = restored.replace(token, original)
-    missing = [original for token, original in mapping.items() if original not in restored]
-    if missing:
-        raise RuntimeError("FNM 引用标记未保留")
-    return restored
-
-
 def _call_openai_mt(
     base_url: str,
     user_msg: str,
@@ -901,13 +865,11 @@ def _translate_with_mt(
     base_url: str | None = None,
     request_overrides: dict | None = None,
     heading_level: int = 0,
-    is_fnm: bool = False,
 ) -> dict:
     resolved_base_url = base_url or DASHSCOPE_BASE_URL
-    request_text, ref_mapping = _freeze_fnm_refs(para_text) if is_fnm else (str(para_text or "").strip(), {})
     result = _call_openai_mt(
         resolved_base_url,
-        request_text,
+        str(para_text or "").strip(),
         model_id,
         api_key,
         request_overrides=request_overrides,
@@ -916,7 +878,6 @@ def _translate_with_mt(
     full = result.get("text", "").strip()
     if not full:
         raise RuntimeError("API返回空内容")
-    full = _restore_fnm_refs(full, ref_mapping)
     return {
         "pages": para_pages,
         "original": para_text,
@@ -940,13 +901,11 @@ def _stream_translate_with_mt(
     stream_mode: str = "mt_cumulative",
     stop_checker=None,
     heading_level: int = 0,
-    is_fnm: bool = False,
 ):
     resolved_base_url = base_url or DASHSCOPE_BASE_URL
-    request_text, ref_mapping = _freeze_fnm_refs(para_text) if is_fnm else (str(para_text or "").strip(), {})
     stream_iter = _stream_openai_mt(
         resolved_base_url,
-        request_text,
+        str(para_text or "").strip(),
         model_id,
         api_key,
         stream_mode=stream_mode,
@@ -976,7 +935,7 @@ def _stream_translate_with_mt(
             yield event
             continue
         final_text = _normalize_translation_text(
-            _restore_fnm_refs(event.get("text", ""), ref_mapping),
+            event.get("text", ""),
             para_text,
             heading_level=heading_level,
         )
@@ -1213,14 +1172,13 @@ def _prepare_translate_request(
     section_path: list[str] | None = None,
     cross_page: str | None = None,
     content_role: str = "body",
-    is_fnm: bool = False,
 ) -> tuple[str, str]:
     matched_glossary = match_glossary_terms(
         _glossary_match_source_text(para_text, footnotes, content_role=content_role),
         glossary,
     )
     gloss_str = "\n".join(f"{term}→{defn}" for term, defn in matched_glossary)
-    sys_prompt = build_prompt(gloss_str, content_role=content_role, is_fnm=is_fnm)
+    sys_prompt = build_prompt(gloss_str, content_role=content_role)
     msg = _build_translate_message(
         para_text=para_text,
         para_pages=para_pages,
@@ -1233,7 +1191,6 @@ def _prepare_translate_request(
         section_path=section_path,
         cross_page=cross_page,
         content_role=content_role,
-        is_fnm=is_fnm,
     )
     return sys_prompt, msg
 
@@ -1256,7 +1213,6 @@ def translate_paragraph(
     section_path: list[str] | None = None,
     cross_page: str | None = None,
     content_role: str = "body",
-    is_fnm: bool = False,
 ) -> dict:
     """
     翻译一个段落。
@@ -1282,7 +1238,6 @@ def translate_paragraph(
             base_url=base_url,
             request_overrides=request_overrides,
             heading_level=heading_level,
-            is_fnm=is_fnm,
         )
 
     sys_prompt, msg = _prepare_translate_request(
@@ -1298,7 +1253,6 @@ def translate_paragraph(
         section_path=section_path,
         cross_page=cross_page,
         content_role=content_role,
-        is_fnm=is_fnm,
     )
 
     result = _call_provider(
@@ -1369,7 +1323,6 @@ def stream_translate_paragraph(
     section_path: list[str] | None = None,
     cross_page: str | None = None,
     content_role: str = "body",
-    is_fnm: bool = False,
 ):
     """
     流式翻译一个段落。
@@ -1397,7 +1350,6 @@ def stream_translate_paragraph(
             stream_mode=stream_mode,
             stop_checker=stop_checker,
             heading_level=heading_level,
-            is_fnm=is_fnm,
         )
         return
 
@@ -1414,7 +1366,6 @@ def stream_translate_paragraph(
         section_path=section_path,
         cross_page=cross_page,
         content_role=content_role,
-        is_fnm=is_fnm,
     )
 
     stream_iter = _stream_provider(

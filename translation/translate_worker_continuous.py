@@ -258,8 +258,14 @@ def run_translate_all_worker(doc_id: str, start_bp: int, doc_title: str, deps: d
             "provider": worker_plan.get("provider", ""),
             "model": worker_plan.get("model_key", ""),
         })
+        _retry_failed_pages(
+            doc_id=doc_id,
+            context=context,
+            retry_bps=retry_bps,
+            retry_round=1,
+        )
         retry_models = _retry_model_candidates()
-        for retry_round, (retry_model_key, retry_t_args) in enumerate(retry_models, start=1):
+        for retry_round, (retry_model_key, retry_t_args) in enumerate(retry_models, start=2):
             remaining = _collect_retry_targets(doc_id=doc_id, target_bps=target_bps)
             if not remaining:
                 return

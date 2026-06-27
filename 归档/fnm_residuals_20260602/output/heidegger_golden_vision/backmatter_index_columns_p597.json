@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    597
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 597\",\n      \"printed_page\": \"597\",\n      \"lines\": [\n        \"REVAULT D'ALONNES (Myriam) : 391n\",\n        \"REVEL (Jean-François) : 139n\",\n        \"RICHARD (Lionel) : 280n\",\n        \"RICHARDSON (William) : 263, 402\",\n        \"RICHIR (Marc) : 338n, 388, 395n,\",\n        \"420n, 450-451, 522n, 533n, 535n\",\n        \"RICŒUR (Paul) : 145-146, 150n,\",\n        \"153n-155, 158, 160, 180-181,\",\n        \"199n, 203, 239-240, 301n, 404-\",\n        \"405, 436, 438, 441, 454, 456,\",\n        \"459, 464-478, 481, 486, 487,\",\n        \"490n\",\n        \"RIGAL (Élisabeth) : 23\",\n        \"RILKE (Rainer Maria) : 11, 91, 185n,\",\n        \"206, 265, 281, 434, 508\",\n        \"RIMBAUD (Arthur) : 226, 245n, 381,\",\n        \"507-511, 513-514\",\n        \"RIVAROL (Antoine) : 160\",\n        \"RIVELAYGUE (Jacques) : 326n, 503n\",\n        \"ROBERT (Dictionnaire) : 164n, 333n\",\n        \"ROCHE (Denis) : 506n\",\n        \"ROCHLITZ (Rainer) : 471n\",\n        \"ROCKMORE (Tom) : 7n, 18n, 23,\",\n        \"49n, 525n\",\n        \"RODIN (Auguste) : 11n\",\n        \"ROËLS (Claude) : 23, 266n, 276n,\",\n        \"301n, 322, 518n\",\n        \"RŒHM (Ernst) : 348, 364n\",\n        \"ROGOZINSKI (Jacob) : 393n\",\n        \"ROMAN (Joël) : 395n\",\n        \"ROMANO (Claude) : 452\",\n        \"ROSENBERG (Alfred) : 91, 108, 190n,\",\n        \"358, 392\",\n        \"ROSENBERG (Mme) : 198n\",\n        \"ROSSET (Clément) : 420n, 505\",\n        \"ROUBAUD (Jacques) : 516\",\n        \"ROUD (Gustave) : 508n\",\n        \"ROUDINESCO (Élisabeth) : 150n,\",\n        \"187n, 216n, 217n, 219n, 221n\",\n        \"ROUSSEAU (Jean-Jacques) : 104, 361\",\n        \"ROVAN (Joseph) : 47, 87, 113n, 323\",\n        \"RUBERCY (Éryck de) : 258n, 281n,\",\n        \"302n\",\n        \"RUGGENINI (Mario) : 406n\",\n        \"RYBALKA (Michel) : 23, 53n, 59n,\",\n        \"134n\",\n        \"RYLE (Gilbert) : 405\",\n        \"SADE (Donatien de) : 516\",\n        \"SAFRANSKI (Rüdiger) : 49n, 50n,\",\n        \"395-396\",\n        \"SAGAVE (Pierre-Paul) : 174n-175\",\n        \"SAINT-EXUPÉRY (Antoine de) : 56n\",\n        \"SAINT-JOHN PERSE : 516\",\n        \"SALANSKIS (Jean-Michel) : 417,\",\n        \"418n, 431n, 432n\",\n        \"SALLIS (John) : 359n, 535n\",\n        \"SAPHO : 185n\",\n        \"SARTRE (Jean-Paul) : 7, 9n, 16, 19,\",\n        \"34, 37, 39, 41-42, 46-48, 52, 53,\",\n        \"55-79, 81, 83-85, 87-89, 93-95n,\",\n        \"97-98, 100, 103-111, 114-117,\",\n        \"120, 122, 124, 127-128, 130-131,\",\n        \"133-134, 137, 141, 146, 151n,\",\n        \"180, 183-184, 186n, 196, 224,\",\n        \"228, 277n, 280, 382, 400, 431,\",\n        \"441-442, 524-525, 527, 529n\",\n        \"SASS (Hans Martin) : 303n\",\n        \"SASSO (Robert) : 41n, 52n\",\n        \"SAUNIÉ-SÉITÉ (Alice) : 294\",\n        \"SCARPETTA (Guy) : 353n\",\n        \"SCHAPIRO (Meyer) : 308-309\",\n        \"SCHELER (Max) : 27, 31n\",\n        \"SCHELLING (Friedrich Wilhelm) :\",\n        \"158, 181, 246, 470, 476, 478\",\n        \"SCHILLER (Friedrich) : 363n\",\n        \"SCHIRMACHER (Wolfgang) : 527n\",\n        \"SCHLAGETER (Leo) : 123, 188n, 305\",\n        \"SCHLICK (Moritz) : 417, 426n, 460n\",\n        \"SCHMITT (Carl) : 391n\",\n        \"SCHNEEBERGER (Guido) : 188, 192-\",\n        \"194\",\n        \"SCHOPENHAUER (Arthur) : 394, 396,\",\n        \"538\",\n        \"SCHUHL (Pierre-Maxime) : 278n\",\n        \"SCHULZ (Walter) : 158\",\n        \"SCHÜRMANN (Reiner) : 294, 296-\",\n        \"298, 527\",\n        \"SCHÜSSLER (Ingeborg) : 406n\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1911,
+      "total_tokens": 3344
+    }
+  }
+}

@@ -1,0 +1,2462 @@
+{
+  "doc_id": "a5d9a08d6871",
+  "name": "Heidegger en France (Dominique Janicaud) (Z-Library).pdf — Épilogue I",
+  "parent_raw_pages": "raw_pages.json",
+  "chapter_ord": 51,
+  "chapter_title": "Épilogue I",
+  "printed_page_range": "179–184",
+  "page_count": 6,
+  "pages": [
+    {
+      "fileIdx": 178,
+      "bookPage": 179,
+      "pdfPage": 179,
+      "printPage": 179,
+      "printPageLabel": "179",
+      "detectedPage": 179,
+      "imgW": 594,
+      "imgH": 992,
+      "blocks": [
+        {
+          "text": "La contrepartie de l'embellie allait en effet se révéler: l'apologie inconditionnelle des thèses du Maître, le succès même de leur diffu­ sion (bientôt soutenue par un contrat exclusif avec Gallimard) vont paradoxalement faire perdre à sa pensée - gagnant une stature presque classique- une partie de l'aura mystérieuse et prestigieuse dont elle jouissait, et contribueront aussi à préparer de virulentes réactions. Surtout, le climat va se modifier radicalement vis-à-vis de Heidegger, mais aussi sans lui ; de nouvelles étoiles vont scintiller au firmament intellectuel. L'éclatement de ces contradictions obligera à prendre au sérieux des questions auxquelles la décennie qui se clôt n'avait pas réussi à répondre nettement : quel est le vrai visage de Heidegger? comment approfondir l'intelligence de sa pensée, ménager à son égard une distance critique qui sache éviter les rejets polémiques et les schématisations hâtives ?",
+          "x": 50,
+          "bbox": [
+            50,
+            95,
+            534,
+            376
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "ÉPILOGUE!",
+          "x": 248,
+          "bbox": [
+            248,
+            490,
+            336,
+            512
+          ],
+          "label": "doc_title",
+          "is_meta": false,
+          "heading_level": 1,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Toujours étrange, en sa contingence, se révèle la première récep­ tion personnelle d'une grande pensée. Un nom d'abord, coquille vide d'intuitions qu'on suppose pro/ondes et inouïes. C'est ainsi que les trois syllabes de ce nom lourdement germanique viennent frapper mes oreilles durant l'été 1954 (j'ai seize ans), alors que je feuillette manuels et bouquins pour m'initier à la philosophie. Contrairement à ce qu'on pourrait m'attribuer rétrospectivement, le coup de foudre n'a pas lieu. Au contraire, pas plus au cours de cet été-là que durant mon année de Philosophie, je ne tombe sous le charme. C'est Bergson qui me séduit et bergsonien je deviens, conciliant provisoirement mon catholicisme avec une philosophie du dynamisme vital. Pourtant, André Jacob, mon professeur au lycée Lakanal, a ouvert le feu avec le nom de Heidegger. Je me rappelle non sans émotion l'émerveillement éprouvé d'emblée devant ce jeune professeur qui nous faisait l'hon­ neur de penser devant nous ! Pour la première fois, on ne nous impo­ sait pas un savoir: on pensait! Les premiers mots d'André Jacob sont presque llttéralement gravés dans ma mémoire: « On définit tradi­ tionnellement la philosophie comme l'amour de la sagesse. Heidegger",
+          "x": 51,
+          "bbox": [
+            51,
+            530,
+            534,
+            892
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 60,
+      "textSource": "pdf",
+      "markdown": "La contrepartie de l'embellie allait en effet se révéler : l'apologie inconditionnelle des thèses du Maître, le succès même de leur diffusion (bientôt soutenue par un contrat exclusif avec Gallimard) vont paradoxalement faire perdre à sa pensée — gagnant une stature presque classique — une partie de l'aura mystérieuse et prestigieuse dont elle jouissait, et contribueront aussi à préparer de virulentes réactions. Surtout, le climat va se modifier radicalement vis-à-vis de Heidegger, mais aussi sans lui ; de nouvelles étoiles vont scintiller au firmament intellectuel. L'éclatement de ces contradictions obligera à prendre au sérieux des questions auxquelles la décennie qui se clôt n'avait pas réussi à répondre nettement : quel est le vrai visage de Heidegger ? comment approfondir l'intelligence de sa pensée, ménager à son égard une distance critique qui sache éviter les rejets polémiques et les schématisations hâtives ?\n\n# ÉPLOGUE I\n\nToujours étrange, en sa contingence, se révèle la première réception personnelle d'une grande pensée. Un nom d'abord, coquille vide d'intuitions qu'on suppose profondes et inouïes. C'est ainsi que les trois syllabes de ce nom lourdement germanique viennent frapper mes oreilles durant l'été 1954 (l'ai seize ans), alors que je feuillette manuels et bouquins pour m'initier à la philosophie. Contrairement à ce qu'on pourrait m'attiruer rétrospectivement, le coup de foudre n'a pas lieu. Au contraire, pas plus au cours de cet été-là que durant mon année de Philosophie, je ne tombe sous le charme. C'est Bergson qui me séduit et bergsonien je deviens, conciliant provisoirement mon catholicisme avec une philosophie du dynamisme vital. Pourtant, André Jacob, mon professeur au lycée Lakanah, a ouvert le feu avec le nom de Heidegger. Je me rappelle non sans émotion l'émerveillement éprouvé d'emblée devant ce jeune professeur qui nous faisait l'honneur de penser devant nous ! Pour la première fois, on ne nous imposait pas un savoir : on pensait ! Les premiers mots d'André Jacob sont presque littéralement gravés dans ma mémoire : « On définit traditionnellement la philosophie comme l'amour de la sagesse. Heidegger",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 594,
+        "height": 992,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "header",
+            "block_content": "L'EMBELLIE DES ANNÉES 1950",
+            "block_bbox": [
+              183,
+              62,
+              398,
+              80
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                182.99998474121094,
+                62.0
+              ],
+              [
+                396.99993896484375,
+                62.0
+              ],
+              [
+                396.99993896484375,
+                79.0
+              ],
+              [
+                182.99998474121094,
+                79.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "179",
+            "block_bbox": [
+              506,
+              62,
+              530,
+              78
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                506,
+                62
+              ],
+              [
+                506,
+                77
+              ],
+              [
+                529,
+                77
+              ],
+              [
+                529,
+                62
+              ],
+              [
+                527,
+                62
+              ],
+              [
+                527,
+                65
+              ],
+              [
+                526,
+                66
+              ],
+              [
+                509,
+                66
+              ],
+              [
+                508,
+                65
+              ],
+              [
+                508,
+                62
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "La contrepartie de l'embellie allait en effet se révéler : l'apologie inconditionnelle des thèses du Maître, le succès même de leur diffusion (bientôt soutenue par un contrat exclusif avec Gallimard) vont paradoxalement faire perdre à sa pensée — gagnant une stature presque classique — une partie de l'aura mystérieuse et prestigieuse dont elle jouissait, et contribueront aussi à préparer de virulentes réactions. Surtout, le climat va se modifier radicalement vis-à-vis de Heidegger, mais aussi sans lui ; de nouvelles étoiles vont scintiller au firmament intellectuel. L'éclatement de ces contradictions obligera à prendre au sérieux des questions auxquelles la décennie qui se clôt n'avait pas réussi à répondre nettement : quel est le vrai visage de Heidegger ? comment approfondir l'intelligence de sa pensée, ménager à son égard une distance critique qui sache éviter les rejets polémiques et les schématisations hâtives ?",
+            "block_bbox": [
+              50,
+              95,
+              534,
+              376
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                50.0,
+                95.0
+              ],
+              [
+                534.0,
+                95.0
+              ],
+              [
+                534.0,
+                376.0
+              ],
+              [
+                50.0,
+                376.0
+              ]
+            ]
+          },
+          {
+            "block_label": "doc_title",
+            "block_content": "ÉPLOGUE I",
+            "block_bbox": [
+              248,
+              490,
+              336,
+              512
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                248.0,
+                490.0
+              ],
+              [
+                335.0,
+                490.0
+              ],
+              [
+                335.0,
+                511.0
+              ],
+              [
+                248.0,
+                511.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Toujours étrange, en sa contingence, se révèle la première réception personnelle d'une grande pensée. Un nom d'abord, coquille vide d'intuitions qu'on suppose profondes et inouïes. C'est ainsi que les trois syllabes de ce nom lourdement germanique viennent frapper mes oreilles durant l'été 1954 (l'ai seize ans), alors que je feuillette manuels et bouquins pour m'initier à la philosophie. Contrairement à ce qu'on pourrait m'attiruer rétrospectivement, le coup de foudre n'a pas lieu. Au contraire, pas plus au cours de cet été-là que durant mon année de Philosophie, je ne tombe sous le charme. C'est Bergson qui me séduit et bergsonien je deviens, conciliant provisoirement mon catholicisme avec une philosophie du dynamisme vital. Pourtant, André Jacob, mon professeur au lycée Lakanah, a ouvert le feu avec le nom de Heidegger. Je me rappelle non sans émotion l'émerveillement éprouvé d'emblée devant ce jeune professeur qui nous faisait l'honneur de penser devant nous ! Pour la première fois, on ne nous imposait pas un savoir : on pensait ! Les premiers mots d'André Jacob sont presque littéralement gravés dans ma mémoire : « On définit traditionnellement la philosophie comme l'amour de la sagesse. Heidegger",
+            "block_bbox": [
+              51,
+              530,
+              534,
+              892
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                51.0,
+                530.0
+              ],
+              [
+                534.0,
+                530.0
+              ],
+              [
+                534.0,
+                892.0
+              ],
+              [
+                51.0,
+                892.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8464134931564331,
+              "coordinate": [
+                183,
+                62,
+                398,
+                80
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  182.99998474121094,
+                  62.0
+                ],
+                [
+                  396.99993896484375,
+                  62.0
+                ],
+                [
+                  396.99993896484375,
+                  79.0
+                ],
+                [
+                  182.99998474121094,
+                  79.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.7664104700088501,
+              "coordinate": [
+                506,
+                62,
+                530,
+                78
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  506,
+                  62
+                ],
+                [
+                  506,
+                  77
+                ],
+                [
+                  529,
+                  77
+                ],
+                [
+                  529,
+                  62
+                ],
+                [
+                  527,
+                  62
+                ],
+                [
+                  527,
+                  65
+                ],
+                [
+                  526,
+                  66
+                ],
+                [
+                  509,
+                  66
+                ],
+                [
+                  508,
+                  65
+                ],
+                [
+                  508,
+                  62
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.951404869556427,
+              "coordinate": [
+                50,
+                95,
+                534,
+                376
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  50.0,
+                  95.0
+                ],
+                [
+                  534.0,
+                  95.0
+                ],
+                [
+                  534.0,
+                  376.0
+                ],
+                [
+                  50.0,
+                  376.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 6,
+              "label": "doc_title",
+              "score": 0.5269580483436584,
+              "coordinate": [
+                248,
+                490,
+                336,
+                512
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  248.0,
+                  490.0
+                ],
+                [
+                  335.0,
+                  490.0
+                ],
+                [
+                  335.0,
+                  511.0
+                ],
+                [
+                  248.0,
+                  511.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9543864130973816,
+              "coordinate": [
+                51,
+                530,
+                534,
+                892
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  51.0,
+                  530.0
+                ],
+                [
+                  534.0,
+                  530.0
+                ],
+                [
+                  534.0,
+                  892.0
+                ],
+                [
+                  51.0,
+                  892.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.179",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 179,
+      "bookPage": 180,
+      "pdfPage": 180,
+      "printPage": 180,
+      "printPageLabel": "180",
+      "detectedPage": 180,
+      "imgW": 594,
+      "imgH": 992,
+      "blocks": [
+        {
+          "text": "a proposé une définition inverse: la sag&sse de l'amour. » Ce renver­ sement initial est resté sans suite: paradoxe jeté en pâture à de jeunes esprits trop pressés d'aller plus avant, ii n'annonçait aucun dévelop­ pement particulièrement« heideggérien ».Jacob se réclame avant tout de Piaget et son éclectisme est total. Aussi cette allusion à Heidegger est-elle restée fort longtemps une énigme (que même Jean Beau/ret, interrogé plus tard à ce propos, ne savait pas déchiffrer) jusqu'à une date récente où la publication du cours donné par Jean Wahl en 1946 m'a permis de retrouver l'origine de cette allusion.",
+          "x": 66,
+          "bbox": [
+            66,
+            95,
+            545,
+            273
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "C'est surtout en tant que précurseur 4e Sartre que Heidegger inter­ vient, encore assez mystérieusement. A cet « existentialiste athée», je préf'ere Kierkegaard, voire Jaspers et ~imone Weil. Profondément croyant, je fais une lecture mystique de ce que je connais de Heidegger: l'ouverture à l'être va dans le sens de la « décréation » de Simone Weil. Un instant, durant l'été d~ 1956, j'envisage d'écrire un «mystère» à la Péguy avec pour épigramme cette pensée de Heidegger: «L'obscurcissement du monde n'atteint jamais la lumière de l'être.» Je discute pied à pied les thèses de L'Être et le Néant avec mon ami Jean-Philippe Guinle. La différence entre l'être et l'étant, l'affrontement radical du Néant sont les thèmes que je commence à découvrir l'année suivante, en hypokhâgJte, en explorant le recueil de Corbin et en consultant le volume datant de 1942 où de Waelhens résume Être et temps. Mon professeur de philosophie en hypokhâgne et en khâgne, Jean Brun, éloquent, efficace, protestant sans se proclamer tel, ne peut qu'encourager mon attirance pour Kierkegaard et Bergson : il n'a guère de sympathie envers Heidegger, sans pour autant taire son nom ni ses thèmes. Apr~s un exposé sur« L'ennui et l'angoisse» où, pour la première fois, je me suis imprégné de la lecture de Qu'est-ce que la métaphysique?, il me met en garde: «Citer Heidegger d'emblée et continûment comt:ne vous l'avez/ait peut vous coûter cher!» Première découverte du daractère dérangeant du «cas Heidegger»!",
+          "x": 65,
+          "bbox": [
+            65,
+            274,
+            546,
+            728
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Je ne suis pas moins intrigué lorsque/assiste médusé, et sans en mesurer tous les enjeux, à une brève confrontation entre Jean Beau/ret et Jean Wahl à la fin d'une conférence de Paul Ricœur sur Heidegger et la mort de Dieu. Cette scène se situe rue Madame, au Centre catho­ lique des intellectuels français, sans do~te en février ou mars 1956. Beau/ret, que je ne vois que de dos, est au premier rang à gauche; Wahl, dans une position symétrique à droite. La discussion ne porte pas sur la conférence elle-même, résumé.sérieux du fameux texte des",
+          "x": 66,
+          "bbox": [
+            66,
+            729,
+            545,
+            889
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 75,
+      "textSource": "pdf",
+      "markdown": "a proposé une définition inverse : la sagisse de l'amour. » Ce renversement initial est resté sans suite : paradoxe jeté en pâtre à de jeunes esprits trop pressés d'aller plus avant, il n'annonçait aucun développement particulièrement « heideggérien ». Jacob se réclame avant tout de Piaget et son éclectisme est total. Aussi cette allusion à Heidegger est-elle restée fort longtemps une énigme (que même Jean Beaufret, interrogé plus tard à ce propos, ne savait pas déchiffrer) jusqu'à une date récente où la publication du cours donné par Jean Wahl en 1946 m'a permis de retrouver l'origine de cette allusion.\n\nC'est surtout en tant que précurseur de Sartre que Heidegger intervient, encore assez mystérieusement. À cet « existentialiste  athée », je préfère Kierkegaard, voire Jaspers et Simone Weil. Profondément croyant, je fais une lecture mystique de ce que je connais de Heidegger : l'ouverture à l'être va dans le sens de la « décréation » de Simone Weil. Un instant, durant l'été de 1956, j'envisage d'écrire un « mystère » à la Péguy avec pour épigramme cette pensée de Heidegger : « L'obscurcissement du monde n'atteint jamais la lumière de l'être. » Je discute pied à pied les thèses de L'Être et le Néan avec mon ami Jean-Philippe Guinle. La différence entre l'être et l'étant, l'affrontement radical du Néan sont les thèmes que je commence à découvrir l'année suivante, en hypokhâgne, en explorant le recueil de Corbin et en consultant le volume datant de 1942 où de Waelhens résume Être et temps. Mon professeur de philosophie en hypokhâgne et en khâgne, Jean Brun, éloquent, efficace, protestant sans se proclamer tel, ne peut qu'encourager mon attirance pour Kierkegaard et Bergson : il n'a guère de sympathie envers Heidegger, sans pour autant taire son nom ni ses thèmes. Après un exposé sur « L'ennui et l'angoisse » où, pour la première fois, je me suis imprégné de la lecture de Qu'est-ce que la métaphysique?, il me met en garde : « Citer Heidegger d'emblée et continiment comme vous l'avez fait peut vous coûter cher ! » Première découverte du caractère dérangeant du « cas Heidegger » !\n\nJe ne suis pas moins intrigué lorsque j'assiste méduisé, et sans en mesurer tous les enjeux, à une brève confrontation entre Jean Beaufret et Jean Wahl à la fin d'une conférence de Paul Ricœur sur Heidegger et la mort de Dieu. Cette scène se situe rue Madame, au Centre catholique des intellectuels français, sans doute en février ou mars 1956. Beaufret, que je ne vois que de dos, est au premier rang à gauche; Wahl, dans une position symétrique à droite. La discussion ne porte pas sur la conférence elle-même, résumé sérieux du fameux texte des",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 594,
+        "height": 992,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "number",
+            "block_content": "180",
+            "block_bbox": [
+              70,
+              62,
+              94,
+              76
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                70.0,
+                62.0
+              ],
+              [
+                93.0,
+                62.0
+              ],
+              [
+                93.0,
+                75.0
+              ],
+              [
+                70.0,
+                75.0
+              ]
+            ]
+          },
+          {
+            "block_label": "header",
+            "block_content": "HEIDEGGER EN FRANCE",
+            "block_bbox": [
+              218,
+              62,
+              394,
+              79
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                218.0,
+                62.0
+              ],
+              [
+                393.0,
+                62.0
+              ],
+              [
+                393.0,
+                78.0
+              ],
+              [
+                218.0,
+                78.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "a proposé une définition inverse : la sagisse de l'amour. » Ce renversement initial est resté sans suite : paradoxe jeté en pâtre à de jeunes esprits trop pressés d'aller plus avant, il n'annonçait aucun développement particulièrement « heideggérien ». Jacob se réclame avant tout de Piaget et son éclectisme est total. Aussi cette allusion à Heidegger est-elle restée fort longtemps une énigme (que même Jean Beaufret, interrogé plus tard à ce propos, ne savait pas déchiffrer) jusqu'à une date récente où la publication du cours donné par Jean Wahl en 1946 m'a permis de retrouver l'origine de cette allusion.",
+            "block_bbox": [
+              66,
+              95,
+              545,
+              273
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                66.0,
+                95.0
+              ],
+              [
+                545.0,
+                95.0
+              ],
+              [
+                545.0,
+                273.0
+              ],
+              [
+                66.0,
+                273.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "C'est surtout en tant que précurseur de Sartre que Heidegger intervient, encore assez mystérieusement. À cet « existentialiste  athée », je préfère Kierkegaard, voire Jaspers et Simone Weil. Profondément croyant, je fais une lecture mystique de ce que je connais de Heidegger : l'ouverture à l'être va dans le sens de la « décréation » de Simone Weil. Un instant, durant l'été de 1956, j'envisage d'écrire un « mystère » à la Péguy avec pour épigramme cette pensée de Heidegger : « L'obscurcissement du monde n'atteint jamais la lumière de l'être. » Je discute pied à pied les thèses de L'Être et le Néan avec mon ami Jean-Philippe Guinle. La différence entre l'être et l'étant, l'affrontement radical du Néan sont les thèmes que je commence à découvrir l'année suivante, en hypokhâgne, en explorant le recueil de Corbin et en consultant le volume datant de 1942 où de Waelhens résume Être et temps. Mon professeur de philosophie en hypokhâgne et en khâgne, Jean Brun, éloquent, efficace, protestant sans se proclamer tel, ne peut qu'encourager mon attirance pour Kierkegaard et Bergson : il n'a guère de sympathie envers Heidegger, sans pour autant taire son nom ni ses thèmes. Après un exposé sur « L'ennui et l'angoisse » où, pour la première fois, je me suis imprégné de la lecture de Qu'est-ce que la métaphysique?, il me met en garde : « Citer Heidegger d'emblée et continiment comme vous l'avez fait peut vous coûter cher ! » Première découverte du caractère dérangeant du « cas Heidegger » !",
+            "block_bbox": [
+              65,
+              274,
+              546,
+              728
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                65.0,
+                274.0
+              ],
+              [
+                546.0,
+                274.0
+              ],
+              [
+                546.0,
+                728.0
+              ],
+              [
+                65.0,
+                728.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Je ne suis pas moins intrigué lorsque j'assiste méduisé, et sans en mesurer tous les enjeux, à une brève confrontation entre Jean Beaufret et Jean Wahl à la fin d'une conférence de Paul Ricœur sur Heidegger et la mort de Dieu. Cette scène se situe rue Madame, au Centre catholique des intellectuels français, sans doute en février ou mars 1956. Beaufret, que je ne vois que de dos, est au premier rang à gauche; Wahl, dans une position symétrique à droite. La discussion ne porte pas sur la conférence elle-même, résumé sérieux du fameux texte des",
+            "block_bbox": [
+              66,
+              729,
+              545,
+              889
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                66.0,
+                729.0
+              ],
+              [
+                545.0,
+                729.0
+              ],
+              [
+                545.0,
+                889.0
+              ],
+              [
+                66.0,
+                889.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.7794804573059082,
+              "coordinate": [
+                70,
+                62,
+                94,
+                76
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  70.0,
+                  62.0
+                ],
+                [
+                  93.0,
+                  62.0
+                ],
+                [
+                  93.0,
+                  75.0
+                ],
+                [
+                  70.0,
+                  75.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8668336868286133,
+              "coordinate": [
+                218,
+                62,
+                394,
+                79
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  218.0,
+                  62.0
+                ],
+                [
+                  393.0,
+                  62.0
+                ],
+                [
+                  393.0,
+                  78.0
+                ],
+                [
+                  218.0,
+                  78.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9614967107772827,
+              "coordinate": [
+                66,
+                95,
+                545,
+                273
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  66.0,
+                  95.0
+                ],
+                [
+                  545.0,
+                  95.0
+                ],
+                [
+                  545.0,
+                  273.0
+                ],
+                [
+                  66.0,
+                  273.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9673103094100952,
+              "coordinate": [
+                65,
+                274,
+                546,
+                728
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  65.0,
+                  274.0
+                ],
+                [
+                  546.0,
+                  274.0
+                ],
+                [
+                  546.0,
+                  728.0
+                ],
+                [
+                  65.0,
+                  728.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9522387385368347,
+              "coordinate": [
+                66,
+                729,
+                545,
+                889
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  66.0,
+                  729.0
+                ],
+                [
+                  545.0,
+                  729.0
+                ],
+                [
+                  545.0,
+                  889.0
+                ],
+                [
+                  66.0,
+                  889.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.180",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 180,
+      "bookPage": 181,
+      "pdfPage": 181,
+      "printPage": 181,
+      "printPageLabel": "181",
+      "detectedPage": 181,
+      "imgW": 594,
+      "imgH": 992,
+      "blocks": [
+        {
+          "text": "Holzwege, ouvrage alors non traduit. À la tribune, Ricœur paraît gêné et débordé par l'étrange affrontement entre Beau/ret et Wahl. Insistant sur ce que Heidegger a dit à Cerisy (et prononçant plusieurs fois ce nom qui ne me dit rien sur le moment), le premier dit: «La philosophie n'est pas périmée, elle est morte»; le second réplique «Malheureusement. » Beau/ret reprend de sa voix singulière et douce: «Heureusement.» Le malentendu est complet et les têtes se tournent tantôt d'un côté, tantôt de l'autre. Je ne me rappelle pas comment le président de séance (Étienne Borne, je crois) a mis fin à ce duel bizarre.",
+          "x": 40,
+          "bbox": [
+            40,
+            91,
+            525,
+            289
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Je n'ose pas aborder Beau/ret ce soir-là. Sa personnalité m'intrigue d'autant plus qu'il est un personnage mythique dans ma famille: on me parlait du «cousin Beau/ret» sans que je pusse exactement savoir à quel titre ill' était, comment et pourquoi mes parents l'avaient perdu de vue depuis fort longtemps. On m'explique que c'était un «original» qui ne répondait jamais aux lettres. Cela me laisse insa­ tisfait et curieux d'en savoir plus. L'aubaine, pour satisfaire cette curiosité, a été, dès le printemps de 1956, un livre de lui, récemment paru, Le Poème de Parménide. On imagine mal aujourd'hui l'effet sidérant que ce petit livre fait sur moi, parmi d'autres, car nombreux sont les khâgneux de cette génération à le dévorer, éblouis peut-être plus par l'insolence à la fois brillante et enthousiaste d'un ton nouveau que par le contenu même dont trop d'éléments nous échap­ pent (le grec de Parménide, le problème de l'unité du Poème, les inter­ férences avec les réinterprétations de la philosophie moderne et de Kant en particulier). Malgré tout, ce qui domine, c'était l'idée que Heidegger révolutionne la pensée, grâce à un sens inouï de l'être lui­ même (distingué de l'être des métaphysidens, l'être de l'étant, que je critique au même titre que le «Dieu des philosophes»), grâce à la redécouverte des présocratiques. Ce qui s'annonce ainsi est une lecture totalement renouvelée de l'histoire de la philosophie. Inclassable, Heidegger me paraît infiniment plus profond que Hegel et Schelling.",
+          "x": 39,
+          "bbox": [
+            39,
+            289,
+            525,
+            725
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "C'est bien dans ce sens que Jean Beau/ret axe ses propos, quand je fais enfin sa connaissance. Ayant mis trois mois à répondre à une lettre admirative que je me suis enfin déddé à lui adresser; il vient déjeuner à la maison avec ses vieux parents en avril19 57 (c'est donc grâce à la philosophie que ma famille a renoué avec lui). Ce jour-là et lors des rencontres qui vont suivre (et d'abord un cours sur Bergson, à l'École normale, où Jean Beau/ret m'entraîne avec mon ami, Jean­ Philippe Guinle), il est peu question d'Être et temps, mais presque",
+          "x": 40,
+          "bbox": [
+            40,
+            725,
+            525,
+            886
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 49,
+      "textSource": "pdf",
+      "markdown": "Holzwege, ouvrage alors non traduit. À la tribune, Ricœur paraît gêné et débordé par l'étrange affrontement entre Beauffret et Wahl. Insistant sur ce que Heidegger a dit à Cerisy (et prononçant plusieurs fois ce nom qui ne me dit rien sur le moment), le premier dit : « La philosophie n'est pas périmée, elle est morte » ; le second réplique « Malheureusement. » Beauffret reprend de sa voix singulière et douce : « Heureusement. » Le malentendu est complet et les têtes se tournent tantôt d'un côté, tantôt de l'autre. Je ne me rappelle pas comment le président de séance (Etienne Borne, je crois) a mis fin à ce duel bizarre.\n\nJe n'ose pas aborder Beaufret ce soir-là. Sa personnalité m'intrigue d'autant plus qu'il est un personnage mythique dans ma famille : on me parlait du « cousin Beaufret » sans que je pusse exactement savoir à quel titre il l'était, comment et pourquoi mes parents l'avaient perdu de vue depuis fort longtemps. On m'explique que c'était un « original » qui ne répondait jamais aux lettres. Cela me laisse insatisfait et curieux d'en savoir plus. L'aubaine, pour satisfaire cette curiosité, a été, dès le printemps de 1956, un livre de lui, récemment paru, Le Poème de Parménide. On imagine mal aujourd'hui l'effet sidérant que ce petit livre fait sur moi, parmi d'autres, car nombreux sont les khâgneux de cette génération à le dévorer, éblouis peut-être plus par l'insolence à la fois brillante et enthousiastie d'un ton nouveau que par le contenu même dont trop d'éléments nous échappent (le grec de Parménide, le problème de l'unité du Poème, les interférences avec les réinterprétations de la philosophie moderne et de Kant en particulier). Malgré tout, ce qui domine, c'était l'idée que Heidegger révolutionne la pensée, grâce à un sens inouï de l'être lui-même (distingué de l'être des métaphysiciens, l'être de l'étant, que je critique au même titre que le « Dieu des philosophes »), grâce à la redécouverte des présocratiques. Ce qui s'annonce ainsi est une lecture totalement renouvelée de l'histoire de la philosophie. Inclassable, Heidegger me paraît infiniment plus profond que Hegel et Schelling.\n\nC'est bien dans ce sens que Jean Beaufret axe ses propos, quand je fais enfin sa connaissance. Ayant mis trois mois à répondre à une lettre admirative que je me suis enfin décidé à lui adresser, il vient déjeuner à la maison avec ses vieux parents en avril 1957 (c'est donc grâce à la philosophie que ma famille a renoué avec lui). Ce jour-là et lors des rencontres qui vont suivre (et d'abord un cours sur Bergson, à l'École normale, où Jean Beaufret m'entraîne avec mon ami, Jean-Philippe Guinle), il est peu question d'être et temps, mais presque",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 594,
+        "height": 992,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "header",
+            "block_content": "L'EMBELLIE DES ANNÉES 1950",
+            "block_bbox": [
+              173,
+              57,
+              390,
+              75
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                173.0,
+                57.0
+              ],
+              [
+                389.0,
+                57.0
+              ],
+              [
+                389.0,
+                74.0
+              ],
+              [
+                173.0,
+                74.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "181",
+            "block_bbox": [
+              497,
+              58,
+              522,
+              73
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                497.0,
+                58.0
+              ],
+              [
+                521.0,
+                58.0
+              ],
+              [
+                521.0,
+                72.0
+              ],
+              [
+                497.0,
+                72.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Holzwege, ouvrage alors non traduit. À la tribune, Ricœur paraît gêné et débordé par l'étrange affrontement entre Beauffret et Wahl. Insistant sur ce que Heidegger a dit à Cerisy (et prononçant plusieurs fois ce nom qui ne me dit rien sur le moment), le premier dit : « La philosophie n'est pas périmée, elle est morte » ; le second réplique « Malheureusement. » Beauffret reprend de sa voix singulière et douce : « Heureusement. » Le malentendu est complet et les têtes se tournent tantôt d'un côté, tantôt de l'autre. Je ne me rappelle pas comment le président de séance (Etienne Borne, je crois) a mis fin à ce duel bizarre.",
+            "block_bbox": [
+              40,
+              91,
+              525,
+              289
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                40.0,
+                91.0
+              ],
+              [
+                525.0,
+                91.0
+              ],
+              [
+                525.0,
+                289.0
+              ],
+              [
+                40.0,
+                289.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Je n'ose pas aborder Beaufret ce soir-là. Sa personnalité m'intrigue d'autant plus qu'il est un personnage mythique dans ma famille : on me parlait du « cousin Beaufret » sans que je pusse exactement savoir à quel titre il l'était, comment et pourquoi mes parents l'avaient perdu de vue depuis fort longtemps. On m'explique que c'était un « original » qui ne répondait jamais aux lettres. Cela me laisse insatisfait et curieux d'en savoir plus. L'aubaine, pour satisfaire cette curiosité, a été, dès le printemps de 1956, un livre de lui, récemment paru, Le Poème de Parménide. On imagine mal aujourd'hui l'effet sidérant que ce petit livre fait sur moi, parmi d'autres, car nombreux sont les khâgneux de cette génération à le dévorer, éblouis peut-être plus par l'insolence à la fois brillante et enthousiastie d'un ton nouveau que par le contenu même dont trop d'éléments nous échappent (le grec de Parménide, le problème de l'unité du Poème, les interférences avec les réinterprétations de la philosophie moderne et de Kant en particulier). Malgré tout, ce qui domine, c'était l'idée que Heidegger révolutionne la pensée, grâce à un sens inouï de l'être lui-même (distingué de l'être des métaphysiciens, l'être de l'étant, que je critique au même titre que le « Dieu des philosophes »), grâce à la redécouverte des présocratiques. Ce qui s'annonce ainsi est une lecture totalement renouvelée de l'histoire de la philosophie. Inclassable, Heidegger me paraît infiniment plus profond que Hegel et Schelling.",
+            "block_bbox": [
+              39,
+              289,
+              525,
+              725
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                39.0,
+                289.0
+              ],
+              [
+                525.0,
+                289.0
+              ],
+              [
+                525.0,
+                725.0
+              ],
+              [
+                39.0,
+                725.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "C'est bien dans ce sens que Jean Beaufret axe ses propos, quand je fais enfin sa connaissance. Ayant mis trois mois à répondre à une lettre admirative que je me suis enfin décidé à lui adresser, il vient déjeuner à la maison avec ses vieux parents en avril 1957 (c'est donc grâce à la philosophie que ma famille a renoué avec lui). Ce jour-là et lors des rencontres qui vont suivre (et d'abord un cours sur Bergson, à l'École normale, où Jean Beaufret m'entraîne avec mon ami, Jean-Philippe Guinle), il est peu question d'être et temps, mais presque",
+            "block_bbox": [
+              40,
+              725,
+              525,
+              886
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                40.0,
+                725.0
+              ],
+              [
+                525.0,
+                725.0
+              ],
+              [
+                525.0,
+                886.0
+              ],
+              [
+                40.0,
+                886.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8724405765533447,
+              "coordinate": [
+                173,
+                57,
+                390,
+                75
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  173.0,
+                  57.0
+                ],
+                [
+                  389.0,
+                  57.0
+                ],
+                [
+                  389.0,
+                  74.0
+                ],
+                [
+                  173.0,
+                  74.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.7964087128639221,
+              "coordinate": [
+                497,
+                58,
+                522,
+                73
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  497.0,
+                  58.0
+                ],
+                [
+                  521.0,
+                  58.0
+                ],
+                [
+                  521.0,
+                  72.0
+                ],
+                [
+                  497.0,
+                  72.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9585487246513367,
+              "coordinate": [
+                40,
+                91,
+                525,
+                289
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  40.0,
+                  91.0
+                ],
+                [
+                  525.0,
+                  91.0
+                ],
+                [
+                  525.0,
+                  289.0
+                ],
+                [
+                  40.0,
+                  289.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9631190299987793,
+              "coordinate": [
+                39,
+                289,
+                525,
+                725
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  39.0,
+                  289.0
+                ],
+                [
+                  525.0,
+                  289.0
+                ],
+                [
+                  525.0,
+                  725.0
+                ],
+                [
+                  39.0,
+                  725.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9558305740356445,
+              "coordinate": [
+                40,
+                725,
+                525,
+                886
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  40.0,
+                  725.0
+                ],
+                [
+                  525.0,
+                  725.0
+                ],
+                [
+                  525.0,
+                  886.0
+                ],
+                [
+                  40.0,
+                  886.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.181",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 181,
+      "bookPage": 182,
+      "pdfPage": 182,
+      "printPage": 182,
+      "printPageLabel": "182",
+      "detectedPage": 182,
+      "imgW": 594,
+      "imgH": 992,
+      "blocks": [
+        {
+          "text": "uniquement des auteurs classiques et de~ lumières que Heidegger jette sur eux. Ainsi Héraclite a-t-il été réduit au mobilisme universe~ dans une opposition stupide à l'immobilisme parménidien, alors que ses fragments vibrent d'une richesse inouïe où peut se lire la première expérience de l'être comme « Un- Tout »1 préfigurant la métaphysique, sans que s'y déploie déjà sa structure 01ito-théologique. Ainsi Aristote a-t-il été complètement méconnu par l'idéalisme français: ce qui impose de revenir aux textes, d'apprendre à entendre le grec d'une oreille grecque et de déchiffrer les« sign'ifications multiples» de l'être. Il faut se déprendre des interprétations convenues de la métaphysique et même de ses fondements: déjà le principe d'identité est un «saut dans l'Être»; l'objectivité cartésienne est rendue possible par la réflexion cogitative, et non l'inverse. '",
+          "x": 75,
+          "bbox": [
+            75,
+            99,
+            554,
+            357
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Heidegger apparaît, au fil des longues conversations avec Jean Beau/ret, comme le seul penseur du XX' siècle qui ait su mesurer la «continuité monumentale» de la métaphysique depuis ses origines grecques et qui, par-delà les oppositions scolaires comme celle de l'idéalisme et du réalisme, fait reparlen les textes et la tension qu'ils abritent avec leur «non-dit». Paradoxalement cet enseignement patient (et constamment polémique à l'égard des poncifs universi­ taires) invite moins à se plonger dans Heidegger, du moins exclusive­ ment, qu'à relire d'un œil neuf les grifnds textes de la tradition (y compris Spinoza sur lequel Heidegger lui-même fait presque complètement silence). '",
+          "x": 75,
+          "bbox": [
+            75,
+            357,
+            555,
+            574
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Tous ces dialogues menés tranquillement, soit à Sceaux, soit au passage Stendha~ me font faire d'immenses progrès dans la connais­ sance des auteurs, m'encouragent à m'i!Jitier au grec et à l'allemand, me font peu à peu abandonner ma «première philosophie» bergso­ nienne et kierkegaardienne. C'est par Jean Beau/ret que j'entends pour la première fois le nom d'Althusser, qui me semble un person­ nage inabordable et déjà mythique, lu{ aussi (bien qu'il ne soit pas encore célèbre). Je n'ose imaginer que je serai normalien; et qu'Althusser sera mon «caïman »; c' e~t pourtant ce qui advient au concours de 1958: à l'automne, Beau/ret devient un de mes profes­ seurs à la rue d'Ulm. Mon destin était clone de le rencontrer. Pourtant, quant au fond, son enseignement « offiçiel » ne change rien à l'orien­ tation déjà prise :je vais garder le cap jusqu'à ma sortie de l'École en 1962. J'apprends souvent plus en bavardant avec Jean à bâtons rompus qu'au fil des cours, dont le thème est essentiellement dépen­ dant du programme de l'agrégation (successivement, si mes souvenirs",
+          "x": 75,
+          "bbox": [
+            75,
+            575,
+            554,
+            892
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 85,
+      "textSource": "pdf",
+      "markdown": "uniquement des auteurs classiques et des lumières que Heidegger jette sur eux. Ainsi Héraclite a-t-il été réduit au mobilisme universel, dans une opposition stupide à l'immobilisme parméniéden, alors que ses fragments vibrent d'une richesse inouïe où peut se lire la première expérience de l'être comme « Un-Tout », préfigurant la métaphysique, sans que s'y déploie déjà sa structure onto-héologique. Ainsi Aristote a-t-il été complètement méconnu par l'idéalisme français : ce qui impose de revenir aux textes, d'apprendre à entendre le grec d'une oreille grecque et de déchiffrer les « significations multiples » de l'être. Il faut se déprendre des interprétations convenues de la métaphysique et même de ses fondements : déjà le principe d'identité est un « saut dans l'être »; l'objectivité cartésienne est rendue possible par la réflexion cogitative, et non l'inverse.\n\nHeidegger apparaît, au fil des longues conversations avec Jean Beaufret, comme le seul penseur du XX siècle qui ait su mesurer la « continuité monumentale » de la métaphysique depuis ses origines grecques et qui, par-delà les oppositions scolaires comme celle de l'idéalisme et du réalisme, fait reparler les textes et la tension qu'ils abritent avec leur « non-dit ». Paradoxalement cet enseignement patient (et constamment polémique à l'égard des poncifs universitaires) invite moins à se plonger dans Heidegger, du moins exclusivement, qu'à relire d'un ceil neuf les grands textes de la tradition (y compris Spinoza sur lequel Heidegger lui-même fait presque complètement silence).\n\nTous ces dialogues menés tranquillement, soit à Sceaux, soit au passage Stendhal, me font faire d'immenses progrès dans la connaissance des auteurs, m'encouragent à m'initier au grec et à l'allemand, me font peu à peu abandonner ma « première philosophie » bergsonienne et kierkegaardienne. C'est par Jean Beaufret que j'entends pour la première fois le nom d'Althusser, qui me semble un personnage inabordable et déjà mythique, lui aussi (bien qu'il ne soit pas encore célèbre). Je n'ose imaginer que je serai normalien; et qu'Althusser sera mon « caiman »; c'est pourtant ce qui advient au concours de 1958 : à l'automne, Beaufret devient un de mes professeurs à la rue d'Ulm. Mon destin était donc de le rencontrer. Pourtant, quant au fond, son enseignement « officiel » ne change rien à l'orientation déjà prise : je vais garder le cap jusqu'à ma sortie de l'École en 1962. l'apprends souvent plus en bavardant avec Jean à bâtons rompus qu'au fil des cours, dont le thème est essentiellement dépendant du programme de l'agrégation (successivement, si mes souvenirs",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 594,
+        "height": 992,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "number",
+            "block_content": "182",
+            "block_bbox": [
+              78,
+              66,
+              103,
+              80
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                78.0,
+                66.0
+              ],
+              [
+                102.0,
+                66.0
+              ],
+              [
+                102.0,
+                79.0
+              ],
+              [
+                78.0,
+                79.0
+              ]
+            ]
+          },
+          {
+            "block_label": "header",
+            "block_content": "HEIDEGGER EN FRANCE",
+            "block_bbox": [
+              227,
+              65,
+              403,
+              83
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                227.0,
+                65.0
+              ],
+              [
+                402.0,
+                65.0
+              ],
+              [
+                402.0,
+                82.0
+              ],
+              [
+                227.0,
+                82.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "uniquement des auteurs classiques et des lumières que Heidegger jette sur eux. Ainsi Héraclite a-t-il été réduit au mobilisme universel, dans une opposition stupide à l'immobilisme parméniéden, alors que ses fragments vibrent d'une richesse inouïe où peut se lire la première expérience de l'être comme « Un-Tout », préfigurant la métaphysique, sans que s'y déploie déjà sa structure onto-héologique. Ainsi Aristote a-t-il été complètement méconnu par l'idéalisme français : ce qui impose de revenir aux textes, d'apprendre à entendre le grec d'une oreille grecque et de déchiffrer les « significations multiples » de l'être. Il faut se déprendre des interprétations convenues de la métaphysique et même de ses fondements : déjà le principe d'identité est un « saut dans l'être »; l'objectivité cartésienne est rendue possible par la réflexion cogitative, et non l'inverse.",
+            "block_bbox": [
+              75,
+              99,
+              554,
+              357
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                75.0,
+                99.0
+              ],
+              [
+                554.0,
+                99.0
+              ],
+              [
+                554.0,
+                357.0
+              ],
+              [
+                75.0,
+                357.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Heidegger apparaît, au fil des longues conversations avec Jean Beaufret, comme le seul penseur du XX siècle qui ait su mesurer la « continuité monumentale » de la métaphysique depuis ses origines grecques et qui, par-delà les oppositions scolaires comme celle de l'idéalisme et du réalisme, fait reparler les textes et la tension qu'ils abritent avec leur « non-dit ». Paradoxalement cet enseignement patient (et constamment polémique à l'égard des poncifs universitaires) invite moins à se plonger dans Heidegger, du moins exclusivement, qu'à relire d'un ceil neuf les grands textes de la tradition (y compris Spinoza sur lequel Heidegger lui-même fait presque complètement silence).",
+            "block_bbox": [
+              75,
+              357,
+              555,
+              574
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                75.0,
+                357.0
+              ],
+              [
+                555.0,
+                357.0
+              ],
+              [
+                555.0,
+                574.0
+              ],
+              [
+                75.0,
+                574.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Tous ces dialogues menés tranquillement, soit à Sceaux, soit au passage Stendhal, me font faire d'immenses progrès dans la connaissance des auteurs, m'encouragent à m'initier au grec et à l'allemand, me font peu à peu abandonner ma « première philosophie » bergsonienne et kierkegaardienne. C'est par Jean Beaufret que j'entends pour la première fois le nom d'Althusser, qui me semble un personnage inabordable et déjà mythique, lui aussi (bien qu'il ne soit pas encore célèbre). Je n'ose imaginer que je serai normalien; et qu'Althusser sera mon « caiman »; c'est pourtant ce qui advient au concours de 1958 : à l'automne, Beaufret devient un de mes professeurs à la rue d'Ulm. Mon destin était donc de le rencontrer. Pourtant, quant au fond, son enseignement « officiel » ne change rien à l'orientation déjà prise : je vais garder le cap jusqu'à ma sortie de l'École en 1962. l'apprends souvent plus en bavardant avec Jean à bâtons rompus qu'au fil des cours, dont le thème est essentiellement dépendant du programme de l'agrégation (successivement, si mes souvenirs",
+            "block_bbox": [
+              75,
+              575,
+              554,
+              892
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                75.0,
+                575.0
+              ],
+              [
+                554.0,
+                575.0
+              ],
+              [
+                554.0,
+                892.0
+              ],
+              [
+                75.0,
+                892.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.7266787886619568,
+              "coordinate": [
+                78,
+                66,
+                103,
+                80
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  78.0,
+                  66.0
+                ],
+                [
+                  102.0,
+                  66.0
+                ],
+                [
+                  102.0,
+                  79.0
+                ],
+                [
+                  78.0,
+                  79.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8559854626655579,
+              "coordinate": [
+                227,
+                65,
+                403,
+                83
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  227.0,
+                  65.0
+                ],
+                [
+                  402.0,
+                  65.0
+                ],
+                [
+                  402.0,
+                  82.0
+                ],
+                [
+                  227.0,
+                  82.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9633927941322327,
+              "coordinate": [
+                75,
+                99,
+                554,
+                357
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  75.0,
+                  99.0
+                ],
+                [
+                  554.0,
+                  99.0
+                ],
+                [
+                  554.0,
+                  357.0
+                ],
+                [
+                  75.0,
+                  357.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9634405970573425,
+              "coordinate": [
+                75,
+                357,
+                555,
+                574
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  75.0,
+                  357.0
+                ],
+                [
+                  555.0,
+                  357.0
+                ],
+                [
+                  555.0,
+                  574.0
+                ],
+                [
+                  75.0,
+                  574.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9627112746238708,
+              "coordinate": [
+                75,
+                575,
+                554,
+                892
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  75.0,
+                  575.0
+                ],
+                [
+                  554.0,
+                  575.0
+                ],
+                [
+                  554.0,
+                  892.0
+                ],
+                [
+                  75.0,
+                  892.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.182",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 182,
+      "bookPage": 183,
+      "pdfPage": 183,
+      "printPage": 183,
+      "printPageLabel": "183",
+      "detectedPage": 183,
+      "imgW": 594,
+      "imgH": 992,
+      "blocks": [
+        {
+          "text": "sont bons: la métaphysique d'Aristote, Descartes et Leibniz, Kant et sa troisième Critique, les grands dialogues de Platon), mais dont le style est si singulier (un rythme binaire: tantôt la dictée d'un texte soigneusement composé, tantôt de lentes, étincelantes et désinvoltes improvisations - des «divagations... au sens mallarmé en», dira Hyppolite).",
+          "x": 50,
+          "bbox": [
+            50,
+            93,
+            534,
+            213
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Quant à Heidegger lui-même, lai lu tout ce qui a paru en français (y compris, dès 1954, les premières traductions du «Chemin de campagne» et de «Sur l'expérience de la pensée» dans la N.R.E), je suis très impressionné par la Lettre sur l'humanisme et je commence à tâtonner dans quelques textes originaux. Je discute ardemment avec Michel Haar qu; en 1960 (je crois), va soudainement se «convertir» à Heidegger après avoir entendu un exposé sur l'Introduction à la métaphysique (organisé, d'ailleurs, par Jean Hyppolite qu4 dans des cours, parle presque plus de Heidegger que Jean Beau/ret- mais évidemment en mode plus critique). Faut-il interpréter la métaphy­ sique comme oubli de l'être? Que penser de la réinterprétation heideggérienne de l'essence de la vérité? De son «dépassement» de la métaphysique? Comment comprendre l'essence de la technique? Toutes ces questions nous préoccupent et vont être le thème de séances de discussion que Michel Haar organise avec Hubert Dreyfus et même Henri Birault qui a la gentillesse de nous rejoindre.",
+          "x": 50,
+          "bbox": [
+            50,
+            212,
+            534,
+            530
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "Événement: durant l'hiver 1960-1961, Sartre vient faire aux normaliens philosophes une conférence à huis clos. Au premier rang, Hyppolite, Merleau-Ponty, Canguilhem; je crois que Jean Beau/ret y assiste aussi. Althusser est dans un coin à droite de la salle des Actes, entouré de ses amis. Après plus de deux heures de lecture d'un de ses manuscrits inédits sur La Raison dialectique, Sartre répond aux ques­ tions. C'est Althusser qui est le plus coriace. Au dernier moment, alors que le jeu des questions et des réponses va se terminer, je prends mon courage à deux mains et j'ose l'interroger à peu près en ces termes: «Vous n'avez jamais répondu aux critiques formulées à votre encontre par Heidegger dans sa Lettre sur l'humanisme. Quelle est votre posi­ tion actuelle vis-à-vis de ces critiques?» Alors que je m'attendais à me faire rembarrer en quelques mots, à ma grande surprise Sartre répondit assez longuement et avec bienveillance, concédant qu'il avait peu suivi l'évolution récente de Heidegger vers une philosophie du langage 'pensant et poétique, mais qu'il gardait une grande dette envers Heidegger, lui accordait toujours une importance décisive et n'entendait pas prendre à la légère ses objections. Il revint sur ses",
+          "x": 48,
+          "bbox": [
+            48,
+            530,
+            534,
+            888
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 58,
+      "textSource": "pdf",
+      "markdown": "sont bons : la métaphysique d'Aristote, Descartes et Leibniz, Kant et sa troisième Critique, les grands dialogues de Platon), mais dont le style est si singulier (un rythme binaire : tantôt la dictée d'un texte soigneusement composé, tantôt de lentes, étincelantes et désinvoltes improvisations – des « divagations... au sens mallarméen », dira Hyppolite).\n\nQuant à Heidegger lui-même, j'ai lu tout ce qui a paru en français (y compris, dès 1954, les premières traductions du « Chemin de campagne » et de « Sur l'expérience de la pensée » dans la N.R.F.), je suis très impressionné par la Lettre sur l'humanisme et je commence à tâtonner dans quelques textes originaux. Je discute ardemment avec Michel Haar qui, en 1960 (je crois), va soudainement se « convertir » à Heidegger après avoir entendu un exposé sur l'Introduction à la métaphysique (organisé, d'ailleurs, par Jean Hyppolite qui, dans des cours, parle presque plus de Heidegger que Jean Beaufret — mais évidemment en mode plus critique). Faut-il interpréter la métaphysique comme oubli de l'être ? Que penser de la réinterprétation heideggerienne de l'essence de la vérité ? De son « dépassement » de la métaphysique ? Comment comprendre l'essence de la technique ? Toutes ces questions nous préoccupent et vont être le thème de séances de discussion que Michel Haar organise avec Hubert Dreyfus et même Henri Birault qui a la gentillesse de nous rejoindre.\n\nÉvénement : durant l'hiver 1960-1961, Sartre vient faire aux normaliens philosophes une conférence à buis clos. Au premier rang, Hyppolite, Merleau-Ponty, Canguilhem; je crois que Jean Beaufret y assiste aussi. Althusser est dans un coin à droite de la salle des Actes, entouré de ses amis. Après plus de deux heures de lecture d'un de ses manuscrits inédits sur La Raison dialectique, Sartre répond aux questions. C'est Althusser qui est le plus coriace. Au dernier moment, alors que le jeu des questions et des réponses va se terminer, je prends mon courage à deux mains et j'ose l'interroger à peu près en ces termes : «Vous n'avez jamais répondu aux critiques formulées à votre encontre par Heidegger dans sa Lettre sur l'humanisme. Quelle est votre position actuelle vis-à-vis de ces critiques ? » Alors que je m'attendais à me faire rembarrer en quelques mots, à ma grande surprise. Sartre répondit assez longuement et avec bienveillance, concédant qu'il avait peu suivi l'évolution récente de Heidegger vers une philosophie du langage pensant et poétique, mais qu'il gardait une grande dette envers Heidegger, lui accordait toujours une importance décisive et n'entendait pas prendre à la légère ses objections. Il revint sur ses",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 594,
+        "height": 992,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "header",
+            "block_content": "L'EMBELLIE DES ANNÉES 1950",
+            "block_bbox": [
+              183,
+              60,
+              399,
+              78
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                183.0,
+                60.0
+              ],
+              [
+                398.0,
+                60.0
+              ],
+              [
+                398.0,
+                77.0
+              ],
+              [
+                183.0,
+                77.0
+              ]
+            ]
+          },
+          {
+            "block_label": "number",
+            "block_content": "183",
+            "block_bbox": [
+              507,
+              61,
+              531,
+              75
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                507.0,
+                61.0
+              ],
+              [
+                530.0,
+                61.0
+              ],
+              [
+                530.0,
+                74.0
+              ],
+              [
+                507.0,
+                74.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "sont bons : la métaphysique d'Aristote, Descartes et Leibniz, Kant et sa troisième Critique, les grands dialogues de Platon), mais dont le style est si singulier (un rythme binaire : tantôt la dictée d'un texte soigneusement composé, tantôt de lentes, étincelantes et désinvoltes improvisations – des « divagations... au sens mallarméen », dira Hyppolite).",
+            "block_bbox": [
+              50,
+              93,
+              534,
+              213
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                50.0,
+                93.0
+              ],
+              [
+                534.0,
+                93.0
+              ],
+              [
+                534.0,
+                213.0
+              ],
+              [
+                50.0,
+                213.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Quant à Heidegger lui-même, j'ai lu tout ce qui a paru en français (y compris, dès 1954, les premières traductions du « Chemin de campagne » et de « Sur l'expérience de la pensée » dans la N.R.F.), je suis très impressionné par la Lettre sur l'humanisme et je commence à tâtonner dans quelques textes originaux. Je discute ardemment avec Michel Haar qui, en 1960 (je crois), va soudainement se « convertir » à Heidegger après avoir entendu un exposé sur l'Introduction à la métaphysique (organisé, d'ailleurs, par Jean Hyppolite qui, dans des cours, parle presque plus de Heidegger que Jean Beaufret — mais évidemment en mode plus critique). Faut-il interpréter la métaphysique comme oubli de l'être ? Que penser de la réinterprétation heideggerienne de l'essence de la vérité ? De son « dépassement » de la métaphysique ? Comment comprendre l'essence de la technique ? Toutes ces questions nous préoccupent et vont être le thème de séances de discussion que Michel Haar organise avec Hubert Dreyfus et même Henri Birault qui a la gentillesse de nous rejoindre.",
+            "block_bbox": [
+              50,
+              212,
+              534,
+              530
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                50.0,
+                212.0
+              ],
+              [
+                534.0,
+                212.0
+              ],
+              [
+                534.0,
+                530.0
+              ],
+              [
+                50.0,
+                530.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "Événement : durant l'hiver 1960-1961, Sartre vient faire aux normaliens philosophes une conférence à buis clos. Au premier rang, Hyppolite, Merleau-Ponty, Canguilhem; je crois que Jean Beaufret y assiste aussi. Althusser est dans un coin à droite de la salle des Actes, entouré de ses amis. Après plus de deux heures de lecture d'un de ses manuscrits inédits sur La Raison dialectique, Sartre répond aux questions. C'est Althusser qui est le plus coriace. Au dernier moment, alors que le jeu des questions et des réponses va se terminer, je prends mon courage à deux mains et j'ose l'interroger à peu près en ces termes : «Vous n'avez jamais répondu aux critiques formulées à votre encontre par Heidegger dans sa Lettre sur l'humanisme. Quelle est votre position actuelle vis-à-vis de ces critiques ? » Alors que je m'attendais à me faire rembarrer en quelques mots, à ma grande surprise. Sartre répondit assez longuement et avec bienveillance, concédant qu'il avait peu suivi l'évolution récente de Heidegger vers une philosophie du langage pensant et poétique, mais qu'il gardait une grande dette envers Heidegger, lui accordait toujours une importance décisive et n'entendait pas prendre à la légère ses objections. Il revint sur ses",
+            "block_bbox": [
+              48,
+              530,
+              534,
+              888
+            ],
+            "block_id": 4,
+            "block_order": 3,
+            "group_id": 4,
+            "block_polygon_points": [
+              [
+                48.0,
+                530.0
+              ],
+              [
+                534.0,
+                530.0
+              ],
+              [
+                534.0,
+                888.0
+              ],
+              [
+                48.0,
+                888.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8771985173225403,
+              "coordinate": [
+                183,
+                60,
+                399,
+                78
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  183.0,
+                  60.0
+                ],
+                [
+                  398.0,
+                  60.0
+                ],
+                [
+                  398.0,
+                  77.0
+                ],
+                [
+                  183.0,
+                  77.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.7923347353935242,
+              "coordinate": [
+                507,
+                61,
+                531,
+                75
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  507.0,
+                  61.0
+                ],
+                [
+                  530.0,
+                  61.0
+                ],
+                [
+                  530.0,
+                  74.0
+                ],
+                [
+                  507.0,
+                  74.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9545186758041382,
+              "coordinate": [
+                50,
+                93,
+                534,
+                213
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  50.0,
+                  93.0
+                ],
+                [
+                  534.0,
+                  93.0
+                ],
+                [
+                  534.0,
+                  213.0
+                ],
+                [
+                  50.0,
+                  213.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9668236970901489,
+              "coordinate": [
+                50,
+                212,
+                534,
+                530
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  50.0,
+                  212.0
+                ],
+                [
+                  534.0,
+                  212.0
+                ],
+                [
+                  534.0,
+                  530.0
+                ],
+                [
+                  50.0,
+                  530.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.964278519153595,
+              "coordinate": [
+                48,
+                530,
+                534,
+                888
+              ],
+              "order": 4,
+              "polygon_points": [
+                [
+                  48.0,
+                  530.0
+                ],
+                [
+                  534.0,
+                  530.0
+                ],
+                [
+                  534.0,
+                  888.0
+                ],
+                [
+                  48.0,
+                  888.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.183",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    },
+    {
+      "fileIdx": 183,
+      "bookPage": 184,
+      "pdfPage": 184,
+      "printPage": 184,
+      "printPageLabel": "184",
+      "detectedPage": 184,
+      "imgW": 594,
+      "imgH": 992,
+      "blocks": [
+        {
+          "text": "points de désaccord, mais il termina en s'excusant presque de ne pas avoir encore lu les derniers travaux de; Heidegger. Après coup, on m'avait rapporté cet extrait de la conversation de Sartre avec Hyppolite et Merleau-Ponty au café·' «Peut-être devrais-je lire Heidegger?» avait demandé Sartre. Hyppolite lui aurait répondu: «Mais non, tu es génial; il vaut mieux que tu donnes la priorité à la poursuite de ton œuvre. ~>",
+          "x": 67,
+          "bbox": [
+            67,
+            96,
+            546,
+            235
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        },
+        {
+          "text": "De ces hauteurs, il fallut revenir aux impératifs de la vie étudiante. L'inexorable pression d'une «fatalité» }art prévisible (l'approche du concours d'agrégation) fit d'abord retamE, er ma belle ardeur de lecteur de Heidegger; elle allait cependant renaître durant mon «année supplémentaire» d'École, en 1961-1962;: le moment de ma vie où je travaille probablement le plus sous l'inspiration de Jean Beau/ret, où je me mets sérieusement à l'allemand et: où je suis conduit- presque malgré moi - à rencontrer finalement Heidegger. Césure incontes­ table.",
+          "x": 66,
+          "bbox": [
+            66,
+            234,
+            546,
+            414
+          ],
+          "label": "text",
+          "is_meta": false,
+          "heading_level": 0,
+          "textSource": "pdf"
+        }
+      ],
+      "fnBlocks": [],
+      "footnotes": "",
+      "indent": 76,
+      "textSource": "pdf",
+      "markdown": "points de désaccord, mais il termina en s'excusant presque de ne pas avoir encore lu les derniers travaux de Heidegger. Après coup, on m'avait rapporté cet extrait de la conversation de Sartre avec Hyppolite et Merleau-Ponty au café : « Peut-être devrais-je lire Heidegger ? » avait demandé Sartre. Hyppolite lui aurait répondu : « Mais non, tu es génial ; il vaut mieux que tu donnes la priorité à la poursuite de ton œuvre. »\n\nDe ces hauteurs, il fallut revenir aux impératifs de la vie étudiante. L'inexorable pression d'une « fatalité » fort prévisible (l'approche du concours d'agrégation) fit d'abord retomber ma belle ardeur de lecteur de Heidegger; elle allait cependant renaître durant mon « année supplémentaire » d'École, en 1961-1962: le moment de ma vie où je travaille probablement le plus sous l'inspiration de Jean Beaufret, où je me mets sérieusement à l'allemand et où je suis conduit - presque malgré moi - à rencontrer finalement Heidegger. Césure incontestable.",
+      "prunedResult": {
+        "page_count": 1,
+        "width": 594,
+        "height": 992,
+        "model_settings": {
+          "use_doc_preprocessor": true,
+          "use_layout_detection": true,
+          "use_chart_recognition": false,
+          "use_seal_recognition": false,
+          "use_ocr_for_image_block": false,
+          "format_block_content": false,
+          "merge_layout_blocks": true,
+          "markdown_ignore_labels": [
+            "number",
+            "footnote",
+            "header",
+            "header_image",
+            "footer",
+            "footer_image",
+            "aside_text"
+          ],
+          "return_layout_polygon_points": true
+        },
+        "parsing_res_list": [
+          {
+            "block_label": "number",
+            "block_content": "184",
+            "block_bbox": [
+              69,
+              64,
+              94,
+              78
+            ],
+            "block_id": 0,
+            "block_order": null,
+            "group_id": 0,
+            "block_polygon_points": [
+              [
+                69.0,
+                64.0
+              ],
+              [
+                93.0,
+                64.0
+              ],
+              [
+                93.0,
+                77.0
+              ],
+              [
+                69.0,
+                77.0
+              ]
+            ]
+          },
+          {
+            "block_label": "header",
+            "block_content": "HEIDEGGER EN FRANCE",
+            "block_bbox": [
+              218,
+              63,
+              394,
+              80
+            ],
+            "block_id": 1,
+            "block_order": null,
+            "group_id": 1,
+            "block_polygon_points": [
+              [
+                218.0,
+                63.0
+              ],
+              [
+                393.0,
+                63.0
+              ],
+              [
+                393.0,
+                79.0
+              ],
+              [
+                218.0,
+                79.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "points de désaccord, mais il termina en s'excusant presque de ne pas avoir encore lu les derniers travaux de Heidegger. Après coup, on m'avait rapporté cet extrait de la conversation de Sartre avec Hyppolite et Merleau-Ponty au café : « Peut-être devrais-je lire Heidegger ? » avait demandé Sartre. Hyppolite lui aurait répondu : « Mais non, tu es génial ; il vaut mieux que tu donnes la priorité à la poursuite de ton œuvre. »",
+            "block_bbox": [
+              67,
+              96,
+              546,
+              235
+            ],
+            "block_id": 2,
+            "block_order": 1,
+            "group_id": 2,
+            "block_polygon_points": [
+              [
+                67.0,
+                96.0
+              ],
+              [
+                546.0,
+                96.0
+              ],
+              [
+                546.0,
+                235.0
+              ],
+              [
+                67.0,
+                235.0
+              ]
+            ]
+          },
+          {
+            "block_label": "text",
+            "block_content": "De ces hauteurs, il fallut revenir aux impératifs de la vie étudiante. L'inexorable pression d'une « fatalité » fort prévisible (l'approche du concours d'agrégation) fit d'abord retomber ma belle ardeur de lecteur de Heidegger; elle allait cependant renaître durant mon « année supplémentaire » d'École, en 1961-1962: le moment de ma vie où je travaille probablement le plus sous l'inspiration de Jean Beaufret, où je me mets sérieusement à l'allemand et où je suis conduit - presque malgré moi - à rencontrer finalement Heidegger. Césure incontestable.",
+            "block_bbox": [
+              66,
+              234,
+              546,
+              414
+            ],
+            "block_id": 3,
+            "block_order": 2,
+            "group_id": 3,
+            "block_polygon_points": [
+              [
+                66.0,
+                234.0
+              ],
+              [
+                546.0,
+                234.0
+              ],
+              [
+                546.0,
+                414.0
+              ],
+              [
+                66.0,
+                414.0
+              ]
+            ]
+          }
+        ],
+        "doc_preprocessor_res": {
+          "model_settings": {
+            "use_doc_orientation_classify": true,
+            "use_doc_unwarping": false
+          },
+          "angle": 0
+        },
+        "layout_det_res": {
+          "boxes": [
+            {
+              "cls_id": 16,
+              "label": "number",
+              "score": 0.7611078023910522,
+              "coordinate": [
+                69,
+                64,
+                94,
+                78
+              ],
+              "order": 1,
+              "polygon_points": [
+                [
+                  69.0,
+                  64.0
+                ],
+                [
+                  93.0,
+                  64.0
+                ],
+                [
+                  93.0,
+                  77.0
+                ],
+                [
+                  69.0,
+                  77.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 12,
+              "label": "header",
+              "score": 0.8617947101593018,
+              "coordinate": [
+                218,
+                63,
+                394,
+                80
+              ],
+              "order": null,
+              "polygon_points": [
+                [
+                  218.0,
+                  63.0
+                ],
+                [
+                  393.0,
+                  63.0
+                ],
+                [
+                  393.0,
+                  79.0
+                ],
+                [
+                  218.0,
+                  79.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9474998116493225,
+              "coordinate": [
+                67,
+                96,
+                546,
+                235
+              ],
+              "order": 2,
+              "polygon_points": [
+                [
+                  67.0,
+                  96.0
+                ],
+                [
+                  546.0,
+                  96.0
+                ],
+                [
+                  546.0,
+                  235.0
+                ],
+                [
+                  67.0,
+                  235.0
+                ]
+              ]
+            },
+            {
+              "cls_id": 22,
+              "label": "text",
+              "score": 0.9435828328132629,
+              "coordinate": [
+                66,
+                234,
+                546,
+                414
+              ],
+              "order": 3,
+              "polygon_points": [
+                [
+                  66.0,
+                  234.0
+                ],
+                [
+                  546.0,
+                  234.0
+                ],
+                [
+                  546.0,
+                  414.0
+                ],
+                [
+                  66.0,
+                  414.0
+                ]
+              ]
+            }
+          ]
+        }
+      },
+      "printPageDisplay": "原书 p.184",
+      "isFigurePage": false,
+      "_cleanup_applied": true,
+      "_note_scan_version": 1,
+      "_note_scan": {
+        "page_kind": "body",
+        "items": [],
+        "section_hints": [],
+        "ambiguity_flags": [],
+        "note_start_line_index": null,
+        "reviewed_by_model": false
+      }
+    }
+  ]
+}

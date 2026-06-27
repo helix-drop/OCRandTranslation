@@ -1,0 +1,1087 @@
+[
+  {
+    "folder": "Biopolitics",
+    "doc_id": "0d285c0800db",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "0d285c0800db",
+      "status": "blocked",
+      "reason": "structure_review_required",
+      "blocking_reasons": [
+        "footnote_orphan_note"
+      ],
+      "generated_at": 1775750768
+    },
+    "issues": [],
+    "chapters": [
+      {
+        "path": "chapters/001-COURS, ANNÉE 1978-1979.md",
+        "title": "COURS, ANNÉE 1978-1979",
+        "paragraph_count": 12,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 2,
+        "opening_excerpt": "## COURS, ANNÉE 1978-1979\nMICHEL FOUCAULT NAISSANCE\nDE LA BIOPOLITIQUE HAUTES ÉTUDES Cours au Collège de France. 1978-1979\n<div style=\"text-align: center;\"><img src=\"imgs/img_in_image_box_344_1030_436_1057.jpg\" alt=\"Image\" width=\"11%\" /></div> GALLIMARD SEUIL",
+        "issues": [
+          {
+            "type": "front_matter_leak_in_opening"
+          }
+        ]
+      },
+      {
+        "path": "chapters/002-Leçon du 10 janvier 1979.md",
+        "title": "Leçon du 10 janvier 1979",
+        "paragraph_count": 59,
+        "body_ref_count": 18,
+        "definition_count": 18,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 10 janvier 1979\nLEÇON DU 10 JANVIER 1979\nQuestions de méthode. - Supposer que les universaux n'exisient pas. - Résumé du cours de l'année précédente : l'objectif limité du gouvernement de la raison d'État (politique extérieure) et l'objectif illimité de l'État de police (politique intérieure). - Le droit comme principe de limitation externe de la raison d'État.— Perspective du cours de cette année : l'économie politique comme principe de limitation interne de la raison gouvernementale. - Enjeu général de cette recherche : le couplage série de pratiques - régime de vérité et ses effets d'inscription dans le réel. - Qu'est-ce que le libéralisme ?\n[Vous connaissez] la citation de Freud : « Acheronta movebo[1]. » Eh bien, je voudrais placer le cours de cette année sous le signe d'une autre citation moins connue et qui a été faite par quelqu'un de moins connu, enfin, d'une certaine façon, c'est l'homme d'État anglais Walpole[^1] qui disait, à propos de sa propre manière de gouverner : « Quieta non movere[^2] », « À ce qui reste tranquille il ne faut pas toucher ». C'est le contraire de Freud en un sens. Alors je voudrais en fait, cette année, continuer un peu ce que j'avais ",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-Leçon du 17 janvier 1979.md",
+        "title": "Leçon du 17 janvier 1979",
+        "paragraph_count": 52,
+        "body_ref_count": 22,
+        "definition_count": 22,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 17 janvier 1979\nLEÇON DU 17 JANVIER 1979\nLe libéralisme et la mise en œuvre d'un nouvel art de gouverner au XVIII<sup>e</sup> siècle. - Les traits spécifiques de l'art libéral de gouverner : (1) La constitution du marché comme lieu de formation de vérité et non plus seulement comme domaine de juridiction. - Questions de méthode. Enjeux des recherches entreprises autour de la folie, la pénalité et la sexualité : esquisse d'une histoire des « régimes de véridiction ». - En quoi doit consister une critique politique du savoir. - (2) Le problème de la limitation de l'exercice de la puissance publique. Les deux types de solution : le radicalisme juridique français et l'utilitarisme anglais. - La question de l'« utilité » et la limitation de l'exercice de la puissance publique. - Remarque sur le statut de l'hétérogène en histoire : logique de stratégie contre logique dialectique. - La notion d'« intérêt » comme opérateur du nouvel art de gouverner.\nJe voudrais un petit peu affiner les thèses ou hypothèses que j'ai avancées la dernière fois à propos de l'art de gouverner, à propos de ce que je crois être un nouvel art de gouverner qui a commencé à se formuler, à se réfléchir, ",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-Leçon du 24 janvier 1979.md",
+        "title": "Leçon du 24 janvier 1979",
+        "paragraph_count": 54,
+        "body_ref_count": 33,
+        "definition_count": 33,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 24 janvier 1979\nLECON DU 24 JANVIER 1979\nLes traits spécifiques de l'art libéral de gouverner (II) : (3) Le problème de l'équilibre européen et des rapports internationaux. - Le calcul économique et politique dans le mercantilisme. Le principe de la liberté du marché selon les physiocrates et Adam Smith : naissance d'un nouveau modèle européen. - L'apparition d'une rationalité gouvernementale étendue à l'échelle mondiale. Exemples : la question du droit de la mer ; les projets de paix perpétuelle au x/111\" siècle. - Les principes du nouvel art libéral de gouverner : un « naturalisme gouvernemental « ; la production de la liberté. - Le problème de l'arbitrage libéral. Ses instruments : (1) la gestion des dangers et la mise en œuvre de mécanismes de sécurité ; (2) les contrôles disciplinaires (le panoptisme de Bentham) ; (3) les politiques interventionnistes. - La gestion de la liberté et ses crises.\nLa dernière fois, j'avais essayé de préciser quelques-uns de ce qui me paraît être les caractères fondamentaux de l'art libéral de gouverner. D'abord, j'avais parlé du problème de la vérité économique et de la véridiction du marché. et puis du problème de la limitation de la ",
+        "issues": []
+      },
+      {
+        "path": "chapters/005-Leçon du 31 janvier 1979.md",
+        "title": "Leçon du 31 janvier 1979",
+        "paragraph_count": 84,
+        "body_ref_count": 31,
+        "definition_count": 31,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 31 janvier 1979\nLEÇON DU 31 JANVIER 1979\nLa phobie d'État. – Questions de méthode : sens et enjeux de la mise entre parenthèses d'une théorie de l'État dans l'analyse des mécanismes de pouvoir. – Les pratiques gouvernementales néolibérales : le libéralisme allemand des années 1948-1962 ; le néolibéralisme américain. – Le néolibéralisme allemand (I). – Son contexte politico-économique. – Le conseil scientifique réuni par Erhard en 1947. Son programme : libération des prix et limitation des interventions gouvernementales. – La voie moyenne définie par Erhard, en 1948, entre l'anarchie et l'État-termite. – Sa double signification : (a) le respect de la liberté économique comme condition de la représentativité politique de l'État ; (b) l'institution de la liberté économique comme amorce pour la formation d'une souveraineté politique. – Caractère fondamental de la gouvernementalité allemande contemporaine : la liberté économique, source de légitimité juridique et de consensus politique. – La croissance économique, axe d'une nouvelle conscience historique permettant la rupture avec le passé. – Le ralliement de la Démocratie chrétienne et du SPD à la politique libérale. – Les ",
+        "issues": []
+      },
+      {
+        "path": "chapters/006-Leçon du 7 février 1979.md",
+        "title": "Leçon du 7 février 1979",
+        "paragraph_count": 57,
+        "body_ref_count": 49,
+        "definition_count": 49,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 7 février 1979\nLEÇON DU 7 FÉVRIER 1979\nLe néolibéralisme allemand (II.) – Son problème : comment la liberté économique peut-elle à la fois fonder et limiter l'État? – Les théoriciens néolibéraux : W. Eucken, F. Böhm, A. Müller-Armack, F. von Hayek. – Max Weber et le problème de la rationalité irrationnelle du capitalisme. Les réponses de l'École de Francfort et de l'École de Fribourg. – Le nazisme comme champ d'adversité nécessaire à la définition de l'objectif néolibéral. – Les obstacles à la politique libérale en Allemagne depuis le xix<sup>e</sup> siècle : (a) l'économie protectionniste selon List ; (b) le socialisme d'État bismarckien ; (c) la mise en place, pendant la Première Guerre mondiale, d'une économie planifiée ; (d) le dirigisme de type keynésien ; (e) la politique économique du national-socialisme. – La critique néolibérale du national-socialisme à partir de ces différents éléments de l'histoire allemande. – Conséquences théoriques : extension de cette critique au New Deal et aux plans Beveridge ; dirigisme et croissance du pouvoir d'État ; la massification et l'uniformisation, effets de l'étatisme. – L'enjeu du néolibéralisme : sa nouveauté par rapport au",
+        "issues": []
+      },
+      {
+        "path": "chapters/007-Leçon du 14 février 1979.md",
+        "title": "Leçon du 14 février 1979",
+        "paragraph_count": 59,
+        "body_ref_count": 24,
+        "definition_count": 24,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 14 février 1979\nLEÇON DU 14 FÉVRIER 1979\nLe néolibéralisme allemand (III.) – Utilité des analyses historiques par rapport au présent. – En quoi le néolibéralisme se distingue-t-il du libéralisme classique? – Son enjeu spécifique : comment régler l'exercice global du pouvoir politique sur les principes d'une économie de marché, et les transformations qui en découlent. – Le décrochage entre l'économie de marché et les politiques de laissez-faire. – Le colloque Walter Lippmann (26-30 août 1938). – Le problème du style de l'action gouvernementale. Trois exemples : (a) la question des monopoles; (b) la question des « actions conformes ». Les fondements de la politique économique selon W. Eucken. Actions régulatrices et action ordonnatrices; (c) la politique sociale. La critique ordolibérale de l'économie de bien-être. – La société comme point d'application des interventions gouvernementales. La « politique de société » (Gesellschaftspolitik). – Premier aspect de cette politique : la formalisation de la société sur le modèle de l'entreprise. – Société d'entreprise et société judiciaire, les deux faces d'un même phénomène.\nJe voudrais continuer aujourd'hui ce que j'avais comme",
+        "issues": []
+      },
+      {
+        "path": "chapters/008-Leçon du 21 février 1979.md",
+        "title": "Leçon du 21 février 1979",
+        "paragraph_count": 43,
+        "body_ref_count": 28,
+        "definition_count": 28,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 21 février 1979\nLEÇON DU 21 FÉVRIER 1979\nSecond aspect de la « politique de société », selon les ordolibéraux : le problème du droit dans une société régulée selon le modèle de l'économie concurrentielle de marché. - Retour au colloque Walter Lippmann. - Réflexions à partir d'un texte de Louis Rougier. - (1) L'idée d'un ordre juridico-économique. Réciprocité des rapports entre les processus économiques et le cadre institutionnel. - Enjeu politique : le problème de la survie du capitalisme. - Deux problèmes complémentaires : la théorie de la concurrence et l'analyse historique et sociologique du capitalisme. - (2) La question de l'interventionnisme juridique. - Rappel historique : l'État de droit au XVIIIe siècle, par opposition au despotisme et à l'État de police. Réélaboration de la notion au XIXe siècle : la question des arbitrages entre citoyens et puissance publique. Le problème des tribunaux administratifs. - Le projet néolibéral : introduire les principes de l'État de droit dans l'ordre économique. - État de droit et planification selon Hayek. - (3) La croissance de la demande judiciaire. - Conclusion générale : la spécificité de l'art néolibéral de gouverner en A",
+        "issues": []
+      },
+      {
+        "path": "chapters/009-Leçon du 7 mars 1979.md",
+        "title": "Leçon du 7 mars 1979",
+        "paragraph_count": 55,
+        "body_ref_count": 2,
+        "definition_count": 2,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 7 mars 1979\nLEÇON DU 7 MARS 1979\nRemarques générales : (1) La portée méthodologique de l'analyse des micro-pouvoirs. (2) L'inflationnisme de la phobie d'État. Ses liens avec la critique ordolibérale. – Deux thèses sur l'État totalitaire et la décroissance de la gouvernementalité d'État au XX< sècle. – Remarques sur la diffusion du modèle allemand, en France et aux États-Unis. – Le modèle néolibéral allemand et le projet français d'une « économie sociale de marché ». – Le contexte du passage, en France, à une économie néolibérale. – La politique sociale française : l'exemple de la sécurité sociale. – La dissociation entre l'économique et le social selon Giscard d'Estaing. – Le projet d'un « impôt négatif » et ses enjeux sociaux et politiques. Pauvreté « relative » et pauvreté « absolue ». Le renoncement à la politique de plein emploi.\nJe voudrais vous assurer, malgré tout, que j'avais bien l'intention, au départ, de vous parler de biopolitique et puis, les choses étant ce qu'elles sont, voilà que j'en suis arrivé à vous parler longuement, et trop longuement peut-être, du néolibéralisme, et encore du néolibéralisme sous sa forme allemande. Il faut tout de même que je m'ex",
+        "issues": []
+      },
+      {
+        "path": "chapters/010-Leçon du 14 mars 1979.md",
+        "title": "Leçon du 14 mars 1979",
+        "paragraph_count": 55,
+        "body_ref_count": 1,
+        "definition_count": 1,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 14 mars 1979\nLEÇON DU 14 MARS 1979\nLe néolibéralisme américain. Son contexte. – Différences entre les néolibéralismes américain et européen. – Le néolibéralisme américain comme revendication globale, foyer utopique et méthode de pensée. – Aspects de ce néolibéralisme : (1) La théorie du capital humain. Les deux processus qu'elle représente : (a) une avancée de l'analyse économique à l'intérieur de son propre domaine : critique de l'analyse classique du travail en termes de facteur temps ; (b) une extension de l'analyse économique à des domaines considérés jusque-là comme non économiques. – La mutation épistémologique produite par l'analyse néolibérale : de l'analyse des processus économiques à l'analyse de la rationalité interne des comportements humains. – Le travail comme conduite économique. – Sa décomposition en capital-compétence et en revenu. – La redéfinition de l'homo œconomicus comme entrepreneur de lui-même. – La notion de « capital humain ». Ses éléments constitutifs : (a) les éléments innés et la question de l'amélioration du capital humain génétique ; (b) les éléments acquis et le problème de la formation du capital humain (éducation, santé, etc.). – Intérê",
+        "issues": []
+      },
+      {
+        "path": "chapters/011-Leçon du 21 mars 1979.md",
+        "title": "Leçon du 21 mars 1979",
+        "paragraph_count": 48,
+        "body_ref_count": 1,
+        "definition_count": 1,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 21 mars 1979\nLe néolibéralisme américain (II). - L'application de la grille économique aux phénomènes sociaux. - Retour à la problématique ordolibérale : les équivoques de la Gesellschaftspolitik. La généralisation de la forme « entre-prise » dans le champ social. Politique économique et Vitalpolitik : une société pour le marché et contre le marché. - La généralisation illimitée de la forme économique du marché dans le néolibéralisme américain : principe d'intelligibilité des comportements individuels et principe critique des interventions gouvernementales. - Aspects du néolibéralisme américain : (2) La délinquance et la politique pénale. - Rappel historique : le problème de la réforme du droit pénal à la fin du xvii<sup>e</sup> siècle. Calcul économique et principe de légalité. Le parasitage de la loi par la norme au xix<sup>e</sup> siècle et la naissance d'une anthropologie criminelle. - L'analyse néolibérale : (1) la définition du crime ; (2) la caractérisation du sujet criminel comme homo œconomicus ; (3) le statut de la peine comme instrument d'« enforcement » de la loi. L'exemple du marché de la drogue. - Conséquences de cette analyse : (a) le gommage anthropologi",
+        "issues": []
+      },
+      {
+        "path": "chapters/012-Leçon du 28 mars 1979.md",
+        "title": "Leçon du 28 mars 1979",
+        "paragraph_count": 248,
+        "body_ref_count": 12,
+        "definition_count": 12,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Leçon du 28 mars 1979\nLEÇON DU 28 MARS 1979\nLe modèle de l'homo œconomicus. – Sa généralisation à toute forme de comportement dans le néolibéralisme américain. – Analyse économique et techniques comportementales. – L'homo œconomicus comme élément de base de la nouvelle raison gouvernementale apparue au xviii<sup>e</sup> siècle. – Éléments pour une histoire de la notion d'homo œconomicus avant Walras et Pareto. – Le sujet d'intérêt dans la philosophie empiriste anglaise (Hume). – L'hétérogénéité entre sujet d'intérêt et sujet de droit : (1) Le caractère irréductible de l'intérêt par rapport à la volonté juridique. (2) La logique inverse du marché et du contrat. – Seconde innovation par rapport au modèle juridique : la relation du sujet économique avec le pouvoir politique. Condorcet. La « main invisible » d'Adam Smith : l'invisibilité du lien entre la recherche du profit individuel et l'accroissement de la richesse collective. Caractère intolaisable du monde économique. La nécessaire ignorance du souverain. – L'économie politique comme critique de la raison gouvernementale : disqualification de la possibilité d'un souverain économique, sous ses deux formes mercantiliste et physio",
+        "issues": []
+      }
+    ]
+  },
+  {
+    "folder": "Germany_Madness",
+    "doc_id": "67356d1f7d9a",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "67356d1f7d9a",
+      "status": "ready",
+      "reason": "ok",
+      "blocking_reasons": [],
+      "generated_at": 1775750703
+    },
+    "issues": [
+      {
+        "type": "chapter_title_sequence_mismatch",
+        "expected_titles": [
+          "Historical Problems: Sin, St. Vitus, and the Devil",
+          "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+          "Academic “Psychiatry” and the Rise of Galenic Observation",
+          "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+          "Court Fools and Their Folly: Image and Social Reality",
+          "Pilgrims in Search of Their Reason",
+          "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+          "Epilogue"
+        ],
+        "export_titles": [
+          "Historical Problems Sin, St Vitus, and the Devil",
+          "Two Reformers and a World Gone Mad Luther and Paracelsus",
+          "Academic “Psychiatry” and the Rise of Galenic Observation",
+          "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+          "Court Fools and Their Folly Image and Social Reality",
+          "Pilgrims in Search of Their Reason",
+          "Madness as Helplessness Two Hospitals in the Age of the Reformations",
+          "Epilogue"
+        ]
+      }
+    ],
+    "chapters": [
+      {
+        "path": "chapters/001-Historical Problems Sin, St Vitus, and the Devil.md",
+        "title": "Historical Problems Sin, St Vitus, and the Devil",
+        "paragraph_count": 178,
+        "body_ref_count": 148,
+        "definition_count": 148,
+        "body_contract_ok": true,
+        "section_head_count": 5,
+        "opening_excerpt": "## Historical Problems: Sin, St. Vitus, and the Devil\nHistorical Problems: Sin, St.Vitus, and the Devil\nA history of madness must confront three salient problems in the early modern period. The first is the problem of sources. In our efforts to see how the mad experienced their world and how the world experienced them, we are usually at the mercy of written evidence. In fact, we normally rejoice if we find a long and circumstantial account or a full archival dossier. But historians recognize that their texts can be opaque even when they seem to be unusually full and transparent. This will become clear in the case of the troubled late medieval painter Hugo van der Goes. A second basic problem is the possibility, even the likelihood, that the sixteenth century experienced certain disorders that no longer occur. In cases like the dancing mania, we encounter strange diseases that do not fit into modern diagnostic categories very well. The historian of madness is well advised, especially in such cases, to attend scrupulously to exactly what was said and done with such suffering, rather than leaping to fill the diagnostic vacuum with the confident assurances of the modern psychiatric man",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-Two Reformers and a World Gone Mad Luther and Paracelsus.md",
+        "title": "Two Reformers and a World Gone Mad Luther and Paracelsus",
+        "paragraph_count": 193,
+        "body_ref_count": 242,
+        "definition_count": 242,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## Two Reformers and a World Gone Mad: Luther and Paracelsus\nTwo Reformers and a World Gone Mad: Luther and Paracelsus\nONE of the reasons the experience of madness in the sixteenth century seems so strange to us is that we have mainly lost the appropriate terms, images, and metaphors with which early modern Europeans looked at and understood the insane. To recover these ideas is the major task of the next few chapters, which deal with religious, medical, and legal attitudes toward mental disorder. The problems highlighted in chapter 1 make it clear that getting at the history of madness requires a detailed knowledge of a spiritual world in which the devil was as much a reality as death.\nWhen we voyage to the sixteenth century without the conceptual comforts of the twentieth, the first differences we are likely to notice are physical. Life was then rougher; hunger, disease and death were closer, transportation more arduous. Because roads were often just rutted paths, even noble ladies rode on horseback rather than in carriages; and ordinary people walked everywhere. The dark of night was not lit up by street lights. The cold of winter was seldom effectively shut out. Smells of rotti",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-Academic “Psychiatry” and the Rise of Galenic Observation.md",
+        "title": "Academic “Psychiatry” and the Rise of Galenic Observation",
+        "paragraph_count": 143,
+        "body_ref_count": 112,
+        "definition_count": 112,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## Academic “Psychiatry” and the Rise of Galenic Observation\nAcademic \"Psychiatry\" and the Rise of Galenic Observation The Early Sixteenth Century\nSTUDIES of Renaissance psychology, especially when inspired by great Renaissance poets, such as Shakespeare, or painters, such as Albrecht Dürer, have often assumed that starting with Marsiglio Ficino in fifteenth-century Florence, and continuing for almost two hundred years, intellectuals operated unquestioningly with a basic humoral psychology, which they mixed variously with the Platonic writings, Aristotle's De anima, and sometimes with Pseudo-Aristotle's Problems. Renaissance humanists and academics, we are told, all agreed in finding the roots of madness in an excess of the melancholy humor (black bile). We usually think of this as a crucial \"background\" for understanding the art and literature of the Renaissance, but as a result, the medical history of the sixteenth century flattens out. Although historians of medicine have celebrated the important innovations in anatomical studies, they have mainly agreed that sixteenth-century medicine and psychology stagnated, trapped in a stultifying humanist scientific tradition and not yet a",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-Witchcraft and the Melancholy Interpretation of the Insanity Defense.md",
+        "title": "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+        "paragraph_count": 119,
+        "body_ref_count": 154,
+        "definition_count": 154,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## Witchcraft and the Melancholy Interpretation of the Insanity Defense\nWitchcraft and the Melancholy Interpretation of the Insanity Defense\nMEDICAL theories of melancholy mental disorder did not only affect medical treatment. By thinking of the mentally disordered as having a medical condition, one could also justify the consultation of medical authorities for advice on social policy, as occurs today, or even in legal matters, as began to occur more frequently in the late sixteenth century. To observe this process, one needs to look, not just at what the law said, but also at how it worked in practice. In the waning years of the twentieth century, people sometimes think that the insanity defense is one of the proud achievements of the Enlightenment and of the nineteenth century, or that it must be some sort of modern, \"liberal,\" weak-kneed, tenderhearted, and softheaded approach to crime—as if a tough-minded attitude would ignore a defendant's state of mind either during the commission of a crime or during a trial. It often surprises modern readers to learn that in the West the insanity defense is at least two thousand years old. The ancient Romans, who were not known for their te",
+        "issues": []
+      },
+      {
+        "path": "chapters/005-Court Fools and Their Folly Image and Social Reality.md",
+        "title": "Court Fools and Their Folly Image and Social Reality",
+        "paragraph_count": 202,
+        "body_ref_count": 71,
+        "definition_count": 71,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## Court Fools and Their Folly: Image and Social Reality\nCourt Fools and Their Folly: Image and Social Reality\nLONG ago a wise people called the “Lalen” grew so tired of being constantly asked to solve the problems of their princes and neighbors that they decided to dispel their reputation for wisdom and to behave in as foolish a manner as they could. They built a new triangular town hall with no proper doors and no windows; they then tried to bring in sunshine in baskets and buckets, and finally solved the problem of darkness by taking off the roof. When the emperor came to visit, they recognized that he must already have gold and silver aplenty, and so presented him with a common pot of sour mustard. Noticing his unmarried son, they offered the swine-herd’s daughter to him in marriage. In due course, their cleverly planned foolishness became habitual, and habit became second nature to them: “Consuetudo est altera natura.” In the end, they found that they could not be other than the fools they had become. Fear of a cat (a “mousedog”) led them finally to burn down their whole town and to scatter to the four corners of the world, spreading their folly to every tribe of the race of m",
+        "issues": []
+      },
+      {
+        "path": "chapters/006-Pilgrims in Search of Their Reason.md",
+        "title": "Pilgrims in Search of Their Reason",
+        "paragraph_count": 177,
+        "body_ref_count": 140,
+        "definition_count": 140,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## Pilgrims in Search of Their Reason\n<div style=\"text-align: center;\"><img src=\"imgs/img_in_image_box_237_1453_473_1692.jpg\" alt=\"Image\" width=\"5%\" /></div> Pilgrims in Search of Their Reason\nIN THE late Middle Ages, a popular piety flourished so vigorously that some churchmen worried about how to retain control over the sacred.[^1] It was the age of the “children’s pilgrimage” to Mont St. Michel (1456–59) and of the mass enthusiasm surrounding Drummer of Niklashausen (1476), of bleeding hosts and the cult of Corpus Christi, of the new devotion of the Rosary and an apparently insatiable appetite for preaching.[^2] The reader of such accounts could easily come away with the impression that this florid display of religious excess fell victim in the sixteenth century to the combined forces of Protestant and Catholic Reformation, and to what Peter Burke has called the “triumph of Lent.”[^3] Reading in English, especially, one would conclude that pilgrimage was an essentially medieval form of piety, and that after 1500 the ridicule of Erasmus and Luther’s systematic critique undid the venerable practice of pilgrimage.[^4] Certainly, this is what Michel Foucault had in mind when he char",
+        "issues": [
+          {
+            "type": "front_matter_leak_in_opening"
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "LATE MEDIEVAL MIRACLES IN",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      },
+      {
+        "path": "chapters/007-Madness as Helplessness Two Hospitals in the Age of the Reformations.md",
+        "title": "Madness as Helplessness Two Hospitals in the Age of the Reformations",
+        "paragraph_count": 259,
+        "body_ref_count": 149,
+        "definition_count": 149,
+        "body_contract_ok": true,
+        "section_head_count": 11,
+        "opening_excerpt": "## Madness as Helplessness: Two Hospitals in the Age of the Reformations\nMadness as Helplessness: Two Hospitals in the Age of the Reformations Madness as Helplessness\nONE of the characteristics of the early modern state, observable all over Europe, was an increasing concern about and even care for the troubled, dispossessed, and wretched. Tudor England had its famous Poor Laws, and French, Italian, and German towns reformed their provisions for widows, orphans, and the aged. The German territories were not far behind. A generation ago, there was a lively debate among scholars about whether the Protestants were entitled to take most of the credit for such reforms, a debate that evaporated as it became plain that the changes in question were about as prevalent in Catholic towns as in Protestant ones. Then the controversy shifted to center on the question of whether the new interventions of the state were part of a bourgeois or newly rational attempt to control the poor, and most recently they have been seen as part of the civilizing process or of \"confessionalization\" and state-building.\nIn this chapter, we shall examine madness in another of its sixteenth-century costumes. Here we s",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "FOOD CONSUMPTION AND NUTRITION",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "THE HOSPITAL AS A THERAPEUTIC",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      },
+      {
+        "path": "chapters/008-Epilogue.md",
+        "title": "Epilogue",
+        "paragraph_count": 12,
+        "body_ref_count": 1,
+        "definition_count": 1,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Epilogue\nCpilogue\nWHEN Germans of the sixteenth century encountered thoughts and behavior that made no sense, they were quick to conclude that the problem was madness, but they disagreed sharply over the causes. Basic to everyone's understanding of insanity was the assumption that it might well have physical origins in congenital retardation, brain disease, cerebral injury or tumors, or in more general disorders of the temperament or of the whole body. Physicians made this set of assumptions more specific and more classical by claiming to locate and to give Greek names to the specific bodily juices or humors whose excess or deficit might be at the root of mania, phrenitis, melancholia, or the other less common, but no less well recognized, mental disorders. Even when they did not find a physical cause for madness, early modern Germans knew of other natural processes by which one might be driven crazy. The chapters of this book have illustrated, for example, the widespread notion that a sudden terror might produce so great a shock that one might be driven mad. A bad marriage was another noted source of insanity.\nIn addition to these naturalistic assumptions, however, sixteenth-ce",
+        "issues": []
+      }
+    ]
+  },
+  {
+    "folder": "post-revolutionary",
+    "doc_id": "7ba9bca783fd",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "7ba9bca783fd",
+      "status": "ready",
+      "reason": "ok",
+      "blocking_reasons": [],
+      "generated_at": 1775750816
+    },
+    "issues": [],
+    "chapters": [
+      {
+        "path": "chapters/001-Introduction Psychological Interiority versus Self-Talk.md",
+        "title": "Introduction Psychological Interiority versus Self-Talk",
+        "paragraph_count": 53,
+        "body_ref_count": 38,
+        "definition_count": 38,
+        "body_contract_ok": true,
+        "section_head_count": 1,
+        "opening_excerpt": "## Introduction: Psychological Interiority versus Self-Talk\nIntroduction: Psychological Interiority versus Self-Talk\nIs the self a unitary whole, or is it fractured and fragmentary? That very general, open-ended question has been a recurrent one, assuming different forms and freighted with different meanings according to the historical context. In the aftermath of the Revolution of 1789, it took on an almost startling urgency in France; the highest social and political stakes seemed to ride on it. Spanning the period 1750 to 1850, this book explores a conjuncture between psychological discourse and sociopolitical change that, I argue, captures the French in the act of grappling with the newly imposed conditions of modernity. Hence this is a book at once about the self and about sociopolitical order.\nAs anyone who has embarked on research of this sort knows, basic definitional considerations make the self a treacherous object of investigation. Commonplace in present-day American English, the word “self” does not send us rushing to the dictionary; we have a firm if intuitive grasp of what it signifies and how to use it. At the same time, the word, which belongs both to everyday speec",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-1 The Perils of Imagination at the End of the Old Regime.md",
+        "title": "1 The Perils of Imagination at the End of the Old Regime",
+        "paragraph_count": 124,
+        "body_ref_count": 100,
+        "definition_count": 100,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## 1 The Perils of Imagination at the End of the Old Regime\n1 The Perils of Imagination at the End of the Old Regime\nEach artisan will regard himself as a solitary being, dependent on himself alone, and free to indulge all the flights of an often disordered imagination.\nRemonstrance of the Parlement of Paris against the edict abolishing the guilds, 1776",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-2 The Revolutionary Schooling of Imagination.md",
+        "title": "2 The Revolutionary Schooling of Imagination",
+        "paragraph_count": 132,
+        "body_ref_count": 116,
+        "definition_count": 116,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## 2 The Revolutionary Schooling of Imagination\n2 The Revolutionary Schooling of Imagination\nWhat happened to the anxiety about the freestanding individual—an anxiety for which the discourse on imagination typically served as proxy—during the Revolution itself? Or, put differently, how could the Revolutionaries have confidently embarked upon such policies as the abolition of the craft guilds in 1791 and the abolition of a host of other corporate bodies on the night of August 4, 1789, if they believed that only a fully elaborated social matrix could contain the potentially unruly imaginations of the populace? Within a smaller compass, the oeuvre of Condillac poses much the same question. How could the master of sensationalist psychology, whose Essai sur les origines des connaissances humaines (1746) trenchantly analyzed the dangers presented to imagination by solitude, have unequivocally championed the laissez-faire market in his Le commerce et le gouvernement considérés relativement l'un à l'autre (1776)?\nA basic, skeletal answer to these parallel questions—to be fleshed out later in this chapter—can be found in a short text from the republican phase of the Revolution: an anonymous",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-3 Is There a Self in This Mental Apparatus.md",
+        "title": "3 Is There a Self in This Mental Apparatus",
+        "paragraph_count": 114,
+        "body_ref_count": 131,
+        "definition_count": 131,
+        "body_contract_ok": true,
+        "section_head_count": 5,
+        "opening_excerpt": "## 3 Is There a Self in This Mental Apparatus?\nIs There a Self in This Mental Apparatus? The difficult thing is forming the moi. Sieyès, 1773\nNo one could have been more committed to the psychology of Condilac than the minor historical figure Dieudonné Thiébault, who made a cameo appearance in Chapter 2. A professor of general grammar at a Paris central school under the Directory, Thiébault had earlier done a stint in Berlin teaching the sensationalist epistemology at a new school personally founded by Frederick the Great to foster the spread of enlightenment in his domains. Hence it is of no little moment that, addressing the French fathers who had sent their sons to the central schools in the Year XI (1802), he listed among the goals of secondary education that the students become “accustomed to that inner life (vie intérieure) that assures us of so many resources in times of trouble and vexation,” that they “learn to descend into their own thoughts and to search deeply (fouiller) in their heads, everyone’s richest and most fecund book, the most important for all of us to study.”[^1] In other words, Thiébault, the veritable ideal type of the sensationalist psychologist, referred ",
+        "issues": []
+      },
+      {
+        "path": "chapters/005-4 An A Priori Self for the Bourgeois Male Victor Cousin's Project.md",
+        "title": "4 An A Priori Self for the Bourgeois Male Victor Cousin's Project",
+        "paragraph_count": 145,
+        "body_ref_count": 152,
+        "definition_count": 152,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## 4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\n4 An A Priori Self for the Bourgeois Male: Victor Cousin's Project\nDinner at the Ecole polytechnique with Monsieur D . . . and the young philosophy professor Cousin. We spoke a great deal about metaphysics, and I was pleased with myself; I thought the others were, too. I laid out my mode of conceptualization . . . , explain[ing it] to my young professor, who grasped it wonderfully (a merveille). Maine de Biran, Journal, 1816\nAmong the educated Frenchmen troubled by the defective, fragmented sensationalist self, none was more dogged in his pursuit of it than Victor Cousin. A junior participant in Maine de Biran's exclusive metaphysical society during the early years of the Restoration, he had a glint in his eye, a capacity to grasp ideas “à merveille,” that made a strong impression on the philosopher from the Périgord. By 1821, Maine de Biran felt sure that, despite his excessive fervor (une tête trop ardente)—apparently a coded reference to fondness for German idealism—the “young professor Cousin” was the “hope of the true philosophy among us.”[^1] In fact, even as the older man penned those lines, Cousin was bus",
+        "issues": []
+      },
+      {
+        "path": "chapters/006-5 Cousinian Hegemony.md",
+        "title": "5 Cousinian Hegemony",
+        "paragraph_count": 170,
+        "body_ref_count": 147,
+        "definition_count": 147,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## 5 Cousinian Hegemony\n5 Cousinian Hegemony\nThe enemy is disciplined. Let us discipline ourselves. Victor Cousin, 1843\nA French bourgeois household of the era of the July Monarchy might have owned and displayed on its bookshelves the Dictionnaire de la conversation et de la lecture, a multivolume, all-purpose reference work intended to serve the everyday needs of the educated middle-class family. Turning to its article, “Moi,” the reader would find these remarkable opening lines:",
+        "issues": []
+      },
+      {
+        "path": "chapters/007-6 Religious and Secular Access to the Vie Intérieure Renan at the Crossroads.md",
+        "title": "6 Religious and Secular Access to the Vie Intérieure Renan at the Crossroads",
+        "paragraph_count": 114,
+        "body_ref_count": 35,
+        "definition_count": 35,
+        "body_contract_ok": true,
+        "section_head_count": 4,
+        "opening_excerpt": "## 6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\n6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads\nThe travails of the Cousinian regiment in the provinces, as described in the previous chapter, make plain the frictions between eclecticism and Catholicism that could intrude into everyday life during the 1840s—frictions summed up in the contemporary Bordelais quip that “Catholic doesn’t rhyme with eclectic.” But, confined to institutional politics and suffused with a sense of raw urgency, the accounts provided by Cousin’s former students are necessarily limited in scope. Especially conspicuous from the vantage point of this book, they fail to probe the relationship between the two doctrines at the phenomenological level. How did Cousinian philosophical psychology and Catholic piety compare as alternate mid-nineteenth-century modes of access to an interior life? Were the clergy who “persecuted” the teachers of eclectic philosophy correct in their assessment that the kind of interiority encouraged by Cousin was inimical to their own, religious project? Did Catholic belief stand as a barrier to the appropriation of a Cousinian ",
+        "issues": []
+      },
+      {
+        "path": "chapters/008-7 A Palpable Self for the Socially Marginal The Phrenological Alternative.md",
+        "title": "7 A Palpable Self for the Socially Marginal The Phrenological Alternative",
+        "paragraph_count": 140,
+        "body_ref_count": 18,
+        "definition_count": 18,
+        "body_contract_ok": true,
+        "section_head_count": 4,
+        "opening_excerpt": "## 7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\n7 A Palpable Self for the Socially Marginal: The Phrenological Alternative\nI make no appeal to 14 in this country [France]. Here one is polite, social, agreeable, but we must not expect 14. J. C. Spurzheim to George Combe, 1824\nAt the end of November 1839, an infernal machine—the same kind of device that had been used several years earlier in Fieschi's attempted assassination of King Louis-Philippe—mysteriously exploded in the center of Paris, destroying a wall on a street adjacent to the Palais-Royal. The police soon decided that the crime had been politically motivated, the work of a left-wing secret society hostile to the July Monarchy. They based this conclusion on the fact that their chief suspect, whose tiny rented room in the Marais was found to harbor a cache of explosives, had previously been sentenced for placarding the city with “seditious” posters. The suspect was Antoine-Pierre Béraud, a young man of twenty-two enrolled at the Paris Law Faculty. The arrest of Béraud proved to be a colorful affair. According to the Gazette des tribunaux, a police officer successfully recognized him at night ev",
+        "issues": []
+      },
+      {
+        "path": "chapters/009-Epilogue.md",
+        "title": "Epilogue",
+        "paragraph_count": 94,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 3,
+        "opening_excerpt": "## Epilogue\nEpilogue\nWhen you have just taken the bachot at the age of seventeen with the \"I think, therefore I am\" of Descartes as your text and you open The Psychopathology of Everyday Life and you read the famous episode of Signorelli with its substitutions, combinations and displacements, implying that Freud was simultaneously thinking of a patient who had committed suicide and of certain Turkish mores, on so on—when you read all that, your breath is simply taken away. Jean-Paul Sartre\nWith the marginalization of phrenology in the late 1840s, and the strong reaffirmation of the unitary moi that it represented, we come to the end of our principal story. But to tie up some loose ends and grasp more fully the significance of Cousin's project, we need to look ahead into the latter half of the nineteenth century. This epilogue will consider three aspects of the post-1850 history of Cousinian self-talk, all hinted at in the body of the text: the fate of the internal contradictions of Cousinian psychology with respect to its denial of selfhood to workers and to women, respectively; and the remarkable longevity of Cousinianism, or, more precisely, of certain of its signature psychologi",
+        "issues": []
+      }
+    ]
+  },
+  {
+    "folder": "Heidegger_en_France",
+    "doc_id": "a5d9a08d6871",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "a5d9a08d6871",
+      "status": "ready",
+      "reason": "ok",
+      "blocking_reasons": [],
+      "generated_at": 1775750915
+    },
+    "issues": [
+      {
+        "type": "chapter_title_sequence_mismatch",
+        "expected_titles": [
+          "Introduction",
+          "1. Premiers passages du Rhin",
+          "2. La bombe Sartre",
+          "3. Les fascinations de l'après-guerre"
+        ],
+        "export_titles": [
+          "Introduction",
+          "1 Premiers passages du Rhin",
+          "2 La bombe Sartre",
+          "3 Les fascinations de l'après-guerre"
+        ]
+      }
+    ],
+    "chapters": [
+      {
+        "path": "chapters/001-Introduction.md",
+        "title": "Introduction",
+        "paragraph_count": 46,
+        "body_ref_count": 6,
+        "definition_count": 6,
+        "body_contract_ok": true,
+        "section_head_count": 1,
+        "opening_excerpt": "## Introduction\n### De la mode à la méthode\nfoyer culturel et spirituel élargi aux philosophes d'expression française (ainsi qu'aux interprétations étrangères dont les traductions viendront enrichir le débat hexagonal). Mais surtout, l'historien doit d'abord raconter et analyser : analyser pour raconter à bon escient, raconter pour analyser sereinement, soutenir ses analyses grâce au recours au narratif — et l'inverse. Tout en restant philosophe (et il faut l'être pour affronter les difficultés de l'entreprise, en matière lexicale aussi bien que sur le terrain conceptuel), on se voudra ici avant tout historien, fidèle au sens grec de l'histoire : enquête permettant l'intelligence des événements. L'effort d'impartialité n'interdira cependant pas la critique : impartialité n'est pas neutralité. Le lecteur serait en droit d'être déçu si nous nous bornions à passer en revue les progrès d'une « réception » exceptionnelle en nous limitant à en enregistrer les éléments (pour autant qu'il soit même possible de se borner à un tel impassible compte rendu) : ne doit-on pas laisser sur le côté de la route ce qu'on a jugé accessoire et contribuer au moins à préparer une appréciation philosophiq",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-1 Premiers passages du Rhin.md",
+        "title": "1 Premiers passages du Rhin",
+        "paragraph_count": 87,
+        "body_ref_count": 34,
+        "definition_count": 34,
+        "body_contract_ok": true,
+        "section_head_count": 4,
+        "opening_excerpt": "## 1. Premiers passages du Rhin\n1. Premiers passages du Rhin\nLa soudaine célébrité de Heidegger, à la suite de la publication de Sein und Zeit, en 1927, n'a pas pu passer complètement inaperçue à Paris qui était à l'époque, encore plus nettement qu'aujourd'hui, la capitale intellectuelle de l'Europe et sans doute du monde. Mais connaître un nom est une chose, pénétrer une pensée en est une autre. Alors que le chef-d'œuvre de Heidegger dut attendre près de soixante ans pour être traduit dans son intégralité, des témoignages et des publications permettent de constater que des universitaires distingués comme Léon Brunschvicq ou Xavier Léon ne furent pas, dans ce cas précis, trop lents à apprendre qu'un événement philosophique s'était produit en Allemagne.\nEt même, fait plus surprenant, dès les années immédiatement postérieures à la publication de Sein und Zeit, un cours eut lieu en Sorbonne sur la philosophie allemande contemporaine[^1]. Nous n'avons pas la preuve que la dernière partie, consacrée à Heidegger, ait été prononcée dès 1928. L'auteur, Georges Gurvitch, précise seulement dans son Avant-propos que le livre qu'il fait paraître en 1930 rassemble quatre études résumant trois c",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-2 La bombe Sartre.md",
+        "title": "2 La bombe Sartre",
+        "paragraph_count": 92,
+        "body_ref_count": 19,
+        "definition_count": 19,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## 2. La bombe Sartre\n### Les aveux de la drôle de guerre\n2. La bombe Sartre\nSi Sartre mérite un chapitre à part, ce n'est pas seulement en raison de l'éclatante irruption de sa célébrité après la Libération, c'est surtout parce que sa manière décidée et très personnelle d'aborder la pensée de Heidegger, de la critiquer et de l'intégrer à son propre projet philosophique a bouleversé les conditions de la première réception. Nous avons constaté que celle-ci était déjà conséquente. Sans nier sa dette à son égard, Sartre l'occulte en imposant son style et sa problématique. Mais la contrepartie de cette occultation — qu'il n'a pas maîtrisée ni même peut-être voulue — est l'incontestable reconnaissance du Maître de Fribourg, placé sur le même pied que Hegel et Husserl. Discuté, critiqué, Heidegger voit sa stature philosophique définitivement consacrée. On va établir comment et à quel prix cette opération de grand style a été menée.",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-3 Les fascinations de l'après-guerre.md",
+        "title": "3 Les fascinations de l'après-guerre",
+        "paragraph_count": 2081,
+        "body_ref_count": 393,
+        "definition_count": 393,
+        "body_contract_ok": true,
+        "section_head_count": 41,
+        "opening_excerpt": "## 3. Les fascinations de l'après-guerre\n3. Les fascinations de l'après-guerre\nIl n'est pas surprenant que la Libération n'ait pas été seulement politique, mais aussi culturelle, et que la bombe Sartre n'ait pas été la seule à exploser dans un bouillonnement intellectuel intense, au milieu d'une joyeuse confusion. Sartre lui-même a constaté et déploré que, transformé en mode, l'existentialisme soit devenu un mot qui « a pris aujourd'hui une telle largeur et une telle extension qu'il ne signifie plus rien du tout ». L'existentialisme devint ainsi presque un slogan, sans qu'on sût exactement en quoi il consistait : « À Saint-Germain-des-Prés le langage de l'époque prenait forme, et aussi son jargon... La critique mélangeait tout. La philosophie de Jaspers et celle de Gabriel Marcel, Trotski et Malraux, Nietzsche et André Breton, Kierkegaard et Heidegger. » Rien donc d'extraordinaire à ce que ce dernier ait été l'un des convives involontaires de cette vaste et plus ou moins sympathique auberge espagnole.\nCe qui est plus étonnant, c'est qu'il se soit vu porté au pinacle du snobisme de l'intelligentsia parisienne, son prestige soudain au zénith, sans que rigueur lui soit guère tenue d'ê",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "Des intelligences plus parisiennes",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "11.",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "folder": "Mad_Act",
+    "doc_id": "bd05138cd773",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "bd05138cd773",
+      "status": "ready",
+      "reason": "ok",
+      "blocking_reasons": [],
+      "generated_at": 1775750999
+    },
+    "issues": [
+      {
+        "type": "chapter_title_sequence_mismatch",
+        "expected_titles": [
+          "Prologue Diversity, coherence, and scheme transfers",
+          "Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca. 1150",
+          "From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360",
+          "“Danxi said…” The textual life of medical ideas, 1360-1530",
+          "Replenish or attack? Competing etiologies and therapies of madness, 1530-1650",
+          "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+          "Ghosts or mucus? Possession symptoms and their treatment in Ming and Qing medicine",
+          "Gendered mania Women’s madness in late-imperial medicine",
+          "Prologue Language, objects, and practices"
+        ],
+        "export_titles": [
+          "Prologue Diversity, coherence, and scheme transfers",
+          "Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca 1150",
+          "From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca 1150-1360",
+          "“Danxi said…” The textual life of medical ideas, 1360-1530",
+          "Replenish or attack Competing etiologies and therapies of madness, 1530-1650",
+          "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+          "Ghosts or mucus Possession symptoms and their treatment in Ming and Qing medicine",
+          "Gendered mania Women’s madness in late-imperial medicine",
+          "Prologue Language, objects, and practices"
+        ]
+      }
+    ],
+    "chapters": [
+      {
+        "path": "chapters/001-Prologue Diversity, coherence, and scheme transfers.md",
+        "title": "Prologue Diversity, coherence, and scheme transfers",
+        "paragraph_count": 17,
+        "body_ref_count": 6,
+        "definition_count": 6,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Prologue Diversity, coherence, and scheme transfers\n2 Prologue to Part One Diversity, coherence, and scheme transfer\nMedicine is the most complex field I shall be studying. Qing legislative and judicial practices were far from simple, but criminal trials followed common procedures and referred to a single body of laws that discussed madness and mad acts with consistent terminology. Although Qing laws were often modified, officials worked with only one code. Medical texts form a less cohesive corpus. They were produced in often-obscure contexts by authors or compilers who shared neither a common vocabulary nor a common understanding of madness. With no institution to stabilize it, the meaning of medical terms varied in time, between works of the same period, and even within individual works.[^1] Unlike the relatively simple madness that the law described, medical kuang 狂 was characterized by a wide variety of behaviors and traced to origins as diverse as mucus accumulation in the chest, internally generated Liver Fire, and invasion by external Wind. Many contradictory explanations could even be presented as true in a single text.[^2]\nTo assess and explain this diversity properly,",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca 1150.md",
+        "title": "Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca 1150",
+        "paragraph_count": 161,
+        "body_ref_count": 5,
+        "definition_count": 5,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## Psycho-behavioral pathology in Chinese medicine Concepts and early developments, 2nd century BCE – ca. 1150\nPsycho-behavioral pathology in Chinese medicine\nConcepts and early developments, $ 3^{rd} $ century BCE – ca. 1150\nThis chapter provides conceptual and factual tools for understanding how medical treatments of insanity changed despite how stably Chinese doctors kept describing mad behavior. As I pointed out in Chapter 1, Chinese people called “mad” the same disorders of behavior, speech, affect, and perception that we intuitively include under the category of madness. Here I survey the way ancient medical texts described such symptoms and analyze how physicians explained and treated psycho-behavioral pathology before about 1150.",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca 1150-1360.md",
+        "title": "From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca 1150-1360",
+        "paragraph_count": 205,
+        "body_ref_count": 23,
+        "definition_count": 23,
+        "body_contract_ok": true,
+        "section_head_count": 9,
+        "opening_excerpt": "## From Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360\nFrom Wind to mucus and Fire The innovations of Jin and Yuan physicians, ca. 1150-1360\nIn Chapter 3, I traced the increasingly widespread association of mucus with Wind disorders from the tenth to the twelfth century and showed that several illnesses whose pathomechanisms had been considered close to those of kuang—Wind strokes and xian 痈 seizures—were often treated with anti-mucus remedies by the end of that period. Let me now explain how the mucus-and-Fire etiology of madness that dominated late-imperial conceptions of insanity developed. The mucus-and-Fire script emerged among doctrinally minded physicians who lived in north China under the Jin dynasty (1115-1234), and was consolidated by southern doctors who were influenced by these northerners in the early fourteenth century under the Yuan dynasty (1260-1368), after the Mongol conquest of both the Jin and the southern Song (1127-1279) had re-established contacts between north and south China. The innovations these medical thinkers proposed built on the trends I outlined in Chapter 3, but it was their doctrinal and therapeutic precepts that ",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-“Danxi said…” The textual life of medical ideas, 1360-1530.md",
+        "title": "“Danxi said…” The textual life of medical ideas, 1360-1530",
+        "paragraph_count": 221,
+        "body_ref_count": 4,
+        "definition_count": 4,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## “Danxi said…” The textual life of medical ideas, 1360-1530\n“Danxi said…” The textual life of medical ideas on madness, 1360-1530\nDanxi said that dian belongs to Yin and kuang to Yang, that dian is excessive joy and kuang excessive anger. He also stated that the doubling of Yin is dian and the doubling of Yang is kuang. 丹溪謂癲屬陰 狂屬陽 癲多喜 狂多怒 又云重陰者癲 重陽者狂\nXu Chunfu 徐春甫 in Gujin yitong daquan 古今醫統大全 (1556) [1]",
+        "issues": []
+      },
+      {
+        "path": "chapters/005-Replenish or attack Competing etiologies and therapies of madness, 1530-1650.md",
+        "title": "Replenish or attack Competing etiologies and therapies of madness, 1530-1650",
+        "paragraph_count": 187,
+        "body_ref_count": 12,
+        "definition_count": 12,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## Replenish or attack? Competing etiologies and therapies of madness, 1530-1650\n6 Replenish or attack? Competing etiologies and therapies of madness in Ming medicine\nWhen there is depletion, replenish it; when there is repletion: drain it. 虛者補之 實者瀉之 Canon of Problems 難經, problem 69\nThis chapter explains the rich developments that took place in elite medical thinking and practice from roughly 1530 to 1650. In addition to writing long sections on diankuang in their treatises, physicians from this ebullient period recorded in some detail how they handled specific cases of madness. All of these men had read the Danxi xinfa 丹溪心法 (1482), knew of Wang Lun's 王綸 (1453-1510) arguments on Yin-replenishing, and embraced a syncretistic approach to past medical teachings. Their clinical practice and most of the doctrinal debates in which they engaged were thus informed by the trends in medical thinking that I described in previous chapters.",
+        "issues": []
+      },
+      {
+        "path": "chapters/006-Shapes of practices Medical trends surrounding dian and kuang, 1650-1911.md",
+        "title": "Shapes of practices Medical trends surrounding dian and kuang, 1650-1911",
+        "paragraph_count": 217,
+        "body_ref_count": 15,
+        "definition_count": 15,
+        "body_contract_ok": true,
+        "section_head_count": 5,
+        "opening_excerpt": "## Shapes of practices Medical trends surrounding dian and kuang, 1650-1911\nShapes of practice\nMedical trends surrounding dian and kuang, 17th-19th century\nThe profusion of medical works that appeared after 1650 are an irritating windfall. As medical publications boomed, vectors of knowledge transmission and the doctrinal debates that interested physicians became more intricate and numerous. It thus becomes difficult to find narrative threads to explain how Qing medical reflections on madness changed. Far too many texts were published for me to base my conclusions on comprehensive data as I tried to do for earlier periods. But the extensive array of short treatises, collections of case files, formularies, and medical primers that appeared in Qing times hint to the thinking and practice of minor physicians who made no “contributions to the development of Chinese medicine”—to borrow a phrase from a less critical historiography. These works allow us to see how much medical luminaries had in common with their less famous counterparts.",
+        "issues": []
+      },
+      {
+        "path": "chapters/007-Ghosts or mucus Possession symptoms and their treatment in Ming and Qing medicine.md",
+        "title": "Ghosts or mucus Possession symptoms and their treatment in Ming and Qing medicine",
+        "paragraph_count": 152,
+        "body_ref_count": 13,
+        "definition_count": 13,
+        "body_contract_ok": true,
+        "section_head_count": 5,
+        "opening_excerpt": "## Ghosts or mucus? Possession symptoms and their treatment in Ming and Qing medicine\nGhosts or mucus?\nPossession symptoms and their treatments in Ming and Qing medicine\nI also saw a bearded figure lifting my oilcloth screen, but he suddenly disappeared. I was startled and I started to feel befuddled inside: I wanted to seek death. 又見一鬍子將油簾揭起 倏忽不見 吃了一驚 心內恍 惚起來 自欲尋死",
+        "issues": []
+      },
+      {
+        "path": "chapters/008-Gendered mania Women’s madness in late-imperial medicine.md",
+        "title": "Gendered mania Women’s madness in late-imperial medicine",
+        "paragraph_count": 142,
+        "body_ref_count": 11,
+        "definition_count": 11,
+        "body_contract_ok": true,
+        "section_head_count": 3,
+        "opening_excerpt": "## Gendered mania Women’s madness in late-imperial medicine\nGendered mania? Women's madness in late-imperial case records\nA notorious adage circulating in late imperial medical circles declared that the women's illnesses were more difficult to cure than men's. [1] Two other sayings claimed that women's bodies were \"governed by Blood\" (以血為主 or a variant) and that treating women necessitated \"separate prescriptions\" (别方). Ming and Qing physicians cited these sayings to set up concurring arguments, to introduce objections or qualifications, or to clinch points with the help of a well-formulated piece of common knowledge.\nIn this chapter, I want to explore whether the gender of the sufferer was one of the fault lines along which the understanding and treatment of mad acts and mad people were divided. Did physicians from the Song (960-1279) to the Qing (1644-1911) describe madness as occurring to women by different mechanisms than to men? Did the treatments they prescribed differ according to the gender of the patient? What other aspects of medical approaches to insanity were “gendered”?",
+        "issues": []
+      },
+      {
+        "path": "chapters/009-Prologue Language, objects, and practices.md",
+        "title": "Prologue Language, objects, and practices",
+        "paragraph_count": 2207,
+        "body_ref_count": 79,
+        "definition_count": 79,
+        "body_contract_ok": true,
+        "section_head_count": 39,
+        "opening_excerpt": "## Prologue Language, objects, and practices\n10 Prologue to Part Two\nMadness and mad people in the Qing dynasty have been studied mostly in a legal context.[^1] The easy availability and relative intelligibility of legal documents vis-à-vis medical ones have undoubtedly contributed to this trend. [2] Following pioneers like Chen Hsiu-fen and Angelika Messner, I showed in Part One that Qing medical approaches to madness were also a legitimate topic. In Part Two, I want to show that the study of Qing legislative and judicial activities surrounding madness can be improved, and gains from being compared with the many other ways in which mad acts, words, and people were handled in both technical and non-technical contexts.\nIn this prologue and the next few chapters, I will often propose brief comparisons with the medical field, leaving more systematic reflections for Chapter 16, the general conclusion. But before I turn to comparisons, let me first explain how the Qing legal field functioned and what kinds of documents it produced. Doing so will help to understand how the object \"madness illness\" (feng bing 瘋病) emerged from concrete legal practices. I then present the ways in which dyna",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "11 Errors and projections",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "12",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "13",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "13.1 Discussions of madness in legal reports",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "14",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "folder": "Napoleon",
+    "doc_id": "5df1d3d7f9c1",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "5df1d3d7f9c1",
+      "status": "blocked",
+      "reason": "semantic_export_blocked",
+      "blocking_reasons": [
+        "toc_partial_tail_capture"
+      ],
+      "generated_at": 1775751027
+    },
+    "issues": [
+      {
+        "type": "chapter_title_sequence_mismatch",
+        "expected_titles": [
+          "V. La raison insurgée",
+          "Justine d’Élie et les principes généraux",
+          "Des chants, des jeux, des rêves et des prières",
+          "Les Napoléons de l’Histoire",
+          "Postambule"
+        ],
+        "export_titles": [
+          "V La raison insurgée",
+          "Justine d’Etre et les principes généraux",
+          "Des chutes, des gens, des règles et du génie",
+          "Les Mésaventures de l’Histoire"
+        ]
+      },
+      {
+        "type": "blocked_but_latest_zip_still_exists"
+      }
+    ],
+    "chapters": [
+      {
+        "path": "chapters/001-V La raison insurgée.md",
+        "title": "V La raison insurgée",
+        "paragraph_count": 10,
+        "body_ref_count": 2,
+        "definition_count": 2,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## V. La raison insurgée\nV La raison insurgée\nLe 19 juillet 1870, à la suite de la fameuse dépêche d'Ems récrite par Bismarck afin de provoquer le conflit, la France déclare la guerre à l'Allemagne. En quelques semaines, les troupes prussiennes déferlent sur le pays. La défaite de Sedan, le 2 septembre, signe l'effondrement du Second Empire; le 4, la République est proclamée. Progressant dans les campagnes et dans les villes, l'armée étrangère encercle Paris à partir du 19 septembre, instaurant le blocus. La capitale lutte et résiste, dans le froid et la faim, mais, le 28 janvier 1871, la France capitale. Se sentant trahie par le gouvernement de Défense nationale et l'Assemblée réfugiés à Versailles, la population parisienne se révolte le 18 mars et organise la Commune de Paris, gouvernement révolutionnaire et mouvement insurrectionnel écrasé par les Versaillais, au terme de la Semaine sanglante (21-28 mai).\n1870-1871 : la période est insécable et, pourtant, la guerre franco-prussienne n'est pas la guerre intestine, un siège n'est pas une insurrection. Si étrangers soient-ils dans leur nature, les événements qui se déroulent entre le 19 septembre 1870 et le 28 mai 1871 à Paris doiv",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-Justine d’Etre et les principes généraux.md",
+        "title": "Justine d’Etre et les principes généraux",
+        "paragraph_count": 32,
+        "body_ref_count": 15,
+        "definition_count": 15,
+        "body_contract_ok": true,
+        "section_head_count": 1,
+        "opening_excerpt": "## Justine d’Etre et les principes généraux\ndéterminées, avant leur internement, par le choc d'avoir vu un obus tomber à côté d'eux. Mais peut-on pour autant parler de délire spécifique aux événements de la guerre ?\nJEANNE D'ARC ET LES PANOPHOBES GÉMISSEURS\nBien avant que la « névrose de guerre » soit identifiée par Freud après la Première Guerre mondiale, les troubles occasionnés par la violence des chocs et des conflits ont trouvé dans la littérature médicale diverses formulations. Les chirurgiens de la Grande Armée isolèrent le « syndrome du vent du boulet », qui paralysait les grognards de l'Empire ; la notion concomitante de « névrose trauma-tique » fut élaborée, en France et en Angleterre, à la suite des premières catastrophes ferroviaires ; la guerre de Crimée et le siège de Sébastopol (1854), la campagne d'Italie et la bataille de Solferino (1859), la guerre de Sécession (1865-1867) occasionnèrent récits et études à propos du syndrome du « cœur de soldat » ou « cœur irritable », décrivant « les manifestations neurovégétatives de l'anxiété de guerre[^1] ».",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-Des chutes, des gens, des règles et du génie.md",
+        "title": "Des chutes, des gens, des règles et du génie",
+        "paragraph_count": 29,
+        "body_ref_count": 32,
+        "definition_count": 32,
+        "body_contract_ok": true,
+        "section_head_count": 0,
+        "opening_excerpt": "## Des chutes, des gens, des règles et du génie\nLe reste des cas se partage entre l'hystérie, la chorée et l'idiotie, cas isolés non évalués en pourcentage par les deux aliénistes. Les deux chiffres frappants sont la mélancolie des femmes, déjà évoquée, et l'alcoolisme des hommes, qui occupe dans le tableau nosologique la première place, qu'il ne quittera pas avant le xx<sup>e</sup> siècle[^1]... Le taux d'alcooliques entrés à Bicêtre, par exemple, n'avait pas cessé d'augmenter sous le Second Empire, passant de 12,78 % en 1855 à 25,24 % en 1862. À Sainte-Anne, Bouchereau et Magnan établissent des statistiques comparatives pour les périodes de mars-juin 1870 (21,2 % d'alcooliques internés) et mars-juin 1871 (22,6 %) qui montrent que, contrairement à ce que la propagande a voulu faire accroire, la Commune n'a pas été cette période d'inflation morbide du délire alcoolique — les chiffres marquent même une baisse en mars 1871 par rapport à l'année précédente[^2].\nOn assiste en revanche sous la Commune à une explosion des délires en lien avec les événements — qu'il s'agisse des traumatismes de la guerre ou de l'insurrection. Ce constat semble se vérifier en priorité à Paris. Dans son imm",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-Les Mésaventures de l’Histoire.md",
+        "title": "Les Mésaventures de l’Histoire",
+        "paragraph_count": 67,
+        "body_ref_count": 16,
+        "definition_count": 16,
+        "body_contract_ok": true,
+        "section_head_count": 3,
+        "opening_excerpt": "## Les Mésaventures de l’Histoire\nDistinctes sans être séparées, la guerre et la Commune sont traitées pour la première fois dès le second semestre 1871 par Benedict-Augustin Morel, qui déclare faire « œuvre de patriotisme[^1] » en montant à l’assaut contre un livre du docteur Carl Starck, dont le titre résume la visée : La Dégénérescence du peuple français, son caractère pathologique, ses symptômes et ses causes. Contribution de médecine mentale à l’histoire médicale des peuples. Selon Starck, les brutalités et les horreurs de la guerre seraient à mettre sur le compte d’un peuple abâtardi, décadent et corrompu, dont l’orgueil natif (et légendaire) est devenu « une monomanie, une idée fixe, un vrai délire[^2] ... ». Toujours persuadée d’être à la tête de la civilisation, la nation française ressemble à un aliéné atteint de « folie raisonnante », un « paralytique général couché sur son grabat annonçant qu’il est plein de force et de santé[^3] ». Comble des humiliations, le docteur Starck a pour elle la commisération du médecin devant un organisme débile. « Les Français, dit-il, ont un cerveau organisé d’une manière spéciale, et Huschke (un autre savant) a démontré que le poids des c",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "180000",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "folder": "Neuropsychoanalysis_in_Practice",
+    "doc_id": "e7f8a1b6c2d3",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "e7f8a1b6c2d3",
+      "status": "ready",
+      "reason": "ok",
+      "blocking_reasons": [],
+      "generated_at": 1775750592
+    },
+    "issues": [],
+    "chapters": [
+      {
+        "path": "chapters/001-Introduction.md",
+        "title": "Introduction",
+        "paragraph_count": 85,
+        "body_ref_count": 2,
+        "definition_count": 2,
+        "body_contract_ok": true,
+        "section_head_count": 9,
+        "opening_excerpt": "## Introduction\npsychology of the mind, which is now merely extended from the psyche to the brain? Let us now finally turn to the brain itself, and see whether neuropsychoanalysis can indeed overcome the deficits in knowledge of the brain that Freud identified during his lifetime.\n### Function- and localization-based approach to the brain\nCurrent neuropsychoanalysis draws heavily on recent developments in cognitive, affective, and social neuroscience (Panksepp, 1998; Gazzaniga, 2008). For instance, different cognitive functions (e.g. attention, working memory, episodic memory, etc.) are taken as the initial starting point and are then related to supposedly corresponding concepts (e.g. memory, dreams) within the psychodynamic context (for examples of such an approach, see Solms and Turnbull, 2002; Mancia, 2006). Cognitive neuroscience has been most recently complemented by affective and social neuroscience (Panksepp, 1998) since psychodynamic concepts such as introjections, narcissism, self-objects, drives, etc. may be closely related to specific affective and social functions (Solms, 2004; Northoff et al., 2007a,c; Northoff and Panksepp, 2008). It is thus possible to speak of what ",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-1 Transcendental Approach to the Brain.md",
+        "title": "1 Transcendental Approach to the Brain",
+        "paragraph_count": 107,
+        "body_ref_count": 5,
+        "definition_count": 5,
+        "body_contract_ok": true,
+        "section_head_count": 4,
+        "opening_excerpt": "## 1 Transcendental Approach to the Brain\n### Philosophical concepts\nTranscendental Approach to the Brain Philosophical concepts The psyche’s input to cognition: Kant and Freud\nFreud was interested in the psyche or the “psychic apparatus” as he called it. More specifically, he focused on how the human psyche works, how it is organized and structured, and how in turn its structure and organization determine the contents that it can process and represent. For instance, consider Freud’s text about the ego and the id (Freud, 1923a). The first two chapters are about the structure and organization of the ego, and its functions and characterization. The ego and its tripartite structure describes the organization of the psychic apparatus which it applies to the processing of stimuli. However, at the end of the second chapter there is a shift, as Freud starts to describe the ego in terms of specific contents such as bodily contents as distinct from its functions and structure. This moves the focus from the structure and organization of the ego to its contents, as has been pointed out by Brook (2003).",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-2 Unknowability and the Concept of the Brain.md",
+        "title": "2 Unknowability and the Concept of the Brain",
+        "paragraph_count": 102,
+        "body_ref_count": 8,
+        "definition_count": 8,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## 2 Unknowability and the Concept of the Brain\n### Philosophical concepts\nUnknowability and the Concept of the Brain Philosophical concepts\n\"Doctrine of the unknowability of the noumenal mind\": Kant and the mind–brain problem",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity.md",
+        "title": "3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity",
+        "paragraph_count": 154,
+        "body_ref_count": 8,
+        "definition_count": 8,
+        "body_contract_ok": true,
+        "section_head_count": 9,
+        "opening_excerpt": "## 3 Transdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity\n### Freud’s duality between science and hermeneutics of mind: “concept–fact linkage”\nTransdisciplinary Methodology and Neuropsychodynamic Concept–Fact Iterativity\nFreud's duality between science and hermeneutics of mind: \"concept-fact linkage\"",
+        "issues": []
+      },
+      {
+        "path": "chapters/005-4 Cathexis and the Energy of the Brain.md",
+        "title": "4 Cathexis and the Energy of the Brain",
+        "paragraph_count": 116,
+        "body_ref_count": 1,
+        "definition_count": 1,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## 4 Cathexis and the Energy of the Brain\n### Determination of cathexis\nCathexis and the Energy of the Brain Determination of cathexis\nStrachey (1967, p. 62) used the Greek term “cathexis” to translate what Freud described as Besetzung in German. Although Strachey pointed out that the English terms “occupation” and “filling” capture some of the meaning of what Freud referred to as Besetzung, the term “cathexis” has suffered from ambiguities subsequently (Holt, 1962; McIntosh, 1993; Hoffer, 2005). However, these ambiguities have been caused not only by the translation of Besetzung as “cathexis,” but also by Freud’s multiple usage of the former term. Before considering these ambiguities in detail, I shall briefly introduce the term “cathexis” and discuss some of its key features.",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "Hierarchical organization, “inner–outer dichotomy,” and the ego",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      },
+      {
+        "path": "chapters/006-5 Cathexis, Neural Coding, and Mental States.md",
+        "title": "5 Cathexis, Neural Coding, and Mental States",
+        "paragraph_count": 145,
+        "body_ref_count": 1,
+        "definition_count": 1,
+        "body_contract_ok": true,
+        "section_head_count": 11,
+        "opening_excerpt": "## 5 Cathexis, Neural Coding, and Mental States\n### Cathexis as a “neuro-mental bridge concept”\nCathexis, Neural Coding, and Mental States\nCathexis as a \"neuro-mental bridge concept\"",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "Difference-based coding and Freud’s Project for a Scientific Psychology",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      },
+      {
+        "path": "chapters/007-6 Defense Mechanisms and Brain–Object and Brain–Self Differentiation.md",
+        "title": "6 Defense Mechanisms and Brain–Object and Brain–Self Differentiation",
+        "paragraph_count": 143,
+        "body_ref_count": 4,
+        "definition_count": 4,
+        "body_contract_ok": true,
+        "section_head_count": 10,
+        "opening_excerpt": "## 6 Defense Mechanisms and Brain–Object and Brain–Self Differentiation\n### Defense mechanisms and internalization\nDefense Mechanisms and Brain–Object and Brain–Self Differentiation Defense mechanisms and internalization\nThe concept of defense mechanisms was introduced in Sigmund Freud's early work, where he regarded them as mental operations that keep painful thoughts and affects out of awareness. Freud considered repression to be the most significant defense mechanism that describes how painful thoughts and affects can be suppressed in order to prevent them from entering consciousness, and thus to remain in the unconscious. Anna Freud (1946) broadened the concept of defense mechanisms and described them as psychological mechanisms (e.g. the unconscious part of the ego) for coping with intrapsychic conflict in order to protect the ego and the self from psychological damage. More recently, the original psychodynamic concept of defense mechanisms has aroused the interest of empirical researchers who aim to associate them with specific psychological and/or neuronal mechanisms (Vaillant, 1992; Cramer, 2000; Northoff et al., 2007c; Feinberg, 2010).",
+        "issues": []
+      },
+      {
+        "path": "chapters/008-7 Narcissism, Self-Objects, and the Brain.md",
+        "title": "7 Narcissism, Self-Objects, and the Brain",
+        "paragraph_count": 111,
+        "body_ref_count": 5,
+        "definition_count": 5,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## 7 Narcissism, Self-Objects, and the Brain\n### Psychodynamic concepts\nNarcissism, Self-Objects, and the Brain Psychodynamic concepts Concept of narcissism in Freud\nFreud first mentioned the concept of narcissism in a footnote that he inserted in his essay on a theory of sexuality, where he associated it with self-love in homosexuality (Freud, 1905). This sets the stage for Freud's determination of narcissism in a predominantly sexual–libidinal context in a later writing on Leonardo da Vinci, whom he characterizes by a repressed form of homosexuality which Freud associates with narcissism (Freud, 1910).",
+        "issues": []
+      },
+      {
+        "path": "chapters/009-8 Unconsciousness and the Brain.md",
+        "title": "8 Unconsciousness and the Brain",
+        "paragraph_count": 135,
+        "body_ref_count": 8,
+        "definition_count": 8,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## 8 Unconsciousness and the Brain\n### Psychodynamic concepts\nUnconsciousness and the Brain Psychodynamic concepts Freud and the concept of the unconscious\nWhat is the unconscious? Notions of the unconscious can be traced back as far as Plato and Aristotle, and have been elaborated since in philosophical and later in psychological thought. Whatever frameworks have been presupposed, unconscious states have been characterized by hidden characteristics of a person's self (fate, temperament, soul, or character) that need to be inferred and cannot be accessed directly. Such hidden characteristics were distinguished from those that were believed to be transparent, experienced directly, open to introspection, and thus accessible to consciousness (Uleman, 2005).",
+        "issues": []
+      },
+      {
+        "path": "chapters/010-9 The Self and its Brain.md",
+        "title": "9 The Self and its Brain",
+        "paragraph_count": 146,
+        "body_ref_count": 2,
+        "definition_count": 2,
+        "body_contract_ok": true,
+        "section_head_count": 8,
+        "opening_excerpt": "## 9 The Self and its Brain\n### Concept of self in psychoanalysis and neuroscience\nThe Self and its Brain Concept of self in psychoanalysis and neuroscience\nThe concept of self is crucial in psychoanalysis. Although Freud focused more on the ego than on the self, Kohut as one of his successors shifted the self into the centre of psychoanalysis (Kohut, 1971, 1977) by founding self psychology (for an overview, see Milch, 2001). The self has recently also become a major focus in neuroscience. Several authors have been searching for the neural correlates of the self and assume that the self may play a central role in neural architecture of the brain (Panksepp, 1998; Kelley et al., 2002; Damasio, 2003b; Northoff and Bermpohl, 2004; Northoff and Panksepp, 2008; Panksepp and Northoff, 2008). Although coming from opposite directions, the usage of the concept of self in both neuroscience and psychoanalysis suggests a possible overlap between the two disciplines with regard to the self.",
+        "issues": []
+      },
+      {
+        "path": "chapters/011-10 Depression and the Brain.md",
+        "title": "10 Depression and the Brain",
+        "paragraph_count": 133,
+        "body_ref_count": 2,
+        "definition_count": 2,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## 10 Depression and the Brain\n### Reactivation of early object loss\nDepression and the Brain Reactivation of early object loss\nThere have been many psychodynamic accounts of depression by various authors (for excellent overviews, see Böker et al., 2000; Böker and Northoff, 2005; Gabbard, 2005a,b). Rather than describing the details of the different psychodynamic theories, I want to focus on some key features that ultimately can be traced back to Freud and his description of depression in his classic work Mourning and Melancholia (Freud, 1917). I here focus on three psychodynamic key features of depression, namely reactivation of early object loss, loss of actual object relations, and increased introjection coupled with negative affect (see Figure 10.1). While focusing on these three features, I am fully aware that this list is by no means exhaustive and thus neglects many other issues, such as the complexity of psychodynamic constellations (Bleichmar, 1996, 2010) and the psychotherapeutic modulation of depression (Taylor, 2008).",
+        "issues": [
+          {
+            "type": "suspicious_section_head",
+            "title": "Reduced rest–exteroceptive stimulus interaction and abnormal affective assignment of actual objects",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "Reduced rest–stimulus interaction, reduced goal-oriented cognitions, and the loss of actual object relations",
+            "details": [
+              "duplicated_next"
+            ]
+          },
+          {
+            "type": "suspicious_section_head",
+            "title": "Increased paralimbic–midline activity and the “self-object dilemma”",
+            "details": [
+              "duplicated_next"
+            ]
+          }
+        ]
+      },
+      {
+        "path": "chapters/012-11 Psychosis I Psychodynamics and Phenomenology.md",
+        "title": "11 Psychosis I Psychodynamics and Phenomenology",
+        "paragraph_count": 296,
+        "body_ref_count": 15,
+        "definition_count": 15,
+        "body_contract_ok": true,
+        "section_head_count": 17,
+        "opening_excerpt": "## 11 Psychosis I: Psychodynamics and Phenomenology\n### Lack of energy investment in objects (“decathexis of objects”)\nPsychosis I[^1]: Psychodynamics and Phenomenology[^2]\nLack of energy investment in objects (\"decathexis of objects\")",
+        "issues": []
+      },
+      {
+        "path": "chapters/013-Epilogue The Beauty of Transdisciplinary Failure—A Trialogue.md",
+        "title": "Epilogue The Beauty of Transdisciplinary Failure—A Trialogue",
+        "paragraph_count": 140,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## Epilogue: The Beauty of Transdisciplinary Failure—A Trialogue\n### Transcendental and empirical views of the brain\nThe Beauty of Transdisciplinary Failure—A Trialogue\nIn lieu of a Conclusion, there now follows a dialog between a psychoanalyst (PS), a neuroscientist (NS), and a philosopher (PH) about neuropsychoanalysis.",
+        "issues": []
+      }
+    ]
+  },
+  {
+    "folder": "Neuropsychoanalysis_Introduction",
+    "doc_id": "a3c9e1f7b284",
+    "zip_exists": true,
+    "status": {
+      "doc_id": "a3c9e1f7b284",
+      "status": "ready",
+      "reason": "ok",
+      "blocking_reasons": [],
+      "generated_at": 1775751010
+    },
+    "issues": [],
+    "chapters": [
+      {
+        "path": "chapters/001-Introduction.md",
+        "title": "Introduction",
+        "paragraph_count": 92,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 4,
+        "opening_excerpt": "## Introduction\n### Neuropsychoanalysis\nGeorg Northoff presents the first introduction to neuropsychoanalysis and the search for a brain-based understanding and explanation of our psyche and its psychodynamic features.\nThis book covers the key features of psychodynamics, including the concepts of self, narcissism, defense mechanisms, unconsciousness/consciousness, attachment and trauma, energy/cathexis, and depression/schizophrenia. After reviewing past and current state-of-the-art models and their limitations, Northoff uniquely links these psychodynamic features to temporal and spatial features in the brain (and body). The key element in connecting brain and mind is dynamic, the pattern of change over time: from brain dynamic to psychodynamic – dynamic is thus shared by brain and psyche as their “common currency”. This spatiotemporal approach offers novel and sometimes surprising insights into the elusive connection of brain and mind. Ultimately, this carries important clinico-therapeutic implications for psychodynamic psychotherapy in a spatiotemporal sense, such as through spatiotemporal psychotherapy.",
+        "issues": []
+      },
+      {
+        "path": "chapters/002-Self and narcissism.md",
+        "title": "Self and narcissism",
+        "paragraph_count": 103,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 2,
+        "opening_excerpt": "## Self and narcissism\nSelf and narcissism Introduction\nOne of the key discoveries of Freud and subsequent psychoanalysis is that the ego is not a homogenous entity. Instead, the ego refers to a particular structure or organization, the famous three-fold structure or topography of Id, Ego, and Super-ego. There has been much discussion about this and further developments in subsequent psychoanalysis up to the present day. Instead of recounting these developments in psychoanalysis, we rather focus on whether there are corresponding developments in neuroscience that may be to integrate both psychological and neural observations.\nThe core of the ego is the self, which is considered intrinsically subjective. The self has been extensively investigated for its neural correlates in neuroscience in recent years. This includes different concepts of self like mental self, bodily self, objective vs subjective self, integrative self, emotional self, and so on (Northoff 2016; Frewen et al. 2020; Qin et al. 2020; Sui and Humphreys 2015 for overviews). The different concepts of self are often associated with distinct regions or networks in the brain. Core regions include especially the regions in ",
+        "issues": []
+      },
+      {
+        "path": "chapters/003-Attachment and trauma.md",
+        "title": "Attachment and trauma",
+        "paragraph_count": 73,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 7,
+        "opening_excerpt": "## Attachment and trauma\nAttachment and trauma Introduction\nWe characterized the topography of the brain-based self in the previous chapter. This let us distinguish three different layers of self, interoceptive, exteroceptive, and mental-cognitive. While detailing the relationship of brain and self, we more or less neglected the context within which the brain-based self operates, namely body and environment. The relationship of self to its environment is key, especially in psychoanalysis, where it is thematized in terms of attachment and trauma.\nThere is abundant literature on both attachment and trauma in current psychoanalysis, including their connection to body and brain. Rather than discussing all the details of that, we here focus on their deeper dimensions, namely their spatial topography and temporal dynamic, which, in turn, render the kind of affective and cognitive features emphasized in the literature. Highlighting the brain's spatiotemporal relationship to body and world, our focus is on the inter-subjective and ultimately neuro-ecological/social dimension of both attachment and trauma rather than on their intra-subjective features like vegetative, affective, and cogniti",
+        "issues": []
+      },
+      {
+        "path": "chapters/004-Defense mechanisms and dissociation.md",
+        "title": "Defense mechanisms and dissociation",
+        "paragraph_count": 96,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 3,
+        "opening_excerpt": "## Defense mechanisms and dissociation\nDefense mechanisms and dissociation Introduction\nDefense mechanisms I – topographic and dynamic reorganization of the self\nTrauma can be detrimental to the self, as it disrupts the nested neural and psychological hierarchies of self, as we have seen in the last chapter. The self can defend itself against such trauma, though. This leads us to what has been described psychodynamically as defense mechanisms. The body has its own physiological defense mechanisms, namely the immune system that allows the body to defend itself against foreign intruders like viruses by producing its own antibodies. Defense mechanisms of the psyche are here understood in a more or less analogous and thus biological way; the main difference is that defense mechanisms do not concern the body but the self that is defended against foreign intrusions and threats.",
+        "issues": []
+      },
+      {
+        "path": "chapters/005-Cathexis and free energy.md",
+        "title": "Cathexis and free energy",
+        "paragraph_count": 115,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 5,
+        "opening_excerpt": "## Cathexis and free energy\nCathexis and free energy Introduction\nWhat is cathexis? The concept of cathexis has a difficult history. Originally it was to designate what Freud described as Besetzung in German, which translates into “occupation” in English. However, the meaning of cathexis extends far beyond that: occupation or besetzung is only the result or outcome of an underlying complex process that consists and is maintained by recruiting and investing energy. Cathexis has therefore been reserved for describing the “investment of energy” (Hoffer 2005).\nNote that energy and investment are here understood in a purely psychological or psychological way. The psyche is characterized by energy, that is, mental or psychic energy, which can be understood in either mechanical or dynamic terms. If understood in purely mechanical terms, cathexis invokes the image of a machine-like function entailing clear-cut separation between cause and effect as well as discontinuity with discrete points in time and space. This is probably what Freud had in mind when, in his 1895 writing “Project for a Scientific Psychology”, he associated cathexis with the discharge of electrochemical energy in the bra",
+        "issues": []
+      },
+      {
+        "path": "chapters/006-Unconscious and conscious.md",
+        "title": "Unconscious and conscious",
+        "paragraph_count": 97,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 2,
+        "opening_excerpt": "## Unconscious and conscious\nUnconscious and conscious Introduction\nFreud introduced the unconscious into psychology. While others like Arthur Schopenhauer and Friedrich Nietzsche had already thematized the unconsciousness in philosophy, Freud was the first to investigate it in a systematic and empirical (taken in a broad definition) way. For him the unconscious consists in innate, inherently sexual, and aggressive blind drives – we have no control over these drives. They are instinctual, non-rational, and strongly affective–emotional – psychoanalysis speaks therefore of primary process – this amounts to what Freud describes as “dynamic or repressed unconscious”.\nMore recently these primary processes have been associated with mainly subcortical regions and their various subcortical primary emotion systems like rage, seeking, fear, panic, care, play, and lust (Panksepp 1998; Solms 2015; Panksepp and Biven 2012). Mark Solms therefore associates these subcortical emotional systems with the dynamic unconscious and its Id (Solms 2015). The primary emotions remain largely unconscious, and we have barely access to them; they are evolutionarily imprinted, so we as humans share them with ou",
+        "issues": []
+      },
+      {
+        "path": "chapters/007-Dreams.md",
+        "title": "Dreams",
+        "paragraph_count": 111,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 5,
+        "opening_excerpt": "## Dreams\nDreams Introduction\nDreams take on a key role in psychoanalysis. They provide access to the unconscious, that is, the “via regia to the unconscious”. At the same time, dreams are considered therapeutic, as they offer insight into early traumatic memories that then can be used for conflict resolution in psychotherapy. Finally, there has been much neuroscientific research on dreams in recent years so that they provide a paradigmatic example of inner mental life.\nGoing back to Freud, dreams are psychoanalytically often conceived as wish fulfillment reflecting endogenous drives and primary processes that are disinhibited and uncontrolled. They are conceived as the hallucinatory realization of those impulses that are strongly driven by energy, that is, cathexis, and unconscious affective demands. More recently, dreams have been related to specific affect/emotions like the SEEKING system that drives emotion and behavior (Panksepp and Biven 2012; Solms 2020), while cognitively, dreams are associated with unconscious memories: the memories often can be traced back to early childhood where they have been “stored” in terms of body signatures in the unconscious without yet leaving a",
+        "issues": []
+      },
+      {
+        "path": "chapters/008-Schizophrenia and depression.md",
+        "title": "Schizophrenia and depression",
+        "paragraph_count": 119,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 6,
+        "opening_excerpt": "## Schizophrenia and depression\nSchizophrenia and depression Introduction\nWe already showed that the self operates on a continuum between healthy and pathological states, as in narcissism, trauma, and dissociation. This leaves open the very extreme pathological end of that continuum where psychiatric disorders like schizophrenia and major depressive disorders (in the following simply termed depression) are “located”. We show how the spatiotemporal approach can yield novel insight into the neuronal mechanisms of the typical psychodynamic features like introjection in depression and projection in schizophrenia.\nWe will discuss topographic and dynamic changes in the brain's neural activity in schizophrenia and depression. That, in turn, serves as stepping stone for understanding the psychodynamic changes in these disorders. Given the constraints of this book, I cannot focus on all the psychodynamic or neuronal details in depression and schizophrenia. For that, I refer to specific papers and books (Boeker et al. 2019). I therefore focus on some psychodynamic core features. Introjection is a typical characteristic of depression, while increased projection is a psychodynamic hallmark fea",
+        "issues": []
+      },
+      {
+        "path": "chapters/009-Conclusion.md",
+        "title": "Conclusion",
+        "paragraph_count": 37,
+        "body_ref_count": 0,
+        "definition_count": 0,
+        "body_contract_ok": true,
+        "section_head_count": 1,
+        "opening_excerpt": "## Conclusion\nConclusion\nConnecting brain and psyche – project for a spatiotemporal neuroscience\n\"Project for a spatiotemporal neuroscience\" I – complementing and extending Freud",
+        "issues": []
+      }
+    ]
+  }
+]

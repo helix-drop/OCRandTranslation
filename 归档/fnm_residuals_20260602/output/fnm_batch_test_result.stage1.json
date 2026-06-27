@@ -1,0 +1,235 @@
+[
+  {
+    "doc_id": "a5d9a08d6871",
+    "doc_name": "Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+    "slug": "Heidegger_en_France",
+    "example_folder": "Heidegger_en_France",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 23,
+        "page_count": 608,
+        "section_count": 12,
+        "note_count": 1538,
+        "unit_count": 1589,
+        "structure_state": "review_required",
+        "manual_toc_required": false,
+        "blocking_reasons": [
+          "toc_chapter_order_non_monotonic"
+        ],
+        "review_counts": {
+          "toc_chapter_order_non_monotonic": 1
+        },
+        "export_ready_real": false
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "page_count": 608,
+        "chapter_count": 12,
+        "section_head_count": 142,
+        "note_region_count": 26,
+        "note_item_count": 1538,
+        "body_anchor_count": 1782,
+        "note_link_count": 1577,
+        "suppressed_chapter_candidate_count": 0,
+        "partition_heading_conflict_count": 0,
+        "review_row_count": 0,
+        "footnote_count": 1531,
+        "endnote_count": 7,
+        "linked_endnote_count": 0,
+        "structure_state": "review_required",
+        "review_counts": {
+          "toc_chapter_order_non_monotonic": 1
+        },
+        "blocking_reasons": [
+          "toc_chapter_order_non_monotonic"
+        ],
+        "link_summary": {
+          "matched": 1523,
+          "footnote_orphan_note": 0,
+          "footnote_orphan_anchor": 39,
+          "endnote_orphan_note": 0,
+          "endnote_orphan_anchor": 0,
+          "ambiguous": 15,
+          "ignored": 0,
+          "fallback_count": 988,
+          "repair_count": 113
+        },
+        "page_partition_summary": {
+          "total_pages": 608,
+          "noise": 0,
+          "front_matter": 5,
+          "body": 580,
+          "note": 2,
+          "other": 21
+        },
+        "chapter_mode_summary": {
+          "footnote_primary": 12,
+          "chapter_endnotes": 0,
+          "book_endnotes": 0,
+          "body_only": 0,
+          "mixed_or_unclear": 0
+        },
+        "heading_review_summary": {
+          "chapter_candidate_count": 365,
+          "suppressed_candidate_count": 61,
+          "suppressed_reason_counts": {
+            "low_score": 53,
+            "sentence_like": 8
+          },
+          "partition_conflict_count": 0
+        },
+        "chapter_source_summary": {
+          "source": "visual_toc",
+          "chapter_level": 1,
+          "visual_toc_chapter_count": 12,
+          "legacy_chapter_count": 0,
+          "fallback_used": false
+        },
+        "visual_toc_conflict_count": 0,
+        "toc_export_coverage_summary": {
+          "resolved_body_items": 0,
+          "exported_body_items": 0,
+          "missing_body_items_preview": []
+        },
+        "toc_alignment_summary": {
+          "chapter_level_body_items": 12,
+          "exported_chapter_count": 12,
+          "missing_chapter_titles_preview": [],
+          "misleveled_titles_preview": [
+            "De la mode à la méthode",
+            "Quels horizons d'attente ?",
+            "Un idéalisme existentiel",
+            "Rencontres, études et traductions pionnières",
+            "Du concret ?",
+            "Une traduction qui fait date",
+            "Une occasion manquée, des semences de gloire",
+            "Les aveux de la drôle de guerre"
+          ],
+          "reanchored_titles_preview": [
+            "Une vague de traductions"
+          ],
+          "missing_section_titles_preview": []
+        },
+        "toc_semantic_summary": {
+          "body_item_count": 70,
+          "chapter_item_count": 12,
+          "part_item_count": 0,
+          "back_matter_item_count": 0,
+          "first_body_pdf_page": 7,
+          "last_body_pdf_page": 565,
+          "body_span_ratio": 0.9194,
+          "nonbody_contamination_count": 0,
+          "mixed_level_chapter_count": 0
+        },
+        "toc_role_summary": {
+          "container": 0,
+          "chapter": 71,
+          "section": 59,
+          "post_body": 0,
+          "back_matter": 4,
+          "front_matter": 0
+        },
+        "container_titles": [],
+        "post_body_titles": [],
+        "back_matter_titles": [
+          "Bibliographie",
+          "Livres et articles en français sur Heidegger",
+          "Index historique des traductions françaises des mots clés heideggériens",
+          "Index des noms"
+        ],
+        "toc_semantic_contract_ok": true,
+        "toc_semantic_blocking_reasons": [],
+        "toc_export_coverage_ok": true,
+        "chapter_title_alignment_ok": true,
+        "chapter_section_alignment_ok": true,
+        "chapter_endnote_region_alignment_ok": true,
+        "chapter_endnote_region_alignment_summary": {},
+        "chapter_endnote_region_boundary_ok": true,
+        "chapter_endnote_region_cross_next_chapter_count": 0,
+        "chapter_endnote_region_cross_next_chapter_preview": [],
+        "chapter_endnote_region_audit_rows": [],
+        "manual_toc_required": false,
+        "manual_toc_ready": true,
+        "manual_toc_summary": {
+          "mode": "manual_pdf",
+          "page_count": 4,
+          "file_count": 1,
+          "image_count": 0,
+          "source_name": "目录.pdf"
+        },
+        "export_drift_summary": {
+          "legacy_footnote_ref_count": 0,
+          "legacy_endnote_ref_count": 0,
+          "legacy_en_bracket_ref_count": 0,
+          "legacy_note_token_count": 0,
+          "orphan_local_definition_count": 0,
+          "orphan_local_ref_count": 0
+        },
+        "chapter_local_endnote_contract_ok": true,
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 51,
+        "note_unit_count": 1538,
+        "changed_page_count": 527,
+        "translated_chars": 1349728,
+        "translated_paras": 2613,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "toc_chapter_order_non_monotonic"
+        ],
+        "execution_mode": "test",
+        "latest_export_zip_saved": false,
+        "latest_export_zip_path": "",
+        "latest_export_zip_folder": "Heidegger_en_France",
+        "latest_export_zip_reason": "structure_review_required",
+        "stale_export_artifact_detected": false,
+        "export_artifact_status": "blocked",
+        "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Heidegger_en_France/latest_export_status.json",
+        "biopolitics_export_contract_ok": true,
+        "biopolitics_export_audit": {
+          "applicable": false,
+          "ok": true
+        }
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  }
+]

@@ -1,0 +1,8 @@
+{
+  "case": "visual_toc_goldstein",
+  "model_requested": "glm-4.6v-flashx",
+  "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+  "prompt": "你会看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"has_chapter_keyed_subentries_in_toc\":false},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter|container|front_matter|post_body|back_matter\",\"parent_title\":\"\"}]}.\n规则：保留没有页码的 Part/Book/COURS 等容器层；有正文页码的 Introduction/Conclusion/章标题是 chapter；书末独立的 Notes/Endnotes/Notes to the Chapters 是尾注容器并填入 endnotes_summary；Bibliography/References/Index/单行 Note on Sources 是 back_matter，不得当作尾注；目录页总标题不输出；页码看不清设为 null，禁止补写看不见的标题。",
+  "image_count": 1,
+  "started_at": "2026-05-23T19:12:05+0800"
+}

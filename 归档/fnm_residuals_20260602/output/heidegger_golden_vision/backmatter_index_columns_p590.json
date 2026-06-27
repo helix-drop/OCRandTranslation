@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    590
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 590\",\n      \"printed_page\": \"590\",\n      \"lines\": [\n        \"DAVREU (Robert) : 245n, 248n\",\n        \"DAVY (Marie-Madeleine) : 146n\",\n        \"DEBRAY (Régis) : 505-506, 533n\",\n        \"DEBUSSY (Claude) : 154\",\n        \"DE GAULLE (Charles) : 227\",\n        \"DEGUY (Michel) : 23, 185n, 212n,\",\n        \"213, 245n, 248n, 250n, 277n,\",\n        \"359-360, 516\",\n        \"DELACAMPAGNE (Christian) : 439n\",\n        \"DELEUZE (Gilles) : 128, 150n, 151,\",\n        \"252, 276n, 419n\",\n        \"DELP (A.) : 52n, 53n\",\n        \"DEMENY (Paul) : 509n\",\n        \"DERRIDA (Jacques) : 14n, 20n, 23,\",\n        \"203-205, 207-210, 212n-215,\",\n        \"231, 233, 235n, 238, 253-256,\",\n        \"277n, 280, 292-293, 298, 299,\",\n        \"304, 308-310, 337n, 338, 340-\",\n        \"342, 345, 349, 352, 356-357,\",\n        \"360-361, 363, 365-367, 369n,\",\n        \"374-378, 383, 410, 429n, 431,\",\n        \"434, 443, 461-464, 499n, 502,\",\n        \"503n, 524, 527, 529n, 539\",\n        \"DESANTI (Dominique) : 82n-83n\",\n        \"DESANTI (Jean-Toussaint) : 136n,\",\n        \"385n\",\n        \"DESCARTES (René) : 13, 15, 40, 48-\",\n        \"50, 56, 66, 130, 183, 202, 226,\",\n        \"258, 302n, 406n, 491, 493, 496-\",\n        \"497, 512\",\n        \"DESCOMBES (Vincent) : 253n, 395n\",\n        \"DEUTSCH (Michel) : 373n, 531n\",\n        \"DIELS (Hermann) : 164n, 220n, 244\",\n        \"DILTHEY (Wilhelm) : 38, 44, 437\",\n        \"DIONYSOS : 408n\",\n        \"DOLLÉ (Jean-Paul) : 280, 419n\",\n        \"DONDEYNE (le chanoine) : 150n\",\n        \"DOSSE (François) : 187n\",\n        \"DOSTOÏEVSKY (Fedor) : 36, 121\",\n        \"DOZ (André) : 278n\",\n        \"DREYFUS (Dina) : 128n, 187n, 491n\",\n        \"DREYFUS (Hubert) : 183, 215n, 216,\",\n        \"231\",\n        \"DRIEU LA ROCHELLE (Pierre) : 61n\",\n        \"DROIT (Roger-Pol) : 257n, 306,\",\n        \"326n, 327n, 349-351, 353, 366-\",\n        \"369, 533n\",\n        \"DUBARLE (Dominique) : 487\",\n        \"DUFRENNE (Mikel) : 172, 238, 491\",\n        \"DUMÉZIL (Georges) : 187, 240\",\n        \"DUNS SCOT (John) : 498n\",\n        \"DUPUY (Jean-Pierre) : 420n\",\n        \"ECKHART (Maître) : 145, 252n, 483\",\n        \"ELKAÏM-SARTRE (Arlette) : 77n,\",\n        \"133n\",\n        \"ÉLUARD (Paul) : 85n\",\n        \"ENGEL (Pascal) : 490n\",\n        \"ENGELS (Friedrich) : 178, 490n\",\n        \"ÉRIBON (Didier) : 356n\",\n        \"ESCOUBAS (Éliane) : 23, 192n, 208n,\",\n        \"337, 338n, 359n, 441, 451n,\",\n        \"499n\",\n        \"ETCHEGOYEN (abbé) : 59n\",\n        \"FARIAS (Victor) : 14, 49, 189, 221n,\",\n        \"337, 342, 345, 348-370, 374-375,\",\n        \"377n-380, 381n, 382, 385n-386,\",\n        \"388-389, 392-396, 401, 435, 440,\",\n        \"472, 521\",\n        \"FAURISSON (Robert) : 355n\",\n        \"FAUST : 36\",\n        \"FAYE (Jean-Pierre) : 23, 47, 136,\",\n        \"188-191, 196-199n, 234n, 235n,\",\n        \"261, 264, 280, 305, 314, 355n,\",\n        \"358, 373-374, 402, 432-434,\",\n        \"436n, 524\",\n        \"FÉDIER (François) : 9n, 15n, 85n, 89,\",\n        \"166, 174n, 175n, 185n, 192-198,\",\n        \"199n, 211, 213, 229, 241-243n,\",\n        \"248n, 250n, 257n, 266n, 268-\",\n        \"270, 275, 282n, 300n, 303n,\",\n        \"304n, 310, 312, 314, 319n, 320,\",\n        \"327, 355n, 358, 359, 365n, 367-\",\n        \"369, 379, 385n, 398-401n, 430n,\",\n        \"431n, 448n, 479n, 481, 483, 484,\",\n        \"503n, 507n, 508n, 514n, 528,\",\n        \"529-530n, 532n\",\n        \"FEICK (Hildegard) : 466\",\n        \"FERENCZI (Thomas) : 392n\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 2142,
+      "total_tokens": 3575
+    }
+  }
+}

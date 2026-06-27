@@ -52,7 +52,6 @@ class SQLiteSplitMigrationTest(unittest.TestCase):
             ],
         )
         legacy_repo.save_translate_run(doc_id, phase="idle", running=0, done_pages=1, total_pages=1)
-        legacy_repo.create_fnm_run(doc_id, status="done", page_count=1, section_count=1, note_count=1, unit_count=1)
         legacy_repo.set_app_state("current_doc_id", doc_id)
         legacy_repo.set_translation_title(doc_id, "迁移标题")
 
@@ -76,8 +75,4 @@ class SQLiteSplitMigrationTest(unittest.TestCase):
         pages = doc_repo.load_pages(doc_id)
         self.assertEqual(len(pages), 1)
         self.assertEqual(pages[0]["markdown"], "legacy page")
-        fnm_run = doc_repo.get_latest_fnm_run(doc_id)
-        self.assertIsNotNone(fnm_run)
-        self.assertEqual(fnm_run["status"], "done")
         self.assertEqual(doc_repo.get_translation_title(doc_id), "迁移标题")
-

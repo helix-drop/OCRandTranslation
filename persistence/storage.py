@@ -19,8 +19,7 @@ from config import (
     get_paddle_token, get_deepseek_key, get_dashscope_key, get_mimo_api_key,
     get_glm_api_key, get_kimi_api_key, get_gemini_key,
     get_glossary,
-    get_translation_model_pool, get_fnm_model_pool,
-    get_fnm_repair_primary_model_id, get_fnm_repair_final_model_id,
+    get_translation_model_pool, get_visual_model_pool,
     get_translate_parallel_enabled, get_translate_parallel_limit,
     get_current_doc_id, get_doc_dir, get_doc_meta, update_doc_meta,
     get_doc_cleanup_headers_footers,
@@ -722,7 +721,7 @@ def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: s
         if extra_body:
             request_overrides = {"extra_body": extra_body}
 
-    default_api_family = "vision" if capability in {"vision", "fnm"} else ("mt" if provider == "qwen_mt" else "chat")
+    default_api_family = "vision" if capability == "vision" else ("mt" if provider == "qwen_mt" else "chat")
     return ResolvedModelSpec(
         source=source,
         model_key="",
@@ -736,7 +735,7 @@ def _resolve_custom_model_spec(custom_model: dict, *, source: str, capability: s
             builtin_spec.get("supports_translation", capability == "translation")
         ),
         supports_vision=bool(
-            builtin_spec.get("supports_vision", capability in {"vision", "fnm"})
+            builtin_spec.get("supports_vision", capability == "vision")
         ),
         supports_stream=bool(builtin_spec.get("supports_stream", True)),
         stream_mode=str(
@@ -775,7 +774,7 @@ def _resolve_pool_slot_spec(
 
 
 def _resolve_pool_specs(pool_name: str, capability: str) -> list[ResolvedModelSpec]:
-    pool = get_translation_model_pool() if pool_name == "translation" else get_fnm_model_pool()
+    pool = get_translation_model_pool() if pool_name == "translation" else get_visual_model_pool()
     specs: list[ResolvedModelSpec] = []
     for index, slot in enumerate(pool, start=1):
         spec = _resolve_pool_slot_spec(slot, capability=capability, pool_name=pool_name, slot_index=index)
@@ -788,24 +787,8 @@ def resolve_translation_model_pool_specs() -> list[ResolvedModelSpec]:
     return _resolve_pool_specs("translation", "translation")
 
 
-def resolve_fnm_model_pool_specs() -> list[ResolvedModelSpec]:
-    return _resolve_pool_specs("fnm", "fnm")
-
-
-def resolve_fnm_repair_model_specs(*, final_round: bool = False) -> list[ResolvedModelSpec]:
-    """按 FNM repair 角色返回模型；视觉目录的首槽顺序不影响修补主模型。"""
-    specs = resolve_fnm_model_pool_specs()
-    target = (
-        get_fnm_repair_final_model_id()
-        if final_round
-        else get_fnm_repair_primary_model_id()
-    )
-    if not target:
-        return specs
-    return [
-        spec for spec in specs
-        if target in {spec.model_id, spec.model_key}
-    ]
+def resolve_visual_model_pool_specs() -> list[ResolvedModelSpec]:
+    return _resolve_pool_specs("visual", "vision")
 
 
 def resolve_model_spec(target: str | None = None) -> ResolvedModelSpec:
@@ -831,22 +814,22 @@ def resolve_model_spec(target: str | None = None) -> ResolvedModelSpec:
 
 def resolve_visual_model_spec(target: str | None = None) -> ResolvedModelSpec:
     """自动视觉目录等「读图」能力使用的模型，与翻译模型独立配置。"""
-    active_specs = resolve_fnm_model_pool_specs()
+    active_specs = resolve_visual_model_pool_specs()
 
     normalized_target = str(target or "").strip()
     if normalized_target.startswith("builtin:"):
         builtin_key = normalized_target.split(":", 1)[1].strip()
         fallback_key = active_specs[0].model_key if active_specs else "qwen-vl-plus"
         if builtin_key not in MODELS:
-            builtin_key = normalize_builtin_model_key(fallback_key, capability="fnm")
-        return _resolve_builtin_model_spec(builtin_key, capability="fnm")
+            builtin_key = normalize_builtin_model_key(fallback_key, capability="vision")
+        return _resolve_builtin_model_spec(builtin_key, capability="vision")
     if normalized_target == "custom":
         for spec in active_specs:
             if spec.source == "custom":
                 return spec
     if active_specs:
         return active_specs[0]
-    return _resolve_builtin_model_spec("", capability="fnm")
+    return _resolve_builtin_model_spec("", capability="vision")
 
 
 def get_visual_model_args(target: str | None = None) -> dict:

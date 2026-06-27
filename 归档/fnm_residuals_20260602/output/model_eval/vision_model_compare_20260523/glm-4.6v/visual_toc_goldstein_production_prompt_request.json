@@ -1,0 +1,11 @@
+{
+  "case": "visual_toc_goldstein_production_prompt",
+  "model_requested": "glm-4.6v",
+  "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+  "prompt": "你会依次看到一整份书籍目录页截图。请按整份目录的真实组织方式输出 JSON 对象，不要只做扁平标题提取。输出格式必须是 {\"endnotes_summary\":{\"present\":false,\"container_title\":null,\"container_printed_page\":null,\"container_visual_order\":null,\"has_chapter_keyed_subentries_in_toc\":false,\"subentry_pattern\":null},\"items\":[{\"title\":\"章节标题\",\"depth\":0,\"visual_order\":1,\"printed_page\":12,\"role_hint\":\"chapter\",\"parent_title\":\"Part One\"}]}。规则：1. 必须保留无页码的容器层，例如 Part、Book、COURS、INDICES、APPENDICES；这些条目是 container，不是 chapter。2. chapter 是正文里最独立的可导航单元：显式编号章，以及有正文页码的 Introduction、Conclusion、Préambule、单独 Epilogue。chapter 挂在容器下时仍然是 chapter，不会因为容器存在而变成 section。3. front_matter 只用于第一条正文 chapter 之前的辅助材料，如 Acknowledgments、Remerciements、Preface、Foreword、List of Abbreviations、List of Illustrations。4. back_matter 只用于书末参考性材料，如 Bibliography、References、Index、Indices、Works Cited，以及单行独立的 Note on Sources。5. post_body 只用于最后一条正文 chapter 之后、back_matter 之前的实质性内容，如 RÉSUMÉ、SITUATION、Postambule、独立带页码的 Appendix。6. 书末独立的 Notes、Endnotes、Notes on the Text、Notes to the Chapters、Chapter Notes 是 endnotes 容器，不改变正文 chapter 的层级基准；Bibliography、References、Index 永远不要标成 endnotes。7. Note on Sources 只有在下方有按章 notes 子项时才允许判成 endnotes；如果只是单行独立条目，固定判成 back_matter。8. 如果目录里列出了尾注容器下按章分组的子条目，这些子条目标成 section，parent_title 写尾注容器标题。9. 目录页总标题如 Contents、Sommaire 不输出；标题下方的说明性斜体副标题、摘要句、时间说明如果不是独立可导航标题，不输出。10. parent_title 只写直接父标题；最顶层为空字符串；没有可见页码就把 printed_page 设为 null；请保持从前到后、从上到下的视觉顺序。",
+  "source_prompt_file": "output/model_eval/glm_4_6v_flashx_20260523/visual_toc_goldstein_production_prompt_request.json",
+  "image_files": [
+    "output/model_eval/glm_4_6v_flashx_20260523/goldstein_toc_fileidx_0.png"
+  ],
+  "started_at": "2026-05-23T19:17:58+0800"
+}

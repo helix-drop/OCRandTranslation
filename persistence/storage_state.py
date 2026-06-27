@@ -8,7 +8,7 @@ from config import (
     get_active_builtin_visual_model_key,
     get_visual_custom_model_config,
     get_translation_model_pool,
-    get_fnm_model_pool,
+    get_visual_model_pool,
     get_glossary,
     get_paddle_token,
     get_deepseek_key,
@@ -18,8 +18,6 @@ from config import (
     get_kimi_api_key,
     get_translate_parallel_enabled,
     get_translate_parallel_limit,
-    get_doc_cleanup_headers_footers,
-    get_upload_cleanup_headers_footers_enabled,
     get_doc_auto_visual_toc_enabled,
     get_upload_auto_visual_toc_enabled,
     get_doc_meta,
@@ -51,11 +49,10 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
     resolved_visual_spec = resolve_visual_model_spec()
     meta = get_doc_meta(doc_id)
     repo = sqlite_repository_factory() if callable(sqlite_repository_factory) else None
-    fnm_run = repo.get_latest_fnm_run(doc_id) if repo and doc_id else {}
+    del repo
     entry_idx = meta.get("last_entry_idx", entry_idx)
-    cleanup_headers_footers_enabled = get_doc_cleanup_headers_footers(doc_id) if doc_id else True
+    cleanup_headers_footers_enabled = False
     auto_visual_toc_enabled = get_doc_auto_visual_toc_enabled(doc_id) if doc_id else False
-    fnm_view_ready = bool(cleanup_headers_footers_enabled and fnm_run and fnm_run.get("status") == "done")
     visual_toc_status = str(meta.get("toc_visual_status", "idle") or "idle").strip() or "idle"
     visual_toc_message = str(meta.get("toc_visual_message", "") or "").strip()
     visual_toc_phase = str(meta.get("toc_visual_phase", "") or "").strip()
@@ -88,9 +85,8 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
 
     has_entries = len(entries) > 0
     translation_models = get_selectable_models("translation")
-    fnm_models = get_selectable_models("fnm")
+    visual_models = get_selectable_models("vision")
     translation_model_pool = get_translation_model_pool()
-    fnm_model_pool = get_fnm_model_pool()
     return {
         "pages": pages,
         "src_name": src_name,
@@ -100,8 +96,7 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "model_key": active_builtin_model_key,
         "models": translation_models,
         "translation_models": translation_models,
-        "fnm_models": fnm_models,
-        "visual_models": fnm_models,
+        "visual_models": visual_models,
         "glossary": get_glossary(doc_id),
         "paddle_token": get_paddle_token(),
         "deepseek_key": get_deepseek_key(),
@@ -129,7 +124,7 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "current_visual_model_id": resolved_visual_spec.model_id,
         "current_visual_model_label": resolved_visual_spec.display_label,
         "current_visual_model_provider": resolved_visual_spec.provider,
-        "fnm_model_pool": fnm_model_pool,
+        "visual_model_pool": get_visual_model_pool(),
         "translate_parallel_enabled": get_translate_parallel_enabled(),
         "translate_parallel_limit": get_translate_parallel_limit(),
         "has_pages": len(pages) > 0,
@@ -144,19 +139,14 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "visible_page_count": visible_page_count or len(pages),
         "entry_count": len(entries),
         "cleanup_headers_footers_enabled": cleanup_headers_footers_enabled,
-        "fnm_view_ready": fnm_view_ready,
-        "cleanup_mode_label": "FNM 模式（清理 + 视觉目录）" if cleanup_headers_footers_enabled else "快速模式",
-        "cleanup_mode_detail": "当前文档会先清理页眉页脚，再生成自动视觉目录，随后执行 FNM 注释分类。" if cleanup_headers_footers_enabled else "当前文档跳过 FNM 链路，优先更快开始阅读。",
-        "upload_cleanup_default_enabled": get_upload_cleanup_headers_footers_enabled(),
+        "cleanup_mode_label": "快速模式",
+        "cleanup_mode_detail": "当前文档优先更快开始阅读。",
+        "upload_cleanup_default_enabled": False,
         "auto_visual_toc_enabled": auto_visual_toc_enabled,
-        "auto_visual_toc_mode_label": "自动视觉目录已纳入 FNM" if cleanup_headers_footers_enabled else ("自动视觉目录已手动开启" if auto_visual_toc_enabled else "自动视觉目录未开启"),
+        "auto_visual_toc_mode_label": "自动视觉目录已手动开启" if auto_visual_toc_enabled else "自动视觉目录未开启",
         "auto_visual_toc_mode_detail": (
             visual_toc_message
-            or (
-                "FNM 模式下会先生成自动视觉目录，再进入 FNM 分类。"
-                if cleanup_headers_footers_enabled
-                else ("当前文档保留手动触发的自动视觉目录结果。" if auto_visual_toc_enabled else "当前文档不会自动生成视觉目录。")
-            )
+            or ("当前文档保留手动触发的自动视觉目录结果。" if auto_visual_toc_enabled else "当前文档不会自动生成视觉目录。")
         ),
         "visual_toc_status": visual_toc_status,
         "visual_toc_status_label": visual_toc_status_label,
@@ -170,5 +160,5 @@ def get_app_state(doc_id: str = "", *, deps: dict) -> dict:
         "manual_toc_label": manual_toc_label,
         "manual_toc_page_count": manual_toc_page_count,
         "manual_toc_source_name": manual_toc_source_name,
-        "upload_auto_visual_toc_default_enabled": get_upload_cleanup_headers_footers_enabled(),
+        "upload_auto_visual_toc_default_enabled": get_upload_auto_visual_toc_enabled(),
     }

@@ -4,33 +4,47 @@
 from __future__ import annotations
 
 import unittest
-from pathlib import Path
 
 import document.pdf_extract as pdf_extract
 
 
-REPO_ROOT = Path("/Users/hao/OCRandTranslation")
-TEST_EXAMPLE_DIR = REPO_ROOT / "test_example"
-
-
 class PdfExtractHeadingEvidenceTest(unittest.TestCase):
     def test_extract_pdf_text_keeps_font_name_and_weight_hint(self):
-        pdf_path = next((TEST_EXAMPLE_DIR / "Neuropsychoanalysis_Introduction").glob("*.pdf"))
+        try:
+            import fitz
+        except ModuleNotFoundError:
+            self.skipTest("PyMuPDF 未安装，无法生成字体证据 PDF")
 
-        pages = pdf_extract.extract_pdf_text(pdf_path.read_bytes())
-        chapter_page = next(page for page in pages if int(page.get("pageIdx") or -1) == 19)
-        chapter_items = list(chapter_page.get("items") or [])
+        doc = fitz.open()
+        page = doc.new_page(width=360, height=240)
+        page.insert_text(
+            (36, 72),
+            "Synthetic bold heading",
+            fontsize=18,
+            fontname="hebo",
+        )
+        page.insert_text(
+            (36, 120),
+            "Regular body paragraph with enough readable text layer.",
+            fontsize=12,
+            fontname="tiro",
+        )
+        pdf_bytes = doc.tobytes()
+        doc.close()
 
-        title_item = next(item for item in chapter_items if "Self and narcissism" in str(item.get("str") or ""))
+        pages = pdf_extract.extract_pdf_text(pdf_bytes)
+        chapter_items = list(pages[0].get("items") or [])
+
+        title_item = next(item for item in chapter_items if "Synthetic bold heading" in str(item.get("str") or ""))
         body_item = next(
             item
             for item in chapter_items
-            if "One of the key discoveries of Freud" in str(item.get("str") or "")
+            if "Regular body paragraph" in str(item.get("str") or "")
         )
 
-        self.assertEqual(title_item.get("font_name"), "GillSansStd-Bold")
+        self.assertEqual(title_item.get("font_name"), "Helvetica-Bold")
         self.assertEqual(title_item.get("font_weight_hint"), "bold")
-        self.assertEqual(body_item.get("font_name"), "TimesNewRomanPSMT")
+        self.assertEqual(body_item.get("font_name"), "Times-Roman")
         self.assertEqual(body_item.get("font_weight_hint"), "regular")
 
     def test_extract_pdf_text_without_font_dict_falls_back_to_unknown_weight(self):

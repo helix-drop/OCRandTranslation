@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    550,
+    551,
+    552,
+    553,
+    554,
+    555,
+    556,
+    557
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 550\",\n      \"printed_page\": \"550\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"« Le souvenir de Marcelle Mathieu », trad. François FÉDIER in René CHAR,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页为书目列表，非标准正文段落。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 551\",\n      \"printed_page\": \"551\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"trad. François FÉDIER, Paris, PUF, seconde édition revue et corrigée,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"页顶标题应为上一章结尾的延续或新章节起始。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 552\",\n      \"printed_page\": \"552\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"« Lettre à Victor Schwoerer, 2 octobre 1929 », trad. de Nicolas TERTULIAN,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 553\",\n      \"printed_page\": \"553\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"réelle » (GA 58, pp. 103-104) ; « Lettre à un doctorant, lettre à Karl\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 554\",\n      \"printed_page\": \"554\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"REMARQUES\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"François FÉDIER, Regarder voir, Paris, Les Belles Lettres/Archimbaud,\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"1. Les volumes suivants ont fait l'objet d'une réédition en format de\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 555\",\n      \"printed_page\": \"555\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"II. LIVRES ET ARTICLES EN FRANÇAIS SUR HEIDEGGER\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"2. Signalons une traduction sans date, par Gérard GRANEL, de « La\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"ADORNO (Theodor), Jargon de l'authenticité, trad. É. Escoubas, Paris,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 556\",\n      \"printed_page\": \"556\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"ANDIA (Ysabel de), Présence et eschatologie dans la pensée de Martin\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 557\",\n      \"printed_page\": \"557\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"BLANCHARD (Jean-Pierre), Martin Heidegger, philosophe incorrect, Paris,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    }\n  ],\n  \"correction_guidance\": [\n    \"书目列表页（如550, 551, 552等）段落边界不明显，建议作为单一列表块处理。\",\n    \"检查第554页REMARQUES部分的序号列表是否在自动转换时丢失层级。\",\n    \"第555页出现了新一级标题“II. LIVRES ET ARTICLES EN FRANÇAIS SUR HEIDEGGER”，需确保其与前文Bibliography章节的逻辑隶属关系正确。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 1483,
+      "total_tokens": 10570
+    }
+  }
+}

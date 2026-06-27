@@ -41,10 +41,6 @@ env/
 *.sublime-project
 *.sublime-workspace
 
-# Rust 构建产物
-target/
-Cargo.lock
-
 # 日志文件
 *.log
 
@@ -63,7 +59,6 @@ output/**/*
 .agents/
 .codex/
 verification.md
-FootNoteMachine/
 
 # 旧代码归档（仅本地保留，不入库）
 legacy/
@@ -80,10 +75,5 @@ session-ses_*.md
 # 根目录的空数据库副本（真正的数据库在 local_data/ 下）
 app.db
 
-# test_example 中超过 GitHub 100MB 限制的 PDF
-test_example/Napoleon/*.pdf
-test_example/Germany_Madness/Bell*.pdf
-
-# Heidegger golden exports（外部程序产出，不属于 Phase4 管辖）
-test_example/Heidegger_en_France/golden_exports/
-
+# 归档目录中的 PDF（超出 GitHub 100MB 限制）
+归档/**/*.pdf

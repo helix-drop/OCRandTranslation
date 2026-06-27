@@ -1,0 +1,18 @@
+{
+  "slug": "Neuropsychoanalysis_in_Practice",
+  "folder": "Neuropsychoanalysis_in_Practice",
+  "doc_id": "e7f8a1b6c2d3",
+  "verdict": "SKIP",
+  "stage_failed": "ensure_structure",
+  "ensure": {
+    "ok": false,
+    "reason": "no_pages",
+    "pipeline": {
+      "ok": false,
+      "error": "no_pages",
+      "run_id": 5
+    }
+  },
+  "batch_tag": "20260419_tier1a_v4",
+  "commit": "f37b345"
+}

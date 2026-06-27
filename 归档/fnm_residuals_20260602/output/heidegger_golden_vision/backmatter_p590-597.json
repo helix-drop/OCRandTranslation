@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    590,
+    591,
+    592,
+    593,
+    594,
+    595,
+    596,
+    597
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 590\",\n      \"printed_page\": \"590\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页面为索引正文，无常规段落，全是词条列表。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 591\",\n      \"printed_page\": \"591\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"INDEX\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 592\",\n      \"printed_page\": \"592\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 593\",\n      \"printed_page\": \"593\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"INDEX\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 594\",\n      \"printed_page\": \"594\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 595\",\n      \"printed_page\": \"595\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"INDEX\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 596\",\n      \"printed_page\": \"596\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 597\",\n      \"printed_page\": \"597\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"INDEX\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"词条列表页。\"]\n    }\n  ],\n  \"correction_guidance\": [\n    \"所有页面均为书末索引（Index），不存在常规正文段落、脚注或上标注释引用。\",\n    \"核对重点应为词条拼写及其关联页码的数字准确性，页面层级均为索引条目。\",\n    \"页码显示逻辑符合书后索引规范（偶数页页眉为书名，奇数页页眉为'INDEX'）。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 952,
+      "total_tokens": 10039
+    }
+  }
+}

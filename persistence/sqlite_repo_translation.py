@@ -23,7 +23,6 @@ class TranslationRepoMixin:
         payload["retry_round"] = int(payload.get("retry_round", 0) or 0)
         payload["unresolved_count"] = int(payload.get("unresolved_count", 0) or 0)
         payload["manual_required_count"] = int(payload.get("manual_required_count", 0) or 0)
-        payload["fnm_tail_state"] = payload.get("fnm_tail_state") or "idle"
         payload["export_bundle_available"] = bool(payload.get("export_bundle_available", 0))
         payload["export_has_blockers"] = bool(payload.get("export_has_blockers", 0))
         payload["tail_blocking_summary"] = json.loads(payload.pop("tail_blocking_summary_json", None) or "[]")
@@ -81,7 +80,6 @@ class TranslationRepoMixin:
             "retry_round": int(fields.get("retry_round", 0) or 0),
             "unresolved_count": int(fields.get("unresolved_count", 0) or 0),
             "manual_required_count": int(fields.get("manual_required_count", 0) or 0),
-            "fnm_tail_state": fields.get("fnm_tail_state") or "idle",
             "export_bundle_available": int(fields.get("export_bundle_available", 0) or 0),
             "export_has_blockers": int(fields.get("export_has_blockers", 0) or 0),
             "tail_blocking_summary_json": json.dumps(fields.get("tail_blocking_summary") or [], ensure_ascii=False),
@@ -119,7 +117,7 @@ class TranslationRepoMixin:
                         completion_tokens = ?, total_tokens = ?, request_count = ?,
                         last_error = ?, failed_bps_json = ?, partial_failed_bps_json = ?,
                         failed_pages_json = ?, retry_round = ?, unresolved_count = ?, manual_required_count = ?,
-                        fnm_tail_state = ?, export_bundle_available = ?, export_has_blockers = ?,
+                        export_bundle_available = ?, export_has_blockers = ?,
                         tail_blocking_summary_json = ?, translation_attempt_history_json = ?,
                         next_failed_location_json = ?, failed_locations_json = ?, manual_required_locations_json = ?,
                         task_json = ?, draft_json = ?, updated_at = ?
@@ -159,7 +157,6 @@ class TranslationRepoMixin:
                         payload["retry_round"],
                         payload["unresolved_count"],
                         payload["manual_required_count"],
-                        payload["fnm_tail_state"],
                         payload["export_bundle_available"],
                         payload["export_has_blockers"],
                         payload["tail_blocking_summary_json"],
@@ -191,11 +188,11 @@ class TranslationRepoMixin:
                     prompt_tokens, completion_tokens, total_tokens, request_count,
                     last_error, failed_bps_json, partial_failed_bps_json, failed_pages_json,
                     retry_round, unresolved_count, manual_required_count,
-                    fnm_tail_state, export_bundle_available, export_has_blockers,
+                    export_bundle_available, export_has_blockers,
                     tail_blocking_summary_json, translation_attempt_history_json,
                     next_failed_location_json, failed_locations_json, manual_required_locations_json,
                     task_json, draft_json, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     doc_id,
@@ -229,11 +226,10 @@ class TranslationRepoMixin:
                     payload["failed_bps_json"],
                     payload["partial_failed_bps_json"],
                     payload["failed_pages_json"],
-                    payload["retry_round"],
-                    payload["unresolved_count"],
-                    payload["manual_required_count"],
-                    payload["fnm_tail_state"],
-                    payload["export_bundle_available"],
+                        payload["retry_round"],
+                        payload["unresolved_count"],
+                        payload["manual_required_count"],
+                        payload["export_bundle_available"],
                     payload["export_has_blockers"],
                     payload["tail_blocking_summary_json"],
                     payload["translation_attempt_history_json"],

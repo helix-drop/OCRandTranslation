@@ -1,5 +1,5 @@
 {% set reading_layout = request.args.get('layout', 'stack') %}
-{% set current_reading_url = url_for('reading', bp=cur_page_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) ~ ('&view=' ~ current_view if current_view != 'standard' else '') %}
+{% set current_reading_url = url_for('reading', bp=cur_page_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) %}
 
 <!-- Export Modal -->
 <div class="modal-overlay hidden" id="exportModal" onclick="if(event.target===this)this.classList.add('hidden');">
@@ -12,10 +12,6 @@
       <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txM);cursor:pointer;">
         <input type="radio" name="exportFormat" value="standard" checked onchange="_updateExportFormatUi(); _scheduleExportReload();">
         <span>标准导出</span>
-      </label>
-      <label style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txM);cursor:pointer;{{ 'opacity:.55;' if not fnm_export_ready else '' }}">
-        <input type="radio" name="exportFormat" value="fnm_obsidian" {{ 'disabled' if not fnm_export_ready else '' }} onchange="_updateExportFormatUi(); _scheduleExportReload();">
-        <span>FNM Obsidian 章节包导出（.zip）{% if not fnm_export_ready %} · 需先完成 FNM 注释分类{% endif %}</span>
       </label>
     </div>
     <!-- 章节选择器（有 TOC 时显示） -->
@@ -50,7 +46,7 @@
   <!-- 导航 -->
   <div class="flex items-center gap-4">
     {% if prev_bp %}
-    <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) }}{{ '&view=' ~ current_view if current_view != 'standard' else '' }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="nav-arrow">&larr;</a>
+    <a href="{{ url_for('reading', bp=prev_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ prev_bp }}" onclick="return handleReadingNavClick(event, {{ prev_bp }});" class="nav-arrow">&larr;</a>
     {% else %}
     <span class="nav-arrow disabled">&larr;</span>
     {% endif %}
@@ -75,7 +71,7 @@
     {% endif %}
 
     {% if next_bp %}
-    <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) }}{{ '&view=' ~ current_view if current_view != 'standard' else '' }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="nav-arrow">&rarr;</a>
+    <a href="{{ url_for('reading', bp=next_bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, layout=reading_layout, pdf=1 if pdf_visible else 0) }}" data-reading-bp="{{ next_bp }}" onclick="return handleReadingNavClick(event, {{ next_bp }});" class="nav-arrow">&rarr;</a>
     {% else %}
     <span class="nav-arrow disabled">&rarr;</span>
     {% endif %}
@@ -159,7 +155,7 @@
         <div class="toolbar-dropdown-label">当前模型</div>
         <div class="toolbar-dropdown-item" style="cursor:default;white-space:normal;line-height:1.6;">
           翻译主模型：{{ current_model_label or current_model_id or '-' }}<br>
-          FNM 主模型：{{ current_visual_model_label or current_visual_model_id or '-' }}
+          视觉主模型：{{ current_visual_model_label or current_visual_model_id or '-' }}
         </div>
         <div class="toolbar-dropdown-sep"></div>
         <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="toolbar-dropdown-item">模型设置</a>

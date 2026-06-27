@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    591
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 591\",\n      \"printed_page\": \"591\",\n      \"lines\": [\n        \"FERRIÉ (Christian) : 471n\",\n        \"FERRIER (Jean-Louis) : 188\",\n        \"FERRY (Luc) : 234n, 238, 287n-289,\",\n        \"311, 314, 326n, 374-376, 378,\",\n        \"381, 402, 524\",\n        \"FESSARD (Gaston) : 145, 150n, 157,\",\n        \"519\",\n        \"FICHTE (Johann Gottlieb) : 29-30,\",\n        \"196, 246, 282, 490n\",\n        \"FIGUIER (Richard) : 22\",\n        \"FINK (Eugen) : 86, 243, 245, 332n\",\n        \"FINKIELKRAUT (Alain) : 365, 383,\",\n        \"418, 506\",\n        \"FISCHER (Eugen) : 354, 369\",\n        \"FONDANE (Benjamin) : 36\",\n        \"FONTENAY (Élisabeth de) : 377n\",\n        \"FONTENELLE (Bernard) : 16, 226\",\n        \"FOUCAULT (Michel) : 128, 186,\",\n        \"187n, 212n, 215-216, 240, 276n,\",\n        \"439n, 532n\",\n        \"FOUCHER (Dominique) : 266n\",\n        \"FOUILLARON (Philippe) : 494n\",\n        \"FOULQUIÉ (Paul) : 110n\",\n        \"FOURCADE (Dominique) : 212n,\",\n        \"243n, 328n\",\n        \"FOURQUET (Jean) : 198n\",\n        \"FRANCK (Didier) : 23, 334, 479n,\",\n        \"489n, 503n\",\n        \"FRÉDÉRIC II : 175n\",\n        \"FREUD (Sigmund) : 61n, 208, 217n,\",\n        \"219, 252n, 256n, 292n, 293n,\",\n        \"381, 476\",\n        \"FROMENT-MEURICE (Marc) : 326n\",\n        \"FUMET (Stanislas) : 223n\",\n        \"GADAMER (Hans-Georg) : 9, 20,\",\n        \"120n, 212n, 229, 335n, 385n,\",\n        \"402, 404, 472\",\n        \"GAGARINE (Youri) : 199-200\",\n        \"GALILÉE : 517n\",\n        \"GALLIMARD (Éditions) : 46n, 95n,\",\n        \"96n, 179, 224, 228, 234, 268,\",\n        \"310, 317-322, 328, 359, 400,\",\n        \"523, 529, 532\",\n        \"GALLIMARD (Gaston) : 61\",\n        \"GANDILLAC (Maurice de) : 23, 30,\",\n        \"82-83, 94, 107-109, 128, 145n,\",\n        \"150n, 151n, 179, 187n, 207n,\",\n        \"212n\",\n        \"GARELLI (Jacques) : 338n, 452\",\n        \"GAUCHET (Marcel) : 187n\",\n        \"GAXOTTE (Pierre) : 538n\",\n        \"GEFFRÉ (Claude) : 23, 480n, 486-\",\n        \"488\",\n        \"GENTILE (Giovanni) : 536n\",\n        \"GEORGE (Stefan) : 282\",\n        \"GÉRARD (Jacques) : 163n\",\n        \"GÉRARD (Patrick) : 383\",\n        \"GIRARD (Jean-Yves) : 420n\",\n        \"GILSON (Étienne) : 140-142, 146\",\n        \"GLUCKSMANN (André) : 282-283,\",\n        \"355n\",\n        \"GOETHE (Johann Wolfgang) : 359,\",\n        \"363n, 427n, 442, 502\",\n        \"GOLDMANN (Lucien) : 150n-152,\",\n        \"156n, 160, 191, 253n\",\n        \"GOLDSCHMIDT (Georges-Arthur) :\",\n        \"352, 534\",\n        \"GOUHIER (Henri) : 212n\",\n        \"GRACQ (Julien) : 62n\",\n        \"GRANEL (Gérard) : 23, 170, 208n,\",\n        \"212n, 218-219, 235n, 245n,\",\n        \"250n, 252n, 260, 269-270, 294-\",\n        \"296, 299n, 314, 361-364, 398n,\",\n        \"462n, 494, 503, 520n, 527\",\n        \"GRANGER (Gilles-Gaston) : 271,\",\n        \"423n\",\n        \"GRASSI (Ernesto) : 354, 363n, 535n\",\n        \"GREISCH (Jean) : 23, 32n, 307, 404-\",\n        \"406, 441, 465n, 480n, 485, 487,\",\n        \"488-489, 528n, 529n, 532n\",\n        \"GRIMM (les frères) : 50n\",\n        \"GRISONI (Dominique) : 351\",\n        \"GRIVAS (Jean-François) : 248n\",\n        \"GRONDIN (Jean) : 402-404, 406n\",\n        \"GUARDINI (Romano) : 52n\",\n        \"GUATTARI (Félix) : 252\",\n        \"GUÉRY (François) : 428n\",\n        \"GUEST (Gérard) : 324n, 328n, 368n,\",\n        \"503n, 532n\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1862,
+      "total_tokens": 3295
+    }
+  }
+}

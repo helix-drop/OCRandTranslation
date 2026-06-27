@@ -1,0 +1,984 @@
+{
+  "rerun_id": "fnm_visual_real_books_rerun_20260407",
+  "generated_at": "2026-04-07T05:52:08.875181+00:00",
+  "visual_model": {
+    "provider": "qwen",
+    "model_id": "qwen3.5-plus",
+    "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  "source_baseline": "/Users/hao/.copilot/session-state/66f7a1c9-b92c-4492-94a1-bce2ff0508d5/files/five_book_baseline_20260407.json",
+  "required_output_path": "/tmp/fnm_visual_real_books_rerun_20260407.json",
+  "actual_output_path": "/Users/hao/OCRandTranslation/output/fnm_visual_real_books_rerun_20260407.json",
+  "book_count": 5,
+  "books": [
+    {
+      "book": "Biopolitics",
+      "doc_id": "69e476e61e95",
+      "page_count": 370,
+      "errors": [],
+      "visual_toc_result": {
+        "status": "needs_offset",
+        "count": 12,
+        "message": ""
+      },
+      "visual_toc_count": 12,
+      "visual_toc_titles_head": [
+        "Leçon du 31 janvier 1979",
+        "Leçon du 21 février 1979",
+        "Leçon du 21 mars 1979",
+        "COURS, ANNÉE 1978-1979",
+        "Leçon du 7 février 1979",
+        "Leçon du 7 mars 1979",
+        "Leçon du 28 mars 1979",
+        "Leçon du 10 janvier 1979",
+        "Leçon du 14 février 1979",
+        "Leçon du 14 mars 1979",
+        "Leçon du 17 janvier 1979",
+        "Leçon du 24 janvier 1979"
+      ],
+      "visual_toc_reverse_jumps": [
+        [
+          257,
+          1
+        ],
+        [
+          283,
+          3
+        ],
+        [
+          233,
+          43
+        ]
+      ],
+      "section_count": 16,
+      "sections": [
+        {
+          "title": "COURS, ANNÉE 1978-1979",
+          "section_kind": "body",
+          "start_page": 1,
+          "end_page": 8,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "AVERTISSEMENT",
+          "section_kind": "body",
+          "start_page": 9,
+          "end_page": 16,
+          "footnotes": 8,
+          "endnotes": 0
+        },
+        {
+          "title": "LEÇON DU 10 JANVIER 1979",
+          "section_kind": "body",
+          "start_page": 17,
+          "end_page": 42,
+          "footnotes": 12,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 17 janvier 1979",
+          "section_kind": "body",
+          "start_page": 43,
+          "end_page": 66,
+          "footnotes": 11,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 24 janvier 1979",
+          "section_kind": "body",
+          "start_page": 67,
+          "end_page": 90,
+          "footnotes": 12,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 31 janvier 1979",
+          "section_kind": "body",
+          "start_page": 91,
+          "end_page": 118,
+          "footnotes": 13,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 7 février 1979",
+          "section_kind": "body",
+          "start_page": 119,
+          "end_page": 148,
+          "footnotes": 23,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 14 février 1979",
+          "section_kind": "body",
+          "start_page": 149,
+          "end_page": 178,
+          "footnotes": 8,
+          "endnotes": 13
+        },
+        {
+          "title": "Leçon du 21 février 1979",
+          "section_kind": "body",
+          "start_page": 179,
+          "end_page": 202,
+          "footnotes": 14,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 7 mars 1979",
+          "section_kind": "body",
+          "start_page": 203,
+          "end_page": 232,
+          "footnotes": 10,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 14 mars 1979",
+          "section_kind": "body",
+          "start_page": 233,
+          "end_page": 256,
+          "footnotes": 7,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 21 mars 1979",
+          "section_kind": "body",
+          "start_page": 257,
+          "end_page": 282,
+          "footnotes": 17,
+          "endnotes": 0
+        },
+        {
+          "title": "Leçon du 28 mars 1979",
+          "section_kind": "body",
+          "start_page": 283,
+          "end_page": 306,
+          "footnotes": 3,
+          "endnotes": 22
+        },
+        {
+          "title": "LEÇON DU 4 AVRIL 1979",
+          "section_kind": "body",
+          "start_page": 307,
+          "end_page": 328,
+          "footnotes": 11,
+          "endnotes": 0
+        },
+        {
+          "title": "NOTES",
+          "section_kind": "book_end_notes",
+          "start_page": 329,
+          "end_page": 349,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Index des notions",
+          "section_kind": "index",
+          "start_page": 350,
+          "end_page": 370,
+          "footnotes": 0,
+          "endnotes": 0
+        }
+      ],
+      "footnote_eval": {
+        "matched": 17,
+        "missing_annotation": 359,
+        "missing_ref": 4,
+        "cross_page_or_mismatch": 10,
+        "same_page": 7,
+        "unresolved_sum": 363,
+        "status_counts": {
+          "matched": 17,
+          "missing_ref": 4,
+          "missing_annotation": 359
+        }
+      },
+      "endnote_eval": {
+        "matched": 0,
+        "missing_annotation": 0,
+        "missing_ref": 0,
+        "cross_page_or_mismatch": 0,
+        "same_page": 0,
+        "unresolved_sum": 0,
+        "status_counts": {}
+      },
+      "unresolved_reason_counts": {
+        "unresolved_gap": 136,
+        "missing_annotation": 359,
+        "gap_ratio_high_skip_auto_repair": 70
+      },
+      "note_count": 184
+    },
+    {
+      "book": "Germany_Madness",
+      "doc_id": "b9328e594f00",
+      "page_count": 464,
+      "errors": [],
+      "visual_toc_result": {
+        "status": "ready",
+        "count": 10,
+        "message": ""
+      },
+      "visual_toc_count": 10,
+      "visual_toc_titles_head": [
+        "Historical Problems: Sin, St. Vitus, and the Devil",
+        "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+        "Academic “Psychiatry” and the Rise of Galenic Observation",
+        "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+        "Court Fools and Their Folly: Image and Social Reality",
+        "Pilgrims in Search of Their Reason",
+        "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+        "Epilogue",
+        "Bibliography",
+        "Index"
+      ],
+      "visual_toc_reverse_jumps": [],
+      "section_count": 13,
+      "sections": [
+        {
+          "title": "untitled",
+          "section_kind": "body",
+          "start_page": 1,
+          "end_page": 1,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "A History of Madness in\nSixteenth-Century Germany",
+          "section_kind": "body",
+          "start_page": 2,
+          "end_page": 11,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "ACKNOWLEDGMENTS",
+          "section_kind": "acknowledgments",
+          "start_page": 12,
+          "end_page": 44,
+          "footnotes": 53,
+          "endnotes": 0
+        },
+        {
+          "title": "Historical Problems: Sin, St. Vitus, and the Devil",
+          "section_kind": "body",
+          "start_page": 45,
+          "end_page": 99,
+          "footnotes": 167,
+          "endnotes": 0
+        },
+        {
+          "title": "Two Reformers and a World Gone Mad: Luther and Paracelsus",
+          "section_kind": "body",
+          "start_page": 100,
+          "end_page": 159,
+          "footnotes": 268,
+          "endnotes": 0
+        },
+        {
+          "title": "Academic “Psychiatry” and the Rise of Galenic Observation",
+          "section_kind": "body",
+          "start_page": 160,
+          "end_page": 201,
+          "footnotes": 120,
+          "endnotes": 0
+        },
+        {
+          "title": "Witchcraft and the Melancholy Interpretation of the Insanity Defense",
+          "section_kind": "body",
+          "start_page": 202,
+          "end_page": 247,
+          "footnotes": 168,
+          "endnotes": 0
+        },
+        {
+          "title": "Court Fools and Their Folly: Image and Social Reality",
+          "section_kind": "body",
+          "start_page": 248,
+          "end_page": 296,
+          "footnotes": 89,
+          "endnotes": 0
+        },
+        {
+          "title": "Pilgrims in Search of Their Reason",
+          "section_kind": "body",
+          "start_page": 297,
+          "end_page": 341,
+          "footnotes": 162,
+          "endnotes": 0
+        },
+        {
+          "title": "Madness as Helplessness: Two Hospitals in the Age of the Reformations",
+          "section_kind": "body",
+          "start_page": 342,
+          "end_page": 404,
+          "footnotes": 164,
+          "endnotes": 0
+        },
+        {
+          "title": "Epilogue",
+          "section_kind": "body",
+          "start_page": 405,
+          "end_page": 410,
+          "footnotes": 1,
+          "endnotes": 0
+        },
+        {
+          "title": "Bibliography",
+          "section_kind": "bibliography",
+          "start_page": 411,
+          "end_page": 446,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Index",
+          "section_kind": "index",
+          "start_page": 447,
+          "end_page": 464,
+          "footnotes": 0,
+          "endnotes": 0
+        }
+      ],
+      "footnote_eval": {
+        "matched": 1181,
+        "missing_annotation": 3,
+        "missing_ref": 19,
+        "cross_page_or_mismatch": 1,
+        "same_page": 1171,
+        "unresolved_sum": 22,
+        "status_counts": {
+          "matched": 1156,
+          "missing_annotation": 3,
+          "repaired": 25,
+          "missing_ref": 19
+        }
+      },
+      "endnote_eval": {
+        "matched": 0,
+        "missing_annotation": 0,
+        "missing_ref": 0,
+        "cross_page_or_mismatch": 0,
+        "same_page": 0,
+        "unresolved_sum": 0,
+        "status_counts": {}
+      },
+      "unresolved_reason_counts": {
+        "missing_annotation": 3
+      },
+      "note_count": 1192
+    },
+    {
+      "book": "post-revolutionary",
+      "doc_id": "327fa503052b",
+      "page_count": 431,
+      "errors": [],
+      "visual_toc_result": {
+        "status": "ready",
+        "count": 12,
+        "message": ""
+      },
+      "visual_toc_count": 12,
+      "visual_toc_titles_head": [
+        "Introduction: Psychological Interiority versus Self-Talk",
+        "1 The Perils of Imagination at the End of the Old Regime",
+        "2 The Revolutionary Schooling of Imagination",
+        "3 Is There a Self in This Mental Apparatus?",
+        "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+        "5 Cousinian Hegemony",
+        "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "Epilogue",
+        "Notes",
+        "Note on Sources",
+        "Index"
+      ],
+      "visual_toc_reverse_jumps": [],
+      "section_count": 14,
+      "sections": [
+        {
+          "title": "untitled",
+          "section_kind": "body",
+          "start_page": 1,
+          "end_page": 3,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "The Post-\nRevolutionary Self",
+          "section_kind": "body",
+          "start_page": 4,
+          "end_page": 17,
+          "footnotes": 1,
+          "endnotes": 0
+        },
+        {
+          "title": "Introduction: Psychological Interiority versus Self-Talk",
+          "section_kind": "body",
+          "start_page": 18,
+          "end_page": 37,
+          "footnotes": 0,
+          "endnotes": 14
+        },
+        {
+          "title": "1 The Perils of Imagination at the End of the Old Regime",
+          "section_kind": "body",
+          "start_page": 38,
+          "end_page": 76,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "2 The Revolutionary Schooling of Imagination",
+          "section_kind": "body",
+          "start_page": 77,
+          "end_page": 119,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "3 Is There a Self in This Mental Apparatus?",
+          "section_kind": "body",
+          "start_page": 120,
+          "end_page": 155,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "4 An A Priori Self for the Bourgeois Male: Victor Cousin’s Project",
+          "section_kind": "body",
+          "start_page": 156,
+          "end_page": 198,
+          "footnotes": 0,
+          "endnotes": 5
+        },
+        {
+          "title": "5 Cousinian Hegemony",
+          "section_kind": "body",
+          "start_page": 199,
+          "end_page": 249,
+          "footnotes": 0,
+          "endnotes": 139
+        },
+        {
+          "title": "6 Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+          "section_kind": "body",
+          "start_page": 250,
+          "end_page": 285,
+          "footnotes": 0,
+          "endnotes": 17
+        },
+        {
+          "title": "7 A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+          "section_kind": "body",
+          "start_page": 286,
+          "end_page": 332,
+          "footnotes": 0,
+          "endnotes": 115
+        },
+        {
+          "title": "Epilogue",
+          "section_kind": "body",
+          "start_page": 333,
+          "end_page": 347,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Notes",
+          "section_kind": "book_end_notes",
+          "start_page": 348,
+          "end_page": 415,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Note on Sources",
+          "section_kind": "body",
+          "start_page": 416,
+          "end_page": 419,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Index",
+          "section_kind": "index",
+          "start_page": 420,
+          "end_page": 431,
+          "footnotes": 0,
+          "endnotes": 0
+        }
+      ],
+      "footnote_eval": {
+        "matched": 0,
+        "missing_annotation": 590,
+        "missing_ref": 1,
+        "cross_page_or_mismatch": 0,
+        "same_page": 0,
+        "unresolved_sum": 591,
+        "status_counts": {
+          "missing_ref": 1,
+          "missing_annotation": 590
+        }
+      },
+      "endnote_eval": {
+        "matched": 0,
+        "missing_annotation": 0,
+        "missing_ref": 0,
+        "cross_page_or_mismatch": 0,
+        "same_page": 0,
+        "unresolved_sum": 0,
+        "status_counts": {}
+      },
+      "unresolved_reason_counts": {
+        "gap_ratio_high_skip_auto_repair": 693,
+        "missing_annotation": 590,
+        "unresolved_gap": 14
+      },
+      "note_count": 291
+    },
+    {
+      "book": "Heidegger_en_France",
+      "doc_id": "d12325d629d7",
+      "page_count": 608,
+      "errors": [],
+      "visual_toc_result": {
+        "status": "needs_offset",
+        "count": 23,
+        "message": ""
+      },
+      "visual_toc_count": 23,
+      "visual_toc_titles_head": [
+        "Introduction",
+        "Premiers étonnements",
+        "De la mode à la méthode",
+        "Quels horizons d'attente ?",
+        "1. Premiers passages du Rhin",
+        "Un idéalisme existentiel",
+        "Rencontres, études et traductions pionnières",
+        "Du concret ?",
+        "Une traduction qui fait date",
+        "Une occasion manquée, des semences de gloire",
+        "2. La bombe Sartre",
+        "Les aveux de la drôle de guerre"
+      ],
+      "visual_toc_reverse_jumps": [],
+      "section_count": 27,
+      "sections": [
+        {
+          "title": "untitled",
+          "section_kind": "body",
+          "start_page": 1,
+          "end_page": 6,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Introduction",
+          "section_kind": "body",
+          "start_page": 7,
+          "end_page": 9,
+          "footnotes": 8,
+          "endnotes": 0
+        },
+        {
+          "title": "De la mode à la méthode",
+          "section_kind": "body",
+          "start_page": 10,
+          "end_page": 19,
+          "footnotes": 10,
+          "endnotes": 0
+        },
+        {
+          "title": "Quels horizons d'attente ?",
+          "section_kind": "body",
+          "start_page": 20,
+          "end_page": 24,
+          "footnotes": 4,
+          "endnotes": 0
+        },
+        {
+          "title": "1. Premiers passages du Rhin",
+          "section_kind": "body",
+          "start_page": 25,
+          "end_page": 29,
+          "footnotes": 16,
+          "endnotes": 0
+        },
+        {
+          "title": "Rencontres, études et traductions pionnières",
+          "section_kind": "body",
+          "start_page": 30,
+          "end_page": 35,
+          "footnotes": 24,
+          "endnotes": 0
+        },
+        {
+          "title": "Du concret ?",
+          "section_kind": "body",
+          "start_page": 36,
+          "end_page": 39,
+          "footnotes": 15,
+          "endnotes": 0
+        },
+        {
+          "title": "Une traduction qui fait date",
+          "section_kind": "body",
+          "start_page": 40,
+          "end_page": 47,
+          "footnotes": 24,
+          "endnotes": 0
+        },
+        {
+          "title": "Une occasion manquée, des semences de gloire",
+          "section_kind": "body",
+          "start_page": 48,
+          "end_page": 54,
+          "footnotes": 15,
+          "endnotes": 0
+        },
+        {
+          "title": "2. La bombe Sartre",
+          "section_kind": "body",
+          "start_page": 55,
+          "end_page": 61,
+          "footnotes": 17,
+          "endnotes": 0
+        },
+        {
+          "title": "Heidegger omniprésent",
+          "section_kind": "body",
+          "start_page": 62,
+          "end_page": 66,
+          "footnotes": 14,
+          "endnotes": 0
+        },
+        {
+          "title": "Facticité et mauvaise foi",
+          "section_kind": "body",
+          "start_page": 67,
+          "end_page": 70,
+          "footnotes": 13,
+          "endnotes": 0
+        },
+        {
+          "title": "Quel autrui ?",
+          "section_kind": "body",
+          "start_page": 71,
+          "end_page": 74,
+          "footnotes": 9,
+          "endnotes": 0
+        },
+        {
+          "title": "Une morale en suspens",
+          "section_kind": "body",
+          "start_page": 75,
+          "end_page": 77,
+          "footnotes": 11,
+          "endnotes": 0
+        },
+        {
+          "title": "Un impossible bilan",
+          "section_kind": "body",
+          "start_page": 78,
+          "end_page": 80,
+          "footnotes": 5,
+          "endnotes": 0
+        },
+        {
+          "title": "3. Les fascinations de l'après-guerre",
+          "section_kind": "body",
+          "start_page": 81,
+          "end_page": 84,
+          "footnotes": 10,
+          "endnotes": 0
+        },
+        {
+          "title": "Signes d'intelligence d'un certain M. Beaufret",
+          "section_kind": "body",
+          "start_page": 85,
+          "end_page": 89,
+          "footnotes": 23,
+          "endnotes": 0
+        },
+        {
+          "title": "Des intelligences plus parisiennes",
+          "section_kind": "body",
+          "start_page": 90,
+          "end_page": 102,
+          "footnotes": 51,
+          "endnotes": 0
+        },
+        {
+          "title": "Heidegger et la politique : la question est posée",
+          "section_kind": "body",
+          "start_page": 103,
+          "end_page": 112,
+          "footnotes": 20,
+          "endnotes": 0
+        },
+        {
+          "title": "4.\nL'humanisme dans les turbulences",
+          "section_kind": "body",
+          "start_page": 113,
+          "end_page": 184,
+          "footnotes": 222,
+          "endnotes": 0
+        },
+        {
+          "title": "Polémiques renouvelées,\ndéplacements inédits",
+          "section_kind": "body",
+          "start_page": 185,
+          "end_page": 274,
+          "footnotes": 237,
+          "endnotes": 0
+        },
+        {
+          "title": "8.\nMort et transfiguration ?",
+          "section_kind": "body",
+          "start_page": 275,
+          "end_page": 316,
+          "footnotes": 141,
+          "endnotes": 0
+        },
+        {
+          "title": "9.\nLa lettre et l’esprit",
+          "section_kind": "body",
+          "start_page": 317,
+          "end_page": 544,
+          "footnotes": 652,
+          "endnotes": 0
+        },
+        {
+          "title": "BIBLIOGRAPHIE",
+          "section_kind": "bibliography",
+          "start_page": 545,
+          "end_page": 576,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Index historique des traductions françaises\nde mots clés heideggériens",
+          "section_kind": "index",
+          "start_page": 577,
+          "end_page": 588,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "INDEX",
+          "section_kind": "index",
+          "start_page": 589,
+          "end_page": 604,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "COLLECTION «PLURIEL »",
+          "section_kind": "body",
+          "start_page": 605,
+          "end_page": 608,
+          "footnotes": 0,
+          "endnotes": 0
+        }
+      ],
+      "footnote_eval": {
+        "matched": 442,
+        "missing_annotation": 39,
+        "missing_ref": 460,
+        "cross_page_or_mismatch": 62,
+        "same_page": 380,
+        "unresolved_sum": 499,
+        "status_counts": {
+          "matched": 438,
+          "missing_ref": 460,
+          "missing_annotation": 39,
+          "repaired": 4
+        }
+      },
+      "endnote_eval": {
+        "matched": 0,
+        "missing_annotation": 0,
+        "missing_ref": 0,
+        "cross_page_or_mismatch": 0,
+        "same_page": 0,
+        "unresolved_sum": 0,
+        "status_counts": {}
+      },
+      "unresolved_reason_counts": {
+        "unresolved_gap": 147,
+        "missing_annotation": 39,
+        "gap_ratio_high_skip_auto_repair": 350
+      },
+      "note_count": 1541
+    },
+    {
+      "book": "Mad_Act",
+      "doc_id": "2fd99c50ab2c",
+      "page_count": 824,
+      "errors": [],
+      "visual_toc_result": {
+        "status": "failed",
+        "count": 0,
+        "message": ""
+      },
+      "visual_toc_count": 0,
+      "visual_toc_titles_head": [],
+      "visual_toc_reverse_jumps": [],
+      "section_count": 15,
+      "sections": [
+        {
+          "title": "untitled",
+          "section_kind": "body",
+          "start_page": 1,
+          "end_page": 14,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Acknowledgments",
+          "section_kind": "acknowledgments",
+          "start_page": 15,
+          "end_page": 18,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Mad acts, mad words, and mad people in Chinese medicine and law",
+          "section_kind": "body",
+          "start_page": 19,
+          "end_page": 219,
+          "footnotes": 98,
+          "endnotes": 0
+        },
+        {
+          "title": "6\nReplenish or attack?\nCompeting etiologies and therapies of madness in Ming medicine",
+          "section_kind": "body",
+          "start_page": 220,
+          "end_page": 289,
+          "footnotes": 33,
+          "endnotes": 0
+        },
+        {
+          "title": "is limitless and the impoverished roam the markets; $ ^{22} $ [moreover] the meanings and principles [expressed in these books] are profound and subtle, so that the ignorant have failed to examine them.",
+          "section_kind": "body",
+          "start_page": 290,
+          "end_page": 384,
+          "footnotes": 44,
+          "endnotes": 0
+        },
+        {
+          "title": "Gendered mania?\nWomen's madness in late-imperial case records",
+          "section_kind": "body",
+          "start_page": 385,
+          "end_page": 425,
+          "footnotes": 20,
+          "endnotes": 0
+        },
+        {
+          "title": "10",
+          "section_kind": "body",
+          "start_page": 426,
+          "end_page": 438,
+          "footnotes": 6,
+          "endnotes": 0
+        },
+        {
+          "title": "11\nErrors and projections",
+          "section_kind": "body",
+          "start_page": 439,
+          "end_page": 589,
+          "footnotes": 28,
+          "endnotes": 0
+        },
+        {
+          "title": "15",
+          "section_kind": "body",
+          "start_page": 590,
+          "end_page": 639,
+          "footnotes": 8,
+          "endnotes": 0
+        },
+        {
+          "title": "Bibliography A",
+          "section_kind": "bibliography",
+          "start_page": 640,
+          "end_page": 724,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Appendix 1\nGlossary of key terms",
+          "section_kind": "appendix",
+          "start_page": 725,
+          "end_page": 774,
+          "footnotes": 8,
+          "endnotes": 0
+        },
+        {
+          "title": "Appendix 5\nZhang Jiebin on kuang in Jingyue quanshu 景岳全書",
+          "section_kind": "appendix",
+          "start_page": 775,
+          "end_page": 782,
+          "footnotes": 2,
+          "endnotes": 0
+        },
+        {
+          "title": "Appendix 7\nList of Qing laws cited in the text",
+          "section_kind": "appendix",
+          "start_page": 783,
+          "end_page": 788,
+          "footnotes": 0,
+          "endnotes": 0
+        },
+        {
+          "title": "Appendix 8\nChronological evolution of Qing laws on madness",
+          "section_kind": "appendix",
+          "start_page": 789,
+          "end_page": 808,
+          "footnotes": 7,
+          "endnotes": 0
+        },
+        {
+          "title": "Appendix 9\nDing Wenbin's introductory letter and his confession (1753)",
+          "section_kind": "appendix",
+          "start_page": 809,
+          "end_page": 824,
+          "footnotes": 3,
+          "endnotes": 0
+        }
+      ],
+      "footnote_eval": {
+        "matched": 182,
+        "missing_annotation": 855,
+        "missing_ref": 1,
+        "cross_page_or_mismatch": 3,
+        "same_page": 179,
+        "unresolved_sum": 856,
+        "status_counts": {
+          "matched": 176,
+          "missing_annotation": 855,
+          "repaired": 6,
+          "missing_ref": 1
+        }
+      },
+      "endnote_eval": {
+        "matched": 0,
+        "missing_annotation": 0,
+        "missing_ref": 0,
+        "cross_page_or_mismatch": 0,
+        "same_page": 0,
+        "unresolved_sum": 0,
+        "status_counts": {}
+      },
+      "unresolved_reason_counts": {
+        "missing_annotation": 855,
+        "unresolved_gap": 73,
+        "section_boundary_suspect": 275
+      },
+      "note_count": 257
+    }
+  ],
+  "blockers": []
+}

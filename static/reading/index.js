@@ -748,21 +748,6 @@ function _updateExportFormatUi() {
   var excludeWrap = document.getElementById('exportExcludeBoilerplateWrap');
   var copyBtn = document.getElementById('exportCopyBtn');
   var downloadBtn = document.getElementById('exportDownloadBtn');
-  var format = _selectedExportFormat();
-  if (format === 'fnm_obsidian') {
-    section.classList.add('hidden');
-    excludeWrap.classList.add('hidden');
-    if (copyBtn) {
-      copyBtn.disabled = true;
-      copyBtn.style.opacity = '0.5';
-      copyBtn.style.cursor = 'not-allowed';
-      copyBtn.title = 'FNM Obsidian 章节包导出仅支持下载 .zip';
-    }
-    if (downloadBtn) {
-      downloadBtn.textContent = '下载 .zip';
-    }
-    return;
-  }
   excludeWrap.classList.remove('hidden');
   if (copyBtn) {
     copyBtn.disabled = false;
@@ -805,7 +790,7 @@ function _loadExportChapters() {
 function _renderExportChapterList() {
   var section = document.getElementById('exportChapterSection');
   var list = document.getElementById('exportChapterList');
-  if (!_exportChapters.length || _selectedExportFormat() === 'fnm_obsidian') {
+  if (!_exportChapters.length) {
     section.classList.add('hidden');
     return;
   }
@@ -890,30 +875,20 @@ function loadExportContent(force) {
   _updateExportFormatUi();
 
   var url = (ROUTES.exportMd || '/export_md') + '?doc_id=' + encodeURIComponent(docId);
-  var exportFormat = _selectedExportFormat();
-  if (exportFormat === 'fnm_obsidian') {
-    url += '&format=fnm_obsidian';
-  } else {
-    var bpRanges = _exportBpRanges();
-    if (bpRanges === '__none__') {
-      textarea.value = '';
-      loading.classList.add('hidden');
-      textarea.classList.remove('hidden');
-      return;
-    }
-    if (bpRanges) url += '&bp_ranges=' + encodeURIComponent(bpRanges);
-    if (_excludeBoilerplateEnabled()) url += '&exclude_boilerplate=1';
+  var bpRanges = _exportBpRanges();
+  if (bpRanges === '__none__') {
+    textarea.value = '';
+    loading.classList.add('hidden');
+    textarea.classList.remove('hidden');
+    return;
   }
+  if (bpRanges) url += '&bp_ranges=' + encodeURIComponent(bpRanges);
+  if (_excludeBoilerplateEnabled()) url += '&exclude_boilerplate=1';
 
   fetch(url)
     .then(function(r) { return r.json(); })
     .then(function(d) {
-      var markdown = d.markdown || '';
-      if (exportFormat === 'fnm_obsidian' && markdown) {
-        textarea.value = '该格式将下载为 .zip 章节包。\n以下为导出内容预览：\n\n' + markdown;
-      } else {
-        textarea.value = markdown;
-      }
+      textarea.value = d.markdown || '';
       loading.classList.add('hidden');
       textarea.classList.remove('hidden');
     })
@@ -926,29 +901,20 @@ function downloadExportMd() {
   var docId = requireReadingDocId('导出文稿', function() {});
   if (!docId) return;
   var url = (ROUTES.downloadMd || '/download_md') + '?doc_id=' + encodeURIComponent(docId);
-  var exportFormat = _selectedExportFormat();
-  if (exportFormat === 'fnm_obsidian') {
-    url += '&format=fnm_obsidian';
-  } else {
-    var bpRanges = _exportBpRanges();
-    if (bpRanges === '__none__') { alert('请至少选择一个章节'); return; }
-    if (bpRanges) {
-      url += '&bp_ranges=' + encodeURIComponent(bpRanges);
-      var name = _exportChapterName();
-      if (name) url += '&chapter_name=' + encodeURIComponent(name);
-    }
-    if (_excludeBoilerplateEnabled()) {
-      url += '&exclude_boilerplate=1';
-    }
+  var bpRanges = _exportBpRanges();
+  if (bpRanges === '__none__') { alert('请至少选择一个章节'); return; }
+  if (bpRanges) {
+    url += '&bp_ranges=' + encodeURIComponent(bpRanges);
+    var name = _exportChapterName();
+    if (name) url += '&chapter_name=' + encodeURIComponent(name);
+  }
+  if (_excludeBoilerplateEnabled()) {
+    url += '&exclude_boilerplate=1';
   }
   window.location.href = url;
 }
 
 function copyExport() {
-  if (_selectedExportFormat() === 'fnm_obsidian') {
-    alert('FNM Obsidian 章节包导出仅支持下载 .zip');
-    return;
-  }
   var textarea = document.getElementById('exportText');
   if (!textarea.value || textarea.value === '加载中…') {
     alert('内容尚未加载完成');

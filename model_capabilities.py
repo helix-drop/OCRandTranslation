@@ -28,7 +28,6 @@ def _chat_model(
         "stream_mode": "chat_json",
         "companion_chat_model_key": companion or model_id,
         "translation_selectable": selectable,
-        "fnm_selectable": False,
         "visual_selectable": False,
         "rate_limits": {"rpm": rpm, "rpd": rpd, "tpm": tpm},
     }
@@ -59,7 +58,6 @@ def _mt_model(
         "stream_mode": stream_mode,
         "companion_chat_model_key": companion,
         "translation_selectable": selectable,
-        "fnm_selectable": False,
         "visual_selectable": False,
     }
 
@@ -89,7 +87,6 @@ def _vision_model(
         "stream_mode": "chat_json",
         "companion_chat_model_key": companion or model_id,
         "translation_selectable": translation_selectable,
-        "fnm_selectable": selectable,
         "visual_selectable": selectable,
         "rate_limits": {"rpm": rpm, "rpd": rpd, "tpm": tpm},
     }
@@ -477,7 +474,7 @@ def normalize_builtin_model_key(key: str | None, *, capability: str | None = Non
     if normalized not in _MODEL_SPECS:
         normalized = (
             DEFAULT_VISUAL_MODEL_KEY
-            if capability in {"vision", "fnm"}
+            if capability == "vision"
             else DEFAULT_TRANSLATION_MODEL_KEY
         )
     spec = _MODEL_SPECS.get(normalized, {})
@@ -485,15 +482,12 @@ def normalize_builtin_model_key(key: str | None, *, capability: str | None = Non
         return DEFAULT_TRANSLATION_MODEL_KEY
     if capability == "vision" and not spec.get("supports_vision"):
         return DEFAULT_VISUAL_MODEL_KEY
-    if capability == "fnm" and not spec.get("fnm_selectable"):
-        return DEFAULT_VISUAL_MODEL_KEY
     return normalized
 
 
 def get_selectable_models(capability: str) -> dict[str, dict]:
     flag = {
         "translation": "translation_selectable",
-        "fnm": "fnm_selectable",
         "vision": "visual_selectable",
     }.get(capability, "translation_selectable")
     return {

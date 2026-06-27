@@ -1,0 +1,547 @@
+{
+  "slug": "Goldstein",
+  "folder": "post-revolutionary",
+  "doc_id": "7ba9bca783fd",
+  "verdict": "FAIL",
+  "batch_tag": "20260419_tier1a_v4",
+  "commit": "f37b345",
+  "pipeline": {
+    "ok": true,
+    "run_id": 10,
+    "page_count": 431,
+    "section_count": 17,
+    "note_count": 637,
+    "unit_count": 722,
+    "structure_state": "review_required",
+    "manual_toc_required": false,
+    "blocking_reasons": [
+      "link_first_marker_not_one",
+      "link_endnote_not_all_matched",
+      "link_orphan_note_remaining",
+      "link_endnote_only_orphan_anchor_remaining",
+      "freeze_unit_contract_invalid"
+    ],
+    "review_counts": {
+      "link_first_marker_not_one": 1,
+      "link_endnote_not_all_matched": 1,
+      "link_orphan_note_remaining": 1,
+      "link_endnote_only_orphan_anchor_remaining": 1,
+      "freeze_unit_contract_invalid": 1
+    },
+    "export_ready_real": false
+  },
+  "manual_toc_fallback": {},
+  "baseline": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 11,
+      "endnote_orphan_anchor": 267,
+      "ambiguous": 0
+    },
+    "link_count": 904,
+    "body_anchor_count": 903,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {
+      "link": 19,
+      "llm_suggestion": 14
+    }
+  },
+  "after": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 11,
+      "endnote_orphan_anchor": 267,
+      "ambiguous": 0
+    },
+    "link_count": 904,
+    "body_anchor_count": 903,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {
+      "link": 22,
+      "llm_suggestion": 13
+    }
+  },
+  "repair": {
+    "cluster_count": 9,
+    "suggestion_count": 13,
+    "auto_applied_count": 4,
+    "suggestions": [
+      {
+        "suggestion_id": "llm-01-001",
+        "cluster_id": "toc-ch-010-anaprioriselfforthebourg:toc-ch-010-anaprioriselfforthebourg:endnote",
+        "chapter_id": "toc-ch-010-anaprioriselfforthebourg",
+        "chapter_title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "OCR excerpt for page 156 is insufficient to verify the text context for anchor-00311; no matched note items provided to confirm endnote resolution.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-01-002",
+        "cluster_id": "toc-ch-010-anaprioriselfforthebourg:toc-ch-010-anaprioriselfforthebourg:endnote",
+        "chapter_id": "toc-ch-010-anaprioriselfforthebourg",
+        "chapter_title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "OCR excerpt for page 157 is truncated and does not contain the full text for anchors 00312 through 00315; unable to verify markers or content without complete context.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-01-003",
+        "cluster_id": "toc-ch-010-anaprioriselfforthebourg:toc-ch-010-anaprioriselfforthebourg:endnote",
+        "chapter_id": "toc-ch-010-anaprioriselfforthebourg",
+        "chapter_title": "An A Priori Self for the Bourgeois Male: Victor Cousin's Project",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "OCR excerpt for page 160 is incomplete regarding the Laromiguière section, making it impossible to verify anchors 00325, 00327, 00328, and 00332-00334 which appear in this region based on the provided source text snippets.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-04-001",
+        "cluster_id": "toc-ch-001-introductionpsychologica:toc-ch-001-introductionpsychologica:endnote",
+        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "chapter_title": "Introduction: Psychological Interiority versus Self-Talk",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00011",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor: marker '11' appears twice in the same paragraph on page 22 (OCR shows '$ ^{11} $ Similarly'). The first instance is a valid citation; the second is likely an OCR error or duplicate rendering.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-04-002",
+        "cluster_id": "toc-ch-001-introductionpsychologica:toc-ch-001-introductionpsychologica:endnote",
+        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "chapter_title": "Introduction: Psychological Interiority versus Self-Talk",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00012",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor: see reason for anchor-00011. This is the second occurrence of marker '11' in the same context.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-05-001",
+        "cluster_id": "toc-ch-014-religiousandsecularacces:toc-ch-014-religiousandsecularacces:endnote",
+        "chapter_id": "toc-ch-014-religiousandsecularacces",
+        "chapter_title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "Cluster contains multiple unmatched anchors (markers 92-102) on pages 278-280 without corresponding note items. The OCR excerpts provided in the input do not show the footnote markers (e.g., $ ^{91} $ is visible but no note item exists for it; markers 92-102 are listed as anchors but their context in OCR is truncated or missing the specific marker symbols needed to confirm isolation). Without the full endnote list or complete context for markers 92-102, automatic ignoring is unsafe.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-06-001",
+        "cluster_id": ":nr-en-bk-0001-none:endnote",
+        "chapter_id": "",
+        "chapter_title": "",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "The provided chapter_body_excerpt is a list of illustration captions (likely from an 'Illustrations' page) rather than the main narrative text. These captions do not contain unique, in-text anchor phrases that can be synthesized to link the endnotes to specific locations in the body text. The notes appear to be references to the figures themselves, but without the actual body text where these figures are discussed or referenced, no valid anchor_phrase (3-12 words unique to the narrative flow) can be extracted.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-07-001",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0013-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "synthesize_anchor",
+        "note_item_id": "en-00568",
+        "anchor_id": "",
+        "anchor_phrase": "On Raucourt's relation to Saint-Simonianism; see Broussais, Communication faite à la Société [phrénologique de Paris]",
+        "fuzzy_score": 45.299145299145295,
+        "fuzzy_hit": false,
+        "ambiguous": false,
+        "matched_text": "en's questions, with anticlerical requirements entering the picture as a justification for antifeminist policy decisi",
+        "confidence": 0.95,
+        "reason": "The note excerpt 'Broussais, Communication sur Raucourt' corresponds to the text in endnote 112 visible in the provided image (page 392), which discusses 'Raucourt's relation to Saint-Simonianism'. The phrase is unique and matches the citation context.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-07-002",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0013-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "needs_review",
+        "note_item_id": "en-00572",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "Note 118 ('Ibid., p. 441...') refers to a previous source not present in the provided excerpts or images, and the specific phrase about Cousin being a bachelor is not found in the available body text.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-07-003",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0013-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "synthesize_anchor",
+        "note_item_id": "en-00596",
+        "anchor_id": "",
+        "anchor_phrase": "Spurzheim to Combe, 12 August 1818, NLS, Combe MSS 7203, fols. 115–16",
+        "fuzzy_score": 37.68115942028986,
+        "fuzzy_hit": false,
+        "ambiguous": false,
+        "matched_text": "her to Plato, Aristotle, Descartes, Locke, Laromiguière, nor to Monsi",
+        "confidence": 0.98,
+        "reason": "The note content for item 142 matches exactly with the text of endnote 141 visible on page 393 of the provided image. Although the marker number differs (142 vs 141), the text is unique and verbatim.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-08-001",
+        "cluster_id": "toc-ch-016-apalpableselfforthesocia:toc-ch-016-apalpableselfforthesocia:endnote",
+        "chapter_id": "toc-ch-016-apalpableselfforthesocia",
+        "chapter_title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00819",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The OCR excerpt ends mid-sentence ('...dangerous wor ...') and does not contain the footnote marker '95' which appears at the end of the full sentence in the clean text image. Since the provided context lacks the anchor, this reference cannot be resolved from the input data.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-08-002",
+        "cluster_id": "toc-ch-016-apalpableselfforthesocia:toc-ch-016-apalpableselfforthesocia:endnote",
+        "chapter_id": "toc-ch-016-apalpableselfforthesocia",
+        "chapter_title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00820",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The OCR excerpt for paragraph 1 is truncated ('...unsuitable for its workin ...') and does not include the footnote marker '96' found at the end of the paragraph in the clean text image. The anchor is missing from the provided context.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-09-001",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0014-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "Note en-00597 (marker 143) and en-00605 (marker 151) appear in the OCR excerpt on page 411, but their corresponding textual anchors are missing from the provided chapter_body_excerpt. The excerpt cuts off before reaching the sections where these notes would logically attach (likely later in the Epilogue or a subsequent section not included in the snippet). Without the body text containing the markers or unique phrases associated with these specific citations, synthesis is not possible.",
+        "auto_selected": false
+      }
+    ],
+    "auto_applied": [
+      {
+        "link_id": "link-00648",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00011",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor: marker '11' appears twice in the same paragraph on page 22 (OCR shows '$ ^{11} $ Similarly'). The first instance is a valid citation; the second is likely an OCR error or duplicate rendering."
+      },
+      {
+        "link_id": "link-00649",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00012",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "Duplicate anchor: see reason for anchor-00011. This is the second occurrence of marker '11' in the same context."
+      },
+      {
+        "link_id": "link-00903",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00819",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "The OCR excerpt ends mid-sentence ('...dangerous wor ...') and does not contain the footnote marker '95' which appears at the end of the full sentence in the clean text image. Since the provided context lacks the anchor, this reference cannot be resolved from the input data."
+      },
+      {
+        "link_id": "link-00904",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00820",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "The OCR excerpt for paragraph 1 is truncated ('...unsuitable for its workin ...') and does not include the footnote marker '96' found at the end of the paragraph in the clean text image. The anchor is missing from the provided context."
+      }
+    ],
+    "request_metrics": [
+      {
+        "cluster_id": "toc-ch-010-anaprioriselfforthebourg:toc-ch-010-anaprioriselfforthebourg:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11480,
+        "estimated_prompt_tokens": 3415,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-003-theperilsofimaginationat:toc-ch-003-theperilsofimaginationat:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11319,
+        "estimated_prompt_tokens": 3369,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-012-cousinianhegemony:toc-ch-012-cousinianhegemony:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11341,
+        "estimated_prompt_tokens": 3376,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-001-introductionpsychologica:toc-ch-001-introductionpsychologica:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11438,
+        "estimated_prompt_tokens": 3403,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-014-religiousandsecularacces:toc-ch-014-religiousandsecularacces:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 6467,
+        "estimated_prompt_tokens": 1983,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 11,
+        "page_context_count": 3,
+        "truncated": false
+      },
+      {
+        "cluster_id": ":nr-en-bk-0001-none:endnote",
+        "request_mode": "note_only_with_body",
+        "allowed_actions": [
+          "synthesize_anchor",
+          "needs_review"
+        ],
+        "chars": 2879,
+        "estimated_prompt_tokens": 1006,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 6,
+        "unmatched_anchors": 0,
+        "page_context_count": 1,
+        "truncated": false
+      },
+      {
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0013-toc-ch-017-epilogue:endnote",
+        "request_mode": "note_only_with_body",
+        "allowed_actions": [
+          "synthesize_anchor",
+          "needs_review"
+        ],
+        "chars": 5482,
+        "estimated_prompt_tokens": 1749,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 2,
+        "unmatched_note_items": 3,
+        "unmatched_anchors": 0,
+        "page_context_count": 2,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-016-apalpableselfforthesocia:toc-ch-016-apalpableselfforthesocia:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 2194,
+        "estimated_prompt_tokens": 762,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 2,
+        "page_context_count": 1,
+        "truncated": false
+      },
+      {
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0014-toc-ch-017-epilogue:endnote",
+        "request_mode": "note_only_with_body",
+        "allowed_actions": [
+          "synthesize_anchor",
+          "needs_review"
+        ],
+        "chars": 4639,
+        "estimated_prompt_tokens": 1509,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 2,
+        "unmatched_note_items": 2,
+        "unmatched_anchors": 0,
+        "page_context_count": 1,
+        "truncated": true
+      }
+    ],
+    "action_counts": {
+      "needs_review": 7,
+      "ignore_ref": 4,
+      "synthesize_anchor": 2
+    },
+    "auto_action_counts": {
+      "ignore_ref": 4
+    },
+    "synth_suggestion_count": 2,
+    "synth_auto_applied_count": 0,
+    "fuzzy_hit_count": 0,
+    "fuzzy_ambiguous_count": 0,
+    "caps": {
+      "matched_examples": 2,
+      "unmatched_note_items": 24,
+      "unmatched_anchors": 24,
+      "cluster_limit": 0
+    }
+  },
+  "rebuild": {
+    "ok": true,
+    "run_id": 10,
+    "page_count": 431,
+    "section_count": 17,
+    "note_count": 637,
+    "unit_count": 722,
+    "structure_state": "review_required",
+    "manual_toc_required": false,
+    "blocking_reasons": [
+      "link_first_marker_not_one",
+      "link_endnote_not_all_matched",
+      "link_orphan_note_remaining",
+      "link_endnote_only_orphan_anchor_remaining",
+      "freeze_unit_contract_invalid"
+    ],
+    "review_counts": {
+      "link_first_marker_not_one": 1,
+      "link_endnote_not_all_matched": 1,
+      "link_orphan_note_remaining": 1,
+      "link_endnote_only_orphan_anchor_remaining": 1,
+      "freeze_unit_contract_invalid": 1
+    },
+    "export_ready_real": false
+  },
+  "blocking_reasons": [
+    "link_first_marker_not_one",
+    "link_endnote_not_all_matched",
+    "link_orphan_note_remaining",
+    "link_endnote_only_orphan_anchor_remaining",
+    "freeze_unit_contract_invalid"
+  ],
+  "manual_toc_required": false
+}

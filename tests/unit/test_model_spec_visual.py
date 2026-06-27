@@ -23,14 +23,14 @@ class TestChatKwargsMerge(unittest.TestCase):
 
 
 class TestResolveVisualModelSpec(unittest.TestCase):
-    def test_visual_resolver_reads_fnm_pool_primary_slot(self):
+    def test_visual_resolver_reads_visual_pool_primary_slot(self):
         from persistence.storage import resolve_model_spec, resolve_visual_model_spec
 
         with patch(
             "persistence.storage.get_translation_model_pool",
             return_value=[{"mode": "builtin", "builtin_key": "deepseek-chat"}, {"mode": "empty"}, {"mode": "empty"}],
         ), patch(
-            "persistence.storage.get_fnm_model_pool",
+            "persistence.storage.get_visual_model_pool",
             return_value=[{"mode": "builtin", "builtin_key": "qwen3.6-plus"}, {"mode": "empty"}, {"mode": "empty"}],
         ):
             self.assertEqual(resolve_model_spec().model_id, "deepseek-chat")
@@ -57,7 +57,7 @@ class TestResolveVisualModelSpec(unittest.TestCase):
         from persistence.storage import resolve_visual_model_spec
 
         with patch(
-            "persistence.storage.get_fnm_model_pool",
+            "persistence.storage.get_visual_model_pool",
             return_value=[{"mode": "builtin", "builtin_key": "qwen3.6-plus"}, {"mode": "empty"}, {"mode": "empty"}],
         ):
             spec = resolve_visual_model_spec()

@@ -1,0 +1,819 @@
+[
+  {
+    "doc_id": "0d285c0800db",
+    "doc_name": "Foucault和Foucault - 2004 - Naissance de la biopolitique.pdf",
+    "slug": "Biopolitics",
+    "example_folder": "Biopolitics",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 110,
+        "page_count": 370,
+        "section_count": 14,
+        "note_count": 588,
+        "unit_count": 626,
+        "structure_state": "review_required",
+        "manual_toc_required": false,
+        "blocking_reasons": [
+          "contract_def_anchor_mismatch"
+        ],
+        "review_counts": {
+          "contract_def_anchor_mismatch": 1
+        },
+        "export_ready_real": false,
+        "module_phase2_detail": {
+          "total_items": 588,
+          "item_kind_counts": {
+            "footnote": 108,
+            "endnote": 480
+          }
+        },
+        "module_phase3_detail": {
+          "matched": 582,
+          "footnote_orphan_note": 0,
+          "footnote_orphan_anchor": 4,
+          "endnote_orphan_note": 4,
+          "endnote_orphan_anchor": 0,
+          "ambiguous": 2,
+          "ignored": 0,
+          "fallback_count": 45,
+          "repair_count": 43,
+          "fallback_matched_count": 45,
+          "fallback_match_ratio": 0.07731958762886598
+        },
+        "module_phase3_reasons": [
+          "contract_def_anchor_mismatch"
+        ]
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "page_count": 370,
+        "chapter_count": 14,
+        "section_head_count": 0,
+        "note_region_count": 74,
+        "note_item_count": 588,
+        "body_anchor_count": 654,
+        "note_link_count": 601,
+        "suppressed_chapter_candidate_count": 0,
+        "partition_heading_conflict_count": 0,
+        "review_row_count": 0,
+        "footnote_count": 108,
+        "endnote_count": 480,
+        "linked_endnote_count": 476,
+        "structure_state": "review_required",
+        "review_counts": {
+          "contract_def_anchor_mismatch": 1
+        },
+        "blocking_reasons": [
+          "contract_def_anchor_mismatch"
+        ],
+        "link_summary": {
+          "matched": 582,
+          "footnote_orphan_note": 0,
+          "footnote_orphan_anchor": 4,
+          "endnote_orphan_note": 4,
+          "endnote_orphan_anchor": 0,
+          "ambiguous": 2,
+          "ignored": 0,
+          "fallback_count": 45,
+          "repair_count": 43,
+          "fallback_matched_count": 45,
+          "fallback_match_ratio": 0.07731958762886598
+        },
+        "page_partition_summary": {
+          "total_pages": 370,
+          "noise": 3,
+          "front_matter": 5,
+          "body": 282,
+          "note": 65,
+          "other": 15
+        },
+        "chapter_mode_summary": {
+          "footnote_primary": 0,
+          "chapter_endnotes": 12,
+          "book_endnotes": 0,
+          "body_only": 2,
+          "mixed_or_unclear": 0
+        },
+        "heading_review_summary": {
+          "chapter_candidate_count": 185,
+          "suppressed_candidate_count": 12,
+          "suppressed_reason_counts": {
+            "low_score": 10,
+            "non_body_family": 2
+          },
+          "partition_conflict_count": 0
+        },
+        "heading_graph_summary": {
+          "toc_body_item_count": 14,
+          "resolved_anchor_count": 14,
+          "provisional_anchor_count": 0,
+          "section_node_count": 9,
+          "unresolved_titles_preview": [],
+          "boundary_conflict_titles_preview": [],
+          "promoted_section_titles_preview": [],
+          "demoted_chapter_titles_preview": [
+            "MICHEL FOUCAULT",
+            "Naissance de la biopolitique",
+            "FRANÇOIS EWALD et ALESSANDRO FONTANA",
+            "des physiocrates, de d’Argenson, d’Adam Smith, de Bentham, des utili-",
+            "le marché, ou plutôt la concurrence pure, qui est l’essence même du",
+            "cation, une discipline",
+            "Indices",
+            "liberté"
+          ],
+          "optimized_anchor_count": 0,
+          "residual_provisional_count": 0,
+          "residual_provisional_titles_preview": [],
+          "expanded_window_hit_count": 0,
+          "composite_heading_count": 15
+        },
+        "chapter_source_summary": {
+          "source": "visual_toc",
+          "chapter_level": 2,
+          "visual_toc_chapter_count": 14,
+          "legacy_chapter_count": 0,
+          "fallback_used": false,
+          "body_section_fallback_suppressed": 8
+        },
+        "visual_toc_conflict_count": 0,
+        "toc_export_coverage_summary": {
+          "resolved_body_items": 0,
+          "exported_body_items": 0,
+          "missing_body_items_preview": []
+        },
+        "toc_alignment_summary": {
+          "chapter_level_body_items": 12,
+          "exported_chapter_count": 14,
+          "missing_chapter_titles_preview": [],
+          "misleveled_titles_preview": [],
+          "reanchored_titles_preview": [
+            "Leçon du 10 janvier 1979"
+          ],
+          "missing_section_titles_preview": []
+        },
+        "toc_semantic_summary": {
+          "body_item_count": 12,
+          "chapter_item_count": 12,
+          "part_item_count": 0,
+          "back_matter_item_count": 0,
+          "first_body_pdf_page": 17,
+          "last_body_pdf_page": 307,
+          "body_span_ratio": 0.7865,
+          "nonbody_contamination_count": 0,
+          "mixed_level_chapter_count": 0
+        },
+        "toc_role_summary": {
+          "container": 2,
+          "endnotes": 0,
+          "chapter": 12,
+          "section": 0,
+          "post_body": 2,
+          "back_matter": 2,
+          "front_matter": 1
+        },
+        "container_titles": [
+          "COURS, ANNÉE 1978-1979",
+          "INDICES"
+        ],
+        "post_body_titles": [
+          "RÉSUMÉ DU COURS",
+          "SITUATION DES COURS"
+        ],
+        "back_matter_titles": [
+          "Index des notions",
+          "Index des noms de personnes"
+        ],
+        "visual_toc_endnotes_summary": {},
+        "toc_semantic_contract_ok": true,
+        "toc_semantic_blocking_reasons": [],
+        "toc_export_coverage_ok": true,
+        "chapter_title_alignment_ok": true,
+        "chapter_section_alignment_ok": true,
+        "chapter_endnote_region_alignment_ok": true,
+        "chapter_endnote_region_alignment_summary": {},
+        "chapter_endnote_region_boundary_ok": true,
+        "chapter_endnote_region_cross_next_chapter_count": 0,
+        "chapter_endnote_region_cross_next_chapter_preview": [],
+        "chapter_endnote_region_audit_rows": [
+          {
+            "region_id": "nr-en-ch-0007-toc-ch-001-leçondu10janvier1979",
+            "chapter_id": "toc-ch-001-leçondu10janvier1979",
+            "chapter_title": "Leçon du 10 janvier 1979",
+            "start_page": 39,
+            "end_page": 42,
+            "next_chapter_start_page": 43,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0014-toc-ch-002-leçondu17janvier1979",
+            "chapter_id": "toc-ch-002-leçondu17janvier1979",
+            "chapter_title": "Leçon du 17 janvier 1979",
+            "start_page": 63,
+            "end_page": 65,
+            "next_chapter_start_page": 67,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0020-toc-ch-003-leçondu24janvier1979",
+            "chapter_id": "toc-ch-003-leçondu24janvier1979",
+            "chapter_title": "Leçon du 24 janvier 1979",
+            "start_page": 86,
+            "end_page": 89,
+            "next_chapter_start_page": 91,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": false
+          },
+          {
+            "region_id": "nr-en-ch-0023-toc-ch-004-leçondu31janvier1979",
+            "chapter_id": "toc-ch-004-leçondu31janvier1979",
+            "chapter_title": "Leçon du 31 janvier 1979",
+            "start_page": 111,
+            "end_page": 117,
+            "next_chapter_start_page": 119,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0029-toc-ch-005-leçondu7février1979",
+            "chapter_id": "toc-ch-005-leçondu7février1979",
+            "chapter_title": "Leçon du 7 février 1979",
+            "start_page": 139,
+            "end_page": 147,
+            "next_chapter_start_page": 149,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0036-toc-ch-006-leçondu14février1979",
+            "chapter_id": "toc-ch-006-leçondu14février1979",
+            "chapter_title": "Leçon du 14 février 1979",
+            "start_page": 170,
+            "end_page": 177,
+            "next_chapter_start_page": 179,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0041-toc-ch-007-leçondu21février1979",
+            "chapter_id": "toc-ch-007-leçondu21février1979",
+            "chapter_title": "Leçon du 21 février 1979",
+            "start_page": 197,
+            "end_page": 202,
+            "next_chapter_start_page": 203,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0048-toc-ch-008-leçondu7mars1979",
+            "chapter_id": "toc-ch-008-leçondu7mars1979",
+            "chapter_title": "Leçon du 7 mars 1979",
+            "start_page": 225,
+            "end_page": 232,
+            "next_chapter_start_page": 233,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0053-toc-ch-009-leçondu14mars1979",
+            "chapter_id": "toc-ch-009-leçondu14mars1979",
+            "chapter_title": "Leçon du 14 mars 1979",
+            "start_page": 252,
+            "end_page": 256,
+            "next_chapter_start_page": 257,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0060-toc-ch-010-leçondu21mars1979",
+            "chapter_id": "toc-ch-010-leçondu21mars1979",
+            "chapter_title": "Leçon du 21 mars 1979",
+            "start_page": 279,
+            "end_page": 282,
+            "next_chapter_start_page": 283,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0064-toc-ch-011-leçondu28mars1979",
+            "chapter_id": "toc-ch-011-leçondu28mars1979",
+            "chapter_title": "Leçon du 28 mars 1979",
+            "start_page": 302,
+            "end_page": 306,
+            "next_chapter_start_page": 307,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": true
+          },
+          {
+            "region_id": "nr-en-ch-0071-toc-ch-012-leçondu4avril1979",
+            "chapter_id": "toc-ch-012-leçondu4avril1979",
+            "chapter_title": "Leçon du 4 avril 1979",
+            "start_page": 329,
+            "end_page": 332,
+            "next_chapter_start_page": 333,
+            "not_cross_next_chapter": true,
+            "region_start_first_source_marker": "",
+            "region_first_note_item_marker": "",
+            "region_marker_alignment_ok": false
+          }
+        ],
+        "manual_toc_required": false,
+        "manual_toc_ready": true,
+        "manual_toc_summary": {
+          "mode": "manual_pdf",
+          "page_count": 5,
+          "file_count": 1,
+          "image_count": 0,
+          "source_name": "Bioplitics目录.pdf"
+        },
+        "chapter_binding_summary": {
+          "region_count": 74,
+          "book_scope_region_count": 0,
+          "unbound_region_count": 0,
+          "unbound_region_ids_preview": [],
+          "unassigned_item_count": 0,
+          "unassigned_item_ids_preview": []
+        },
+        "note_capture_summary": {
+          "expected_anchor_count": 468,
+          "captured_note_count": 495,
+          "capture_ratio": 1.0577,
+          "sparse_capture_chapter_ids": [],
+          "dense_anchor_zero_capture_pages": [],
+          "chapters": [
+            {
+              "chapter_id": "toc-ch-001-leçondu10janvier1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 18,
+              "captured_note_count": 18,
+              "capture_ratio": 1.0
+            },
+            {
+              "chapter_id": "toc-ch-002-leçondu17janvier1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 17,
+              "captured_note_count": 17,
+              "capture_ratio": 1.0
+            },
+            {
+              "chapter_id": "toc-ch-003-leçondu24janvier1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 33,
+              "captured_note_count": 34,
+              "capture_ratio": 1.0303
+            },
+            {
+              "chapter_id": "toc-ch-004-leçondu31janvier1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 47,
+              "captured_note_count": 53,
+              "capture_ratio": 1.1277
+            },
+            {
+              "chapter_id": "toc-ch-005-leçondu7février1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 58,
+              "captured_note_count": 54,
+              "capture_ratio": 0.931
+            },
+            {
+              "chapter_id": "toc-ch-006-leçondu14février1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 58,
+              "captured_note_count": 61,
+              "capture_ratio": 1.0517
+            },
+            {
+              "chapter_id": "toc-ch-007-leçondu21février1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 34,
+              "captured_note_count": 42,
+              "capture_ratio": 1.2353
+            },
+            {
+              "chapter_id": "toc-ch-008-leçondu7mars1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 49,
+              "captured_note_count": 52,
+              "capture_ratio": 1.0612
+            },
+            {
+              "chapter_id": "toc-ch-009-leçondu14mars1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 40,
+              "captured_note_count": 42,
+              "capture_ratio": 1.05
+            },
+            {
+              "chapter_id": "toc-ch-010-leçondu21mars1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 35,
+              "captured_note_count": 37,
+              "capture_ratio": 1.0571
+            },
+            {
+              "chapter_id": "toc-ch-011-leçondu28mars1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 36,
+              "captured_note_count": 37,
+              "capture_ratio": 1.0278
+            },
+            {
+              "chapter_id": "toc-ch-012-leçondu4avril1979",
+              "note_mode": "chapter_endnote_primary",
+              "expected_anchor_count": 29,
+              "captured_note_count": 33,
+              "capture_ratio": 1.1379
+            },
+            {
+              "chapter_id": "toc-ch-013-résuméducours",
+              "note_mode": "footnote_primary",
+              "expected_anchor_count": 1,
+              "captured_note_count": 1,
+              "capture_ratio": 1.0
+            },
+            {
+              "chapter_id": "toc-ch-014-situationdescours",
+              "note_mode": "footnote_primary",
+              "expected_anchor_count": 13,
+              "captured_note_count": 14,
+              "capture_ratio": 1.0769
+            }
+          ]
+        },
+        "footnote_synthesis_summary": {
+          "book_type": "mixed",
+          "status": "not_applicable",
+          "reason": "book_type=mixed"
+        },
+        "chapter_link_contract_summary": {
+          "chapter_count": 14,
+          "contract_required_count": 12,
+          "failed_chapter_ids": [],
+          "contract_v2_failed_chapter_ids": [
+            "toc-ch-002-leçondu17janvier1979",
+            "toc-ch-006-leçondu14février1979",
+            "toc-ch-008-leçondu7mars1979",
+            "toc-ch-010-leçondu21mars1979"
+          ],
+          "contract_v2_first_marker_violation_count": 0,
+          "contract_v2_marker_gap_violation_count": 0,
+          "contract_v2_def_anchor_mismatch_count": 4
+        },
+        "book_endnote_stream_summary": {
+          "chapter_count": 12,
+          "chapters_with_endnote_stream": [
+            "toc-ch-001-leçondu10janvier1979",
+            "toc-ch-002-leçondu17janvier1979",
+            "toc-ch-003-leçondu24janvier1979",
+            "toc-ch-004-leçondu31janvier1979",
+            "toc-ch-005-leçondu7février1979",
+            "toc-ch-006-leçondu14février1979",
+            "toc-ch-007-leçondu21février1979",
+            "toc-ch-008-leçondu7mars1979",
+            "toc-ch-009-leçondu14mars1979",
+            "toc-ch-010-leçondu21mars1979",
+            "toc-ch-011-leçondu28mars1979",
+            "toc-ch-012-leçondu4avril1979"
+          ],
+          "high_concentration_chapter_ids": [],
+          "chapters": [
+            {
+              "chapter_id": "toc-ch-001-leçondu10janvier1979",
+              "item_count": 18,
+              "projection_mode_counts": {
+                "native": 18
+              }
+            },
+            {
+              "chapter_id": "toc-ch-002-leçondu17janvier1979",
+              "item_count": 17,
+              "projection_mode_counts": {
+                "native": 17
+              }
+            },
+            {
+              "chapter_id": "toc-ch-003-leçondu24janvier1979",
+              "item_count": 34,
+              "projection_mode_counts": {
+                "native": 34
+              }
+            },
+            {
+              "chapter_id": "toc-ch-004-leçondu31janvier1979",
+              "item_count": 53,
+              "projection_mode_counts": {
+                "native": 53
+              }
+            },
+            {
+              "chapter_id": "toc-ch-005-leçondu7février1979",
+              "item_count": 54,
+              "projection_mode_counts": {
+                "native": 54
+              }
+            },
+            {
+              "chapter_id": "toc-ch-006-leçondu14février1979",
+              "item_count": 61,
+              "projection_mode_counts": {
+                "native": 61
+              }
+            },
+            {
+              "chapter_id": "toc-ch-007-leçondu21février1979",
+              "item_count": 42,
+              "projection_mode_counts": {
+                "native": 42
+              }
+            },
+            {
+              "chapter_id": "toc-ch-008-leçondu7mars1979",
+              "item_count": 52,
+              "projection_mode_counts": {
+                "native": 52
+              }
+            },
+            {
+              "chapter_id": "toc-ch-009-leçondu14mars1979",
+              "item_count": 42,
+              "projection_mode_counts": {
+                "native": 42
+              }
+            },
+            {
+              "chapter_id": "toc-ch-010-leçondu21mars1979",
+              "item_count": 37,
+              "projection_mode_counts": {
+                "native": 37
+              }
+            },
+            {
+              "chapter_id": "toc-ch-011-leçondu28mars1979",
+              "item_count": 37,
+              "projection_mode_counts": {
+                "native": 37
+              }
+            },
+            {
+              "chapter_id": "toc-ch-012-leçondu4avril1979",
+              "item_count": 33,
+              "projection_mode_counts": {
+                "native": 33
+              }
+            }
+          ]
+        },
+        "freeze_note_unit_summary": {
+          "chapter_view_note_unit_count": 588,
+          "owner_fallback_note_unit_count": 0,
+          "unresolved_note_item_count": 0,
+          "unresolved_note_item_ids_preview": []
+        },
+        "chapter_issue_counts": {
+          "chapter_issue_count": 0,
+          "frozen_ref_leak_chapter_count": 0,
+          "raw_marker_leak_chapter_count": 0,
+          "local_ref_contract_broken_chapter_count": 0
+        },
+        "chapter_issue_summary": [
+          {
+            "chapter_id": "toc-ch-001-leçondu10janvier1979",
+            "title": "Leçon du 10 janvier 1979",
+            "path": "chapters/001-Leçon du 10 janvier 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-002-leçondu17janvier1979",
+            "title": "Leçon du 17 janvier 1979",
+            "path": "chapters/002-Leçon du 17 janvier 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-003-leçondu24janvier1979",
+            "title": "Leçon du 24 janvier 1979",
+            "path": "chapters/003-Leçon du 24 janvier 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-004-leçondu31janvier1979",
+            "title": "Leçon du 31 janvier 1979",
+            "path": "chapters/004-Leçon du 31 janvier 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-005-leçondu7février1979",
+            "title": "Leçon du 7 février 1979",
+            "path": "chapters/005-Leçon du 7 février 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-006-leçondu14février1979",
+            "title": "Leçon du 14 février 1979",
+            "path": "chapters/006-Leçon du 14 février 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-007-leçondu21février1979",
+            "title": "Leçon du 21 février 1979",
+            "path": "chapters/007-Leçon du 21 février 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-008-leçondu7mars1979",
+            "title": "Leçon du 7 mars 1979",
+            "path": "chapters/008-Leçon du 7 mars 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-009-leçondu14mars1979",
+            "title": "Leçon du 14 mars 1979",
+            "path": "chapters/009-Leçon du 14 mars 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-010-leçondu21mars1979",
+            "title": "Leçon du 21 mars 1979",
+            "path": "chapters/010-Leçon du 21 mars 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-011-leçondu28mars1979",
+            "title": "Leçon du 28 mars 1979",
+            "path": "chapters/011-Leçon du 28 mars 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-012-leçondu4avril1979",
+            "title": "Leçon du 4 avril 1979",
+            "path": "chapters/012-Leçon du 4 avril 1979.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-013-résuméducours",
+            "title": "RÉSUMÉ DU COURS",
+            "path": "chapters/013-RÉSUMÉ DU COURS.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          },
+          {
+            "chapter_id": "toc-ch-014-situationdescours",
+            "title": "SITUATION DES COURS",
+            "path": "chapters/014-SITUATION DES COURS.md",
+            "frozen_ref_leak": false,
+            "raw_marker_leak": false,
+            "missing_definition_count": 0,
+            "orphan_definition_count": 0,
+            "local_refs_closed": true
+          }
+        ],
+        "export_drift_summary": {
+          "legacy_footnote_ref_count": 0,
+          "legacy_endnote_ref_count": 0,
+          "legacy_en_bracket_ref_count": 0,
+          "legacy_note_token_count": 0,
+          "orphan_local_definition_count": 0,
+          "orphan_local_ref_count": 0
+        },
+        "chapter_local_endnote_contract_ok": true,
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 38,
+        "note_unit_count": 588,
+        "changed_page_count": 269,
+        "translated_chars": 930061,
+        "translated_paras": 1062,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "contract_def_anchor_mismatch"
+        ],
+        "execution_mode": "test",
+        "latest_export_zip_saved": false,
+        "latest_export_zip_path": "",
+        "latest_export_zip_folder": "Biopolitics",
+        "latest_export_zip_reason": "structure_review_required",
+        "stale_export_artifact_detected": true,
+        "export_artifact_status": "blocked",
+        "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Biopolitics/latest_export_status.json",
+        "biopolitics_export_contract_ok": true,
+        "biopolitics_export_audit": {
+          "applicable": false,
+          "ok": true
+        }
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  }
+]

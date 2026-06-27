@@ -8,8 +8,8 @@ from flask import flash, redirect, request, url_for
 
 from config import (
     get_current_doc_id,
-    save_fnm_model_pool,
     save_translation_model_pool,
+    save_visual_model_pool,
     set_translate_parallel_settings,
 )
 from model_capabilities import get_selectable_models
@@ -117,7 +117,7 @@ def _pool_slot_form_prefix(pool_name: str, slot_no: int) -> str:
 
 
 def _pool_custom_provider_options(capability: str) -> set[str]:
-    if capability == "fnm":
+    if capability == "vision":
         return {"qwen", "openai_compatible", "mimo", "mimo_token_plan", "glm", "kimi"}
     return {"deepseek", "qwen", "qwen_mt", "openai_compatible", "mimo", "mimo_token_plan", "glm", "kimi"}
 
@@ -177,9 +177,9 @@ def _validate_and_build_model_pool_slot(pool_name: str, slot_no: int, capability
 
 
 def save_model_pool_section(section: str, current_doc_id: str):
-    if section not in {"translation_model_pool", "fnm_model_pool"}:
+    if section not in {"translation_model_pool", "visual_model_pool"}:
         return None
-    capability = "translation" if section == "translation_model_pool" else "fnm"
+    capability = "translation" if section == "translation_model_pool" else "vision"
     slots = []
     for slot_no in range(1, 4):
         result = _validate_and_build_model_pool_slot(section, slot_no, capability)
@@ -191,6 +191,6 @@ def save_model_pool_section(section: str, current_doc_id: str):
         save_translation_model_pool(slots)
         flash("翻译模型池已保存。", "success")
     else:
-        save_fnm_model_pool(slots)
-        flash("FNM 视觉与修补模型池已保存。", "success")
+        save_visual_model_pool(slots)
+        flash("视觉模型池已保存。", "success")
     return redirect_settings(current_doc_id)

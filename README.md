@@ -47,9 +47,9 @@ start_managed.bat
 1. `PaddleOCR 令牌`
 2. 至少一个翻译模型槽位的 API Key（支持 Qwen / DeepSeek / GLM / Kimi / MiMo / OpenAI 兼容）
 
-翻译模型分为**两组三槽模型池**：
-- **翻译池**（3 槽位）：标准连续翻译和 FNM 文本翻译共用，按 slot1→slot2→slot3 回退
-- **FNM 池**（3 槽位）：自动视觉目录、FNM 视觉判断和 LLM 修补共用
+翻译和视觉能力分为**两组三槽模型池**：
+- **翻译池**（3 槽位）：标准连续翻译使用，按 slot1→slot2→slot3 回退
+- **视觉池**（3 槽位）：自动视觉目录等视觉识别使用，按 slot1→slot2→slot3 回退
 
 每个槽位可选内置模型（Qwen / DeepSeek / GLM / Kimi / MiMo），也可展开为自定义模型填入 Provider、Model ID 和 Base URL。槽位可勾选 thinking 开关（DeepSeek / GLM / Kimi / Qwen 支持）。
 
@@ -134,9 +134,7 @@ CSV 示例：
 
 **格式约定**
 
-- **FNM Obsidian 导出**：为首选导出格式，以 ZIP 包给出 `chapters/*.md` 章节文件，每章统一使用 `[^n]` 章节本地脚注（从 1 重置），尾注定义聚合在 `### NOTES` 区段。
 - **标准导出**：原文用 `> ` 引用块包裹，译文紧随其后成为普通段落。
-- **脚注/尾注**：FNM 模式导出为 Obsidian 标准脚注 `[^label]` / `[^label]: ...`，定义按章聚合。
 - **标题**：由目录层级决定（depth=0 → `#`，depth=1 → `##`）。
 
 **按章节选择导出**
@@ -149,12 +147,12 @@ CSV 示例：
 
 ### 翻译模型池
 
-在设置页配置翻译模型。当前使用**两组三槽模型池**：
+在设置页配置翻译和视觉模型。当前使用**两组三槽模型池**：
 
-- **翻译池**（slot1/slot2/slot3）：标准连续翻译与 FNM 文本翻译共用
-- **FNM 池**（slot1/slot2/slot3）：自动视觉目录、FNM 视觉判断与 LLM 修补共用
+- **翻译池**（slot1/slot2/slot3）：标准连续翻译使用
+- **视觉池**（slot1/slot2/slot3）：自动视觉目录等视觉识别使用
 
-每个槽位可选择内置模型或自定义模型。内置模型按能力筛选：翻译池只显示文本/对话/专用翻译候选，FNM 池只显示同时具备视觉输入和文本输出能力的多模态候选。自定义槽位需填写 Provider、Model ID 和 Base URL（按需）。
+每个槽位可选择内置模型或自定义模型。内置模型按能力筛选：翻译池只显示文本/对话/专用翻译候选，视觉池只显示同时具备视觉输入和文本输出能力的多模态候选。自定义槽位需填写 Provider、Model ID 和 Base URL（按需）。
 
 槽位支持 thinking 开关（Qwen 映射为 `enable_thinking`，DeepSeek / GLM / Kimi 映射为 `thinking.type`）。
 
@@ -194,7 +192,7 @@ python app.py
 
 - `local_data/user_data/config.json` — API Key、模型偏好、术语表等设置
 - `local_data/user_data/data/catalog.db` — SQLite 目录库（文档索引、全局状态）
-- `local_data/user_data/data/documents/{doc_id}/doc.db` — 文档私有 SQLite（页面、翻译、FNM、文档级状态）
+- `local_data/user_data/data/documents/{doc_id}/doc.db` — 文档私有 SQLite（页面、翻译、文档级状态）
 - `local_data/user_data/data/app.db` — 旧单库（仅迁移来源/备份，不再作为运行时主链）
 - `local_data/user_data/data/documents/{doc_id}/source.pdf` — 每份文档的 PDF 副本
 - `local_data/user_data/data/documents/{doc_id}/toc_visual_source.pdf` — 用户手动上传的目录 PDF
@@ -203,17 +201,16 @@ python app.py
 
 这些内容默认不会提交到 Git 仓库。
 
-## 当前代码规模（2026-04-28）
+## 当前代码规模（2026-06-02）
 
-统计口径：按 `*.py` 逐行统计，忽略运行产物目录（如 `.venv/`、`local_data/`、`logs/`、`output/`）。
+统计口径：按 `*.py` 逐行统计，忽略运行产物目录和归档目录（如 `.venv/`、`local_data/`、`logs/`、`output/`、`tmp/`、`归档/`）。
 
 | 范围 | 文件数 | 总行数 |
 |---|---:|---:|
-| 主链运行代码（`app/config/logging/launcher/model/ocr` + `document/` + `persistence/` + `pipeline/` + `translation/` + `web/`） | 72 | 31,247 |
-| FNM_RE 模块链路（`FNM_RE/**/*.py`） | 51 | 25,960 |
-| 自动化测试（`tests/**/*.py`） | 88 | 32,500 |
-| 工程脚本（`scripts/**/*.py`） | 18 | 7,100 |
-| 全部 Python 文件 | 262 | 108,314 |
+| 主链运行代码（`app/config/logging/launcher/model/ocr` + `document/` + `persistence/` + `pipeline/` + `translation/` + `web/`） | 75 | 29,348 |
+| 自动化测试（`tests/**/*.py`） | 33 | 16,483 |
+| 工程脚本（`scripts/*.py`） | 3 | 964 |
+| 全部 Python 文件（含本地 skills/测试辅助，不含运行产物和归档） | 119 | 47,349 |
 
 ## 常见问题
 

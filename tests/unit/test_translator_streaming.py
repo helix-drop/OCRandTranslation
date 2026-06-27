@@ -431,35 +431,5 @@ class TranslatorStreamingTest(unittest.TestCase):
         self.assertEqual(deltas, ["我", "没有", "笑"])
         self.assertEqual(events[-1]["result"]["translation"], "我没有笑")
 
-    def test_mt_fnm_body_freezes_and_restores_ref_markers(self):
-        class _EchoMtClient(_FakeOpenAIClient):
-            def create(self, **kwargs):
-                self.calls.append(kwargs)
-                body = kwargs["messages"][0]["content"]
-                return _FakeNonStreamResponse(
-                    body.replace("Body one ", "正文译文 "),
-                    usage=_FakeUsage(prompt_tokens=4, completion_tokens=4, total_tokens=8),
-                )
-
-        client = _EchoMtClient(None)
-
-        with patch.object(translator, "OpenAI", return_value=client):
-            result = translator.translate_paragraph(
-                para_text="Body one {{FN_REF:fn-01-0001}}",
-                para_pages="1",
-                footnotes="",
-                glossary=[],
-                model_id="qwen-mt-plus",
-                api_key="fake-key",
-                provider="qwen_mt",
-                base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-                request_overrides={"extra_body": {"translation_options": {"source_lang": "auto", "target_lang": "Chinese"}}},
-                is_fnm=True,
-            )
-
-        self.assertNotIn("{{FN_REF:fn-01-0001}}", client.calls[0]["messages"][0]["content"])
-        self.assertEqual(result["translation"], "正文译文 {{FN_REF:fn-01-0001}}")
-
-
 if __name__ == "__main__":
     unittest.main()

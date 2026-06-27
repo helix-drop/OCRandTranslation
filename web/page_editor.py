@@ -10,8 +10,8 @@ from persistence.storage import save_entry_to_disk
 
 
 def _normalize_page_editor_view(view: str | None) -> str:
-    normalized = str(view or "standard").strip().lower()
-    return normalized if normalized in {"standard", "fnm"} else "standard"
+    del view
+    return "standard"
 
 
 def normalize_page_editor_section_path(value) -> list[str]:
@@ -23,24 +23,6 @@ def normalize_page_editor_section_path(value) -> list[str]:
         if text:
             items.append(text)
     return items
-
-
-def normalize_page_editor_fnm_refs(value) -> list[dict]:
-    if not isinstance(value, list):
-        return []
-    refs = []
-    seen = set()
-    for item in value:
-        if not isinstance(item, dict):
-            continue
-        kind = str(item.get("kind") or "").strip()
-        note_id = str(item.get("note_id") or "").strip()
-        key = (kind, note_id)
-        if kind not in {"footnote", "endnote"} or not note_id or key in seen:
-            continue
-        seen.add(key)
-        refs.append({"kind": kind, "note_id": note_id})
-    return refs
 
 
 def page_editor_row_from_segment(segment: dict, order: int, fallback_bp: int) -> dict:
@@ -66,7 +48,6 @@ def page_editor_row_from_segment(segment: dict, order: int, fallback_bp: int) ->
         "note_confidence": float(segment.get("_note_confidence", 0.0) or 0.0),
         "cross_page": segment.get("_cross_page"),
         "section_path": normalize_page_editor_section_path(segment.get("_section_path") or []),
-        "fnm_refs": normalize_page_editor_fnm_refs(segment.get("_fnm_refs") or []),
         "translation_source": str(segment.get("_translation_source") or "model"),
     }
 
@@ -80,8 +61,6 @@ def build_page_editor_payload(
 ) -> dict | None:
     repo = repo or SQLiteRepository()
     mode = _normalize_page_editor_view(view)
-    if mode == "fnm":
-        raise ValueError("FNM 诊断页为只读视图，不支持整页编辑")
     page = repo.get_effective_translation_page(doc_id, int(book_page))
     if not page:
         return None
@@ -130,11 +109,6 @@ def _entry_from_page_editor_rows(current_page: dict, book_page: int, rows: list[
             if row.get("section_path") is not None
             else existing_segment.get("_section_path") or []
         )
-        fnm_refs = normalize_page_editor_fnm_refs(
-            row.get("fnm_refs")
-            if row.get("fnm_refs") is not None
-            else existing_segment.get("_fnm_refs") or []
-        )
         page_entries.append({
             "original": original,
             "translation": translation,
@@ -154,23 +128,12 @@ def _entry_from_page_editor_rows(current_page: dict, book_page: int, rows: list[
             "_manual_updated_by": "local_user",
             "_cross_page": cross_page,
             "_section_path": section_path,
-            "_fnm_refs": fnm_refs,
             "_note_kind": str(row.get("note_kind") or existing_segment.get("_note_kind") or ""),
             "_note_marker": str(row.get("note_marker") or existing_segment.get("_note_marker") or ""),
             "_note_number": note_number,
             "_note_section_title": str(row.get("note_section_title") or existing_segment.get("_note_section_title") or ""),
             "_note_confidence": float(row.get("note_confidence", existing_segment.get("_note_confidence", 0.0)) or 0.0),
         })
-    if _normalize_page_editor_view(view) == "fnm":
-        return {
-            "_pageBP": int(book_page),
-            "_status": "done",
-            "_error": "",
-            "pages": str(current_page.get("pages") or book_page),
-            "_manual_locked": True,
-            "_fnm_source": dict(current_page.get("_fnm_source") or {}),
-            "_page_entries": page_entries,
-        }
     return {
         "_pageBP": int(book_page),
         "_model_source": current_page.get("_model_source", "builtin"),
@@ -197,8 +160,6 @@ def save_page_editor_rows(
 ) -> dict:
     repo = repo or SQLiteRepository()
     mode = _normalize_page_editor_view(view)
-    if mode == "fnm":
-        raise ValueError("FNM 诊断页为只读视图，不支持整页编辑")
     current_page = repo.get_effective_translation_page(doc_id, int(book_page))
     if not current_page:
         raise ValueError("当前页还没有标准译文，无法编辑")
@@ -230,6 +191,5 @@ def list_page_editor_revisions(
     repo: SQLiteRepository | None = None,
 ) -> list[dict]:
     repo = repo or SQLiteRepository()
-    if _normalize_page_editor_view(view) == "fnm":
-        raise ValueError("FNM 诊断页为只读视图，不支持编辑历史")
+    _normalize_page_editor_view(view)
     return repo.list_translation_page_revisions(doc_id, book_page)

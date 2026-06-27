@@ -3,7 +3,6 @@
 import threading
 import time
 
-from FNM_RE import build_unit_progress
 from persistence.storage import load_entries_from_disk, load_pages_from_disk
 from persistence.task_logs import append_doc_task_log
 from document.text_processing import build_visible_page_view
@@ -14,7 +13,6 @@ from translation.translate_progress import (
 )
 from translation.translate_state import (
     TASK_KIND_CONTINUOUS,
-    TASK_KIND_FNM,
     TASK_KIND_GLOSSARY_RETRANSLATE,
     _default_translate_state,
     _normalize_translate_state,
@@ -169,28 +167,7 @@ def get_translate_snapshot(
     target_bps = _resolve_task_target_bps(pages, state, visible_page_view=visible_page_view)
     target_bp_set = set(target_bps)
     task_kind = _normalize_translate_task_meta(state.get("task")).get("kind")
-    if task_kind == TASK_KIND_FNM:
-        unit_progress = build_unit_progress(doc_id, snapshot=state)
-        state.update(unit_progress)
-        state["partial_failed_bps"] = []
-        if (
-            not state.get("running")
-            and unit_progress.get("total_units", 0)
-            and unit_progress.get("processed_units", 0) >= unit_progress.get("total_units", 0)
-            and unit_progress.get("error_units", 0) > 0
-        ):
-            state["phase"] = "partial_failed"
-        state["resume_bp"] = _compute_resume_bp(
-            doc_id,
-            state,
-            pages=pages,
-            entries=entries,
-            target_bps=target_bps,
-            partial_failed_bps=[],
-            visible_page_view=visible_page_view,
-        )
-        return state
-    should_reconcile_page_counts = bool(target_bps) and task_kind != TASK_KIND_FNM and (
+    should_reconcile_page_counts = bool(target_bps) and (
         bool(visible_page_view.get("hidden_placeholder_bps"))
         or task_kind in (TASK_KIND_CONTINUOUS, TASK_KIND_GLOSSARY_RETRANSLATE)
     )

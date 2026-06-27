@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    596
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 596\",\n      \"printed_page\": \"596\",\n      \"lines\": [\n        \"PAOLETTI (Catherine) : 354n\",\n        \"PAPAIOANNOU (Kostas) : 191\",\n        \"PAPON (Maurice) : 382, 439n\",\n        \"PARAIN-VIAL (Mme) : 150n\",\n        \"PAREYSON (Luigi) : 536n\",\n        \"PARFAIT (Nicole) : 23, 358, 359n,\",\n        \"385, 386n\",\n        \"PARKES (Graham) : 535n\",\n        \"PARMÉNIDE : 131, 170, 172, 175,\",\n        \"181, 212n, 214, 228, 236, 243-\",\n        \"244, 280, 282, 314, 337, 409,\",\n        \"434, 491, 492n, 515\",\n        \"PASCAL (Blaise) : 13, 86, 111n, 121,\",\n        \"144, 154, 226, 258, 485, 498n\",\n        \"PASTEUR (Lycée) : 257n\",\n        \"PATRI (Aimé) : 188, 190-191, 197n\",\n        \"PAULHAN (Jean) : 57n\",\n        \"PAUMEN (Jean) : 173n\",\n        \"PAYOT (Daniel) : 513\",\n        \"PÉGUY (Charles) : 180\",\n        \"PÉNARD (Jean) : 51n\",\n        \"PÉPIN (Jean) : 145, 150n\",\n        \"PERNET (Alain) : 23\",\n        \"PERRIN (abbé) : 59n\",\n        \"PETITDEMANGE (Guy) : 338n\",\n        \"PERVICAX : voir CUVILLIER\",\n        \"PÉTREMENT (Simone) : 150n\",\n        \"PETZET (Heinrich) : 190n, 212n\",\n        \"PÉZERIL (Mgr Daniel) : 257n\",\n        \"PHILIPPULUS : 428n\",\n        \"PHILONENKO (Alexis) : 150n-152n\",\n        \"PIAGET (Jean) : 180\",\n        \"PICASSO (Pablo) : 502, 510n\",\n        \"PIF : 431n\",\n        \"PINCHARD (Bruno) : 132n\",\n        \"PINDARE : 408, 508n\",\n        \"PINSON (Jean-Claude) : 507n, 516n\",\n        \"PINTO (Louis) : 13n\",\n        \"PIVOT (Bernard) : 387\",\n        \"PLANTY-BONJOUR (Guy) : 449n\",\n        \"PLATON : 32, 110n, 114, 130, 175,\",\n        \"183, 202, 206n, 225, 254n, 258,\",\n        \"292, 296n, 459, 473, 494n, 515,\",\n        \"528n\",\n        \"PLOTIN : 493n\",\n        \"PODGORNY (Michel) : 245n, 250n\",\n        \"PÖGGELER (Otto) : 234, 378n, 393n,\",\n        \"400n, 504n\",\n        \"POIRIÉ (François) : 32n, 338n\",\n        \"POLAC (Michel) : 383\",\n        \"POLITZER (Georges) : 51, 62n\",\n        \"POMEAU (René) : 51n\",\n        \"PONGE (Francis) : 103-104n, 177-\",\n        \"178n, 516\",\n        \"PONTALIS (J.-B.) : 382n\",\n        \"POSTEL (Frédéric) : 23, 152n\",\n        \"POULAIN (Jacques) : 527n\",\n        \"PRÉAU (André) : 139n, 166-168,\",\n        \"186n, 219n, 220n, 222, 235n,\",\n        \"272, 531\",\n        \"PRÉSOCRATIQUES : 145, 158, 167,\",\n        \"181, 491\",\n        \"PRÉVERT (Jacques) : 149n, 516\",\n        \"PRIGOGINE (Ilya) : 419\",\n        \"PROTÉE : 502\",\n        \"PRYZWARA (Erich) : 491n\",\n        \"PYTHAGORE : 302\",\n        \"QUENEAU (Raymond) : 90, 436\",\n        \"QUILLIEN (Jean) : 9n, 66n, 89n, 393-\",\n        \"394, 464n, 506n\",\n        \"QUIQUEG : 396n\",\n        \"RABELAIS (François) : 363n\",\n        \"RABINOW (Paul) : 215n\",\n        \"RAHAN : 431n\",\n        \"RAHN (Dr) : 61n\",\n        \"RAHNER (Karl) : 487\",\n        \"RANCIÈRE (Jacques) : 187n\",\n        \"RAND (Nicholas) : 221n\",\n        \"RAVAISSON (Félix) : 230\",\n        \"RÉDA (Jacques) : 516\",\n        \"REDFERN (W.D.) : 41n\",\n        \"REINHARDT (Karl) : 491n\",\n        \"RENAUT (Alain) : 9n, 66n, 234n,\",\n        \"238, 259, 266n, 283-289, 301,\",\n        \"311-314, 326n, 360-361, 374-\",\n        \"376, 378, 381, 402, 431n, 506n,\",\n        \"524, 534\",\n        \"RESNAIS (Alain) : 82\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1771,
+      "total_tokens": 3204
+    }
+  }
+}

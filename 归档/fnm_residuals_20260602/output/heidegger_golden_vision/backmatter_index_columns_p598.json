@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    598
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 598\",\n      \"printed_page\": \"598\",\n      \"lines\": [\n        \"SCHWAN (Alexander) : 198n\",\n        \"SCOTT (Charles) : 535n\",\n        \"SÉRIS (Jean-Pierre) : 422-427\",\n        \"SERRES (Michel) : 253, 505\",\n        \"SIBONY (Daniel) : 384\",\n        \"SILESIUS (Angelus) : 436n, 453\",\n        \"SIMMEL (Georg) : 437\",\n        \"SNELL (Bruno) : 220n\",\n        \"SOCRATE : 292\",\n        \"SOHRAVARDI : 41n\",\n        \"SOKAL (Alan) : 419n\",\n        \"SOLLERS (Philippe) : 506-507\",\n        \"SOPHOCLE : 508n\",\n        \"SORLOT (Éditions) : 45n\",\n        \"SOUCHE-DAGUES (Denise) : 456n, 491n\",\n        \"SOUVARINE (Boris) : 191\",\n        \"SPENGLER (Oswald) : 38, 237, 417n, 425, 427n\",\n        \"SPINOZA (Baruch) : 61, 182, 432, 470, 476\",\n        \"STALINE (Joseph) : 191\",\n        \"STAROBINSKI (Jean) : 20n, 150n\",\n        \"STAUDINGER (Herrmann) : 348n\",\n        \"STEINER (George) : 292, 305, 355n\",\n        \"STENDHAL : 147-148, 182, 226\",\n        \"STENGERS (Isabelle) : 419, 420n\",\n        \"STÉPHANE (Roger) : 128\",\n        \"STIEGLER (Bernard) : 429n\",\n        \"STIFTER (Adalbert) : 224\",\n        \"STOÏCIENS : 57\",\n        \"STRAUS (Erwin) : 452\",\n        \"SUAREZ (Francisco) : 493, 495-497\",\n        \"SZILASI (Wilhelm) : 354\",\n        \"TACITE : 437\",\n        \"TACOU (Constantin) : 313\",\n        \"TAINE (Hippolyte) : 13, 17n\",\n        \"TAMINIAUX (Jacques) : 23, 266n, 326n, 389, 406n, 431, 441, 475\",\n        \"TERTULIAN (Nicolas) : 391n\",\n        \"THÉRÈSE (d’Avila) : 516\",\n        \"THIELEMANS (H.) : 52n\",\n        \"THIERS (Fondation) : 230-231\",\n        \"THOM (René) : 413, 415-416, 419\",\n        \"THOMAS D’AQUIN (saint) : 142, 247n, 481, 486\",\n        \"THUCYDIDE : 302, 437\",\n        \"TIBON-CORNILLOT (Michel) : 354\",\n        \"TILLIETTE (Xavier) : 257n\",\n        \"TINGUELY (Jean) : 519\",\n        \"TINTIN : 519\",\n        \"TOURPE (Emmanuel) : 488n\",\n        \"TOWARNICKI (Frédéric de) : 47n, 48n, 81n, 82-85, 87n, 89n, 91-92n, 104n, 107-109, 123, 125, 129n, 133-134n, 141n, 235n, 241n, 244n, 281, 302n, 314, 327n\",\n        \"TROISFONTAINES (Claude) : 23, 317n\",\n        \"TRAKL (Georg) : 163n, 172n, 176, 189, 282, 340-342, 434, 462, 507, 513\",\n        \"TROTIGNON (Pierre) : 326n\",\n        \"TROTSKI (Léon) : 81\",\n        \"TZARA (Tristan) : 51\",\n        \"ULYSSE : 205\",\n        \"VALÉRY (Paul) : 113, 176, 226, 302, 508\",\n        \"VAN GOGH (Vincent) : 308-310\",\n        \"VATTIMO (Gianni) : 303n, 337n, 535n\",\n        \"VERGOTTE (le chanoine) : 145\",\n        \"VERMEIL (Dom Jourdain) : 223n\",\n        \"VERONÈSE (Paul) : 502\",\n        \"VEYNE (Paul) : 385n, 515-516\",\n        \"VEZIN (François) : 14n, 96n, 162n, 241-243n, 245n, 248n, 250n, 268, 275, 303n, 312-314, 318, 319n, 321-334, 343-344, 405, 407, 430n, 431n, 440, 503n, 525, 529\",\n        \"VIGNE (Éric) : 23, 524n\",\n        \"VILLELA-PETIT (Maria) : 482\",\n        \"VILLON (François) : 515\",\n        \"VINAVER (Eugène) : 212n\",\n        \"VOLPI (Franco) : 406n, 430, 492\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1672,
+      "total_tokens": 3105
+    }
+  }
+}

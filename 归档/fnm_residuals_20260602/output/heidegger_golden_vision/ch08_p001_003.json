@@ -1,0 +1,27 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/chapters_pdf/08-Mort et transfiguration?.pdf",
+  "chapter": "ch08",
+  "pages": [
+    1,
+    2,
+    3
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch08 PDF page 1\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"8. Mort et transfiguration ?\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"L'ÉVÉNEMENT ET SES RÉPERCUSSIONS EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"Heidegger s'éteint dans son sommeil, au matin du 26 mai 1976.\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Sans faire allusion à ces nuances rituelles, Jean Beaufret, présent à\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Si l'événement n'occupe pas la manchette des quotidiens ni le tout\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"1\", \"context\": \"extraits de poèmes de Hölderlin¹.\"},\n        {\"marker\": \"2\", \"context\": \"repose dans son pays, auprès des siens².\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"1\", \"text_start\": \"Pain et vin (4e strophe), Aux Allemands (1re et 2e strophe), Conciliateur, à qui nul\"},\n        {\"marker\": \"2\", \"text_start\": \"Jean BEAUFRET, « Martin Heidegger (1889-1876) », La Quinzaine littéraire,\"}\n      ],\n      \"risks\": [\"页面底部正文段落末尾处有明显缩进，需确保与下一页衔接。\"]\n    },\n    {\n      \"label\": \"ch08 PDF page 2\",\n      \"printed_page\": \"276\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"d'une importante dépêche de l'agence France-Presse³, est annoncé par les\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Mais, en cette fin du printemps de l'année 1976, le climat\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"3\", \"context\": \"agence France-Presse³,\"},\n        {\"marker\": \"4\", \"context\": \"du Monde du 28 mai 1976⁴;\"},\n        {\"marker\": \"5\", \"context\": \"climat est dépassionné⁵.\"},\n        {\"marker\": \"6\", \"context\": \"selon Jean Lacroix)⁶,\"},\n        {\"marker\": \"7\", \"context\": \"discret et mesuré⁷.\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"3\", \"text_start\": \"Sous le numéro 078, en date du 26 mai 1976 et en provenance de Bonn, cette\"},\n        {\"marker\": \"4\", \"text_start\": \"Et de toute la page 8 du même numéro.\"},\n        {\"marker\": \"5\", \"text_start\": \"Jean-Michel PALMIER (Cabier de l'Herne Martin Heidegger, op. cit., p. 337)\"},\n        {\"marker\": \"6\", \"text_start\": \"Ainsi intitulé, l'article de Lacroix dans Le Monde du 28 mai 1976 rappelle de\"},\n        {\"marker\": \"7\", \"text_start\": \"Sous la rubrique « Repères », un résumé assez neutre de la carrière du philo-\"}\n      ],\n      \"risks\": [\"脚注段落非常密集，需注意脚注3至脚注7的独立性。\"]\n    },\n    {\n      \"label\": \"ch08 PDF page 3\",\n      \"printed_page\": \"277\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"MORT ET TRANSFIGURATION ?\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"évidence, l'heure est surtout au recueillement : sans doute est-ce la\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Il faut toutefois nuancer ce constat d'hommage quasi universel. D'une part,\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"8\", \"context\": \"plus ou moins pittoresques⁸ de sa visite\"},\n        {\"marker\": \"9\", \"context\": \"du Monde, l'article le plus copieux est signé Jean-Michel Palmier⁹\"},\n        {\"marker\": \"10\", \"context\": \"le jeune philosophe Henri Mongis¹⁰.\"},\n        {\"marker\": \"11\", \"context\": \"ondes de France-Culture¹¹.\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"8\", \"text_start\": \"Ainsi Guitton note-t-il : « On dirait chez nous que Heidegger roule les yeux. »\"},\n        {\"marker\": \"9\", \"text_start\": \"Sous le titre « Vers la fin de la métaphysique ».\"},\n        {\"marker\": \"10\", \"text_start\": \"Les Nouvelles littéraires, 3 juin 1976, n° 2535. Henri Mongis évoque ses visites\"},\n        {\"marker\": \"11\", \"text_start\": \"Je remercie Henri Mongis de m'avoir communiqué un enregistrement de cette\"}\n      ],\n      \"risks\": [\"正文最后一段与页面底部的脚注存在视觉重叠，需仔细区分。\"]\n    }\n  ],\n  \"correction_guidance\": [\n    \"在处理段落衔接时，务必检查每一页的最后一行是否与下一页的第一行文字匹配。\",\n    \"脚注3跨度较大，需特别注意从第276页延续到第277页底部的文字完整性。\",\n    \"上标索引（1-11）位置应紧跟标点符号或词尾，核对时确保没有遗漏。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 3666,
+      "completion_tokens": 1507,
+      "total_tokens": 5173
+    }
+  }
+}

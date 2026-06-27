@@ -48,32 +48,13 @@
       <div class="page-shell">
         {% include "reading/partials/_translation_session_card.html" %}
 
-        {% if fnm_run_status == 'error' %}
-        <div style="margin:-2px 0 12px;font-size:12px;color:var(--txL);line-height:1.7;">
-          FNM 注释分类不可用，当前文档继续使用标准视图即可。
-        </div>
-        {% endif %}
-
-        {% if current_view == 'fnm' and fnm_unresolved_here %}
-        <div class="fnm-validation-banner" style="margin:0 0 14px;padding:10px 12px;border:1px solid var(--bdrL);border-radius:8px;background:var(--bg2);font-size:12px;line-height:1.65;">
-          <div style="font-weight:600;margin-bottom:6px;">脚注/尾注校验：以下编号需人工核对</div>
-          <ul style="margin:0;padding-left:18px;">
-            {% for u in fnm_unresolved_here %}
-            <li>节 {{ u.section_id }} · {{ u.kind }} · 标记 {{ u.marker }} · {{ u.reason }}
-              {% if u.suggested_pages %}（建议查看页: {{ u.suggested_pages|join(', ') }}）{% endif %}
-            </li>
-            {% endfor %}
-          </ul>
-        </div>
-        {% endif %}
-
         {% if display_entries %}
         <div class="reading-page-meta">
           {% if cur_model_label %}
           <span class="reading-page-chip">{{ cur_model_label }}</span>
           {% endif %}
           <span class="reading-page-chip">PDF 第{{ cur_page_bp }}页</span>
-          <span class="reading-page-chip">{{ 'FNM 视图' if current_view == 'fnm' else '标准视图' }}</span>
+          <span class="reading-page-chip">标准视图</span>
           {% if cur_page_print_display %}
           <span class="reading-page-chip">{{ cur_page_print_display }}</span>
           {% endif %}
@@ -161,14 +142,9 @@
         <div class="mt-28">
           <div class="progress-dots">
             {% for bp in page_bps %}
-            {% if current_view == 'fnm' %}
-            {% set dot_state = 'done' if bp in translated_bps else 'pending' %}
-            {% set dot_label = '已投影' if bp in translated_bps else '仅 source' %}
-            {% else %}
             {% set dot_state = 'failed' if bp in failed_bps or bp in partial_failed_bps else ('done' if bp in translated_bps else 'pending') %}
             {% set dot_label = '部分完成' if bp in partial_failed_bps else ('失败' if bp in failed_bps else ('已译' if bp in translated_bps else '待译')) %}
-            {% endif %}
-            <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}{% if current_view != 'standard' %}&view={{ current_view }}{% endif %}"
+            <a href="{{ url_for('reading', bp=bp, doc_id=current_doc_id, usage=1 if usage_open else 0, orig=1 if show_original else 0, pdf=1 if pdf_visible else 0) }}"
                data-page-bp="{{ bp }}"
                data-reading-bp="{{ bp }}"
                onclick="return handleReadingNavClick(event, {{ bp }});"
@@ -227,7 +203,6 @@ window.READING_BOOTSTRAP = {
     translateStatus: {{ url_for('translate_status')|tojson }},
     readingViewState: {{ url_for('api_reading_view_state')|tojson }},
     startTranslateAll: {{ url_for('start_translate_all')|tojson }},
-    fnmTranslate: {{ url_for('api_doc_fnm_translate', doc_id=current_doc_id)|tojson }},
     translateSse: {{ url_for('translate_all_sse')|tojson }},
     stopTranslate: {{ url_for('stop_translate')|tojson }},
     glossaryPreview: {{ url_for('api_glossary_retranslate_preview')|tojson }},

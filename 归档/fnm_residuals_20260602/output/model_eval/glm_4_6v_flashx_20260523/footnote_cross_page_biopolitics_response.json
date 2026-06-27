@@ -1,0 +1,27 @@
+{
+  "case": "footnote_cross_page_biopolitics",
+  "model_requested": "glm-4.6v-flashx",
+  "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+  "prompt": "你会依次看到 Michel Foucault《Naissance de la biopolitique》的相邻两页图像，图1为原书 p.44，图2为原书 p.45。任务是为脚注捕获模块提供可验证事实，不要依据常识补写不可见内容。\n请判断页底脚注区和正文区，并识别“因脚注过长而跨页断开”的情况。重点检查图1页底以星号 * 开头的脚注是否在图2页顶继续；若继续，给出图1末尾和图2开头各一段可见短引文作为证据，并说明图2页顶文本不是新的脚注定义。\n只返回 JSON：{\"pages\":[{\"image_no\":1,\"page_type\":\"body_with_footnote|body|note_page\",\"footnote_definitions\":[{\"marker\":\"*\",\"start_quote\":\"...\",\"continues_to_next\":true}]},{\"image_no\":2,\"page_type\":\"body_with_footnote|body|note_page\",\"continued_from_previous\":[{\"marker\":\"*\",\"start_quote\":\"...\"}],\"new_footnote_definitions\":[]}],\"cross_page_continuations\":[{\"marker\":\"*\",\"from_image\":1,\"to_image\":2,\"confidence\":0.0,\"evidence\":\"...\"}],\"warnings\":[]}",
+  "image_count": 2,
+  "started_at": "2026-05-23T19:11:55+0800",
+  "ok": true,
+  "elapsed_seconds": 7.005,
+  "model_returned": "glm-4.6v-flashx",
+  "content": "```json\n{\n    \"pages\": [\n        {\n            \"image_no\": 1,\n            \"page_type\": \"body_with_footnote\",\n            \"footnote_definitions\": [\n                {\n                    \"marker\": \"*\",\n                    \"start_quote\": \"M. Foucault passe ici rapidement sur les pages 18-20 du manuscrit : « On en trouverait évidemment beaucoup d'exemples dans le discours des révolutionnaires américains. Et c'est peut-être ça précisément la pensée révolutionnaire : penser simultanément l'utilité de l'indépendance et l'axiomatique des droits (Révolution américaine).\"\n                }\n            ]\n        },\n        {\n            \"image_no\": 2,\n            \"page_type\": \"body_with_footnote\",\n            \"continued_from_previous\": [\n                {\n                    \"marker\": \"*\",\n                    \"start_quote\": \"M. Foucault ajoute : vous le verrez très bien fonctionner dans les deux [mot inaudible] et fonctionner de manière [mot inaudible]\"\n                }\n            ]\n        }\n    ],\n    \"cross_page_continuations\": [\n        {\n            \"marker\": \"*\",\n            \"from_image\": 1,\n            \"to_image\": 2,\n            \"confidence\": 0.0,\n            \"evidence\": \"图1末尾可见短引文为「M. Foucault passe ici rapidement sur les pages 18-20 du manuscrit : « On en trouverait évidemment beaucoup d'exemples dans le discours des révolutionnaires américains. Et c'est peut-être ça précisément la pensée révolutionnaire : penser simultanément l'utilité de l'indépendance et l'axiomatique des droits (Révolution américaine).」，图2开头可见短引文为「M. Foucault ajoute : vous le verrez très bien fonctionner dans les deux [mot inaudible] et fonctionner de manière [mot inaudible]」，两者内容衔接，表明脚注跨页断开\"\n        }\n    ],\n    \"warnings\": []\n}\n```",
+  "usage": {
+    "completion_tokens": 450,
+    "prompt_tokens": 2759,
+    "total_tokens": 3209,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 0
+    }
+  }
+}

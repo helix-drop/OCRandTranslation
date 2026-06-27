@@ -17,6 +17,7 @@ from config import create_doc, ensure_dirs, set_current_doc, update_doc_meta
 from document.pdf_extract import extract_pdf_toc
 from pypdf import PdfWriter
 from pypdf.constants import PageLabelStyle
+from persistence.sqlite_db_paths import get_catalog_db_path
 from persistence.sqlite_store import SQLiteRepository, get_connection
 from persistence.storage import (
     get_app_state,
@@ -156,7 +157,7 @@ class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
     def test_sqlite_schema_contains_toc_column(self):
         repo = SQLiteRepository()
         repo.upsert_document("doc-toc", "toc.pdf")
-        with get_connection(config.get_sqlite_db_path()) as conn:
+        with get_connection(get_catalog_db_path()) as conn:
             cols = {
                 row["name"]
                 for row in conn.execute("PRAGMA table_info(documents)").fetchall()
@@ -1000,7 +1001,7 @@ class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn('id="tocBtn"', second_html)
         self.assertEqual(len(SQLiteRepository().get_document_toc(doc_id)), 2)
 
-    def test_load_pages_repairs_pdf_navigation_pages_and_migrates_entries(self):
+    def test_load_pages_repairs_pdf_navigation_pages_without_rewriting_entries(self):
         doc_id = create_doc("repair-pages.pdf")
         pdf_path = os.path.join(config.get_doc_dir(doc_id), "source.pdf")
         with open(pdf_path, "wb") as f:
@@ -1045,7 +1046,7 @@ class BackendBacklogTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(pages[3].get("printPageLabel"), "2")
 
         entries, _, _ = load_entries_from_disk(doc_id)
-        self.assertEqual(entries[0]["_pageBP"], 3)
+        self.assertEqual(entries[0]["_pageBP"], 1)
         self.assertEqual(entries[0]["pages"], "原书 p.1")
         self.assertEqual(entries[0]["_page_entries"][0]["pages"], "原书 p.1")
 

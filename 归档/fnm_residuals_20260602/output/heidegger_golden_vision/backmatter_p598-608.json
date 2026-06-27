@@ -1,0 +1,35 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    598,
+    599,
+    600,
+    601,
+    602,
+    603,
+    604,
+    605,
+    606,
+    607,
+    608
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 598\",\n      \"printed_page\": \"598\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页面为索引正文，无常规段落，全是词条列表。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 599\",\n      \"printed_page\": \"599\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"INDEX\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页面为索引正文，无常规段落，全是词条列表。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 600\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页为空白页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 601\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"Table\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"Introduction ... 7 Premiers étonnements ... 7 De la mode à la\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 602\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [\n        {\"text\": \"4. L'humanisme dans les turbulences ... 113 La lettre à Jean Beaufret\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 603\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [\n        {\"text\": \"9. La lettre et l'esprit ... 317 Soixante ans après ! Du tollé\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 604\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [\n        {\"text\": \"Bibliographie ... 543 Traductions françaises de Heidegger dans l'ordre chronologique de leur\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 605\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"COLLECTION «PLURIEL »\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"ACTUEL\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"ADLER Alexandre J'ai vu finir le monde ancien Au fil des\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 606\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"section\", \"text\": \"LETTRES ET ARTS\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"BOUSTANY Antoine Drogues de paix, drogues de guerre BROMBERGER Christian Passions ordinaires\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 607\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"section\", \"text\": \"PHILOSOPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"STEINER George De la Bible à Kafka Extraterritorialité TAPIÉ Victor L. Baroque\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 608\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [\n        {\"text\": \"Imprimé en Espagne, par LIBERDÚPLEX (Barcelone) HACHETTE LITTÉRATURES - 31, rue de Fleurus\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页面包含出版商信息及ISBN，非正文页。\"]\n    }\n  ],\n  \"correction_guidance\": [\"所有页面均为索引或目录页，不存在需要核对的学术正文段落或页脚注释。核对重点应为目录页标题层级是否与书稿大纲一致。\"]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 12342,
+      "completion_tokens": 1431,
+      "total_tokens": 13773
+    }
+  }
+}

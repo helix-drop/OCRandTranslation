@@ -27,7 +27,7 @@ class SettingsPageRedesignSmokeTests(unittest.TestCase):
         for nav_key in (
             'data-nav="providers"',
             'data-nav="translation-pool"',
-            'data-nav="fnm-pool"',
+            'data-nav="visual-pool"',
             'data-nav="concurrency"',
             'data-nav="glossary"',
             'data-nav="toc"',
@@ -47,16 +47,16 @@ class SettingsPageRedesignSmokeTests(unittest.TestCase):
             "translation_model_pool_slot1_mode",
             "translation_model_pool_slot2_mode",
             "translation_model_pool_slot3_mode",
-            "fnm_model_pool_slot1_mode",
-            "fnm_model_pool_slot2_mode",
-            "fnm_model_pool_slot3_mode",
+            "visual_model_pool_slot1_mode",
+            "visual_model_pool_slot2_mode",
+            "visual_model_pool_slot3_mode",
         ):
             self.assertIn(prefix, html)
 
     def test_preserves_current_model_labels(self):
         html = self._get_html()
         self.assertIn("当前主翻译模型", html)
-        self.assertIn("当前主 FNM 模型", html)
+        self.assertIn("当前主视觉模型", html)
 
     def test_builtin_model_candidates_are_grouped_by_provider(self):
         html = self._get_html()

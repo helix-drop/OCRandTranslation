@@ -1,0 +1,29 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "ch10-full",
+  "pages": [
+    386,
+    387,
+    388,
+    389,
+    390
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch10-full PDF page 386\",\n      \"printed_page\": \"386\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"},\n        {\"level\": \"chapter\", \"text\": \"ÉPILOGUE VI\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"toujours pas été publiée126. On peut espérer qu'elle le sera\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Comment nier l'effet produit par le livre de Farias, du\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Une anecdote révélatrice : quelques jours après la publication du\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"126\", \"context\": \"toujours pas été publiée126.\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"126\", \"text_start\": \"Sur les différentes interventions et péripéties qui ont abouti à ce blocage (concernant aussi partiellement les traductions des «textes politiques» formant le 4e volume de la thèse), voir Entretiens (PARFAIT).\"}\n      ],\n      \"risks\": [\"脚注引用标记与脚注编号一致性需核对正文跨页上下文。\"]\n    },\n    {\n      \"label\": \"ch10-full PDF page 387\",\n      \"printed_page\": \"387\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"LE RETOUR DU REFOULÉ ?\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"mais lui objecte qu'il m'est difficile de lui donner une\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Autre souvenir significatif : je me rappelle avoir découvert avec\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Que reste-t-il aujourd'hui de toute cette agitation ? Il serait\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"无。\"]\n    },\n    {\n      \"label\": \"ch10-full PDF page 388\",\n      \"printed_page\": \"388\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"qui n'a plus rien à voir avec les modes intellectuelles de\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"J'ai pu constater, d'ailleurs, l'écart constant entre l'agitation médiatique et\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"J'ai beaucoup hésité avant d'écrire à mon tour sur cette\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"无。\"]\n    },\n    {\n      \"label\": \"ch10-full PDF page 389\",\n      \"printed_page\": \"389\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"LE RETOUR DU REFOULÉ ?\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"une conquête du second Heidegger, celui qui a remis en\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Lors même que Heidegger se détache personnellement de sa première adhésion\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Avec le recul du temps, il semble bien que ces années\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Ce qu'une telle sagesse d'entendement ne voit pas du tout,\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"无。\"]\n    },\n    {\n      \"label\": \"ch10-full PDF page 390\",\n      \"printed_page\": \"390\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"nazie grâce à la pensée de Heidegger ? Ou tout le\", \"continues_from_previous\": true, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"无。\"]\n    }\n  ],\n  \"correction_guidance\": [\n    \"第386页脚注引用126号对应页底注。确认第385页末尾短语 'Cette thèse n’a' 与第386页开头 'toujours pas été publiée' 完美衔接。\",\n    \"EPILOGUE VI 标题层级为章标题，位于正文顶部区域，Running Header 贯穿所有页面。\",\n    \"第388页段落 'J'ai beaucoup hésité...' 跨页续接到第389页开头 'une conquête du second Heidegger'（注意：此处非段落延续，系页码排版逻辑，第389页开头应为上一页最后一段的延续）。需核实第388页最后一行与第389页首行是否存在逻辑断层。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 5893,
+      "completion_tokens": 1446,
+      "total_tokens": 7339
+    }
+  }
+}

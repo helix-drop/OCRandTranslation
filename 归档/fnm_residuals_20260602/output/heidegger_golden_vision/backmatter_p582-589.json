@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    582,
+    583,
+    584,
+    585,
+    586,
+    587,
+    588,
+    589
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 582\",\n      \"printed_page\": \"582\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"ouverture (MARTINEAU, 1985 ; HAA\", \"continues_from_previous\": true, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页为索引延续页面，视觉上呈现为多行列表，无标准段落，风险为OCR处理时可能错误断行。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 583\",\n      \"printed_page\": \"583\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"INDEX DES MOTS-CLÉS HEIDEGGÉRIENS\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"GEWISSEN : conscience (GRANEL, 1978-79 ; MAR\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 584\",\n      \"printed_page\": \"584\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"SCHRITT ZURÜCK : décrochage (BIRAULT, 1960) ;\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 585\",\n      \"printed_page\": \"585\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"INDEX DES MOTS-CLÉS HEIDEGGÉRIENS\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"VORHANDENHEIT : réalité-des-choses subsistantes (CORBIN, 1938) ;\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 586\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"此页为空白页。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 587\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"Index\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"ABENSOUR (Miguel) : 32n, 337n, 338, 359n\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"分两栏排版，OCR自动序列读取可能会导致左右栏文本错位。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 588\",\n      \"printed_page\": \"588\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"BASSET (Guy) : 23, 544\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"分两栏排版，存在较多缩进和页码列表，易产生排版合并错误。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 589\",\n      \"printed_page\": \"589\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"INDEX\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"BRAGUE (Rémi) : 14n, 208n, 395n, 449, 494-495, 497, 530n\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"分两栏排版，索引项长短不一，建议重点核对栏间距对齐。\"]\n    }\n  ],\n  \"correction_guidance\": [\n    \"页码586为完全空白页，应在索引页序中进行标注以防丢失。\",\n    \"所有索引页面（587-589）均采用双栏排版，务必确保OCR抓取时按照垂直栏顺序处理，避免左右栏文本交错。\",\n    \"索引中的人名与页码关联密集，核对时重点关注数字后的'n'（脚注标志）是否被漏检或误识别为纯数字。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 1360,
+      "total_tokens": 10447
+    }
+  }
+}

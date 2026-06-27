@@ -1,0 +1,31 @@
+{
+  "case": "endnotes_region_goldstein",
+  "model_requested": "glm-4.6v",
+  "base_url": "https://open.bigmodel.cn/api/paas/v4/",
+  "prompt": "你会依次看到 Jan Goldstein《The Post-Revolutionary Self》的相邻两页图像；图1是印刷页 331，目录中 Notes 的起始页；图2是印刷页 332。任务是判定该区域是否为书末尾注定义区，而不是正文页面。\n请根据可见的页眉/标题、连续编号定义、引用排版来判定。提取图1可见的前几个尾注编号；判断图2开头是否是某条定义的跨页续文，并给出可见证据。不要把 bibliography 或正文段落猜成尾注。\n只返回 JSON：{\"classification\":\"endnotes_region|body|bibliography|uncertain\",\"notes_heading_visible\":true,\"page1_note_markers\":[],\"page2_starts_with_continuation\":false,\"continuation_from_marker\":null,\"evidence\":[\"...\"],\"confidence\":0.0,\"warnings\":[]}",
+  "source_prompt_file": "output/model_eval/glm_4_6v_flashx_20260523/endnotes_region_goldstein_request.json",
+  "image_files": [
+    "output/model_eval/glm_4_6v_flashx_20260523/goldstein_endnotes_fileidx_347.png",
+    "output/model_eval/glm_4_6v_flashx_20260523/goldstein_endnotes_fileidx_348.png"
+  ],
+  "started_at": "2026-05-23T19:17:49+0800",
+  "ok": true,
+  "elapsed_seconds": 9.253,
+  "model_returned": "glm-4.6v",
+  "content": "{\"classification\":\"endnotes_region\",\"notes_heading_visible\":true,\"page1_note_markers\":[1,2],\"page2_starts_with_continuation\":false,\"continuation_from_marker\":null,\"evidence\":[\"图1显示页眉为\\\"Notes\\\"，页面内容以\\\"Abbreviations\\\"和\\\"Introduction\\\"为标题，随后是编号为1、2的尾注条目，符合尾注区域的典型结构；图2页眉为\\\"Notes to Pages 2–4\\\"，内容延续尾注编号（从3开始），且排版为连续的尾注条目，无正文段落或参考文献格式特征\"],\"confidence\":1.0,\"warnings\":[]}",
+  "usage": {
+    "completion_tokens": 141,
+    "prompt_tokens": 3270,
+    "total_tokens": 3411,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": null,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": 4
+    }
+  }
+}

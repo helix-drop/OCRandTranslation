@@ -1,0 +1,296 @@
+[
+  {
+    "doc_id": "a3c9e1f7b284",
+    "doc_name": "Neuropsychoanalysis A Contemporary Introduction (Georg Northoff) (Z-Library).pdf",
+    "example_folder": "Neuropsychoanalysis_Introduction",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 189,
+        "page_count": 168,
+        "section_count": 9,
+        "note_count": 0,
+        "unit_count": 18,
+        "structure_state": "ready"
+      },
+      "structure": {
+        "ok": true,
+        "status": "done",
+        "page_count": 168,
+        "chapter_count": 9,
+        "section_head_count": 85,
+        "note_region_count": 0,
+        "note_item_count": 0,
+        "body_anchor_count": 0,
+        "note_link_count": 0,
+        "suppressed_chapter_candidate_count": 258,
+        "partition_heading_conflict_count": 9,
+        "review_row_count": 0,
+        "footnote_count": 0,
+        "endnote_count": 0,
+        "linked_endnote_count": 0,
+        "structure_state": "ready",
+        "review_counts": {
+          "footnote_orphan_note": 0,
+          "footnote_orphan_anchor": 0,
+          "endnote_orphan_note": 0,
+          "endnote_orphan_anchor": 0,
+          "ambiguous": 0,
+          "uncertain_anchor": 0,
+          "boundary_review_required": 0,
+          "toc_alignment_review_required": 0
+        },
+        "blocking_reasons": [],
+        "link_summary": {
+          "matched": 0,
+          "footnote_orphan_note": 0,
+          "footnote_orphan_anchor": 0,
+          "endnote_orphan_note": 0,
+          "endnote_orphan_anchor": 0,
+          "ambiguous": 0
+        },
+        "page_partition_summary": {
+          "noise": 0,
+          "front_matter": 1,
+          "body": 157,
+          "note": 0,
+          "other": 10
+        },
+        "chapter_mode_summary": {
+          "footnote_primary": 0,
+          "chapter_endnotes": 0,
+          "book_endnotes": 0,
+          "body_only": 9,
+          "mixed_or_unclear": 0
+        },
+        "heading_review_summary": {
+          "chapter_candidate_count": 94,
+          "suppressed_candidate_count": 258,
+          "suppressed_reason_counts": {
+            "short_span": 165,
+            "quote_style": 18,
+            "sentence_like": 51,
+            "low_score": 24
+          },
+          "partition_conflict_count": 9
+        },
+        "chapter_source_summary": {
+          "source": "visual_toc",
+          "chapter_level": 1,
+          "visual_toc_chapter_count": 9,
+          "legacy_chapter_count": 0,
+          "fallback_used": false
+        },
+        "visual_toc_conflict_count": 0,
+        "toc_export_coverage_summary": {
+          "resolved_body_items": 9,
+          "exported_body_items": 9,
+          "missing_body_items_preview": []
+        },
+        "toc_alignment_summary": {
+          "chapter_level_body_items": 9,
+          "exported_chapter_count": 9,
+          "missing_chapter_titles_preview": [],
+          "misleveled_titles_preview": [],
+          "reanchored_titles_preview": [],
+          "missing_section_titles_preview": []
+        },
+        "toc_export_coverage_ok": true,
+        "chapter_title_alignment_ok": true,
+        "chapter_section_alignment_ok": true,
+        "export_drift_summary": {},
+        "chapter_local_endnote_contract_ok": false,
+        "export_ready_test": true,
+        "export_ready_real": true,
+        "validation_needs_human_review": false,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 18,
+        "note_unit_count": 0,
+        "changed_page_count": 148,
+        "translated_chars": 335405,
+        "translated_paras": 830,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": true,
+        "blocked": false,
+        "file_count": 10,
+        "chapter_count": 9,
+        "zip_size": 110452,
+        "execution_mode": "test",
+        "local_ref_total": 0,
+        "local_def_total": 0,
+        "unique_local_ref_count": 0,
+        "unique_local_def_count": 0,
+        "orphan_local_definition_count": 0,
+        "orphan_local_ref_count": 0,
+        "orphan_local_definitions_preview": [],
+        "orphan_local_refs_preview": [],
+        "pending_placeholder_count": 0,
+        "raw_note_heading_leak_count": 0,
+        "legacy_footnote_ref_count": 0,
+        "legacy_endnote_ref_count": 0,
+        "legacy_en_bracket_ref_count": 0,
+        "legacy_note_token_count": 0,
+        "forbidden_section_heading_count": 0,
+        "expected_note_count": 0,
+        "chapter_local_endnote_contract_ok": true,
+        "export_drift_summary": {
+          "legacy_footnote_ref_count": 0,
+          "legacy_endnote_ref_count": 0,
+          "legacy_en_bracket_ref_count": 0,
+          "legacy_note_token_count": 0,
+          "orphan_local_definition_count": 0,
+          "orphan_local_ref_count": 0
+        },
+        "latest_export_zip_saved": true,
+        "latest_export_zip_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_Introduction/latest.fnm.obsidian.zip",
+        "latest_export_zip_folder": "Neuropsychoanalysis_Introduction",
+        "latest_export_zip_reason": "",
+        "chapters": [
+          "Introduction",
+          "Self and narcissism",
+          "Attachment and trauma",
+          "Defense mechanisms and dissociation",
+          "Cathexis and free energy"
+        ],
+        "chapter_stats_preview": [
+          {
+            "title": "Introduction",
+            "path": "chapters/001-Introduction.md",
+            "chapter_local_contract_ok": true,
+            "orphan_local_definitions": [],
+            "orphan_local_refs": [],
+            "local_ref_total": 0,
+            "local_def_total": 0,
+            "unique_local_refs": [],
+            "unique_local_defs": [],
+            "local_numbering_starts_at_one": true,
+            "legacy_footnote_ref_count": 0,
+            "legacy_endnote_ref_count": 0,
+            "legacy_en_bracket_ref_count": 0,
+            "legacy_note_token_count": 0,
+            "pending_placeholder_count": 0,
+            "raw_note_heading_leak_count": 0,
+            "section_heading_total": 5,
+            "forbidden_section_heading_count": 0,
+            "forbidden_section_heading_preview": []
+          },
+          {
+            "title": "Self and narcissism",
+            "path": "chapters/002-Self and narcissism.md",
+            "chapter_local_contract_ok": true,
+            "orphan_local_definitions": [],
+            "orphan_local_refs": [],
+            "local_ref_total": 0,
+            "local_def_total": 0,
+            "unique_local_refs": [],
+            "unique_local_defs": [],
+            "local_numbering_starts_at_one": true,
+            "legacy_footnote_ref_count": 0,
+            "legacy_endnote_ref_count": 0,
+            "legacy_en_bracket_ref_count": 0,
+            "legacy_note_token_count": 0,
+            "pending_placeholder_count": 0,
+            "raw_note_heading_leak_count": 0,
+            "section_heading_total": 3,
+            "forbidden_section_heading_count": 0,
+            "forbidden_section_heading_preview": []
+          },
+          {
+            "title": "Attachment and trauma",
+            "path": "chapters/003-Attachment and trauma.md",
+            "chapter_local_contract_ok": true,
+            "orphan_local_definitions": [],
+            "orphan_local_refs": [],
+            "local_ref_total": 0,
+            "local_def_total": 0,
+            "unique_local_refs": [],
+            "unique_local_defs": [],
+            "local_numbering_starts_at_one": true,
+            "legacy_footnote_ref_count": 0,
+            "legacy_endnote_ref_count": 0,
+            "legacy_en_bracket_ref_count": 0,
+            "legacy_note_token_count": 0,
+            "pending_placeholder_count": 0,
+            "raw_note_heading_leak_count": 0,
+            "section_heading_total": 7,
+            "forbidden_section_heading_count": 0,
+            "forbidden_section_heading_preview": []
+          },
+          {
+            "title": "Defense mechanisms and dissociation",
+            "path": "chapters/004-Defense mechanisms and dissociation.md",
+            "chapter_local_contract_ok": true,
+            "orphan_local_definitions": [],
+            "orphan_local_refs": [],
+            "local_ref_total": 0,
+            "local_def_total": 0,
+            "unique_local_refs": [],
+            "unique_local_defs": [],
+            "local_numbering_starts_at_one": true,
+            "legacy_footnote_ref_count": 0,
+            "legacy_endnote_ref_count": 0,
+            "legacy_en_bracket_ref_count": 0,
+            "legacy_note_token_count": 0,
+            "pending_placeholder_count": 0,
+            "raw_note_heading_leak_count": 0,
+            "section_heading_total": 4,
+            "forbidden_section_heading_count": 0,
+            "forbidden_section_heading_preview": []
+          },
+          {
+            "title": "Cathexis and free energy",
+            "path": "chapters/005-Cathexis and free energy.md",
+            "chapter_local_contract_ok": true,
+            "orphan_local_definitions": [],
+            "orphan_local_refs": [],
+            "local_ref_total": 0,
+            "local_def_total": 0,
+            "unique_local_refs": [],
+            "unique_local_defs": [],
+            "local_numbering_starts_at_one": true,
+            "legacy_footnote_ref_count": 0,
+            "legacy_endnote_ref_count": 0,
+            "legacy_en_bracket_ref_count": 0,
+            "legacy_note_token_count": 0,
+            "pending_placeholder_count": 0,
+            "raw_note_heading_leak_count": 0,
+            "section_heading_total": 6,
+            "forbidden_section_heading_count": 0,
+            "forbidden_section_heading_preview": []
+          }
+        ]
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": true
+  }
+]

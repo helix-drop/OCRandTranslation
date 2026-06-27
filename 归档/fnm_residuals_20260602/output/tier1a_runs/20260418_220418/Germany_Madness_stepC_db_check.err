@@ -1,0 +1,3 @@
+Error: in prepare, no such column: source
+  r_id, page_no, char_start, char_end, anchor_kind, source FROM fnm_body_anchors
+                                      error here ---^

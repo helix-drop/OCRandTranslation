@@ -307,7 +307,7 @@ def _save_pdf_toc(
         _task_push(task_id=task_id, deps=deps, event_type="log", data={"msg": "PDF 未检测到目录书签"})
 
 
-def _run_required_visual_toc_before_fnm(
+def _run_auto_visual_toc_step(
     *,
     task_id: str,
     doc_id: str,
@@ -326,14 +326,14 @@ def _run_required_visual_toc_before_fnm(
     if not run_enabled:
         return result_payload
     if not pdf_path or not os.path.exists(pdf_path):
-        error_msg = "FNM 模式缺少源 PDF，无法先生成自动视觉目录。"
+        error_msg = "缺少源 PDF，无法生成自动视觉目录。"
         _task_push(task_id=task_id, deps=deps, event_type="log", data={"msg": error_msg, "cls": "warning"})
         result_payload.update({"ok": False if required else True, "status": "failed", "message": error_msg})
         result_payload["log_messages"].append(("ERROR", error_msg))
         return result_payload
 
     _task_push(task_id=task_id, deps=deps, event_type="progress", data={"pct": 96, "label": "自动视觉目录识别…", "detail": ""})
-    start_msg = "FNM 模式：开始同步生成自动视觉目录。"
+    start_msg = "开始同步生成自动视觉目录。"
     _task_push(task_id=task_id, deps=deps, event_type="log", data={"msg": start_msg, "cls": "success"})
     result_payload["log_messages"].append(("INFO", start_msg))
 
@@ -368,11 +368,11 @@ def _run_required_visual_toc_before_fnm(
     error_msg = str(result.get("message") or "").strip()
     if not error_msg:
         if status == "unsupported":
-            error_msg = "当前视觉模型不支持自动视觉目录，FNM 模式已停止。"
+            error_msg = "当前视觉模型不支持自动视觉目录。"
         elif count <= 0:
-            error_msg = "自动视觉目录没有生成任何可用目录项，FNM 模式已停止。"
+            error_msg = "自动视觉目录没有生成任何可用目录项。"
         else:
-            error_msg = f"自动视觉目录未就绪（{status}），FNM 模式已停止。"
+            error_msg = f"自动视觉目录未就绪（{status}）。"
     _task_push(task_id=task_id, deps=deps, event_type="log", data={"msg": error_msg, "cls": "warning"})
     result_payload.update({"ok": False if required else True, "message": error_msg})
     result_payload["log_messages"].append(("ERROR", error_msg))
@@ -412,7 +412,7 @@ def process_file(task_id: str, deps: Deps) -> None:
             return
         all_logs.extend(parse_logs)
 
-        if file_type == 0 and not cleanup_enabled:
+        if file_type == 0:
             merged_pages, merge_logs = _merge_pdf_text_layers(
                 task_id=task_id,
                 file_bytes=file_bytes,
@@ -437,23 +437,14 @@ def process_file(task_id: str, deps: Deps) -> None:
             _task_push(task_id=task_id, deps=deps, event_type="log", data={"msg": option_log, "cls": "success"})
             all_logs.append(option_log)
 
-        if cleanup_enabled:
-            final_pages = deps["apply_cleanup_mode_to_pages"](
-                parsed["pages"],
-                cleanup_enabled=False,
-            )
-            skip_msg = "FNM 模式：已跳过文字层合并/页眉页脚清理/注释扫描，直接进入 FNM 主线处理。"
-            _task_push(task_id=task_id, deps=deps, event_type="log", data={"msg": skip_msg, "cls": "success"})
-            all_logs.append(skip_msg)
-        else:
-            final_pages, cleanup_logs = _cleanup_and_scan_pages(
-                task_id=task_id,
-                pages=parsed["pages"],
-                cleanup_enabled=cleanup_enabled,
-                deps=deps,
-                emit_cleanup_logs=True,
-            )
-            all_logs.extend(cleanup_logs)
+        final_pages, cleanup_logs = _cleanup_and_scan_pages(
+            task_id=task_id,
+            pages=parsed["pages"],
+            cleanup_enabled=cleanup_enabled,
+            deps=deps,
+            emit_cleanup_logs=True,
+        )
+        all_logs.extend(cleanup_logs)
 
         _task_push(task_id=task_id, deps=deps, event_type="progress", data={"pct": 90, "label": "保存数据…", "detail": ""})
         doc_id = deps["create_doc"](
@@ -496,55 +487,28 @@ def process_file(task_id: str, deps: Deps) -> None:
         log_relpath = deps["create_doc_task_log"](doc_id, "ocr_upload", task_id=task_id)
         for log_line in all_logs:
             deps["append_doc_task_log"](doc_id, log_relpath, log_line)
-        if cleanup_enabled or auto_visual_toc_enabled:
-            visual_toc_result = _run_required_visual_toc_before_fnm(
+        if auto_visual_toc_enabled:
+            visual_toc_result = _run_auto_visual_toc_step(
                 task_id=task_id,
                 doc_id=doc_id,
                 pdf_path=pdf_dest,
                 run_enabled=True,
-                required=cleanup_enabled,
+                required=False,
                 deps=deps,
             )
             for level, message in list(visual_toc_result.get("log_messages") or []):
                 deps["append_doc_task_log"](doc_id, log_relpath, message, level=level)
                 all_logs.append(message)
-            if cleanup_enabled and not visual_toc_result.get("ok"):
-                _task_push(task_id=task_id, deps=deps, event_type="error_msg", data={
-                    "error": str(visual_toc_result.get("message") or "自动视觉目录失败"),
-                    "doc_id": doc_id,
-                    "log_relpath": log_relpath,
-                })
-                return
-            if cleanup_enabled:
-                fnm_result = deps["run_fnm_pipeline_for_doc"](task_id, doc_id) or {}
-            else:
-                fnm_result = {}
-            for level, message in list(fnm_result.get("log_messages") or []):
-                deps["append_doc_task_log"](doc_id, log_relpath, message, level=level)
-                all_logs.append(message)
-        else:
-            fnm_result = {}
 
         visible_page_view = deps["build_visible_page_view"](final_pages)
         first, last = deps["get_page_range"](final_pages)
         start_bp = visible_page_view["first_visible_page"] or first
-        route_mode = "fnm_progress" if cleanup_enabled else "standard"
-        redirect_allowed = not cleanup_enabled
-        redirect_message = ""
-        if cleanup_enabled:
-            redirect_allowed = False
-            if fnm_result.get("fnm_available"):
-                redirect_message = str(fnm_result.get("message") or "").strip() or "FNM 分类完成；请留在首页点击“开始翻译”，并在首页查看进度与阻塞信息。"
-            else:
-                redirect_message = str(fnm_result.get("message") or "").strip()
-        else:
-            redirect_message = "快速模式解析完成后将直接进入标准阅读视图，并自动开始普通翻译。"
-            deps["append_doc_task_log"](doc_id, log_relpath, redirect_message)
+        route_mode = "standard"
+        redirect_allowed = True
+        redirect_message = "解析完成后将直接进入标准阅读视图，并自动开始普通翻译。"
+        deps["append_doc_task_log"](doc_id, log_relpath, redirect_message)
         summary = f"解析完成！{len(final_pages)}页 (p.{first}-{last})"
         deps["append_doc_task_log"](doc_id, log_relpath, summary)
-        if cleanup_enabled:
-            if redirect_message:
-                deps["append_doc_task_log"](doc_id, log_relpath, f"首页保留在 FNM 进度模式：{redirect_message}", level="INFO")
         _task_push(task_id=task_id, deps=deps, event_type="done", data={
             "summary": summary,
             "logs": all_logs,
@@ -628,27 +592,16 @@ def reparse_file(task_id: str, doc_id: str, deps: Deps) -> None:
         deps["save_pages_to_disk"](final_pages, file_name, doc_id)
         for log_line in all_logs:
             deps["append_doc_task_log"](doc_id, log_relpath, log_line)
-        if cleanup_enabled:
-            visual_toc_result = _run_required_visual_toc_before_fnm(
+        if auto_visual_toc_enabled:
+            visual_toc_result = _run_auto_visual_toc_step(
                 task_id=task_id,
                 doc_id=doc_id,
                 pdf_path=file_path,
                 run_enabled=True,
-                required=True,
+                required=False,
                 deps=deps,
             )
             for level, message in list(visual_toc_result.get("log_messages") or []):
-                deps["append_doc_task_log"](doc_id, log_relpath, message, level=level)
-                all_logs.append(message)
-            if not visual_toc_result.get("ok"):
-                _task_push(task_id=task_id, deps=deps, event_type="error_msg", data={
-                    "error": str(visual_toc_result.get("message") or "自动视觉目录失败"),
-                    "doc_id": doc_id,
-                    "log_relpath": log_relpath,
-                })
-                return
-            fnm_result = deps["run_fnm_pipeline_for_doc"](task_id, doc_id) or {}
-            for level, message in list(fnm_result.get("log_messages") or []):
                 deps["append_doc_task_log"](doc_id, log_relpath, message, level=level)
                 all_logs.append(message)
         toc_items = deps["extract_pdf_toc"](file_bytes) or deps["extract_pdf_toc_from_links"](file_bytes)
@@ -785,8 +738,6 @@ def reparse_single_page(task_id: str, doc_id: str, target_bp: int, file_idx: int
         )
 
         deps["save_pages_to_disk"](updated_pages, file_name, doc_id)
-        if cleanup_enabled:
-            deps["run_fnm_pipeline_for_doc"](task_id, doc_id)
         entries, doc_title, _ = deps["load_entries_from_disk"](doc_id, pages=updated_pages)
         entry_title = doc_title or file_name
 

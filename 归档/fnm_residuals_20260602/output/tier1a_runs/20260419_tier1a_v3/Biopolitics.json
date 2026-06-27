@@ -1,0 +1,15 @@
+{
+  "slug": "Biopolitics",
+  "folder": "Biopolitics",
+  "doc_id": "0d285c0800db",
+  "verdict": "FAIL",
+  "stage_failed": "ensure_structure",
+  "ensure": {
+    "ok": false,
+    "reason": "initial_pipeline_exception",
+    "error": "FOREIGN KEY constraint failed",
+    "traceback": "Traceback (most recent call last):\n  File \"/Users/hao/OCRandTranslation/scripts/run_fnm_llm_tier1a.py\", line 253, in _ensure_structure_ready\n    initial = run_fnm_pipeline(book.doc_id) or {}\n              ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^\n  File \"/Users/hao/OCRandTranslation/FNM_RE/__init__.py\", line 93, in run_doc_pipeline\n    return impl(*args, **kwargs)\n  File \"/Users/hao/OCRandTranslation/FNM_RE/app/mainline.py\", line 1041, in run_phase6_pipeline_for_doc\n    run_id = int(getattr(repo, \"create_fnm_run\")(doc_id, status=\"running\"))\n                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/hao/OCRandTranslation/persistence/sqlite_store.py\", line 171, in _call\n    return getattr(repo, item)(*args, **kwargs)\n           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^\n  File \"/Users/hao/OCRandTranslation/persistence/sqlite_repo_fnm.py\", line 151, in create_fnm_run\n    cur = conn.execute(\n        \"\"\"\n    ...<23 lines>...\n        ),\n    )\nsqlite3.IntegrityError: FOREIGN KEY constraint failed\n"
+  },
+  "batch_tag": "20260419_tier1a_v3",
+  "commit": "f37b345"
+}

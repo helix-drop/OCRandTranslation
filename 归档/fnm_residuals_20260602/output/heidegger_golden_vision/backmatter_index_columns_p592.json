@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    592
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 592\",\n      \"printed_page\": \"592\",\n      \"lines\": [\n        \"GUITTON (Jean) : 144-146, 223n, 225, 277, 508n\",\n        \"GUINLE (Françoise) : 314\",\n        \"GUINLE (Jean-Philippe) : 180-181, 312\",\n        \"GURVITCH (Georges) : 25-29, 33-34, 38, 41-42n, 52, 94, 136, 208n\",\n        \"HAAR (Michel) : 23, 183, 227, 231, 266n, 272, 275n, 277n, 303-304, 306n, 307, 313-314, 326, 334-336, 337n, 344, 406n, 441, 503n\",\n        \"HABERMAS (Jürgen) : 9, 377n, 378n, 393n\",\n        \"HALÉVY (Daniel) : 35\",\n        \"HAN (Béatrice) : 216n\",\n        \"HARTMANN (Nicolaï) : 25\",\n        \"HAVILAND (Éric) : 223n\",\n        \"HAYYIM DE VOLOZHYM (Rabbi) : 457n\",\n        \"HEBEL (Johann Peter) : 163n, 195, 234n, 280\",\n        \"HEGEL (Georg Wilhelm Friedrich) : 32, 37, 53n, 55, 61, 67, 71, 90, 105-106, 118n, 152, 156-158, 160, 163n, 173n-175, 181, 213-214, 226-227, 246-248, 250, 254, 258, 269-272, 282, 284, 290, 336, 406n, 414, 416, 427n, 491, 497\",\n        \"HEIDEGGER (Detlev) : 314\",\n        \"HEIDEGGER (Mme Elfride) : 82, 85, 147-148, 407, 410, 479n, 518\",\n        \"HEIDEGGER (Hermann) : 275, 314, 398, 520n\",\n        \"HEISENBERG (Werner) : 412\",\n        \"HELLER (Gerhard) : 61\",\n        \"HENRIC (Jacques) : 353n\",\n        \"HENRY (Michel) : 418, 450, 489n\",\n        \"HÉRACLITE : 164, 175, 182, 201, 220, 222, 224, 236, 241, 243-245, 280n, 332n, 463, 491n, 515\",\n        \"HERGÉ : 519\",\n        \"HERING (Jean) : 31\",\n        \"HERSCH (Jeanne) : 150n, 154, 157-158, 381, 424\",\n        \"HERVIER (Julien) : 185n, 248n, 250n, 312\",\n        \"HÉSIODE : 244\",\n        \"HESS (Rudolf) : 193\",\n        \"HEURGON (Mme) : 150, 159\",\n        \"HEYSE (Hans) : 49\",\n        \"HIMMLER (Heinrich) : 363n\",\n        \"HITLER (Adolf) : 13, 108, 162n, 188, 194-196, 198, 206n, 305, 348, 394, 397-399, 432, 520, 538n\",\n        \"HOBBES (Thomas) : 470\",\n        \"HÖLDERLIN (Friedrich) : 40n, 44-45, 47n, 94, 108, 131, 157-158, 171, 176n, 189, 206, 225, 243, 245n, 275, 282, 308n, 335, 336n, 356n, 358, 406n, 431, 434, 462-464, 479n, 480, 506n, 507, 508n, 515\",\n        \"HOMÈRE : 408\",\n        \"HOTTOIS (Gilbert) : 421n, 428-429\",\n        \"HÜHNERFELD (Paul) : 194, 198n\",\n        \"HUISMAN (Denis) : 129n, 130n, 131n\",\n        \"HUME (David) : 361\",\n        \"HUSSERL (Edmund) : 25, 31-34, 36, 45, 49, 51n, 52n, 55, 57, 61-63, 71, 78, 89, 98-100, 102, 108, 189, 190n, 198n, 203, 207n, 223n, 271, 276, 278n, 353, 355n, 406n, 416n, 446-447, 452, 466, 491, 494n\",\n        \"HUSSERL (Mme) : 353n\",\n        \"HYPPOLITE (Jean) : 95, 117, 128, 151n, 171, 183-184, 212n, 224, 229, 491\",\n        \"IOMMI (Godofredo) : 185n, 245n\",\n        \"IRIGARAY (Luce) : 300n\",\n        \"ISAÏE : 456n, 515\",\n        \"ISHAGHPOUR (Youssef) : 253n, 280n\",\n        \"IZAMBARD (Georges) : 510\",\n        \"JACERME (Pierre) : 312, 503n\",\n        \"JACCOTTET (Philippe) : 508n, 516\",\n        \"JACOB (André) : 179-180\",\n        \"JACOBI (Friedrich Heinrich) : 394\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1968,
+      "total_tokens": 3401
+    }
+  }
+}

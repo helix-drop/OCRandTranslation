@@ -4,13 +4,6 @@ import html
 import json
 import re
 
-from FNM_RE import (
-    build_retry_summary as build_fnm_retry_summary,
-    build_unit_progress as build_fnm_unit_progress,
-    get_diagnostic_entry_for_page as get_fnm_diagnostic_entry_for_page,
-    list_diagnostic_entries_for_doc as list_fnm_diagnostic_entries,
-    list_diagnostic_notes_for_doc as list_fnm_diagnostic_notes,
-)
 from persistence.sqlite_store import SQLiteRepository
 from persistence.storage import (
     format_print_page_display,
@@ -294,72 +287,13 @@ def _render_reading_footnotes_text(text: str) -> str:
     return render_reading_footnote_text(cleaned)
 
 
-def load_fnm_diagnostic_entries(
-    doc_id: str,
-    *,
-    pages: list[dict] | None = None,
-    repo: SQLiteRepository | None = None,
-) -> list[dict]:
-    return list_fnm_diagnostic_entries(doc_id, pages=pages, repo=repo)
-
-
-def load_fnm_diagnostic_view_entries(
-    doc_id: str,
-    *,
-    pages: list[dict],
-    visible_bps: list[int],
-    repo: SQLiteRepository | None = None,
-) -> list[dict]:
-    repo = repo or SQLiteRepository()
-    entries: list[dict] = []
-    for bp in visible_bps or []:
-        entry = get_fnm_diagnostic_entry_for_page(
-            doc_id,
-            int(bp),
-            pages=pages,
-            repo=repo,
-            allow_fallback=True,
-        )
-        if entry:
-            entries.append(entry)
-    return entries
-
-
-def fnm_translated_bps(
-    doc_id: str,
-    *,
-    visible_bps: list[int] | None = None,
-    pages: list[dict] | None = None,
-    repo: SQLiteRepository | None = None,
-) -> list[int]:
-    entries = list_fnm_diagnostic_entries(doc_id, pages=pages, visible_bps=visible_bps, repo=repo)
-    visible_set = {int(bp) for bp in (visible_bps or []) if bp is not None}
-    page_bps = sorted(
-        {
-            int(entry.get("_pageBP"))
-            for entry in entries
-            if entry.get("_pageBP") is not None
-            and any(
-                str((page_entry or {}).get("_translation_source") or "").strip().lower() not in {"", "source"}
-                for page_entry in list((entry or {}).get("_page_entries") or [])
-                if isinstance(page_entry, dict)
-            )
-        }
-    )
-    if visible_set:
-        return [bp for bp in page_bps if bp in visible_set]
-    return page_bps
-
-
 def _reading_done_pages_for_stats(
     snapshot: dict,
     translated_bps: list,
     partial_failed_bps: list,
 ) -> int:
-    task_kind = str((snapshot.get("task") or {}).get("kind") or "")
     phase = str(snapshot.get("phase") or "idle")
-    if task_kind == "fnm":
-        return int(snapshot.get("done_pages") or 0)
+    task_kind = str((snapshot.get("task") or {}).get("kind") or "")
     if task_kind in ("continuous", "glossary_retranslate") or phase in (
         "running",
         "stopping",
@@ -383,31 +317,9 @@ def build_reading_view_state(
     repo: SQLiteRepository | None = None,
 ) -> dict:
     repo = repo or SQLiteRepository()
-    mode = str(view or "standard").strip().lower()
-    mode = mode if mode in {"standard", "fnm"} else "standard"
+    del view, repo
     visible_bps = list(visible_page_view.get("visible_page_bps") or [])
     visible_bp_set = {int(bp) for bp in visible_bps if bp is not None}
-    if mode == "fnm":
-        translated_bps = fnm_translated_bps(
-            doc_id,
-            visible_bps=visible_bps,
-            pages=pages,
-            repo=repo,
-        )
-        translated_bp_set = set(translated_bps)
-        return {
-            "mode": "fnm",
-            "page_bps": visible_bps,
-            "translated_bps": translated_bps,
-            "failed_bps": [],
-            "partial_failed_bps": [],
-            "source_only_bps": [bp for bp in visible_bps if bp not in translated_bp_set],
-            "reading_stats_done_pages": len(translated_bps),
-            "done_pages": len(translated_bps),
-            "partial_failed_pages": 0,
-            "failed_pages": 0,
-            "page_total": len(visible_bps),
-        }
     translated_bps = sorted(
         int(entry.get("_pageBP"))
         for entry in (disk_entries or [])
@@ -444,14 +356,7 @@ def build_reading_view_state(
 
 
 def reading_view_summary_text(state: dict, task_snapshot: dict, current_bp: int, last_page: int) -> str:
-    mode = str(state.get("mode") or "standard")
-    if mode == "fnm":
-        return (
-            f"已投影{len(state.get('translated_bps') or [])}页 · "
-            f"已完成{int(task_snapshot.get('done_units', 0) or 0)}个 unit · "
-            f"失败{int(task_snapshot.get('error_units', 0) or 0)}个 unit · "
-            f"当前 PDF 第{int(current_bp)}页 / 第{int(last_page)}页"
-        )
+    del task_snapshot
     return (
         f"已译{int(state.get('reading_stats_done_pages', 0) or 0)}页 · "
         f"部分完成{len(state.get('partial_failed_bps') or [])}页 · "
@@ -468,18 +373,8 @@ def enrich_translate_snapshot_for_reading_view(
     visible_page_view: dict,
     view: str,
 ) -> dict:
+    del view
     visible_bp_set = set(visible_page_view["visible_page_bps"])
-    if view == "fnm":
-        snapshot.update(build_fnm_unit_progress(doc_id, snapshot=snapshot))
-        snapshot["translated_bps"] = fnm_translated_bps(
-            doc_id,
-            visible_bps=visible_page_view["visible_page_bps"],
-        )
-        snapshot["failed_bps"] = []
-        snapshot["failed_pages"] = []
-        snapshot["partial_failed_bps"] = []
-        snapshot["reading_stats_done_pages"] = len(snapshot["translated_bps"])
-        return snapshot
     snapshot["translated_bps"] = sorted(
         entry.get("_pageBP")
         for entry in entries
@@ -554,72 +449,8 @@ def build_display_entries(
             for item in (pe_copy.get("_section_path") or [])
             if str(item).strip()
         )
-        pe_copy["fnm_ref_labels"] = [
-            (
-                ("FN" if str(ref.get("kind") or "") == "footnote" else "EN")
-                + ":"
-                + str(ref.get("note_id") or "").strip()
-            )
-            for ref in (pe_copy.get("_fnm_refs") or [])
-            if isinstance(ref, dict) and str(ref.get("note_id") or "").strip()
-        ]
         display_entries.append(pe_copy)
     return display_entries
-
-
-def build_fnm_page_context(
-    doc_id: str,
-    *,
-    current_bp: int,
-    fnm_run: dict | None,
-    repo: SQLiteRepository | None = None,
-) -> dict:
-    repo = repo or SQLiteRepository()
-    section = repo.get_fnm_section_for_page(doc_id, current_bp) if fnm_run else None
-    notes = list_fnm_diagnostic_notes(doc_id, repo=repo) if fnm_run else []
-    footnotes = [
-        note for note in notes
-        if note.get("kind") == "footnote" and int(note.get("start_page") or 0) == int(current_bp)
-    ]
-    endnotes = [
-        note for note in notes
-        if note.get("kind") == "endnote"
-        and section
-        and note.get("section_id") == section.get("section_id")
-    ]
-    validation = None
-    if fnm_run and fnm_run.get("validation_json"):
-        try:
-            validation = json.loads(fnm_run["validation_json"])
-        except Exception:
-            validation = None
-    unresolved = []
-    if isinstance(validation, dict):
-        for item in validation.get("unresolved") or []:
-            if not isinstance(item, dict):
-                continue
-            suggested_pages = item.get("suggested_pages") or []
-            try:
-                page_items = [int(x) for x in suggested_pages]
-            except (TypeError, ValueError):
-                page_items = []
-            if int(current_bp) in page_items or not page_items:
-                unresolved.append(item)
-    retry_summary = build_fnm_retry_summary(doc_id, repo=repo) if fnm_run else {}
-    failed_locations = list(retry_summary.get("failed_locations") or [])
-    failed_here = [
-        item for item in failed_locations
-        if int(item.get("page_no") or 0) == int(current_bp)
-    ]
-    return {
-        "section": section,
-        "footnotes": footnotes,
-        "endnotes": endnotes,
-        "validation": validation,
-        "unresolved_here": unresolved,
-        "failed_here": failed_here,
-        "retry_summary": retry_summary,
-    }
 
 
 def build_page_notes_panel(
@@ -632,39 +463,7 @@ def build_page_notes_panel(
     diagnostic_failed_summary: dict | None = None,
     next_bp: int | None = None,
 ) -> dict | None:
-    mode = str(current_view or "standard").strip().lower()
-    if mode == "fnm":
-        groups = []
-        failed_locations = list(diagnostic_failed_locations or [])
-        failed_summary = dict(diagnostic_failed_summary or {})
-        if failed_locations or failed_summary.get("manual_required_locations") or failed_summary.get("failed_locations"):
-            groups.append({
-                "kind": "fnm_diagnostic_failures",
-                "label": "翻译失败",
-                "items": failed_locations,
-                "summary": failed_summary,
-            })
-        if diagnostic_footnotes:
-            groups.append({
-                "kind": "fnm_diagnostic_notes",
-                "label": "本页脚注",
-                "notes": list(diagnostic_footnotes or []),
-            })
-        if diagnostic_endnotes:
-            groups.append({
-                "kind": "fnm_diagnostic_notes",
-                "label": "当前节尾注",
-                "notes": list(diagnostic_endnotes or []),
-            })
-        if not groups:
-            return None
-        return {
-            "title": "页面注释",
-            "subtitle": "当前页脚注按页展示，当前节尾注按节展示。",
-            "bridge": "",
-            "next_bp": next_bp,
-            "groups": groups,
-        }
+    del current_view, diagnostic_footnotes, diagnostic_endnotes, diagnostic_failed_locations, diagnostic_failed_summary
 
     originals = []
     translations = []

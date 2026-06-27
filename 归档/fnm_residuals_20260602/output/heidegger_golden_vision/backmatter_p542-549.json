@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    542,
+    543,
+    544,
+    545,
+    546,
+    547,
+    548,
+    549
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 542\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"页面全白，无任何内容\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 543\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"Bibliographie\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"Des précisions préalables s'imposent quant à la conception d'ensemble de cette\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"On a distingué trois grandes parties, afin d'éviter une dispersion dans\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"La première rubrique se veut exhaustive ; elle s'en tient cependant aux\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Les deux rubriques suivantes ne peuvent qu'être sélectives. S'il était\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"页码缺失\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 544\",\n      \"printed_page\": \"544\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"I. TRADUCTIONS FRANÇAISES DE HEIDEGGER DANS L'ORDRE CHRONOLOGIQUE DE LEUR PUBLICATION\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"ment de travail lisible et offrir des pistes de recherche où\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Je tiens à remercier tout spécialement Guy Basset dont l'aide m'a\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 545\",\n      \"printed_page\": \"545\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [\n        {\"marker\": \"1\", \"context\": \"«Lettre sur l'humanisme» (1)\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"1\", \"text_start\": \"注：该页面未在底部显示注释内容，仅正文引用\"}\n      ],\n      \"risks\": [\"正文段落均为书目条目，未按普通段落排列\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 546\",\n      \"printed_page\": \"546\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 547\",\n      \"printed_page\": \"547\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 548\",\n      \"printed_page\": \"548\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 549\",\n      \"printed_page\": \"549\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    }\n  ],\n  \"correction_guidance\": [\n    \"页面543下方正文存在跨页延续（continues_to_next），需检查544页顶部开头是否完整。\",\n    \"545页出现的脚注标记(1)在页面底部无对应解释，需核实该标记是否为书目内部编号而非脚注。\",\n    \"所有书目页面段落呈现为列表项，OCR处理时应保持其格式而非合并段落。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 1255,
+      "total_tokens": 10342
+    }
+  }
+}

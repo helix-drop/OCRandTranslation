@@ -1,0 +1,12 @@
+{
+  "case": "footnote_cross_page_biopolitics",
+  "model_requested": "gemini-3.1-flash-lite",
+  "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+  "prompt": "你会依次看到 Michel Foucault《Naissance de la biopolitique》的相邻两页图像，图1为原书 p.44，图2为原书 p.45。任务是为脚注捕获模块提供可验证事实，不要依据常识补写不可见内容。\n请判断页底脚注区和正文区，并识别“因脚注过长而跨页断开”的情况。重点检查图1页底以星号 * 开头的脚注是否在图2页顶继续；若继续，给出图1末尾和图2开头各一段可见短引文作为证据，并说明图2页顶文本不是新的脚注定义。\n只返回 JSON：{\"pages\":[{\"image_no\":1,\"page_type\":\"body_with_footnote|body|note_page\",\"footnote_definitions\":[{\"marker\":\"*\",\"start_quote\":\"...\",\"continues_to_next\":true}]},{\"image_no\":2,\"page_type\":\"body_with_footnote|body|note_page\",\"continued_from_previous\":[{\"marker\":\"*\",\"start_quote\":\"...\"}],\"new_footnote_definitions\":[]}],\"cross_page_continuations\":[{\"marker\":\"*\",\"from_image\":1,\"to_image\":2,\"confidence\":0.0,\"evidence\":\"...\"}],\"warnings\":[]}",
+  "source_prompt_file": "output/model_eval/glm_4_6v_flashx_20260523/footnote_cross_page_biopolitics_request.json",
+  "image_files": [
+    "output/model_eval/glm_4_6v_flashx_20260523/biopolitics_footnote_split_fileidx_57.png",
+    "output/model_eval/glm_4_6v_flashx_20260523/biopolitics_footnote_split_fileidx_58.png"
+  ],
+  "started_at": "2026-05-23T19:16:36+0800"
+}

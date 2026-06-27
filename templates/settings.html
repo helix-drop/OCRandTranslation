@@ -17,7 +17,7 @@
     <div style="display:flex;gap:12px;align-items:center;">
       <div class="cur-models">
         当前模型：翻译主模型：<code>{{ current_model_label or current_model_id }}</code>
-        · FNM 主模型：<code>{{ current_visual_model_label or current_visual_model_id }}</code>
+        · 视觉主模型：<code>{{ current_visual_model_label or current_visual_model_id }}</code>
       </div>
       <a href="{{ url_for('home', doc_id=current_doc_id) }}" class="btn btn-sec">← 返回</a>
     </div>
@@ -35,9 +35,9 @@
         <span class="dot" style="background:var(--blu);"></span>
         <span>翻译模型池</span>
       </button>
-      <button class="nav-item" data-nav="fnm-pool" type="button">
+      <button class="nav-item" data-nav="visual-pool" type="button">
         <span class="dot" style="background:var(--blu);"></span>
-        <span>FNM 模型池</span>
+        <span>视觉模型池</span>
       </button>
 
       <div class="grp">运行</div>
@@ -147,7 +147,7 @@
           </div>
 
           <div class="providers-foot">
-            <span class="hint">只保存到本机 SQLite，不对外上传。Token Plan 的自定义 Base URL 请在“翻译模型池 / FNM 模型池”槽位里单独填写。</span>
+            <span class="hint">只保存到本机 SQLite，不对外上传。Token Plan 的自定义 Base URL 请在模型池槽位里单独填写。</span>
             <button type="submit" class="btn btn-pri">保存所有变更</button>
           </div>
         </form>
@@ -156,7 +156,7 @@
       <div data-panel="translation-pool">
         <h2 class="panel-h">翻译模型池</h2>
         <div class="panel-sub">
-          用于标准连续翻译和 FNM 文本翻译。槽位 1 是主模型；某页或某个 FNM unit 失败后，按 2 → 3 顺序切换重试。
+          用于标准连续翻译。槽位 1 是主模型；某页失败后，按 2 → 3 顺序切换重试。
         </div>
 
         <form method="POST" action="{{ url_for('save_settings') }}">
@@ -190,18 +190,18 @@
         </form>
       </div>
 
-      <div data-panel="fnm-pool">
-        <h2 class="panel-h">FNM 视觉与修补模型</h2>
+      <div data-panel="visual-pool">
+        <h2 class="panel-h">视觉模型池</h2>
         <div class="panel-sub">
-          用于自动视觉目录、FNM 视觉判断和 LLM 修补。槽位 1 是主模型；视觉/修补失败后，按 2 → 3 顺序切换重试。
+          用于自动视觉目录等读图任务。槽位 1 是主模型；失败后，按 2 → 3 顺序切换重试。
         </div>
 
         <form method="POST" action="{{ url_for('save_settings') }}">
           <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-          <input type="hidden" name="section" value="fnm_model_pool">
+          <input type="hidden" name="section" value="visual_model_pool">
           <input type="hidden" name="doc_id" value="{{ current_doc_id }}">
 
-          {% set fnm_providers = [
+          {% set visual_providers = [
             ('qwen', 'Qwen (DashScope)'),
             ('glm', 'GLM (智谱)'),
             ('kimi', 'Kimi (Moonshot)'),
@@ -210,17 +210,17 @@
             ('openai_compatible', 'OpenAI Compatible')
           ] %}
 
-          {% for slot in fnm_model_pool %}
+          {% for slot in visual_model_pool %}
             {% set slot_no = loop.index %}
-            {% set prefix = 'fnm_model_pool_slot' ~ slot_no %}
-            {% with slot=slot, slot_no=slot_no, prefix=prefix, builtin_models=fnm_models, providers=fnm_providers %}
+            {% set prefix = 'visual_model_pool_slot' ~ slot_no %}
+            {% with slot=slot, slot_no=slot_no, prefix=prefix, builtin_models=visual_models, providers=visual_providers %}
               {% include "_settings_model_slot.html" %}
             {% endwith %}
           {% endfor %}
 
           <div class="providers-foot">
-            <span class="hint">当前主 FNM 模型：<code>{{ current_visual_model_label or current_visual_model_id }}</code></span>
-            <button type="submit" class="btn btn-pri">保存 FNM 模型池</button>
+            <span class="hint">当前主视觉模型：<code>{{ current_visual_model_label or current_visual_model_id }}</code></span>
+            <button type="submit" class="btn btn-pri">保存视觉模型池</button>
           </div>
         </form>
       </div>

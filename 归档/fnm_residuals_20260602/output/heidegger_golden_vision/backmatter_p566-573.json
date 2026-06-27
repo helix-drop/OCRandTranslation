@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    566,
+    567,
+    568,
+    569,
+    570,
+    571,
+    572,
+    573
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 566\",\n      \"printed_page\": \"566\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"ALTHUSSER (Louis), L'avenir dure longtemps, Paris, Stock/IMEC, 1992.\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"纯书目列表页面，未见明显断句风险。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 567\",\n      \"printed_page\": \"567\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"BIDENT (Christophe), Maurice Blanchot partenaire invisible, Paris, Champ Vallon, 1998.\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 568\",\n      \"printed_page\": \"568\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"- Cahier de l'Herne, René Char, Paris, Éditions de l'Herne, 1971.\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 569\",\n      \"printed_page\": \"569\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"DESANTI (Jean-Toussaint), Introduction à l'histoire de la philosophie, Paris,\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 570\",\n      \"printed_page\": \"570\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"- Le Christianisme au risque de l'interprétation, Paris, Éditions du Cerf,\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 571\",\n      \"printed_page\": \"571\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"- (hommage à) : Martin Heidegger zum siebzigsten Geburtstag, Pful-\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 572\",\n      \"printed_page\": \"572\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"- et NANCY (Jean-Luc), Le Titre de la lettre. Une lecture de Lacan, Paris,\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 573\",\n      \"printed_page\": \"573\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"- Penser l'homme et la folie. À la lumière de l'analyse existentielle et de\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    }\n  ],\n  \"correction_guidance\": [\n    \"所有页面均为参考书目列表，无正文段落，无需脚注核对。\",\n    \"页码均位于顶部外侧，页眉格式在 BIBLIOGRAPHIE 和 HEIDEGGER EN FRANCE 之间交替出现。\",\n    \"每一项书目通常由作者名开始，若有破折号“-”开头的行属于前一条目的续接书目，请确保在排版时保持缩进一致性。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 1236,
+      "total_tokens": 10323
+    }
+  }
+}

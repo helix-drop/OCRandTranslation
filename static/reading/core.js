@@ -98,23 +98,7 @@ function formatPdfPageLabel(bp) {
   return value ? ('PDF 第' + value + '页') : 'PDF 页';
 }
 
-function isFnmTaskState(state) {
-  return String((state && state.task && state.task.kind) || '') === 'fnm';
-}
-
-function isFnmDraftMode(draft, state) {
-  return String((draft && draft.mode) || '') === 'fnm_unit' || isFnmTaskState(state || lastUsageSnapshot || {});
-}
-
-function formatFnmUnitIndex(unitIdx) {
-  var value = Number(unitIdx || 0);
-  return value ? ('Unit #' + value) : 'Unit';
-}
-
 function formatTaskPositionLabel(state, pos) {
-  if (isFnmTaskState(state)) {
-    return formatFnmUnitIndex(pos);
-  }
   return formatPdfPageLabel(pos);
 }
 
@@ -227,29 +211,24 @@ function dispatch(action, payload) {
   }
   if (action === 'stream_page_init') {
     var init = payload && payload.data ? payload.data : {};
-    var isFnmTask = isFnmTaskState(lastUsageSnapshot || {});
     var initDraft = createInitialStreamDraftState();
     initDraft.active = true;
     initDraft.status = 'streaming';
-    initDraft.mode = isFnmTask ? 'fnm_unit' : 'page';
+    initDraft.mode = 'page';
     initDraft.bp = init.bp || null;
-    initDraft.unitIdx = isFnmTask ? Number((store.streamDraft.unitIdx || (lastUsageSnapshot && lastUsageSnapshot.current_unit_idx) || init.bp || 0)) || null : null;
-    initDraft.unitId = isFnmTask ? (store.streamDraft.unitId || (lastUsageSnapshot && lastUsageSnapshot.current_unit_id) || '') : '';
-    initDraft.unitKind = isFnmTask ? (store.streamDraft.unitKind || (lastUsageSnapshot && lastUsageSnapshot.current_unit_kind) || '') : '';
-    initDraft.unitLabel = isFnmTask ? (store.streamDraft.unitLabel || (lastUsageSnapshot && lastUsageSnapshot.current_unit_label) || '') : '';
-    initDraft.unitPages = isFnmTask ? (store.streamDraft.unitPages || (lastUsageSnapshot && lastUsageSnapshot.current_unit_pages) || '') : '';
-    initDraft.unitItems = isFnmTask && Array.isArray(lastUsageSnapshot && lastUsageSnapshot.unit_items)
-      ? lastUsageSnapshot.unit_items.slice()
-      : [];
+    initDraft.unitIdx = null;
+    initDraft.unitId = '';
+    initDraft.unitKind = '';
+    initDraft.unitLabel = '';
+    initDraft.unitPages = '';
+    initDraft.unitItems = [];
     initDraft.paraIdx = 0;
     initDraft.paraTotal = Number(init.para_total || 0);
     initDraft.parallelLimit = Number(init.parallel_limit || 0);
     initDraft.paragraphStates = Array(initDraft.paraTotal).fill('pending');
     initDraft.paragraphErrors = Array(initDraft.paraTotal).fill('');
     initDraft.paragraphs = Array(initDraft.paraTotal).fill('');
-    initDraft.note = isFnmTask
-      ? '当前 unit 正在流式翻译，完整结束后才会提交到硬盘。'
-      : '当前页正在流式翻译，完整结束后才会写入硬盘。';
+    initDraft.note = '当前页正在流式翻译，完整结束后才会写入硬盘。';
     initDraft.updatedAt = Math.floor(Date.now() / 1000);
     dispatch('replace_stream_draft', { draft: initDraft });
     return;
@@ -340,20 +319,17 @@ function dispatch(action, payload) {
   }
   if (action === 'rate_limit_wait') {
     var wait = payload && payload.data ? payload.data : {};
-    var waitIsFnm = isFnmTaskState(lastUsageSnapshot || {});
     var waitDraft = createInitialStreamDraftState();
     waitDraft.active = false;
     waitDraft.status = 'throttled';
-    waitDraft.mode = waitIsFnm ? 'fnm_unit' : 'page';
+    waitDraft.mode = 'page';
     waitDraft.bp = Number(wait.bp || 0) || null;
-    waitDraft.unitIdx = waitIsFnm ? Number((store.streamDraft.unitIdx || (lastUsageSnapshot && lastUsageSnapshot.current_unit_idx) || wait.bp || 0)) || null : null;
-    waitDraft.unitId = waitIsFnm ? (store.streamDraft.unitId || (lastUsageSnapshot && lastUsageSnapshot.current_unit_id) || '') : '';
-    waitDraft.unitKind = waitIsFnm ? (store.streamDraft.unitKind || (lastUsageSnapshot && lastUsageSnapshot.current_unit_kind) || '') : '';
-    waitDraft.unitLabel = waitIsFnm ? (store.streamDraft.unitLabel || (lastUsageSnapshot && lastUsageSnapshot.current_unit_label) || '') : '';
-    waitDraft.unitPages = waitIsFnm ? (store.streamDraft.unitPages || (lastUsageSnapshot && lastUsageSnapshot.current_unit_pages) || '') : '';
-    waitDraft.unitItems = waitIsFnm && Array.isArray(lastUsageSnapshot && lastUsageSnapshot.unit_items)
-      ? lastUsageSnapshot.unit_items.slice()
-      : [];
+    waitDraft.unitIdx = null;
+    waitDraft.unitId = '';
+    waitDraft.unitKind = '';
+    waitDraft.unitLabel = '';
+    waitDraft.unitPages = '';
+    waitDraft.unitItems = [];
     waitDraft.paraIdx = null;
     waitDraft.paraTotal = Number(wait.para_total || 0);
     waitDraft.paraDone = Number(wait.para_done || 0);

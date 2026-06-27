@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    594
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 594\",\n      \"printed_page\": \"594\",\n      \"lines\": [\n        \"LEBRUN (Gérard) : 271, 489n\",\n        \"LE BUHAN (Dominique) : 258n, 281n, 302n\",\n        \"LECOURT (Dominique) : 417, 422n, 427-428\",\n        \"LEFÉBURE (Eugène) : 323n\",\n        \"LEFEBVRE (Henri) : 52, 104n, 118n, 173, 178\",\n        \"LEFEBVRE (Jean-Pierre) : 23, 434, 435n, 507n, 508n\",\n        \"LÉGER (R. P.) : 145, 150n\",\n        \"LEGRAND (Gérard) : 280n\",\n        \"LEIBNIZ (Gottfried Wilhelm) : 50, 144, 178n, 183, 258, 259, 497, 512, 532n\",\n        \"LEIRIS (Michel) : 436\",\n        \"LÉNINE : 490n\",\n        \"LENK (Melle) : 197n\",\n        \"LÉON (Xavier) : 25\",\n        \"LE PEN (Jean-Marie) : 383\",\n        \"LE RIDER (Jacques) : 13n, 378n, 523n, 526\",\n        \"LEROI-GOURHAN (André) : 429n\",\n        \"LESCOURRET (Anne-Marie) : 31n, 199n\",\n        \"LE SENNE (René) : 51, 83\",\n        \"LÉVINAS (Emmanuel) : 30-35, 38, 52, 77, 90, 93-94, 95n, 98-99, 165n, 199-200, 202-207, 212-213, 262, 297n, 300n, 303n, 338-340, 345, 356, 382, 385n, 405, 434, 450, 453, 457-460, 464, 479, 481, 489, 491, 502, 524\",\n        \"LÉVI-STRAUSS (Claude) : 186-187n, 235n-263n, 240, 532n\",\n        \"LÉVY (Patrick) : 245n, 248n, 250n\",\n        \"LÉVY (Pierre) : 505n\",\n        \"LÉVY-LEBLOND (Jean-Marc) : 419, 420n\",\n        \"LITTRÉ (Dictionnaire) : 331n\",\n        \"LLORENS (Paule) : 23, 524n\",\n        \"LŒWITH (Karl) : 7-9, 109, 120-123, 125-127, 189, 192, 264, 359n, 380n, 437\",\n        \"LOREAU (Max) : 450-451\",\n        \"LOSURDO (Domenico) : 437n\",\n        \"LOTZ (Johannes B.) : 485n, 487\",\n        \"LOURIA (Isaac) : 456n\",\n        \"LUDENDORFF (Erich) : 196\",\n        \"LUEGER (Karl) : 358\",\n        \"LUKÁCS (Georg) : 118n, 253n, 305\",\n        \"LURÇAT (François) : 418n\",\n        \"LUTHER (Martin) : 394, 442, 456n, 457n\",\n        \"LYOTARD (Jean-François) : 190, 252, 374, 375n, 381\",\n        \"MACBETH (Lady) : 280\",\n        \"MAGGIORI (Robert) : 321n, 326n, 350-351, 366, 375n, 379n\",\n        \"MAGNAN (Henry) : 91\",\n        \"MAGRITTE (René) : 539\",\n        \"MAISTRE (Joseph de) : 110n\",\n        \"MALABOU (Catherine) : 410n, 463n\",\n        \"MALDINEY (Henri) : 451-453\",\n        \"MALEBRANCHE (Nicolas) : 56\",\n        \"MALLARMÉ (Stéphane) : 206, 226, 254, 323n, 381, 508\",\n        \"MALRAUX (André) : 81\",\n        \"MAN (Paul de) : 171n, 366n\",\n        \"MARCEL (Gabriel) : 37-38, 81, 94, 111n, 137-139, 144n-146, 150n-155, 158-160, 162n, 228, 238-239n, 285, 520\",\n        \"MARCENAC (Jean) : 103n\",\n        \"MARCUSE (Herbert) : 235n, 237, 466\",\n        \"MARIAS (le Professeur) : 156n\",\n        \"MARION (Jean-Luc) : 23, 208n, 314, 395n, 449n, 450, 479, 480n, 482-485, 487-488, 496-497, 503n, 529n\",\n        \"MARQUET (Jean-François) : 406n, 498n\",\n        \"MARTINEAU (Emmanuel) : 257n, 266n, 268n, 311, 315, 317-323, 325, 327-328, 330, 331n, 333, 343-344, 405, 440, 466n\",\n        \"MARX (Karl) : 52n, 61, 78, 90, 118, 132, 173, 176-178, 185n, 227,\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1842,
+      "total_tokens": 3275
+    }
+  }
+}

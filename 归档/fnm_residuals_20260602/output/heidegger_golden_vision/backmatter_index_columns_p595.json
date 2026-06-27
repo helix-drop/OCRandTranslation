@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    595
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 595\",\n      \"printed_page\": \"595\",\n      \"lines\": [\n        \"237, 252n, 280, 282, 293, 295,\",\n        \"301, 362, 424, 476, 490n, 506,\",\n        \"538\",\n        \"MARX (Werner) : 359n\",\n        \"MASCOLO (Dyonis) : 432, 435-436\",\n        \"MATHIEU (Henri) : 212n\",\n        \"MATHIEU (Madame) : 241\",\n        \"MAULNIER (Thierry) : 47n\",\n        \"MAY (Reinhardt) : 517n, 535n\",\n        \"MELVILLE (Hermann) : 148, 515\",\n        \"MENGELE (Josef) : 354\",\n        \"MERLEAU-PONTY (Maurice) : 39,\",\n        \"83n, 89n, 90, 92, 95, 98-102,\",\n        \"115n, 117-120, 128, 131, 136,\",\n        \"151n, 183-184, 186, 271, 287,\",\n        \"317, 334n, 442, 452, 491, 502\",\n        \"MESCHONNIC (Henri) : 432, 434-\",\n        \"435, 524\",\n        \"MESSADIÉ (Gérald) : 518n\",\n        \"METZ (Friedrich) : 49\",\n        \"MILLER (Jacques-Alain) : 217\",\n        \"MILLON (Jérôme) : 388\",\n        \"MINDER (Robert) : 187n, 195-196,\",\n        \"280, 360\",\n        \"MINZ (Melle) : 354n\",\n        \"MITTERRAND (François) : 382\",\n        \"MOÏSE : 480\",\n        \"MOLIÈRE : 16\",\n        \"MÖLLENDORF (Wilhelm von) : 305\",\n        \"MONGIN (Olivier) : 470\",\n        \"MONGIS (Henri) : 23, 266n, 277\",\n        \"MONSACRÉ (Hélène) : 22\",\n        \"MONTENOT (Jean) : 95-96\",\n        \"MOREL (abbé) : 145, 150n\",\n        \"MORGAN (Claude) : 103n\",\n        \"MORIN (Edgar) : 23, 47, 82-83, 105,\",\n        \"173n\",\n        \"MOSCOVICI (Marie) : 366n\",\n        \"MOSÈS (Stéphane) : 360\",\n        \"MOUGIN (Henri) : 8n, 105\",\n        \"MOULINIER (Louis) : 174\",\n        \"MOUNIER (Emmanuel) : 111n, 475n\",\n        \"MUGLIONI (Jacques) : 505n\",\n        \"MUNIER (Roger) : 15n, 23, 84n,\",\n        \"86n, 113n, 145, 147-148n, 166,\",\n        \"212n, 243n, 245n, 248n-249,\",\n        \"266, 268n, 277n, 303n, 326,\",\n        \"467n, 481n, 483n, 510, 512, 516,\",\n        \"518n, 530\",\n        \"NANCY (Jean-Luc) : 23, 207, 222n,\",\n        \"303n, 356, 460n\",\n        \"NAUMANN (Friedrich) : 281\",\n        \"NAVARRO (Fernanda) : 489\",\n        \"NEHER (André) : 223n\",\n        \"NEMO (Philippe) : 41n, 339n\",\n        \"NERVAL (Gérard de) : 302, 381, 508\",\n        \"NEWTON (Isaac) : 427n\",\n        \"NIETZSCHE (Friedrich) : 8, 13-15,\",\n        \"50, 81, 85, 108, 116, 145, 171,\",\n        \"173, 208-210, 215-216, 225-226,\",\n        \"235, 258, 280, 282-283, 290-291,\",\n        \"307, 336, 337n, 358, 373, 381,\",\n        \"397, 406n, 425, 430, 432-434,\",\n        \"436n, 447, 452, 473, 476, 478,\",\n        \"489n, 490n, 491, 493n, 494n,\",\n        \"497, 507, 512, 515, 521, 523,\",\n        \"526, 529n, 536n, 538\",\n        \"NIJHOFF (Martinus) : 200\",\n        \"NIZAN (Paul) : 41, 51-52n\",\n        \"NORA (Pierre) : 359, 368\",\n        \"NOVALIS (Friedrich) : 91\",\n        \"OCHSNER (Heinrich) : 364n\",\n        \"OCHWADT (Kurt) : 241n, 266n,\",\n        \"520n\",\n        \"OCKHAM (Guillaume d’) : 495\",\n        \"O’LEARY (Joseph Stephen) : 300n,\",\n        \"481\",\n        \"OLIVETTI (Marco) : 535n\",\n        \"ORSONI (Jacques) : 23, 241n\",\n        \"OTT (Hugo) : 275n, 368n, 378n,\",\n        \"379-381, 387, 389, 391-392,\",\n        \"393n, 396, 400n, 472\",\n        \"OTTO (Liste) : 61n\",\n        \"OTTO (Walter) : 408\",\n        \"PALMER (l’aviateur) : 86n, 92, 130n\",\n        \"PALMIER (Jean-Michel) : 12, 235-\",\n        \"236, 272, 276n, 277, 304-306,\",\n        \"334n, 391n, 392\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1922,
+      "total_tokens": 3355
+    }
+  }
+}

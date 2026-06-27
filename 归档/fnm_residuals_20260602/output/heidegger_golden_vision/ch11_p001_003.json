@@ -1,0 +1,27 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/chapters_pdf/11-Entre érudition et techno-scie.pdf",
+  "chapter": "ch11",
+  "pages": [
+    1,
+    2,
+    3
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch11 PDF page 1\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"11.\", \"position\": \"top\"},\n        {\"level\": \"chapter\", \"text\": \"Entre érudition et techno-science\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"Les plus grandes tempêtes consentent à s'apaiser. En abordant les années 1990,\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"En octobre 1990 paraît la traduction du livre très attendu de l'historien Hugo\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"1\", \"context\": \"coups de tonnerre¹.\"},\n        {\"marker\": \"2\", \"context\": \"Hugo Ott²,\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"1\", \"text_start\": \"Une longue et minutieuse étude de Nicolas TERTULIAN sur les Beitrage (« Histoire de l'être et révolution politique »,\"},\n        {\"marker\": \"2\", \"text_start\": \"Hugo OTT, Martin Heidegger. Éléments pour une biographie, trad. J.-M. Belceil, Postface de J.-M. Palmier, Paris, Payot, 1990.\"}\n      ],\n      \"risks\": []\n    },\n    {\n      \"label\": \"ch11 PDF page 2\",\n      \"printed_page\": \"392\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"392\", \"position\": \"top\"},\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"ne prétend pas l'être (son travail reste effectivement sur le seuil de\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Ainsi, défavorable à Farias, mais tentant de présenter un bilan équilibré du\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Ne nous y trompons pas : même si l'on tient compte des inévitables morsures\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"3\", \"context\": \"est confirmée³ (et\"},\n        {\"marker\": \"4\", \"context\": \"responsabilité⁴. »\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"3\", \"text_start\": \"C'est le cas de Thomas Ferenczi dans Le Monde du 16 novembre 1990 : « Douze ans dans la vie de Heidegger.\"},\n        {\"marker\": \"4\", \"text_start\": \"Jean-Michel PALMIER, « Heidegger face à l'histoire », in H. OTT, Martin Heidegger..., op. cit., p. 396.\"}\n      ],\n      \"risks\": []\n    },\n    {\n      \"label\": \"ch11 PDF page 3\",\n      \"printed_page\": \"393\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"ENTRE ÉRUDITION ET TECHNO-SCIENCE\", \"position\": \"top\"},\n        {\"level\": \"running_header\", \"text\": \"393\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"question de l'engagement politique de Heidegger, on répondra alors d'un air\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"C'est à l'écart de toute publicité, dans une revue malheureusement peu largement\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"5\", \"context\": \"va baisser⁵; ou,\"},\n        {\"marker\": \"6\", \"context\": \"livre de Farias⁶.\"},\n        {\"marker\": \"7\", \"context\": \"diffusée⁷, que le\"},\n        {\"marker\": \"8\", \"context\": \"philosophie française⁸ » à travers\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"5\", \"text_start\": \"Sans disparaître complètement, bien entendu. En témoigne la traduction du livre de l'américain Richard WOLIN, La Politique de l'être,\"},\n        {\"marker\": \"6\", \"text_start\": \"Jacob ROGOZINSKI montre dans son texte, « Chasser le héros de notre âme » (Penser après Heidegger, Paris, L'Harmattan, 1992,\"},\n        {\"marker\": \"7\", \"text_start\": \"Jean QUILLIEN, « Philosophie et politique. Heidegger, le nazisme et la pensée française », Germanica, 1990, VIII, pp. 103-142.\"},\n        {\"marker\": \"8\", \"text_start\": \"Ibid., p. 103.\"}\n      ],\n      \"risks\": []\n    }\n  ],\n  \"correction_guidance\": [\n    \"在处理第2页时，第一段开头是上一页的延续，需注意Markdown生成的连续性。\",\n    \"确保脚注 Marker 的编号与正文中的上标一一对应，不要漏掉脚注页码后的文字。\",\n    \"检查第3页脚注6，文字较长，在 OCR 中应避免产生多余的断行符。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 3664,
+      "completion_tokens": 1344,
+      "total_tokens": 5008
+    }
+  }
+}

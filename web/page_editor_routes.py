@@ -16,8 +16,6 @@ def api_page_editor(deps: Deps):
         return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
     request_payload = request.get_json(silent=True) if request.method == "POST" else {}
     view = deps["_normalize_reading_view"]((request_payload or {}).get("view") or request.values.get("view", "standard"))
-    if view == "fnm":
-        return jsonify({"ok": False, "error": "fnm_read_only", "message": "FNM 诊断页为只读视图，不支持整页编辑。"}), 403
     if request.method == "GET":
         try:
             bp = int(request.args.get("bp", 0))
@@ -63,8 +61,6 @@ def api_page_editor_history(deps: Deps):
     if not doc_id:
         return jsonify({"ok": False, "error": "缺少文档 ID"}), 400
     view = deps["_normalize_reading_view"](request.args.get("view", "standard"))
-    if view == "fnm":
-        return jsonify({"ok": False, "error": "fnm_read_only", "message": "FNM 诊断页为只读视图，不支持编辑历史。"}), 403
     try:
         bp = int(request.args.get("bp", 0))
     except (TypeError, ValueError):

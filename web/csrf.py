@@ -18,7 +18,6 @@ JSON_CSRF_ENDPOINTS = {
     "save_manual_original",
     "save_manual_revision",
     "start_translate_all",
-    "api_doc_fnm_translate",
     "start_glossary_retranslate",
     "stop_translate",
 }

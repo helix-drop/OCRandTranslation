@@ -29,18 +29,13 @@ GLOSSARY_INIT = []
 PARA_MAX_CONCURRENCY = 10
 PARA_CONTEXT_WINDOW = 200
 
-# 工单 #4：链接质量阈值（FNM_RE.modules.note_linking 用）。
-# fallback resolver 命中的 matched 占 matched 总数的比例，超过即触发 link_quality_low。
-LINK_FALLBACK_MATCH_RATIO_THRESHOLD_DEFAULT = 0.30
-# footnote_orphan_anchor + endnote_orphan_anchor 总数，超过即触发 link_quality_low。
-LINK_ORPHAN_ANCHOR_THRESHOLD_DEFAULT = 10
 PDF_VIRTUAL_WINDOW_RADIUS_DEFAULT = 5
 PDF_VIRTUAL_SCROLL_MIN_PAGES_DEFAULT = 80
 TRANSLATE_PARALLEL_ENABLED_DEFAULT = False
 TRANSLATE_PARALLEL_LIMIT_DEFAULT = 10
 ACTIVE_MODEL_MODE_DEFAULT = "builtin"
 ACTIVE_BUILTIN_MODEL_KEY_DEFAULT = "deepseek-chat"
-ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT = "qwen3.6-plus"
+ACTIVE_BUILTIN_VISUAL_MODEL_KEY_DEFAULT = "qwen3.6-plus"
 CUSTOM_MODEL_NAME_DEFAULT = ""
 CUSTOM_MODEL_ENABLED_DEFAULT = False
 CUSTOM_MODEL_BASE_KEY_DEFAULT = ""
@@ -97,8 +92,6 @@ QWEN_BASE_URLS = {
 }
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
-FNM_REPAIR_PRIMARY_MODEL_ID_DEFAULT = ""
-FNM_REPAIR_FINAL_MODEL_ID_DEFAULT = ""
 CUSTOM_MODEL_PROVIDER_TYPES = {
     "qwen",
     "qwen_mt",
@@ -335,8 +328,8 @@ def _normalize_model_pool_slot(value, *, capability: str) -> dict:
 
 def _default_model_pool(capability: str) -> list[dict]:
     builtin_key = (
-        ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT
-        if capability == "fnm"
+        ACTIVE_BUILTIN_VISUAL_MODEL_KEY_DEFAULT
+        if capability == "vision"
         else ACTIVE_BUILTIN_MODEL_KEY_DEFAULT
     )
     primary = _default_model_pool_slot(capability)
@@ -396,30 +389,30 @@ def _migrate_model_pool_config(cfg: dict) -> tuple[dict, bool]:
         capability="translation",
     )
 
-    if "fnm_model_pool" not in normalized:
+    if "visual_model_pool" not in normalized:
         legacy_visual_custom = _normalize_custom_model_config(normalized.get("visual_custom_model"))
         legacy_mode = _normalize_active_model_mode(normalized.get("active_visual_model_mode"))
         if "active_visual_model_mode" not in normalized and legacy_visual_custom.get("enabled"):
             legacy_mode = "custom"
         legacy_builtin = normalize_builtin_model_key(
-            normalized.get("active_builtin_visual_model_key", ACTIVE_BUILTIN_FNM_MODEL_KEY_DEFAULT),
-            capability="fnm",
+            normalized.get("active_builtin_visual_model_key", ACTIVE_BUILTIN_VISUAL_MODEL_KEY_DEFAULT),
+            capability="vision",
         )
-        primary = _default_model_pool_slot("fnm")
+        primary = _default_model_pool_slot("vision")
         if legacy_mode == "custom":
-            primary = _legacy_custom_model_to_slot(legacy_visual_custom, capability="fnm")
+            primary = _legacy_custom_model_to_slot(legacy_visual_custom, capability="vision")
         else:
             primary["mode"] = "builtin"
             primary["builtin_key"] = legacy_builtin
-        normalized["fnm_model_pool"] = [
+        normalized["visual_model_pool"] = [
             primary,
-            _default_model_pool_slot("fnm"),
-            _default_model_pool_slot("fnm"),
+            _default_model_pool_slot("vision"),
+            _default_model_pool_slot("vision"),
         ]
         changed = True
-    normalized["fnm_model_pool"] = _normalize_model_pool(
-        normalized.get("fnm_model_pool"),
-        capability="fnm",
+    normalized["visual_model_pool"] = _normalize_model_pool(
+        normalized.get("visual_model_pool"),
+        capability="vision",
     )
 
     if "mimo_api_key" not in normalized:
@@ -868,27 +861,15 @@ def save_translation_model_pool(pool: list[dict]) -> None:
     save_config(cfg)
 
 
-def get_fnm_model_pool() -> list[dict]:
+def get_visual_model_pool() -> list[dict]:
     cfg = load_config()
-    return _normalize_model_pool(cfg.get("fnm_model_pool"), capability="fnm")
+    return _normalize_model_pool(cfg.get("visual_model_pool"), capability="vision")
 
 
-def save_fnm_model_pool(pool: list[dict]) -> None:
+def save_visual_model_pool(pool: list[dict]) -> None:
     cfg = load_config()
-    cfg["fnm_model_pool"] = _normalize_model_pool(pool, capability="fnm")
+    cfg["visual_model_pool"] = _normalize_model_pool(pool, capability="vision")
     save_config(cfg)
-
-
-def get_fnm_repair_primary_model_id() -> str:
-    return str(
-        load_config().get("fnm_repair_primary_model_id", FNM_REPAIR_PRIMARY_MODEL_ID_DEFAULT) or ""
-    ).strip()
-
-
-def get_fnm_repair_final_model_id() -> str:
-    return str(
-        load_config().get("fnm_repair_final_model_id", FNM_REPAIR_FINAL_MODEL_ID_DEFAULT) or ""
-    ).strip()
 
 
 def _glossary_state_key(doc_id: str) -> str:
@@ -1117,45 +1098,45 @@ def disable_custom_model():
 
 
 def get_active_visual_model_mode() -> str:
-    return str(get_fnm_model_pool()[0].get("mode") or "empty").strip().lower() or "empty"
+    return str(get_visual_model_pool()[0].get("mode") or "empty").strip().lower() or "empty"
 
 
 def set_active_visual_model_mode(mode: str):
     normalized_mode = str(mode or "").strip().lower()
-    pool = get_fnm_model_pool()
+    pool = get_visual_model_pool()
     slot = dict(pool[0])
     if normalized_mode == "builtin":
-        slot = _default_model_pool_slot("fnm")
+        slot = _default_model_pool_slot("vision")
         slot["mode"] = "builtin"
-        slot["builtin_key"] = normalize_builtin_model_key(pool[0].get("builtin_key"), capability="fnm")
+        slot["builtin_key"] = normalize_builtin_model_key(pool[0].get("builtin_key"), capability="vision")
     elif normalized_mode == "custom" and str(slot.get("model_id") or "").strip():
         slot["mode"] = "custom"
-        slot = _normalize_model_pool_slot(slot, capability="fnm")
+        slot = _normalize_model_pool_slot(slot, capability="vision")
     pool[0] = slot
-    save_fnm_model_pool(pool)
+    save_visual_model_pool(pool)
 
 
 def get_active_builtin_visual_model_key() -> str:
-    slot = get_fnm_model_pool()[0]
-    return normalize_builtin_model_key(slot.get("builtin_key"), capability="fnm")
+    slot = get_visual_model_pool()[0]
+    return normalize_builtin_model_key(slot.get("builtin_key"), capability="vision")
 
 
 def set_active_builtin_visual_model_key(key: str):
-    pool = get_fnm_model_pool()
-    slot = _default_model_pool_slot("fnm")
+    pool = get_visual_model_pool()
+    slot = _default_model_pool_slot("vision")
     slot["mode"] = "builtin"
-    slot["builtin_key"] = normalize_builtin_model_key(key, capability="fnm")
+    slot["builtin_key"] = normalize_builtin_model_key(key, capability="vision")
     pool[0] = slot
-    save_fnm_model_pool(pool)
+    save_visual_model_pool(pool)
 
 
 def get_visual_custom_model_config() -> dict:
-    return _slot_to_legacy_custom_model(get_fnm_model_pool()[0], capability="fnm")
+    return _slot_to_legacy_custom_model(get_visual_model_pool()[0], capability="vision")
 
 
 def save_visual_custom_model_config(visual_custom_model: dict):
     normalized = _normalize_custom_model_config(visual_custom_model)
-    pool = get_fnm_model_pool()
+    pool = get_visual_model_pool()
     if normalized.get("enabled") and normalized.get("model_id"):
         pool[0] = _normalize_model_pool_slot(
             {
@@ -1169,35 +1150,35 @@ def save_visual_custom_model_config(visual_custom_model: dict):
                 "extra_body": dict(normalized.get("extra_body") or {}),
                 "thinking_enabled": _coerce_bool(normalized.get("thinking_enabled"), False),
             },
-            capability="fnm",
+            capability="vision",
         )
     else:
-        pool[0] = _default_model_pool("fnm")[0]
-    save_fnm_model_pool(pool)
+        pool[0] = _default_model_pool("vision")[0]
+    save_visual_model_pool(pool)
 
 
 def clear_visual_custom_model_config():
-    pool = get_fnm_model_pool()
-    pool[0] = _default_model_pool("fnm")[0]
-    save_fnm_model_pool(pool)
+    pool = get_visual_model_pool()
+    pool[0] = _default_model_pool("vision")[0]
+    save_visual_model_pool(pool)
 
 
 def enable_visual_custom_model():
-    pool = get_fnm_model_pool()
+    pool = get_visual_model_pool()
     slot = dict(pool[0])
     if str(slot.get("model_id") or "").strip():
         slot["mode"] = "custom"
-        pool[0] = _normalize_model_pool_slot(slot, capability="fnm")
-        save_fnm_model_pool(pool)
+        pool[0] = _normalize_model_pool_slot(slot, capability="vision")
+        save_visual_model_pool(pool)
 
 
 def disable_visual_custom_model():
-    pool = get_fnm_model_pool()
-    slot = _default_model_pool_slot("fnm")
+    pool = get_visual_model_pool()
+    slot = _default_model_pool_slot("vision")
     slot["mode"] = "builtin"
-    slot["builtin_key"] = normalize_builtin_model_key(pool[0].get("builtin_key"), capability="fnm")
+    slot["builtin_key"] = normalize_builtin_model_key(pool[0].get("builtin_key"), capability="vision")
     pool[0] = slot
-    save_fnm_model_pool(pool)
+    save_visual_model_pool(pool)
 
 
 def get_visual_model_key() -> str:

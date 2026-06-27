@@ -1,0 +1,233 @@
+[
+  {
+    "doc_id": "e7f8a1b6c2d3",
+    "doc_name": "1_Georg Northoff - Neuropsychoanalysis in Practice_ Brain, Self and Objects  -Oxford University Press, USA (2011).pdf",
+    "slug": "Neuropsychoanalysis_in_Practice",
+    "example_folder": "Neuropsychoanalysis_in_Practice",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 20,
+        "page_count": 386,
+        "section_count": 14,
+        "note_count": 63,
+        "unit_count": 125,
+        "structure_state": "review_required",
+        "manual_toc_required": false,
+        "blocking_reasons": [
+          "split_footnote_only_synthesis_failed"
+        ],
+        "review_counts": {
+          "split_footnote_only_synthesis_failed": 1
+        },
+        "export_ready_real": false
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "page_count": 386,
+        "chapter_count": 14,
+        "section_head_count": 224,
+        "note_region_count": 38,
+        "note_item_count": 63,
+        "body_anchor_count": 108,
+        "note_link_count": 108,
+        "suppressed_chapter_candidate_count": 0,
+        "partition_heading_conflict_count": 0,
+        "review_row_count": 0,
+        "footnote_count": 63,
+        "endnote_count": 0,
+        "linked_endnote_count": 0,
+        "structure_state": "review_required",
+        "review_counts": {
+          "split_footnote_only_synthesis_failed": 1
+        },
+        "blocking_reasons": [
+          "split_footnote_only_synthesis_failed"
+        ],
+        "link_summary": {
+          "matched": 63,
+          "footnote_orphan_note": 0,
+          "footnote_orphan_anchor": 45,
+          "endnote_orphan_note": 0,
+          "endnote_orphan_anchor": 0,
+          "ambiguous": 0,
+          "ignored": 0,
+          "fallback_count": 3,
+          "repair_count": 0
+        },
+        "page_partition_summary": {
+          "total_pages": 386,
+          "noise": 0,
+          "front_matter": 13,
+          "body": 362,
+          "note": 0,
+          "other": 11
+        },
+        "chapter_mode_summary": {
+          "footnote_primary": 13,
+          "chapter_endnotes": 0,
+          "book_endnotes": 0,
+          "body_only": 1,
+          "mixed_or_unclear": 0
+        },
+        "heading_review_summary": {
+          "chapter_candidate_count": 728,
+          "suppressed_candidate_count": 256,
+          "suppressed_reason_counts": {
+            "low_score": 201,
+            "sentence_like": 54,
+            "non_body_family": 1
+          },
+          "partition_conflict_count": 0
+        },
+        "chapter_source_summary": {
+          "source": "visual_toc",
+          "chapter_level": 1,
+          "visual_toc_chapter_count": 14,
+          "legacy_chapter_count": 0,
+          "fallback_used": false
+        },
+        "visual_toc_conflict_count": 0,
+        "toc_export_coverage_summary": {
+          "resolved_body_items": 0,
+          "exported_body_items": 0,
+          "missing_body_items_preview": []
+        },
+        "toc_alignment_summary": {
+          "chapter_level_body_items": 7,
+          "exported_chapter_count": 14,
+          "missing_chapter_titles_preview": [],
+          "misleveled_titles_preview": [
+            "Freud and the quest for neuropsychoanalysis",
+            "Function- and localization-based approach to the brain",
+            "Freud’s search for psychological structure and organization",
+            "“Neural correlates” and “neural predispositions”",
+            "The brain’s intrinsic activity as neural predisposition",
+            "Brain–self and brain–object differentiation",
+            "Metaphorical excursion: brain, self, and objects",
+            "Focus of the book: general aims and hypotheses"
+          ],
+          "reanchored_titles_preview": [],
+          "missing_section_titles_preview": []
+        },
+        "toc_semantic_summary": {
+          "body_item_count": 100,
+          "chapter_item_count": 14,
+          "part_item_count": 0,
+          "back_matter_item_count": 0,
+          "first_body_pdf_page": 1,
+          "last_body_pdf_page": 351,
+          "body_span_ratio": 0.9093,
+          "nonbody_contamination_count": 0,
+          "mixed_level_chapter_count": 0
+        },
+        "toc_role_summary": {
+          "container": 0,
+          "chapter": 103,
+          "section": 86,
+          "post_body": 0,
+          "back_matter": 3,
+          "front_matter": 2
+        },
+        "container_titles": [],
+        "post_body_titles": [],
+        "back_matter_titles": [
+          "Appendix: What Can We Learn From Depression and Psychosis? A Transdisciplinary and Neuroexistential Account",
+          "References",
+          "Index"
+        ],
+        "toc_semantic_contract_ok": true,
+        "toc_semantic_blocking_reasons": [],
+        "toc_export_coverage_ok": true,
+        "chapter_title_alignment_ok": true,
+        "chapter_section_alignment_ok": true,
+        "chapter_endnote_region_alignment_ok": true,
+        "chapter_endnote_region_alignment_summary": {},
+        "chapter_endnote_region_boundary_ok": true,
+        "chapter_endnote_region_cross_next_chapter_count": 0,
+        "chapter_endnote_region_cross_next_chapter_preview": [],
+        "chapter_endnote_region_audit_rows": [],
+        "manual_toc_required": false,
+        "manual_toc_ready": true,
+        "manual_toc_summary": {
+          "mode": "manual_pdf",
+          "page_count": 4,
+          "file_count": 1,
+          "image_count": 0,
+          "source_name": "目录.pdf"
+        },
+        "export_drift_summary": {
+          "legacy_footnote_ref_count": 0,
+          "legacy_endnote_ref_count": 0,
+          "legacy_en_bracket_ref_count": 0,
+          "legacy_note_token_count": 0,
+          "orphan_local_definition_count": 0,
+          "orphan_local_ref_count": 0
+        },
+        "chapter_local_endnote_contract_ok": true,
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 62,
+        "note_unit_count": 63,
+        "changed_page_count": 341,
+        "translated_chars": 1259759,
+        "translated_paras": 1836,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "split_footnote_only_synthesis_failed"
+        ],
+        "execution_mode": "test",
+        "latest_export_zip_saved": false,
+        "latest_export_zip_path": "",
+        "latest_export_zip_folder": "Neuropsychoanalysis_in_Practice",
+        "latest_export_zip_reason": "structure_review_required",
+        "stale_export_artifact_detected": false,
+        "export_artifact_status": "blocked",
+        "latest_export_status_path": "/Users/hao/OCRandTranslation/test_example/Neuropsychoanalysis_in_Practice/latest_export_status.json",
+        "biopolitics_export_contract_ok": true,
+        "biopolitics_export_audit": {
+          "applicable": false,
+          "ok": true
+        }
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  }
+]

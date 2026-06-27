@@ -1,0 +1,18 @@
+{
+  "slug": "Neuropsychoanalysis_Introduction",
+  "folder": "Neuropsychoanalysis_Introduction",
+  "doc_id": "a3c9e1f7b284",
+  "verdict": "SKIP",
+  "stage_failed": "ensure_structure",
+  "ensure": {
+    "ok": false,
+    "reason": "no_pages",
+    "pipeline": {
+      "ok": false,
+      "error": "no_pages",
+      "run_id": 3
+    }
+  },
+  "batch_tag": "20260418_tier1a_v2",
+  "commit": "f37b345"
+}

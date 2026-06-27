@@ -17,7 +17,6 @@ from config import (
     get_doc_meta,
 )
 from persistence.sqlite_store import SQLiteRepository
-from FNM_RE import replace_frozen_refs
 from document.text_processing import (
     get_page_range, get_next_page_bp,
     build_visible_page_view, resolve_visible_page_bp,
@@ -63,7 +62,6 @@ from translation.translate_progress import (
 from translation.glossary_tools import diagnose_segment_glossary
 from translation.translate_launch import (
     mark_translate_start_error,
-    start_fnm_translate_task as _launch_fnm_translate_task,
     start_glossary_retranslate_task as _launch_glossary_retranslate_task,
     start_translate_task as _launch_translate_task,
 )
@@ -84,9 +82,13 @@ from translation.translate_store import (
     _save_translate_state,
 )
 from translation.translate_worker_continuous import run_translate_all_worker as _run_translate_all_worker_impl
-from translation.translate_worker_fnm import run_fnm_worker as _run_fnm_worker_impl
 from translation.translate_worker_glossary import run_glossary_retranslate_worker as _run_glossary_retranslate_worker_impl
 # ============ 翻译核心 ============
+
+
+def replace_frozen_refs(text: str, *, endnote_mode: str = "standard") -> str:
+    del endnote_mode
+    return str(text or "")
 
 def _needs_llm_fix(paragraphs: list) -> bool:
     """判断程序化解析结果是否需要 LLM 修正。"""
@@ -918,18 +920,11 @@ def translate_page_stream(
     doc_id: str,
     stop_checker=None,
     *,
-    fnm_doc_id: str | None = None,
     prepared_ctx: dict | None = None,
     prepared_para_jobs: list[dict] | None = None,
     prepared_total_usage: dict | None = None,
-    prepared_is_fnm: bool = False,
 ):
-    """流式翻译指定页面：段内有界并发推送增量，但仅在整页完成后返回 entry。
-
-    fnm_doc_id 若设置，则使用 FNM 章节/尾注区单元任务；结果回写 translation_pages 与 fnm_translation_units，
-    FNM 注释与页投影均从结构真相层现算，不再依赖旧的 fnm_notes/fnm_page_entries 持久化表。
-    prepared_* 若设置，则直接复用外部准备好的上下文/段落任务，仍走同一套流式并发内核。
-    """
+    """流式翻译指定页面：段内有界并发推送增量，但仅在整页完成后返回 entry。"""
     total_usage = {
         "prompt_tokens": 0,
         "completion_tokens": 0,
@@ -940,19 +935,11 @@ def translate_page_stream(
         ctx = dict(prepared_ctx or {})
         para_jobs = [dict(job) for job in (prepared_para_jobs or [])]
         total_usage = _merge_usage(total_usage, prepared_total_usage or {})
-    elif fnm_doc_id:
-        from FNM_RE import prepare_page_translate_jobs
-
-        ctx, para_jobs, total_usage = prepare_page_translate_jobs(
-            pages, target_bp, t_args, fnm_doc_id
-        )
     else:
         ctx, para_jobs, total_usage = _prepare_page_translate_jobs(pages, target_bp, t_args)
     for idx, job in enumerate(para_jobs):
         job.setdefault("para_idx", idx)
         job["para_total"] = len(para_jobs)
-    fnm_mode = bool(fnm_doc_id) or bool(prepared_is_fnm)
-
     max_parallel = _get_para_max_concurrency(model_key, len(para_jobs))
     dynamic_parallel_limit = max_parallel
     request_args = _provider_request_args(t_args)
@@ -1008,7 +995,6 @@ def translate_page_stream(
                 section_path=job["section_path"],
                 cross_page=job["cross_page"],
                 content_role=job.get("content_role", "body"),
-                is_fnm=fnm_mode,
                 **translate_kwargs,
             ):
                 payload = {"type": event["type"], "job": job}
@@ -1181,13 +1167,6 @@ def translate_page_stream(
                 finished_para_indices.add(para_idx)
                 p = event["result"]
                 results[para_idx] = _make_page_entry(job, target_bp, result=p)
-                if fnm_mode and fnm_doc_id and job.get("fnm_note_id"):
-                    SQLiteRepository().update_fnm_note_translation(
-                        fnm_doc_id,
-                        job["fnm_note_id"],
-                        replace_frozen_refs(ensure_str(p.get("translation", ""))),
-                        status="done",
-                    )
                 paragraph_texts[para_idx] = ensure_str(p.get("translation", ""))
                 paragraph_states[para_idx] = "done"
                 paragraph_errors[para_idx] = ""
@@ -1561,14 +1540,6 @@ def _glossary_retranslate_worker(doc_id: str, task_meta: dict, doc_title: str, o
     return _run_glossary_retranslate_worker_impl(
         doc_id,
         task_meta,
-        doc_title,
-        _translate_worker_deps(owner_token),
-    )
-
-
-def _fnm_translate_worker(doc_id: str, doc_title: str, owner_token: int | None = None):
-    return _run_fnm_worker_impl(
-        doc_id,
         doc_title,
         _translate_worker_deps(owner_token),
     )

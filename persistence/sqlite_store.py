@@ -1,4 +1,4 @@
-"""SQLite Repository：文档、翻译、FNM 数据的组合仓储边界。"""
+"""SQLite Repository：文档与翻译数据的组合仓储边界。"""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ from config import get_sqlite_db_path, normalize_doc_id
 from persistence.sqlite_catalog_schema import initialize_catalog_database
 from persistence.sqlite_db_paths import get_catalog_db_path, get_document_db_path
 from persistence.sqlite_repo_documents import DocumentRepoMixin
-from persistence.sqlite_repo_fnm import FnmRepoMixin
 from persistence.sqlite_repo_state import StateRepoMixin
 from persistence.sqlite_repo_translation import TranslationRepoMixin
 from persistence.sqlite_schema import (
@@ -31,7 +30,6 @@ from persistence.sqlite_schema import (
 class SingleDBRepository(
     DocumentRepoMixin,
     TranslationRepoMixin,
-    FnmRepoMixin,
     StateRepoMixin,
 ):
     """单库仓储实现。"""
@@ -47,7 +45,7 @@ class SQLiteRepository:
     - 传入 db_path 时，退化为单库模式（兼容测试/脚本）。
     - 不传 db_path 时，默认走拆库模式：
       - 文档目录/全局状态 -> catalog.db
-      - 页、翻译、FNM、文档级状态 -> documents/{doc_id}/doc.db
+      - 页、翻译、文档级状态 -> documents/{doc_id}/doc.db
     """
 
     _CATALOG_METHODS = {
@@ -157,6 +155,12 @@ class SQLiteRepository:
         doc_db_path = get_document_db_path(normalized_doc_id, ensure_parent_dir=False)
         if os.path.exists(doc_db_path):
             self._get_document_repo(normalized_doc_id).delete_document(normalized_doc_id)
+
+    def load_pages(self, doc_id: str):
+        return self._choose_repo("load_pages", (doc_id,), {}).load_pages(doc_id)
+
+    def list_effective_translation_pages(self, doc_id: str):
+        return self._choose_repo("list_effective_translation_pages", (doc_id,), {}).list_effective_translation_pages(doc_id)
 
     def __getattr__(self, item: str):
         if not hasattr(SingleDBRepository, item):

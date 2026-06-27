@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    558,
+    559,
+    560,
+    561,
+    562,
+    563,
+    564,
+    565
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 558\",\n      \"printed_page\": \"558\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"COURTINE (Jean-François), «Gilson et Heidegger», Étienne Gilson et nous : La\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页面为索引正文部分，没有常规段落，全是参考文献条目。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 559\",\n      \"printed_page\": \"559\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"– Soixante-deux photographies de Martin Heidegger, Paris, Gallimard, 1999.\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 560\",\n      \"printed_page\": \"560\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"GUIBAL (Francis), et combien de dieux nouveaux. Approches contemporaines, I. Heidegger,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 561\",\n      \"printed_page\": \"561\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"G. Granel, D. Charles, G. Liiceanu, J. Greisch, R. Gonner), Paris,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 562\",\n      \"printed_page\": \"562\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"JEANNIÈRE (Abel), «L'itinéraire de Martin Heidegger», Études, janvier-mars 1954, pp. 64-74.\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 563\",\n      \"printed_page\": \"563\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"MARION (Jean-Luc), Réduction et donation. Recherches sur Husserl, Heidegger et\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 564\",\n      \"printed_page\": \"564\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"RUBERCY (Éryck de) et Le BUHAN (Dominique), Douze questions posées à Jean\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    },\n    {\n      \"label\": \"backmatter PDF page 565\",\n      \"printed_page\": \"565\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"},\n        {\"level\": \"chapter\", \"text\": \"III. AUTRES OUVRAGES ET ARTICLES CITÉS OU CONSULTÉS\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"VIETTA (Silvio), Heidegger critique du national-socialisme et de la technique,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": []\n    }\n  ],\n  \"correction_guidance\": [\n    \"页面内容均为书目列表，不存在正文段落，因此无需核对脚注或正文注释。\",\n    \"核对书目条目时，需注意法语特殊字符（如 « » 引号）以及作者姓名的全大写格式。\",\n    \"页码 565 处包含一个三级标题（III），其后为新章节开头。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 1371,
+      "total_tokens": 10458
+    }
+  }
+}

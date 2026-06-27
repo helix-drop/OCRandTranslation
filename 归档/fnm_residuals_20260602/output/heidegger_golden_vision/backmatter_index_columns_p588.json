@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    588
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 588\",\n      \"printed_page\": \"588\",\n      \"lines\": [\n        \"BASSET (Guy) : 23, 544\",\n        \"BATAILLE (Georges) : 41n, 52\",\n        \"BATSALE (Philippe) : 401n\",\n        \"BAUDELAIRE (Charles) : 226, 508,\",\n        \"515\",\n        \"BAUDRILLARD (Jean) : 383-384\",\n        \"BAUMGARTEN (Eduard) : 348n\",\n        \"BAYLE (Pierre) : 226\",\n        \"BEAUFRET (Jean) : 8, 14n, 15, 17, 18,\",\n        \"22, 40n, 47, 49, 52, 83-92, 95,\",\n        \"96n, 109-111, 113-117, 128-131,\",\n        \"135-136, 138, 141n, 144n, 145,\",\n        \"147-154, 159-161, 163n, 165,\",\n        \"167n, 171-176, 178, 180-184,\",\n        \"186n, 187, 190, 192, 197n, 207-\",\n        \"208, 211-214, 216, 217n, 223-\",\n        \"231, 236, 237, 241-246, 248n,\",\n        \"251, 253n, 257-260, 264, 266-\",\n        \"273, 275, 279, 280-290, 295,\",\n        \"300n, 301-303, 310-314, 318,\",\n        \"319n, 322, 326n, 330, 333, 344,\",\n        \"350, 355n, 361, 381-382, 406n,\",\n        \"443, 445n, 457n, 481, 483, 487,\",\n        \"492-494, 501-503n, 512, 514,\",\n        \"515, 531-533, 540n, 541n\",\n        \"BEAUVAIS (Vincent de) : 46n\",\n        \"BEAUVOIR (Simone de) : 62n, 104n,\",\n        \"133n, 134, 137n\",\n        \"BECKETT (Samuel) : 381\",\n        \"BECKER (Aloys) : 462n\",\n        \"BEISTEGUI (Miguel de) : 391n\",\n        \"BELLEFROID (Jacques) : 185n\",\n        \"BENDA (Julien) : 41n, 110n\",\n        \"BENJAMIN (Walter) : 508n\",\n        \"BENN (Gottfried) : 42, 282\",\n        \"BENOIST (Alain de) : 14n\",\n        \"BENOIST (Jean-Marie) : 280\",\n        \"BENOIST (Jocelyn) : 451\",\n        \"BERDIAEFF (Nicolas) : 94\",\n        \"BERGSON (Henri) : 16, 32, 62, 179-\",\n        \"181, 214, 506n\",\n        \"BERQUE (Jacques) : 212n\",\n        \"BESNIER (Jean-Michel) : 384n\",\n        \"BESPALOFF (Rachel) : 35-36, 136,\",\n        \"382\",\n        \"BESSEY (A.) : 34, 43n\",\n        \"BIDENT (Christophe) : 205n, 206n,\",\n        \"213n, 229\",\n        \"BIEMEL (Walter) : 23, 86, 92n, 136n,\",\n        \"150n, 152n, 153, 160n, 163, 165,\",\n        \"166, 317, 364n, 504n, 537n\",\n        \"BILLOUX (François) : 62n\",\n        \"BIRAULT (Henri) : 95, 117, 143-145,\",\n        \"173, 183, 208n, 266n, 277n, 286-\",\n        \"291, 298, 303n, 311, 326n, 487,\",\n        \"491, 493, 502, 503\",\n        \"BLANCHARD (Jean-Pierre) : 14n\",\n        \"BLANCHOT (Maurice) : 31n, 32, 174,\",\n        \"178, 203, 205-207, 212-213, 229,\",\n        \"356, 385n, 434, 508n\",\n        \"BLOY (Léon) : 327\",\n        \"BOEHM (Rudolf) : 95n, 173n, 266n,\",\n        \"317, 320, 322, 323, 331n, 333\",\n        \"BOFINGER (Brasserie) : 312\",\n        \"BOLLACK (Jean) : 221-222, 257n,\",\n        \"280, 491n\",\n        \"BOMPIANI (Ginevra) : 243n\",\n        \"BONAPARTE (Napoléon) : 157, 158,\",\n        \"162n\",\n        \"BONDY (François) : 198n\",\n        \"BONNEFOY (Yves) : 516\",\n        \"BONTEMPS (Jacques) : 245n, 250n\",\n        \"BONZON (Alfred) : 499n\",\n        \"BORCH-JACOBSEN (Mikkel) : 222n\",\n        \"BORNE (Étienne) : 181\",\n        \"BOSS (Médard) : 218n\",\n        \"BOUCHERON (Serge) : 503n\",\n        \"BOUCHINDHOMME (Christian) : 471n\",\n        \"BOURDIEU (Pierre) : 257, 261-265,\",\n        \"272, 279, 280, 288, 306, 314,\",\n        \"366-367, 393n, 401n, 402, 433,\",\n        \"524\",\n        \"BOURGAULT (Jean) : 23\",\n        \"BOURSEILLER (Christophe) : 235n\",\n        \"BOUSQUET (René) : 382\",\n        \"BOUTOT (Alain) : 23, 360, 421n,\",\n        \"503n\",\n        \"BOUTROUX (Émile) : 110n\",\n        \"BOUVERESSE (Jacques) : 417, 424-\",\n        \"427\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 2048,
+      "total_tokens": 3481
+    }
+  }
+}

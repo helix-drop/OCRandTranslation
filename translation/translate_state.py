@@ -2,7 +2,6 @@
 
 
 TASK_KIND_CONTINUOUS = "continuous"
-TASK_KIND_FNM = "fnm"
 TASK_KIND_GLOSSARY_RETRANSLATE = "glossary_retranslate"
 
 
@@ -190,7 +189,6 @@ def _default_translate_state(doc_id: str = "") -> dict:
         "retry_round": 0,
         "unresolved_count": 0,
         "manual_required_count": 0,
-        "fnm_tail_state": "idle",
         "export_bundle_available": False,
         "export_has_blockers": False,
         "tail_blocking_summary": [],
@@ -252,10 +250,6 @@ def _normalize_translate_state(state: dict, assume_inactive: bool = False) -> di
     state["retry_round"] = max(0, int(state.get("retry_round", 0) or 0))
     state["unresolved_count"] = max(0, int(state.get("unresolved_count", 0) or 0))
     state["manual_required_count"] = max(0, int(state.get("manual_required_count", 0) or 0))
-    tail_state = str(state.get("fnm_tail_state", "idle") or "idle").strip().lower() or "idle"
-    if tail_state not in {"idle", "translation_retrying", "post_translate_checking", "repairing", "done"}:
-        tail_state = "idle"
-    state["fnm_tail_state"] = tail_state
     state["export_bundle_available"] = bool(state.get("export_bundle_available"))
     state["export_has_blockers"] = bool(state.get("export_has_blockers"))
     if not isinstance(state.get("tail_blocking_summary"), list):

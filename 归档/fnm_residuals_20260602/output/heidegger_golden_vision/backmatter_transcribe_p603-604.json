@@ -1,0 +1,26 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_transcribe",
+  "pages": [
+    603,
+    604
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_transcribe PDF page 603\",\n      \"printed_page\": \"\",\n      \"lines\": [\n        \"9. La lettre et l’esprit ........................................................................ 317\",\n        \"   Soixante ans après ! .................................................................... 317\",\n        \"   Du tollé aux enjeux .................................................................... 326\",\n        \"   L’esprit souffle où il veut ........................................................... 334\",\n        \"   Épilogue V ................................................................................. 343\",\n        \"10. Le retour du refoulé ? .................................................................. 347\",\n        \"   Le feu aux poudres ..................................................................... 348\",\n        \"   Une tornade ................................................................................ 351\",\n        \"   Du sérieux ! ............................................................................... 356\",\n        \"   Défenseurs et attaquants à la rescousse ..................................... 365\",\n        \"   En quête d’interprétations philosophiques ................................. 370\",\n        \"   Dramaturgie révélatrice ou vaine querelle ? ............................... 378\",\n        \"   Épilogue VI ................................................................................ 386\",\n        \"11. Entre érudition et techno-science ................................................ 391\",\n        \"   Le « tournant » : l’aval et l’amont d’Être et temps .................... 401\",\n        \"   Un entre-deux fragile : les souvenirs d’un voyage en Grèce .... 407\",\n        \"   La science pense-t-elle ? ............................................................. 411\",\n        \"   Haro sur la technique ? ............................................................... 421\",\n        \"   L’exception qui confirme la règle ? ............................................ 429\",\n        \"   Épilogue VII ............................................................................... 439\",\n        \"12. La croisée des chemins ................................................................. 445\",\n        \"   Quelle phénoménologie ? ............................................................ 446\",\n        \"   D’une dette impensée à une éthique neuve ................................. 453\",\n        \"   La part de l’herméneutique ........................................................ 464\",\n        \"   Le débat théologique .................................................................. 478\",\n        \"   Un legs incontesté en histoire de la philosophie ? ...................... 489\",\n        \"Conclusion ............................................................................................ 501\",\n        \"   Pensée et poésie : un dialogue au sommet .................................. 507\",\n        \"   La fin de l’exception française ? ................................................. 518\",\n        \"   L’hapax de la philosophie et son avenir ..................................... 536\"\n      ],\n      \"uncertain\": []\n    },\n    {\n      \"label\": \"backmatter_transcribe PDF page 604\",\n      \"printed_page\": \"\",\n      \"lines\": [\n        \"Bibliographie ........................................................................................ 543\",\n        \"   Traductions françaises de Heidegger dans l’ordre\",\n        \"   chronologique de leur publication .............................................. 544\",\n        \"   Livres et articles en français sur Heidegger ................................. 555\",\n        \"   Autres ouvrages et articles cités ou consultés ............................. 565\",\n        \"Index historique des traductions françaises\",\n        \"   des mots clés heideggériens ......................................................... 577\",\n        \"Index des noms ..................................................................................... 587\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 2476,
+      "completion_tokens": 898,
+      "total_tokens": 3374
+    }
+  }
+}

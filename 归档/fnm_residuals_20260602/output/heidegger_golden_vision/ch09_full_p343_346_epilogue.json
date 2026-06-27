@@ -1,0 +1,28 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "ch09-full",
+  "pages": [
+    343,
+    344,
+    345,
+    346
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch09-full PDF page 343\",\n      \"printed_page\": \"343\",\n      \"headings\": [\n        {\n          \"level\": \"running_header\",\n          \"text\": \"LA LETTRE ET L'ESPRIT\",\n          \"position\": \"top\"\n        },\n        {\n          \"level\": \"chapter\",\n          \"text\": \"ÉPILOGUE V\",\n          \"position\": \"body\"\n        }\n      ],\n      \"paragraph_starts\": [\n        {\n          \"text\": \"ment de plusieurs niveaux: adieu le talent d'écriture, adieu les\",\n          \"continues_from_previous\": true,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Sans commune mesure avec les polémiques antérieures, ce chapitre a vu\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Passer maintenant à un registre plus personnel ne signifie nullement s'ériger\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Une médiocrité comparable a accompagné le tollé qui a suivi la\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": true\n        }\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\n        \"第一段延续自上一页，确认开头词组符合语境。\",\n        \"无脚注。\"\n      ]\n    },\n    {\n      \"label\": \"ch09-full PDF page 344\",\n      \"printed_page\": \"344\",\n      \"headings\": [\n        {\n          \"level\": \"running_header\",\n          \"text\": \"HEIDEGGER EN FRANCE\",\n          \"position\": \"top\"\n        }\n      ],\n      \"paragraph_starts\": [\n        {\n          \"text\": \"publication de la traduction Vezin. Comme on pouvait s'y attendre,\",\n          \"continues_from_previous\": true,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Michel Haar) à une « lettre de protestation » contre la traduction\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Je dois ajouter, pour être aussi équitable que possible (y compris\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Le temps devrait permettre de dédramatiser les blessures personnelles, sans étouffer\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": true\n        }\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\n        \"第一段延续自第343页。\",\n        \"无脚注。\"\n      ]\n    },\n    {\n      \"label\": \"ch09-full PDF page 345\",\n      \"printed_page\": \"345\",\n      \"headings\": [\n        {\n          \"level\": \"running_header\",\n          \"text\": \"LA LETTRE ET L'ESPRIT\",\n          \"position\": \"top\"\n        }\n      ],\n      \"paragraph_starts\": [\n        {\n          \"text\": \"le caractère « intraduisible » du Dasein existe déjà en allemand. Il\",\n          \"continues_from_previous\": true,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"« fidèle » à la pensée de Heidegger, il ne suffit pas d'apprendre\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Comment ne pas avouer, plus que l'embarras, la peine ressentie devant\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": true\n        }\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\n        \"第一段延续自第344页。\",\n        \"无脚注。\"\n      ]\n    },\n    {\n      \"label\": \"ch09-full PDF page 346\",\n      \"printed_page\": \"\",\n      \"headings\": [],\n      \"paragraph_starts\": [\n        {\n          \"text\": \"ces avatars de la traduction d'une grande pensée ? Difficultés encore\",\n          \"continues_from_previous\": true,\n          \"continues_to_next\": false\n        }\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\n        \"该页仅包含正文片段（延续自第345页结尾段落），无页码和章节标题，为第345页内容的延续。\",\n        \"此页面为空白图像，仅含正文内容，末尾无任何NOTES。\"\n      ]\n    }\n  ],\n  \"correction_guidance\": [\n    \"确认第343页第一段 'descendre vertigineuse-' 对应 'ment de plusieurs niveaux'。\",\n    \"核实第346页为全书最后部分，注意确认该页是否应有全书NOTES，目前提供的图片346页仅有正文。\",\n    \"所有页面均无脚注（Footnotes），这在学术书籍末章属正常现象，但请确认是否应有参考文献索引。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 4806,
+      "completion_tokens": 1310,
+      "total_tokens": 6116
+    }
+  }
+}

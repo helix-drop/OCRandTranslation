@@ -1,0 +1,27 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/chapters_pdf/12-La croisée des chemins.pdf",
+  "chapter": "ch12",
+  "pages": [
+    1,
+    2,
+    3
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch12 PDF page 1\",\n      \"printed_page\": \"\",\n      \"headings\": [\n        {\"level\": \"chapter\", \"text\": \"12. La croisée des chemins\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"Notre histoire ayant atteint sa butée chronologique, le terme du siècle, il\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Plutôt que cet impossible bilan, on proposera ici une libre méditation ouverte\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"1\", \"context\": \"les voir' » : en retrouvant\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"1\", \"text_start\": \"Propos rapportés par J. BEAUFRET, Dialogue avec Heidegger, op. cit., I, p. 17.\"}\n      ],\n      \"risks\": []\n    },\n    {\n      \"label\": \"ch12 PDF page 2\",\n      \"printed_page\": \"446\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"QUELLE PHÉNOMÉNOLOGIE ?\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"véritablement quelques percées sera une tâche plus appropriée, que nous allons effectuer\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Les thèmes possibles ne manquent pas, pour que se noue - ou renoue\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Bien qu'on range habituellement la pensée heideggérienne dans la mouvance phénoménologique, un fait\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"C'est dans l'évolution même du projet phénoménologique chez Heidegger qu'il faut chercher\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"2\", \"context\": \"la phénoménologie² » où\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"2\", \"text_start\": \"HEIDEGGER, « Mon chemin de pensée et la phénoménologie », Questions IV, op. cit., pp. 161-175.\"}\n      ],\n      \"risks\": []\n    },\n    {\n      \"label\": \"ch12 PDF page 3\",\n      \"printed_page\": \"447\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"LA CROISÉE DES CHEMINS\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"il renoue soigneusement, mais de manière surtout autobiographique, ce fil conducteur de\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"Que cet héritage soit l'objet d'un litige n'a rien pour surprendre. Les\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"3\", \"context\": \"comme possibilité³.» Heidegger parvient\"},\n        {\"marker\": \"4\", \"context\": \"philosophie comme telle⁴. »\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"3\", \"text_start\": \"Précision qu'il donne dans l'appendice de 1969 : ibid., p. 173.\"},\n        {\"marker\": \"4\", \"text_start\": \"Ibid., p. 169.\"}\n      ],\n      \"risks\": [\"脚注3与引用点对应准确，但在页面布局上处于段落下方较紧凑位置。\"]\n    }\n  ],\n  \"correction_guidance\": [\n    \"页眉与正文之间存在明显的分隔线，应保持Markdown中的语义化分割。\",\n    \"PDF第2页开头部分属于上一页内容的延续，需确保在Markdown中不被视为新段落。\",\n    \"脚注标记（1-4）在正文中均为上标，录入时需使用标准格式以防止与正文粘连。\",\n    \"文中破折号（-）和引号（« »）在处理时需保留法文排版习惯，避免被OCR识别为错误符号。\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 3672,
+      "completion_tokens": 1103,
+      "total_tokens": 4775
+    }
+  }
+}

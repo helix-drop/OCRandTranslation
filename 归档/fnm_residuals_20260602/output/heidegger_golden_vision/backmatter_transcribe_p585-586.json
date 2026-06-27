@@ -1,0 +1,26 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_transcribe",
+  "pages": [
+    585,
+    586
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_transcribe PDF page 585\",\n      \"printed_page\": \"585\",\n      \"lines\": [\n        \"INDEX DES MOTS-CLÉS HEIDEGGÉRIENS\",\n        \"VORHANDENHEIT : réalité-des-choses subsistantes (CORBIN, 1938) ; subsis-\",\n        \"tance (KAHN, 1958 ; BW, 1964 ; COURTINE, 1985) ; être-à-portée-de-la-\",\n        \"main (FÉDIER, 1968) ; être-sous-la-main (MARTINEAU, 1985) ; être-là-\",\n        \"devant (VEZIN, 1986) ; subsistance, pré-sence (DASTUR, 1990).\",\n        \"WELTLICHKEIT : mondanéité (BW, 1964) ; mondéité (VEZIN, 1986).\",\n        \"WESEN : essence (CORBIN, 1938 ; MUNIER, 1957 ; BW, 1964) ; estance\",\n        \"(KAHN, 1958) ; essence, « essence », être (PRÉAU, 1958) ; esprit (BEAU-\",\n        \"FRET, 1974) ; déploiement (FÉDIER, 1976) ; maintien (GRANEL, 1968) ;\",\n        \"aître (GUEST, 1989).\",\n        \"ZEITLICHKEIT : temporalité (CORBIN, 1938 ; ROVAN, 1941 ; KAHN, 1958 ;\",\n        \"GRANEL, 1978-79 ; COURTINE, MARTINEAU, 1985) ; temporellité\",\n        \"(VEZIN, 1986).\",\n        \"ZEUG : outil (BW, 1964 ; MARTINEAU, 1985) ; util (VEZIN, 1986).\",\n        \"ZUHANDENHEIT : maniabilité (LÉVINAS, 1932 ; DASTUR, 1990) ; réalité-\",\n        \"ustensile (CORBIN, 1938) ; disponibilité (BW, 1964 ; COURTINE, 1985) ;\",\n        \"être-en-main (FÉDIER, 1968) ; être-à-portée-de-la-main (MARTINEAU,\",\n        \"1985) ; utilisabilité (VEZIN, 1986).\",\n        \"ZUSAGE : le dire fianciant ou fié, la fiance (FÉDIER, 1976) ; Zusage\",\n        \"(DERRIDA, 1987).\",\n        \"ZUWENDUNG : atour (GRANEL, 1968).\"\n      ],\n      \"uncertain\": []\n    },\n    {\n      \"label\": \"backmatter_transcribe PDF page 586\",\n      \"printed_page\": \"\",\n      \"lines\": [],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 2476,
+      "completion_tokens": 782,
+      "total_tokens": 3258
+    }
+  }
+}

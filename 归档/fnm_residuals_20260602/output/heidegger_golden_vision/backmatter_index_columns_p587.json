@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    587
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns\",\n      \"printed_page\": \"587\",\n      \"lines\": [\n        \"Index\",\n        \"\",\n        \"ABENSOUR (Miguel) : 32n, 337n, 338, 359n\",\n        \"ABRAHAM A SANTA CLARA : 350, 353n, 358, 363, 368, 369\",\n        \"ADLOFF (Jean-Gabriel) : 62n, 111n\",\n        \"ADORNO (Theodor) : 9, 192, 194, 288n, 305, 338, 527\",\n        \"AGAMBEN (Giorgio) : 243n, 245n, 338n\",\n        \"ALEMBERT (Jean Le Rond d’) : 17n\",\n        \"ALLÈGRE (Claude) : 418\",\n        \"ALLEMANN (Beda) : 150n, 157-158, 171, 176n, 212n\",\n        \"ALQUIÉ (Ferdinand) : 128, 212n\",\n        \"ALTHUSSER (Louis) : 128, 132, 182, 183, 187, 226-227, 489, 490n, 503n, 532n\",\n        \"ALUNNI (Charles) : 354n\",\n        \"ANAXIMANDRE : 209-210\",\n        \"ANDIA (Ysabel de) : 266n, 478\",\n        \"ANDROMAQUE : 499n\",\n        \"ANTIGONE : 513n\",\n        \"ARCHILOQUE : 511\",\n        \"ARCHIMÈDE : 302\",\n        \"ARENDT (Hannah) : 279, 299n, 357, 389, 391n, 406n, 437-438, 441, 466, 472, 507n, 518\",\n        \"ARISTOTE : 86, 130, 156, 175, 182, 183, 207n, 213-214, 226, 258, 266n, 279, 301, 406, 415n, 430, 470-473, 476, 493-495, 497\",\n        \"ARNOLD (Serge) : 276n\",\n        \"ARON (Jean-Paul) : 87n, 128, 145n, 150n, 151n, 156n, 160n, 212n\",\n        \"ARON (Raymond) : 52-53, 108, 519\",\n        \"ARTAUD (Antonin) : 310, 381\",\n        \"ASSOULINE (Pierre) : 61n, 62n, 79n\",\n        \"ASTRUC (Alexandre) : 83n\",\n        \"ATLAN (Henri) : 420n\",\n        \"ATTILA : 17\",\n        \"AUBENQUE (Pierre) : 174, 212n, 257n, 278, 279, 297n, 363-364, 369, 492-493\",\n        \"AUBIER (Éditions) : 329\",\n        \"AUFFRET (Dominique) : 53n, 90n\",\n        \"AUGUSTIN (saint) : 70, 111n, 154, 437\",\n        \"AVERROÈS : 432\",\n        \"AXELOS (Kostas) : 23, 52n, 96n, 147-150, 152, 153n, 159, 160n, 173, 176-178, 185n, 207n, 212n, 223n, 224, 240, 242, 257, 272, 277n, 293, 408n, 491n, 537\",\n        \"BACH (Jean-Sébastien) : 174-175n\",\n        \"BADIOU (Alain) : 517, 527\",\n        \"BADONAL (Pierre) : 245n\",\n        \"BALAAM : 122\",\n        \"BARASH (Jeffrey) : 337n, 436-438\",\n        \"BARBARAS (Renaud) : 452\",\n        \"BARBIE (Klaus) : 384\",\n        \"BARDOUT (Jean-Christophe) : 498n\",\n        \"BARTHES (Roland) : 240\",\n        \"BARUZI (Jean) : 40, 41\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1366,
+      "total_tokens": 2799
+    }
+  }
+}

@@ -1,10 +1,5 @@
 <div class="page-action-bar" id="pageActionBar">
   <div class="page-action-bar-main">
-    {% if current_view == 'fnm' %}
-    <button type="button" class="btn btn-pri" id="pageEditorOpenBtn" disabled title="FNM 诊断页为只读视图">
-      FNM 诊断页只读
-    </button>
-    {% else %}
     <button type="button" class="btn btn-pri" id="pageEditorOpenBtn" onclick="openPageEditor();">
       编辑本页段落
     </button>
@@ -22,23 +17,15 @@
       强制 OCR 重解析本页
     </button>
     {% endif %}
-    {% endif %}
   </div>
   <div class="page-action-bar-note">
-    {% if current_view == 'fnm' %}
-      {% if fnm_section %}
-      当前节：{{ fnm_section.section_title or fnm_section.section_id }}。
-      {% endif %}
-      当前页来自 FNM 诊断投影；此视图只用于核对结构、脚注和导出结果，不支持整页编辑。
-    {% else %}
-      {% if page_manual_segment_count %}
-      当前页已有 {{ page_manual_segment_count }} 段人工维护内容。重译、强制 OCR 重解析都会覆盖本页人工结构与文本。
-      {% elif has_pdf %}
-      强制 OCR 重解析会重做这一页版面解析，并用新的页面结构覆盖当前页译文。
-      {% endif %}
-      {% if glossary_retranslate_blocked %}
-      {{ glossary_retranslate_block_reason }}
-      {% endif %}
+    {% if page_manual_segment_count %}
+    当前页已有 {{ page_manual_segment_count }} 段人工维护内容。重译、强制 OCR 重解析都会覆盖本页人工结构与文本。
+    {% elif has_pdf %}
+    强制 OCR 重解析会重做这一页版面解析，并用新的页面结构覆盖当前页译文。
+    {% endif %}
+    {% if glossary_retranslate_blocked %}
+    {{ glossary_retranslate_block_reason }}
     {% endif %}
   </div>
 </div>

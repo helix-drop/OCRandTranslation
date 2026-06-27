@@ -22,11 +22,10 @@ def _request_doc_id(deps: Deps) -> str:
     return deps["_request_doc_id"]()
 
 
-def _task_options_for_fnm_mode(fnm_mode: bool) -> dict:
-    enabled = bool(fnm_mode)
+def _task_options(*, clean_header_footer: bool = False, auto_visual_toc: bool = False) -> dict:
     return {
-        "clean_header_footer": enabled,
-        "auto_visual_toc": enabled,
+        "clean_header_footer": bool(clean_header_footer),
+        "auto_visual_toc": bool(auto_visual_toc),
     }
 
 
@@ -69,10 +68,6 @@ def _collect_glossary_upload() -> tuple[str | None, dict]:
         return "词典文件仅支持 .csv / .xlsx 格式。", {}
     temp_path, original_name = _save_upload_to_temp(glossary)
     return None, {"path": temp_path, "filename": original_name}
-
-
-def _current_doc_fnm_mode(deps: Deps, doc_id: str) -> bool:
-    return bool(deps["get_doc_cleanup_headers_footers"](doc_id))
 
 
 def _resolve_home_doc_id(deps: Deps, requested_doc_id: str, docs: list[dict[str, Any]]) -> str:
@@ -200,17 +195,14 @@ def upload_file(deps: Deps):
     uploaded.save(tmp)
     tmp.close()
 
-    fnm_mode = deps["_parse_bool_flag"](request.form.get("fnm_mode", ""))
     manual_toc_enabled = bool(toc_pdf_upload or toc_image_uploads)
     deps["set_upload_processing_preferences"](
-        cleanup_headers_footers=fnm_mode,
-        auto_visual_toc=fnm_mode or manual_toc_enabled,
+        cleanup_headers_footers=False,
+        auto_visual_toc=manual_toc_enabled,
     )
 
     task_id = uuid.uuid4().hex[:12]
-    task_options = _task_options_for_fnm_mode(fnm_mode)
-    if manual_toc_enabled:
-        task_options["auto_visual_toc"] = True
+    task_options = _task_options(auto_visual_toc=manual_toc_enabled)
     if toc_pdf_upload:
         task_options["toc_visual_pdf_upload"] = toc_pdf_upload
     if toc_image_uploads:
@@ -230,14 +222,14 @@ def upload_file(deps: Deps):
 
 def api_upload_preferences(deps: Deps):
     payload = request.get_json(silent=True) or request.form
-    fnm_mode = deps["_parse_bool_flag"]((payload or {}).get("fnm_mode", ""))
     deps["set_upload_processing_preferences"](
-        cleanup_headers_footers=fnm_mode,
-        auto_visual_toc=fnm_mode,
+        cleanup_headers_footers=False,
+        auto_visual_toc=False,
     )
     return jsonify({
         "ok": True,
-        "fnm_mode": fnm_mode,
+        "cleanup_headers_footers": False,
+        "auto_visual_toc": False,
     })
 
 
@@ -256,13 +248,15 @@ def reparse(deps: Deps):
 
     _pages, file_name = deps["load_pages_from_disk"](doc_id)
     task_id = uuid.uuid4().hex[:12]
-    fnm_mode = _current_doc_fnm_mode(deps, doc_id)
     deps["create_task"](
         task_id,
         pdf_path,
         file_name or "source.pdf",
         0,
-        options=_task_options_for_fnm_mode(fnm_mode),
+        options=_task_options(
+            clean_header_footer=deps["get_doc_cleanup_headers_footers"](doc_id),
+            auto_visual_toc=deps["get_doc_auto_visual_toc_enabled"](doc_id),
+        ),
     )
     threading.Thread(target=deps["reparse_file"], args=(task_id, doc_id), daemon=True).start()
     return jsonify({"task_id": task_id})
@@ -283,14 +277,14 @@ def api_doc_reparse_enhanced(deps: Deps):
 
     _pages, file_name = deps["load_pages_from_disk"](doc_id)
     deps["clear_entries_from_disk"](doc_id)
-    deps["update_doc_meta"](doc_id, cleanup_headers_footers=True, auto_visual_toc_enabled=True)
+    deps["update_doc_meta"](doc_id, cleanup_headers_footers=False, auto_visual_toc_enabled=True)
     task_id = uuid.uuid4().hex[:12]
     deps["create_task"](
         task_id,
         pdf_path,
         file_name or "source.pdf",
         0,
-        options=_task_options_for_fnm_mode(True),
+        options={"clean_header_footer": False, "auto_visual_toc": True},
     )
     threading.Thread(target=deps["reparse_file"], args=(task_id, doc_id), daemon=True).start()
     return jsonify({"task_id": task_id, "cleared_translations": True})
@@ -319,13 +313,15 @@ def reparse_page(page_bp: int, deps: Deps):
         return jsonify({"error": f"未找到页码 {page_bp}"}), 200
 
     task_id = uuid.uuid4().hex[:12]
-    fnm_mode = _current_doc_fnm_mode(deps, doc_id)
     deps["create_task"](
         task_id,
         pdf_path,
         file_name or "source.pdf",
         0,
-        options=_task_options_for_fnm_mode(fnm_mode),
+        options=_task_options(
+            clean_header_footer=deps["get_doc_cleanup_headers_footers"](doc_id),
+            auto_visual_toc=deps["get_doc_auto_visual_toc_enabled"](doc_id),
+        ),
     )
     threading.Thread(
         target=deps["reparse_single_page"],

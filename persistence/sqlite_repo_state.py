@@ -68,4 +68,3 @@ class StateRepoMixin:
         return payload
 
     _row_to_translation_page_revision_payload = _row_to_revision_payload
-    _row_to_fnm_page_revision_payload = _row_to_revision_payload

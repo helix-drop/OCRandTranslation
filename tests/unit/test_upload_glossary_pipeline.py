@@ -1,4 +1,4 @@
-"""覆盖 FNM/标准上传流程里"附带词典"任务选项的 pipeline 行为。"""
+"""覆盖标准上传流程里"附带词典"任务选项的 pipeline 行为。"""
 
 from __future__ import annotations
 

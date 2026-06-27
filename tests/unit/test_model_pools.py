@@ -52,14 +52,14 @@ class ModelPoolsTest(unittest.TestCase):
         migrated = config.load_config()
 
         self.assertIn("translation_model_pool", migrated)
-        self.assertIn("fnm_model_pool", migrated)
+        self.assertIn("visual_model_pool", migrated)
         self.assertEqual(len(migrated["translation_model_pool"]), 4)
-        self.assertEqual(len(migrated["fnm_model_pool"]), 4)
+        self.assertEqual(len(migrated["visual_model_pool"]), 4)
         self.assertEqual(migrated["translation_model_pool"][0]["mode"], "custom")
         self.assertEqual(migrated["translation_model_pool"][0]["provider_type"], "qwen")
         self.assertEqual(migrated["translation_model_pool"][0]["model_id"], "qwen3.5-plus")
-        self.assertEqual(migrated["fnm_model_pool"][0]["mode"], "builtin")
-        self.assertEqual(migrated["fnm_model_pool"][0]["builtin_key"], "gemini-3.1-flash-lite")
+        self.assertEqual(migrated["visual_model_pool"][0]["mode"], "builtin")
+        self.assertEqual(migrated["visual_model_pool"][0]["builtin_key"], "qwen-vl-plus")
 
     def test_resolve_translation_model_pool_specs_supports_mimo_paygo(self) -> None:
         from persistence.storage import resolve_translation_model_pool_specs
@@ -80,7 +80,7 @@ class ModelPoolsTest(unittest.TestCase):
                     },
                     {"mode": "empty"},
                 ],
-                "fnm_model_pool": [{"mode": "builtin", "builtin_key": "qwen-vl-plus"}, {"mode": "empty"}, {"mode": "empty"}],
+                "visual_model_pool": [{"mode": "builtin", "builtin_key": "qwen-vl-plus"}, {"mode": "empty"}, {"mode": "empty"}],
             }
         )
 
@@ -92,14 +92,14 @@ class ModelPoolsTest(unittest.TestCase):
         self.assertEqual(specs[1].base_url, "https://api.xiaomimimo.com/v1")
         self.assertEqual(specs[1].api_key, "mimo-paygo-key")
 
-    def test_resolve_fnm_model_pool_specs_supports_mimo_token_plan(self) -> None:
+    def test_resolve_visual_model_pool_specs_supports_mimo_token_plan(self) -> None:
         from model_capabilities import get_selectable_models
-        from persistence.storage import resolve_fnm_model_pool_specs
+        from persistence.storage import resolve_visual_model_pool_specs
 
         config.save_config(
             {
                 "translation_model_pool": [{"mode": "builtin", "builtin_key": "deepseek-chat"}, {"mode": "empty"}, {"mode": "empty"}],
-                "fnm_model_pool": [
+                "visual_model_pool": [
                     {
                         "mode": "custom",
                         "display_name": "MiMo Omni Token Plan",
@@ -114,21 +114,21 @@ class ModelPoolsTest(unittest.TestCase):
             }
         )
 
-        specs = resolve_fnm_model_pool_specs()
+        specs = resolve_visual_model_pool_specs()
 
         self.assertEqual(len(specs), 1)
         self.assertEqual(specs[0].provider, "mimo_token_plan")
         self.assertEqual(specs[0].base_url, "https://token-plan-cn.xiaomimimo.com/v1")
         self.assertEqual(specs[0].api_key, "mimo-token-plan-key")
-        self.assertIn("mimo-v2.5", get_selectable_models("fnm"))
-        self.assertIn("mimo-v2-omni", get_selectable_models("fnm"))
-        self.assertNotIn("mimo-v2.5-pro", get_selectable_models("fnm"))
+        self.assertIn("mimo-v2.5", get_selectable_models("vision"))
+        self.assertIn("mimo-v2-omni", get_selectable_models("vision"))
+        self.assertNotIn("mimo-v2.5-pro", get_selectable_models("vision"))
 
     def test_selectable_model_pools_are_curated_by_capability(self) -> None:
         from model_capabilities import get_selectable_models
 
         translation_models = get_selectable_models("translation")
-        fnm_models = get_selectable_models("fnm")
+        visual_models = get_selectable_models("vision")
 
         for key in (
             "deepseek-chat",
@@ -169,7 +169,7 @@ class ModelPoolsTest(unittest.TestCase):
             "mimo-v2.5",
             "mimo-v2-omni",
         ):
-            self.assertIn(key, fnm_models)
+            self.assertIn(key, visual_models)
 
         for key in (
             "deepseek-chat",
@@ -181,15 +181,15 @@ class ModelPoolsTest(unittest.TestCase):
             "moonshot-v1-128k",
             "mimo-v2.5-pro",
         ):
-            self.assertNotIn(key, fnm_models)
+            self.assertNotIn(key, visual_models)
 
-    def test_qwen_multimodal_thinking_payload_survives_fnm_pool_resolution(self) -> None:
-        from persistence.storage import resolve_fnm_model_pool_specs
+    def test_qwen_multimodal_thinking_payload_survives_visual_pool_resolution(self) -> None:
+        from persistence.storage import resolve_visual_model_pool_specs
 
         config.save_config(
             {
                 "dashscope_key": "dashscope-key",
-                "fnm_model_pool": [
+                "visual_model_pool": [
                     {
                         "mode": "builtin",
                         "builtin_key": "qwen3.6-plus",
@@ -201,7 +201,7 @@ class ModelPoolsTest(unittest.TestCase):
             }
         )
 
-        specs = resolve_fnm_model_pool_specs()
+        specs = resolve_visual_model_pool_specs()
 
         self.assertEqual(specs[0].model_id, "qwen3.6-plus")
         self.assertTrue(specs[0].supports_vision)
@@ -241,12 +241,12 @@ class ModelPoolsTest(unittest.TestCase):
         self.assertEqual(len(candidates), 1)
         self.assertEqual(candidates[0][1]["model_id"], "ready-model")
 
-    def test_custom_openai_compatible_fnm_slot_defaults_to_visual_capability(self) -> None:
-        from persistence.storage import resolve_fnm_model_pool_specs
+    def test_custom_openai_compatible_visual_slot_defaults_to_visual_capability(self) -> None:
+        from persistence.storage import resolve_visual_model_pool_specs
 
         config.save_config(
             {
-                "fnm_model_pool": [
+                "visual_model_pool": [
                     {
                         "mode": "custom",
                         "display_name": "Vision Compat",
@@ -261,14 +261,14 @@ class ModelPoolsTest(unittest.TestCase):
             }
         )
 
-        specs = resolve_fnm_model_pool_specs()
+        specs = resolve_visual_model_pool_specs()
 
         self.assertEqual(len(specs), 1)
         self.assertTrue(specs[0].supports_vision)
 
     def test_resolve_model_pool_specs_supports_glm_and_kimi_with_thinking(self) -> None:
         from model_capabilities import get_selectable_models
-        from persistence.storage import resolve_fnm_model_pool_specs, resolve_translation_model_pool_specs
+        from persistence.storage import resolve_visual_model_pool_specs, resolve_translation_model_pool_specs
 
         config.save_config(
             {
@@ -287,7 +287,7 @@ class ModelPoolsTest(unittest.TestCase):
                     },
                     {"mode": "empty"},
                 ],
-                "fnm_model_pool": [
+                "visual_model_pool": [
                     {
                         "mode": "builtin",
                         "builtin_key": "glm-5v-turbo",
@@ -304,12 +304,12 @@ class ModelPoolsTest(unittest.TestCase):
         )
 
         translation_specs = resolve_translation_model_pool_specs()
-        fnm_specs = resolve_fnm_model_pool_specs()
+        visual_specs = resolve_visual_model_pool_specs()
 
         self.assertIn("glm-5.1", get_selectable_models("translation"))
-        self.assertIn("glm-5v-turbo", get_selectable_models("fnm"))
+        self.assertIn("glm-5v-turbo", get_selectable_models("vision"))
         self.assertIn("kimi-k2.6", get_selectable_models("translation"))
-        self.assertIn("kimi-k2.6", get_selectable_models("fnm"))
+        self.assertIn("kimi-k2.6", get_selectable_models("vision"))
         self.assertEqual(translation_specs[0].provider, "glm")
         self.assertEqual(translation_specs[0].base_url, "https://open.bigmodel.cn/api/paas/v4/")
         self.assertEqual(translation_specs[0].api_key, "glm-key")
@@ -324,41 +324,10 @@ class ModelPoolsTest(unittest.TestCase):
             translation_specs[1].request_overrides,
             {"extra_body": {"thinking": {"type": "disabled"}}},
         )
-        self.assertEqual(fnm_specs[0].provider, "glm")
-        self.assertEqual(fnm_specs[0].request_overrides["extra_body"]["thinking"]["type"], "enabled")
-        self.assertEqual(fnm_specs[1].provider, "kimi")
-        self.assertEqual(fnm_specs[1].request_overrides["extra_body"]["thinking"]["type"], "enabled")
-
-    def test_fnm_repair_roles_do_not_follow_visual_primary_order(self) -> None:
-        from persistence.storage import resolve_fnm_repair_model_specs, resolve_visual_model_spec
-
-        config.save_config(
-            {
-                "gemini_key": "gemini-key",
-                "glm_api_key": "glm-key",
-                "fnm_repair_primary_model_id": "glm-4.6v",
-                "fnm_repair_final_model_id": "gemini-3.1-flash-lite",
-                "fnm_model_pool": [
-                    {
-                        "mode": "custom",
-                        "display_name": "Gemini Visual",
-                        "provider_type": "gemini",
-                        "model_id": "gemini-3.1-flash-lite",
-                        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
-                        "custom_api_key": "gemini-key",
-                    },
-                    {"mode": "builtin", "builtin_key": "glm-4.6v"},
-                    {"mode": "empty"},
-                ],
-            }
-        )
-
-        self.assertEqual(resolve_visual_model_spec().model_id, "gemini-3.1-flash-lite")
-        self.assertEqual(resolve_fnm_repair_model_specs()[0].model_id, "glm-4.6v")
-        self.assertEqual(
-            resolve_fnm_repair_model_specs(final_round=True)[0].model_id,
-            "gemini-3.1-flash-lite",
-        )
+        self.assertEqual(visual_specs[0].provider, "glm")
+        self.assertEqual(visual_specs[0].request_overrides["extra_body"]["thinking"]["type"], "enabled")
+        self.assertEqual(visual_specs[1].provider, "kimi")
+        self.assertEqual(visual_specs[1].request_overrides["extra_body"]["thinking"]["type"], "enabled")
 
     def test_custom_provider_slots_apply_provider_specific_thinking_payloads(self) -> None:
         from persistence.storage import resolve_translation_model_pool_specs

@@ -1,0 +1,26 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_transcribe",
+  "pages": [
+    599,
+    600
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_transcribe PDF page 599\",\n      \"printed_page\": \"599\",\n      \"lines\": [\n        \"INDEX 599\",\n        \"VOLTAIRE : 17n, 226 WEILL (Nicolas) : 534n\",\n        \"VON HERRMANN (Friedrich- WELTE (Bernhard) : 275, 479n, 486\",\n        \"Wilhelm) : 322, 504n WEIZMANN (Leopoldine) : 354\",\n        \"VUILLEMIN (Jules) : 224, 490-491n WHITEHEAD (Alfred North) : 37-39\",\n        \"WILLIAMS (William C.) : 42\",\n        \"WAELHENS (Alphonse de) : 48, 86, WINCKELMANN (Johann Joachim) :\",\n        \"92n-93, 95n, 104n, 109, 122, 372\",\n        \"125-127, 131n, 136n, 150n, 163, WINDELBAND (Wilhelm) : 437\",\n        \"165-166, 172-173n, 180, 234n, WISMANN (Heinz) : 491n\",\n        \"317, 320, 322-323, 331n, 333 WISSER (Richard) : 426n\",\n        \"WAHL (François) : 217 WITTGENSTEIN (Ludwig) : 249-\",\n        \"WAHL (Jean) : 32n, 36-39, 52, 90, 250n, 286, 362, 460, 464, 474n,\",\n        \"92-98, 103, 115, 117, 128n, 145, 492n, 523, 538\",\n        \"151n, 169-170, 176-178, 180- WOLIN (Richard) : 393n\",\n        \"181, 203, 208n, 212n, 224, 286, WYBRANDS (Franz) : 303n, 326n\",\n        \"487, 491\",\n        \"WAGNER (Richard) : 281 YORCK von WARTENBURG (Paul) :\",\n        \"WALZER (R.) : 244n 44\",\n        \"WARIN (François) : 23, 52n, 207\",\n        \"WEBER (Alfred) : 129n, 130n, 131n ZAC (Sylvain) : 153n\",\n        \"WEIL (Éric) : 109, 122-125, 127, ZARADER (Marlène) : 208n, 453-459\",\n        \"136-137, 189, 192, 198, 271, ZARATHOUSTRA : 13n, 256\",\n        \"373n, 393-394, 397, 519, 521- ZERVOS (Christian et Yvonne) : 241\",\n        \"522 ZIMMER (le menuisier) : 507n\",\n        \"WEIL (Simone) : 180, 312\"\n      ],\n      \"uncertain\": []\n    },\n    {\n      \"label\": \"backmatter_transcribe PDF page 600\",\n      \"printed_page\": \"\",\n      \"lines\": [],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 2476,
+      "completion_tokens": 1006,
+      "total_tokens": 3482
+    }
+  }
+}

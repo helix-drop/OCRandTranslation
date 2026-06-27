@@ -88,37 +88,6 @@ def _compute_resume_bp(
     if phase in ("idle", "done"):
         return None
     task = _normalize_translate_task_meta(state.get("task"))
-    if task.get("kind") == "fnm":
-        from persistence.sqlite_store import SQLiteRepository
-        repo = SQLiteRepository()
-        units = repo.list_fnm_translation_units(doc_id)
-        if not units:
-            return None
-        target_bps = list(range(1, len(units) + 1))
-        done_set = set()
-        failed_set = set()
-        for idx, unit in enumerate(units, start=1):
-            st = unit.get("status")
-            if st == "done":
-                done_set.add(idx)
-            elif st == "error":
-                failed_set.add(idx)
-        processed_bps = done_set | failed_set
-        current_bp = state.get("current_bp")
-        current_bp = int(current_bp) if current_bp is not None else None
-        if phase == "partial_failed":
-            for bp in target_bps:
-                if bp in failed_set:
-                    return bp
-            return None
-        if phase == "error" and current_bp in target_bps and current_bp not in processed_bps:
-            return current_bp
-        if phase == "stopped" and current_bp in target_bps and current_bp not in processed_bps:
-            return current_bp
-        for bp in target_bps:
-            if bp not in processed_bps:
-                return bp
-        return None
     if pages is None:
         pages, _ = load_pages_from_disk(doc_id)
     if target_bps is None:
@@ -253,8 +222,6 @@ def reconcile_translate_state_after_page_success(doc_id: str, bp: int):
     _clear_failed_page_state(doc_id, bp)
     snapshot = _load_translate_state(doc_id)
     task = _normalize_translate_task_meta(snapshot.get("task"))
-    if task.get("kind") == "fnm":
-        return
     pages, _ = load_pages_from_disk(doc_id)
     target_bps = _resolve_task_target_bps(pages, snapshot)
     entries, _, _ = load_entries_from_disk(doc_id, pages=pages)
@@ -281,8 +248,6 @@ def reconcile_translate_state_after_page_failure(doc_id: str, bp: int, error: st
     _mark_failed_page_state(doc_id, bp, error)
     snapshot = _load_translate_state(doc_id)
     task = _normalize_translate_task_meta(snapshot.get("task"))
-    if task.get("kind") == "fnm":
-        return
     pages, _ = load_pages_from_disk(doc_id)
     target_bps = _resolve_task_target_bps(pages, snapshot)
     entries, _, _ = load_entries_from_disk(doc_id, pages=pages)

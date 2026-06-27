@@ -3,7 +3,6 @@
 {% set para_status = pe._status|default('done') %}
 {% set para_bp = pe._startBP|default(cur_page_bp)|int %}
 {% set para_pages_display = pe.pages_display|default(pe.pages|default('')) %}
-{% set has_fnm_meta = current_view == 'fnm' and (pe.section_path_display or pe._cross_page or pe.fnm_ref_labels) %}
 
 {% if hlevel > 0 %}
 <div class="heading-block heading-h{{ hlevel }}" data-para-idx="{{ loop.index0 }}" data-para-bp="{{ para_bp }}" data-bboxes="{{ pe._bboxes|default([])|tojson }}" style="margin:{{ '32px' if hlevel == 1 else '24px' }} 0 12px;">
@@ -19,13 +18,6 @@
   </div>
   {% if para_status == 'error' %}
   <div style="margin-top:6px;font-size:11px;color:var(--red);">该段翻译失败，占位内容已保留。</div>
-  {% endif %}
-  {% if has_fnm_meta %}
-  <div class="entry-structure-line">
-    {% if pe.section_path_display %}<span class="entry-structure-chip">章节：{{ pe.section_path_display }}</span>{% endif %}
-    {% if pe._cross_page %}<span class="entry-structure-chip">跨页：{{ pe._cross_page }}</span>{% endif %}
-    {% if pe.fnm_ref_labels %}<span class="entry-structure-chip">引用：{{ pe.fnm_ref_labels|join(', ') }}</span>{% endif %}
-  </div>
   {% endif %}
 </div>
 {% else %}
@@ -43,13 +35,6 @@
       <div class="text-cn js-para-translation" data-para-idx="{{ loop.index0 }}" style="font-size:16px;">{{ pe.translation or '' }}</div>
     </div>
   </div>
-  {% if has_fnm_meta %}
-  <div class="entry-structure-line">
-    {% if pe.section_path_display %}<span class="entry-structure-chip">章节：{{ pe.section_path_display }}</span>{% endif %}
-    {% if pe._cross_page %}<span class="entry-structure-chip">跨页：{{ pe._cross_page }}</span>{% endif %}
-    {% if pe.fnm_ref_labels %}<span class="entry-structure-chip">引用：{{ pe.fnm_ref_labels|join(', ') }}</span>{% endif %}
-  </div>
-  {% endif %}
 </div>
 {% endif %}
 {% endfor %}

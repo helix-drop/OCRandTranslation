@@ -14,8 +14,8 @@ def request_doc_id(normalize_doc_id_fn, get_current_doc_id_fn) -> str:
 
 
 def normalize_reading_view(view: str | None) -> str:
-    normalized = str(view or "standard").strip().lower()
-    return normalized if normalized in {"standard", "fnm"} else "standard"
+    del view
+    return "standard"
 
 
 def parse_bool_flag(raw: str) -> bool:

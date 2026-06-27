@@ -44,7 +44,7 @@ function hydrateStreamDraftFromSnapshot(snapshot) {
   var paragraphs = Array.isArray(draft.paragraphs) ? draft.paragraphs.slice() : [];
   dispatch('replace_stream_draft', { draft: {
     active: !!draft.active,
-    mode: draft.mode || (isFnmTaskState(snapshot) ? 'fnm_unit' : 'page'),
+    mode: draft.mode || 'page',
     bp: draft.bp || null,
     unitIdx: draft.unit_idx == null ? (snapshot && snapshot.current_unit_idx != null ? snapshot.current_unit_idx : null) : Number(draft.unit_idx || 0),
     unitId: draft.unit_id || ((snapshot && snapshot.current_unit_id) || ''),
@@ -62,7 +62,7 @@ function hydrateStreamDraftFromSnapshot(snapshot) {
     paragraphErrors: Array.isArray(draft.paragraph_errors) ? draft.paragraph_errors.slice() : [],
     paragraphs: paragraphs,
     status: draft.status || 'idle',
-    note: draft.note || (isFnmTaskState(snapshot) ? '当前 unit 的流式草稿会显示在这里。' : '流式翻译开始后，这里会显示当前页正在生成的中文草稿。'),
+    note: draft.note || '流式翻译开始后，这里会显示当前页正在生成的中文草稿。',
     updatedAt: Number(draft.updated_at || 0),
     lastError: draft.last_error || '',
     restored: true,
@@ -117,10 +117,6 @@ function resumeTranslateFromSnapshot(state) {
       nextSegmentIndex = 0;
     }
     startGlossaryRetranslate(nextBp, nextSegmentIndex);
-    return;
-  }
-  if (String(task.kind || '') === 'fnm') {
-    startFnmTranslate(true, nextBp);
     return;
   }
   startTranslateAll(nextBp);
@@ -261,24 +257,6 @@ function formatUsagePhase(phase) {
 
 function _draftListHtml(snapshot, draft) {
   var items = [];
-  if (isFnmTaskState(snapshot)) {
-    var unitItems = Array.isArray((draft && draft.unitItems) && draft.unitItems.length ? draft.unitItems : snapshot.unit_items)
-      ? ((draft && draft.unitItems) && draft.unitItems.length ? draft.unitItems : snapshot.unit_items)
-      : [];
-    unitItems.forEach(function(item) {
-      items.push(
-        '<div class="translation-detail-item">'
-        + '<div class="translation-detail-item-title">' + escapeHtml(item.label || formatFnmUnitIndex(item.unit_idx)) + '</div>'
-        + '<div class="translation-detail-item-meta">状态：' + escapeHtml(formatDraftStatusLabel(item.status || 'pending')) + (item.pages ? (' · p.' + escapeHtml(item.pages)) : '') + '</div>'
-        + (item.preview ? ('<div class="translation-detail-item-preview">' + escapeHtml(item.preview) + '</div>') : '')
-        + ((item.status === 'error' && item.unit_idx)
-          ? ('<div class="translation-session-actions" style="margin-top:8px;"><button type="button" class="btn btn-gho" onclick="startFnmTranslate(false, ' + Number(item.unit_idx) + ');">重试 ' + formatFnmUnitIndex(item.unit_idx) + '</button></div>')
-          : '')
-        + '</div>'
-      );
-    });
-    return items.length ? items.join('') : '<div class="translation-detail-copy">当前还没有可展示的 unit 草稿。</div>';
-  }
   var paragraphs = Array.isArray(draft && draft.paragraphs) ? draft.paragraphs : [];
   var paragraphStates = Array.isArray(draft && draft.paragraphStates) ? draft.paragraphStates : [];
   var paragraphErrors = Array.isArray(draft && draft.paragraphErrors) ? draft.paragraphErrors : [];
@@ -306,7 +284,6 @@ function renderTaskSessionDetails(payload) {
   var display = getUsageDisplaySnapshot(snapshot);
   var sampleStats = isActiveTranslatePhase(display.phase) ? getUsageSampleStats() : { recentTokens: 0, tokenRate: 0 };
   var draft = store.streamDraft || createInitialStreamDraftState();
-  var isFnm = isFnmTaskState(display);
   var metricHtml = [
     ['当前任务', (display.task && display.task.label) || '无'],
     ['任务日志', (display.task && display.task.log_relpath) || '-'],
@@ -324,10 +301,8 @@ function renderTaskSessionDetails(payload) {
       + escapeHtml(item[0]) + '</div><div class="translation-detail-value">'
       + escapeHtml(item[1]) + '</div></div>';
   }).join('');
-  var currentLabel = isFnm
-    ? (display.current_unit_label || (display.current_bp ? formatFnmUnitIndex(display.current_bp) : '等待 unit 进入翻译'))
-    : formatPdfPageLabel(display.current_bp || draft.bp || store.reading.currentBp);
-  var detailTitle = isFnm ? 'FNM 单元详情' : '普通翻译详情';
+  var currentLabel = formatPdfPageLabel(display.current_bp || draft.bp || store.reading.currentBp);
+  var detailTitle = '普通翻译详情';
   var noteParts = [];
   if (draft.note) noteParts.push(draft.note);
   if (draft.lastError) noteParts.push('最近错误：' + draft.lastError);
@@ -336,9 +311,6 @@ function renderTaskSessionDetails(payload) {
   }
   if (display.companion_model_label) {
     noteParts.push('脚注/尾注回退：' + display.companion_model_label);
-  }
-  if (isFnm && display.current_unit_pages) {
-    noteParts.unshift('页范围：p.' + display.current_unit_pages);
   }
   details.innerHTML =
     '<div class="translation-detail-grid">' + metricHtml + '</div>'
@@ -484,15 +456,6 @@ function formatTranslatePhaseLabel(state) {
     label = task.label + ' · ' + label;
   }
   if (phase === 'running' || phase === 'stopping') {
-    if (isFnmTaskState(state)) {
-      if (state && state.current_unit_label) {
-        return label + ' · ' + state.current_unit_label;
-      }
-      if (state && state.current_bp) {
-        return label + ' · ' + formatFnmUnitIndex(state.current_bp);
-      }
-      return label;
-    }
     if (state && state.current_bp) {
       return label + ' · ' + formatPdfPageLabel(state.current_bp);
     }
@@ -538,10 +501,9 @@ function renderTranslateSnapshot(state) {
       : '当前无任务，可从这里启动普通翻译或词典补重译。';
   }
   _renderTaskSessionActions(state);
-  var isFnmTask = isFnmTaskState(state);
-  var totalPages = isFnmTask ? Number(state.total_units || 0) : Number(state.total_pages || 0);
-  var processedPages = isFnmTask ? Number(state.processed_units || 0) : Number(state.processed_pages || 0);
-  if (!isFnmTask && !totalPages) {
+  var totalPages = Number(state.total_pages || 0);
+  var processedPages = Number(state.processed_pages || 0);
+  if (!totalPages) {
     totalPages = Number(store.pages.allBps.length || 0);
   }
   if (totalPages && processedPages > totalPages) {
@@ -549,7 +511,7 @@ function renderTranslateSnapshot(state) {
   }
   var pct = totalPages ? (processedPages / totalPages) * 100 : 0;
   var stats = totalPages
-    ? ('已处理 ' + processedPages + '/' + totalPages + (isFnmTask ? ' 个 unit' : ' 页'))
+    ? ('已处理 ' + processedPages + '/' + totalPages + ' 页')
     : '当前没有活动任务';
   var detail = '已译 ' + Number(state.translated_paras || 0) + ' 段 / ' + Number(state.translated_chars || 0) + ' 字';
   if (Number(state.total_tokens || 0) > 0) {
@@ -573,15 +535,6 @@ function updateProgressStatsText(d) {
   if (!el) return;
   var current = Number(store.reading.currentBp || 0);
   var totalPdfPages = Number(store.pages.allBps.length || 0);
-  if (store.readingView.mode === 'fnm') {
-    var projectedPages = Array.isArray(store.pages.translatedBps) ? store.pages.translatedBps.length : 0;
-    var doneUnits = Number(d && d.done_units || 0);
-    var totalUnits = Number(d && d.total_units || 0);
-    var failedUnits = Number(d && d.error_units || 0);
-    var suffix = totalUnits ? '（任务共 ' + totalUnits + ' 个 unit）' : '';
-    el.textContent = '已投影' + projectedPages + '页 · 已完成' + doneUnits + '个 unit · 失败' + failedUnits + '个 unit · 当前 PDF 第' + current + '页 / 第' + totalPdfPages + '页' + suffix;
-    return;
-  }
   var doneForStats = Number(store.readingView.readingStatsDonePages || 0);
   var partial = Array.isArray(store.pages.partialFailedBps) ? store.pages.partialFailedBps.length : 0;
   var failed = Array.isArray(store.pages.failedBps) ? store.pages.failedBps.length : 0;
@@ -681,56 +634,6 @@ function startTranslateAll(startBp, forceRestart) {
     });
 }
 
-function startFnmTranslate(forceRestart, startUnitIdx) {
-  translateSessionActivated = true;
-  showProgress(true);
-  setTranslateProgress(0, '启动 FNM 翻译…', '', '');
-
-  var docId = requireReadingDocId('启动 FNM 翻译', function(message) {
-    setTranslateProgress(0, '启动失败', message, '');
-  });
-  if (!docId) return;
-
-  var form = new FormData();
-  form.append('doc_title', BOOTSTRAP.docTitle || '');
-  if (forceRestart) {
-    form.append('force_restart', '1');
-  }
-  if (startUnitIdx !== undefined && startUnitIdx !== null) {
-    form.append('start_unit_idx', String(startUnitIdx));
-  }
-
-  fetch(ROUTES.fnmTranslate || ('/api/doc/' + encodeURIComponent(docId) + '/fnm/translate'), {
-    method: 'POST',
-    headers: withCsrfHeaders(),
-    body: form
-  })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      if (d.status === 'already_running') {
-        if (forceRestart) {
-          setTranslateProgress(0, '启动失败', '当前翻译任务仍未停止，请稍后重试。', '');
-          return;
-        }
-        var shouldRestart = window.confirm('当前已有翻译任务在运行。要停止当前任务并切换到 FNM 翻译吗？');
-        if (shouldRestart) {
-          startFnmTranslate(true);
-        } else {
-          setTranslateProgress(0, '未切换', '保留当前翻译任务。', '');
-        }
-        return;
-      }
-      if (d.error) {
-        setTranslateProgress(0, '启动失败', d.message || d.error, '');
-        return;
-      }
-      refreshTranslateStatus();
-    })
-    .catch(function(err) {
-      setTranslateProgress(0, '启动失败', String(err || 'unknown_error'), '');
-    });
-}
-
 function listenTranslateSSE() {
   closeTranslateSSE();
   var docId = requireReadingDocId('订阅翻译进度');
@@ -793,33 +696,19 @@ function listenTranslateSSE() {
   translateES.addEventListener('page_done', function(e) {
     var d = JSON.parse(e.data);
     dispatch('stream_page_done', { data: d });
-    if (isFnmDraftMode(store.streamDraft, lastUsageSnapshot || {})) {
-      var affectedBps = Array.isArray(d.affected_bps) ? d.affected_bps.map(function(bp) { return Number(bp); }).filter(Boolean) : [];
-      if (affectedBps.length) {
-        dispatch('mark_pages_done', { bps: affectedBps });
-        if (affectedBps.indexOf(Number(store.reading.currentBp || 0)) >= 0
-            && !store.guards.manualNavigationInFlight
-            && !currentPageHasEntry) {
-          forceReloadReadingPage(store.reading.currentBp);
-        }
-      }
-    } else {
-      var hasDraftError = !!d.partial_failed || (
-        Array.isArray(store.streamDraft.paragraphStates)
-        && store.streamDraft.paragraphStates.some(function(state) { return state === 'error'; })
-      );
-      dispatch('mark_page_done', { bp: d.bp, partialFailed: hasDraftError });
-      scheduleCommittedPageRefresh(d.bp);
-    }
+    var hasDraftError = !!d.partial_failed || (
+      Array.isArray(store.streamDraft.paragraphStates)
+      && store.streamDraft.paragraphStates.some(function(state) { return state === 'error'; })
+    );
+    dispatch('mark_page_done', { bp: d.bp, partialFailed: hasDraftError });
+    scheduleCommittedPageRefresh(d.bp);
     renderStreamDraftState();
     refreshTranslateStatus();
   });
 
   translateES.addEventListener('page_error', function(e) {
     var d = JSON.parse(e.data);
-    if (!isFnmDraftMode(store.streamDraft, lastUsageSnapshot || {})) {
-      dispatch('mark_page_error', { bp: d.bp });
-    }
+    dispatch('mark_page_error', { bp: d.bp });
     refreshTranslateStatus();
   });
 

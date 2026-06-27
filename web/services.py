@@ -18,7 +18,6 @@ import translation.service as translation_service
 import translation.translate_launch as translate_launch
 import translation.translate_progress as translate_progress
 import translation.translate_runtime as translate_runtime
-from FNM_RE import build_export_bundle_for_doc, build_export_zip_for_doc
 import web.common as common
 import web.document_support as document_support
 import web.export_support as export_support
@@ -87,7 +86,6 @@ class ReadingServices(_ServiceBag):
     _render_reading_body_text: Any
     _render_reading_footnotes_text: Any
     build_display_entries: Any
-    build_fnm_page_context: Any
     build_page_notes_panel: Any
     build_reading_view_state: Any
     ensure_str: Any
@@ -100,7 +98,6 @@ class ReadingServices(_ServiceBag):
     get_translate_snapshot: Any
     has_pdf: Any
     load_effective_toc: Any
-    load_fnm_diagnostic_view_entries: Any
     load_visible_page_view: Any
     normalize_doc_id: Any
     reading_view_summary_text: Any
@@ -134,7 +131,6 @@ class TranslationServices(_ServiceBag):
     get_translate_snapshot: Any
     has_active_translate_task: Any
     load_entries_from_disk: Any
-    load_fnm_diagnostic_entries: Any
     load_pages_from_disk: Any
     load_visible_page_view: Any
     logger: Any
@@ -147,7 +143,6 @@ class TranslationServices(_ServiceBag):
     save_entries_to_disk: Any
     save_entry_to_disk: Any
     set_current_doc: Any
-    start_fnm_translate_task: Any
     start_translate_task: Any
     translate_page: Any
     wait_for_translate_idle: Any
@@ -204,8 +199,6 @@ class ExportServices(_ServiceBag):
     _parse_bp_ranges: Any
     _request_doc_id: Any
     _sanitize_filename: Any
-    build_fnm_obsidian_export: Any
-    build_fnm_obsidian_export_zip: Any
     compute_boilerplate_skip_bps: Any
     gen_markdown: Any
     get_app_state: Any
@@ -320,7 +313,6 @@ def build_app_services() -> AppServices:
         _render_reading_body_text=reading_view._render_reading_body_text,
         _render_reading_footnotes_text=reading_view._render_reading_footnotes_text,
         build_display_entries=reading_view.build_display_entries,
-        build_fnm_page_context=reading_view.build_fnm_page_context,
         build_page_notes_panel=reading_view.build_page_notes_panel,
         build_reading_view_state=reading_view.build_reading_view_state,
         ensure_str=text_utils.ensure_str,
@@ -333,7 +325,6 @@ def build_app_services() -> AppServices:
         get_translate_snapshot=_proxy(translate_runtime, "get_translate_snapshot"),
         has_pdf=_proxy(storage, "has_pdf"),
         load_effective_toc=_proxy(storage, "load_effective_toc"),
-        load_fnm_diagnostic_view_entries=reading_view.load_fnm_diagnostic_view_entries,
         load_visible_page_view=_proxy(storage, "load_visible_page_view"),
         normalize_doc_id=_proxy(app_config, "normalize_doc_id"),
         reading_view_summary_text=reading_view.reading_view_summary_text,
@@ -366,7 +357,6 @@ def build_app_services() -> AppServices:
         get_translate_snapshot=_proxy(translate_runtime, "get_translate_snapshot"),
         has_active_translate_task=_proxy(translate_runtime, "has_active_translate_task"),
         load_entries_from_disk=_proxy(storage, "load_entries_from_disk"),
-        load_fnm_diagnostic_entries=reading_view.load_fnm_diagnostic_entries,
         load_pages_from_disk=_proxy(storage, "load_pages_from_disk"),
         load_visible_page_view=_proxy(storage, "load_visible_page_view"),
         logger=logger,
@@ -379,7 +369,6 @@ def build_app_services() -> AppServices:
         save_entries_to_disk=_proxy(storage, "save_entries_to_disk"),
         save_entry_to_disk=_proxy(storage, "save_entry_to_disk"),
         set_current_doc=_proxy(app_config, "set_current_doc"),
-        start_fnm_translate_task=_proxy(translate_launch, "start_fnm_translate_task"),
         start_translate_task=_proxy(translate_launch, "start_translate_task"),
         translate_page=_proxy(translation_service, "translate_page"),
         wait_for_translate_idle=_proxy(translate_runtime, "wait_for_translate_idle"),
@@ -434,8 +423,6 @@ def build_app_services() -> AppServices:
         _parse_bp_ranges=export_support.parse_bp_ranges,
         _request_doc_id=request_doc_id,
         _sanitize_filename=common.sanitize_filename,
-        build_fnm_obsidian_export=build_export_bundle_for_doc,
-        build_fnm_obsidian_export_zip=build_export_zip_for_doc,
         compute_boilerplate_skip_bps=_proxy(storage, "compute_boilerplate_skip_bps"),
         gen_markdown=_proxy(storage, "gen_markdown"),
         get_app_state=_proxy(storage, "get_app_state"),

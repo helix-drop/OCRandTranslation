@@ -1,0 +1,83 @@
+{
+  "slug": "Goldstein",
+  "folder": "post-revolutionary",
+  "doc_id": "7ba9bca783fd",
+  "verdict": "FAIL",
+  "batch_tag": "20260419_tier1a_v5_goldstein",
+  "commit": "f37b345",
+  "pipeline": {
+    "ok": true,
+    "run_id": 11,
+    "page_count": 431,
+    "section_count": 17,
+    "note_count": 637,
+    "unit_count": 722,
+    "structure_state": "review_required",
+    "manual_toc_required": false,
+    "blocking_reasons": [
+      "link_first_marker_not_one",
+      "link_endnote_not_all_matched",
+      "link_orphan_note_remaining",
+      "link_endnote_only_orphan_anchor_remaining",
+      "freeze_unit_contract_invalid"
+    ],
+    "review_counts": {
+      "link_first_marker_not_one": 1,
+      "link_endnote_not_all_matched": 1,
+      "link_orphan_note_remaining": 1,
+      "link_endnote_only_orphan_anchor_remaining": 1,
+      "freeze_unit_contract_invalid": 1
+    },
+    "export_ready_real": false
+  },
+  "manual_toc_fallback": {},
+  "baseline": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 11,
+      "endnote_orphan_anchor": 267,
+      "ambiguous": 0
+    },
+    "link_count": 904,
+    "body_anchor_count": 903,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {
+      "link": 22,
+      "llm_suggestion": 13
+    }
+  },
+  "after": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 11,
+      "endnote_orphan_anchor": 267,
+      "ambiguous": 0
+    },
+    "link_count": 904,
+    "body_anchor_count": 903,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {
+      "link": 22
+    }
+  },
+  "repair": {
+    "error": "模型请求失败（HTTP 400）：<400> InternalError.Algo.DataInspectionFailed: Input image data may contain inappropriate content.",
+    "traceback": "Traceback (most recent call last):\n  File \"/Users/hao/OCRandTranslation/FNM_RE/llm_repair.py\", line 710, in request_llm_repair_actions\n    response = client.chat.completions.create(\n        model=str(resolved_args.get(\"model_id\") or \"\"),\n    ...<5 lines>...\n        extra_body={\"enable_thinking\": False},\n    )\n  File \"/Users/hao/OCRandTranslation/.venv/lib/python3.14/site-packages/openai/_utils/_utils.py\", line 286, in wrapper\n    return func(*args, **kwargs)\n  File \"/Users/hao/OCRandTranslation/.venv/lib/python3.14/site-packages/openai/resources/chat/completions/completions.py\", line 1211, in create\n    return self._post(\n           ~~~~~~~~~~^\n        \"/chat/completions\",\n        ^^^^^^^^^^^^^^^^^^^^\n    ...<47 lines>...\n        stream_cls=Stream[ChatCompletionChunk],\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/hao/OCRandTranslation/.venv/lib/python3.14/site-packages/openai/_base_client.py\", line 1297, in post\n    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))\n                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/hao/OCRandTranslation/.venv/lib/python3.14/site-packages/openai/_base_client.py\", line 1070, in request\n    raise self._make_status_error_from_response(err.response) from None\nopenai.BadRequestError: Error code: 400 - {'error': {'message': '<400> InternalError.Algo.DataInspectionFailed: Input image data may contain inappropriate content.', 'type': 'data_inspection_failed', 'param': None, 'code': 'data_inspection_failed'}, 'id': 'chatcmpl-988a2375-fb80-9b7c-bc11-42aeb585416a', 'request_id': '988a2375-fb80-9b7c-bc11-42aeb585416a'}\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/Users/hao/OCRandTranslation/scripts/run_fnm_llm_tier1a.py\", line 283, in _run_repair\n    return run_llm_repair(\n        doc_id,\n    ...<6 lines>...\n        max_unmatched_anchors=_positive_or_none(args.max_unmatched_anchors),\n    )\n  File \"/Users/hao/OCRandTranslation/FNM_RE/__init__.py\", line 27, in run_llm_repair\n    return impl(*args, **kwargs)\n  File \"/Users/hao/OCRandTranslation/FNM_RE/llm_repair.py\", line 843, in run_llm_repair\n    llm_result = request_llm_repair_actions(\n        cluster,\n    ...<3 lines>...\n        max_unmatched_anchors=max_unmatched_anchors,\n    )\n  File \"/Users/hao/OCRandTranslation/FNM_RE/llm_repair.py\", line 720, in request_llm_repair_actions\n    raise _classify_provider_exception(exc) from exc\ntranslation.translator.NonRetryableProviderError: 模型请求失败（HTTP 400）：<400> InternalError.Algo.DataInspectionFailed: Input image data may contain inappropriate content.\n",
+    "cluster_count": 0,
+    "suggestion_count": 0,
+    "auto_applied_count": 0,
+    "suggestions": [],
+    "auto_applied": []
+  },
+  "rebuild": {},
+  "blocking_reasons": [
+    "link_first_marker_not_one",
+    "link_endnote_not_all_matched",
+    "link_orphan_note_remaining",
+    "link_endnote_only_orphan_anchor_remaining",
+    "freeze_unit_contract_invalid"
+  ],
+  "manual_toc_required": false
+}

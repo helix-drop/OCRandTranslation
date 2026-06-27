@@ -985,10 +985,10 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertIn('name="section" value="translation_model_pool"', html)
-        self.assertIn('name="section" value="fnm_model_pool"', html)
+        self.assertIn('name="section" value="visual_model_pool"', html)
         for slot_no in (1, 2, 3):
             self.assertIn(f'name="translation_model_pool_slot{slot_no}_mode"', html)
-            self.assertIn(f'name="fnm_model_pool_slot{slot_no}_mode"', html)
+            self.assertIn(f'name="visual_model_pool_slot{slot_no}_mode"', html)
         self.assertIn("MiMo Token Plan", html)
         self.assertIn("智谱 GLM API Key", html)
         self.assertIn("Kimi API Key", html)
@@ -1007,7 +1007,7 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertNotIn("qwen-vl-ocr", html)
         self.assertIn("当前模型", html)
         self.assertIn("翻译主模型：", html)
-        self.assertIn("当前主 FNM 模型", html)
+        self.assertIn("当前主视觉模型", html)
         self.assertNotIn('id="customModelPanel"', html)
         self.assertNotIn('id="visualCustomModelPanel"', html)
         self.assertNotIn("toggleCustomModelPanel", html)
@@ -1038,7 +1038,7 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
                 "custom_api_key": "",
                 "extra_body": {"enable_thinking": False},
             }, {"mode": "empty"}, {"mode": "empty"}],
-            "fnm_model_pool": [{
+            "visual_model_pool": [{
                 "mode": "builtin",
                 "builtin_key": "qwen3.6-plus",
             }, {"mode": "empty"}, {"mode": "empty"}],
@@ -1070,10 +1070,10 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         settings_html = self.client.get("/settings", query_string={"doc_id": self.doc_a_id}).get_data(as_text=True)
 
         self.assertIn("翻译主模型：Qwen 3.5 Plus", home_html)
-        self.assertIn("FNM 主模型：Qwen3.6 Plus", home_html)
+        self.assertIn("视觉主模型：Qwen3.6 Plus", home_html)
         self.assertIn("翻译主模型：Qwen 3.5 Plus", input_html)
         self.assertIn("翻译主模型：Qwen 3.5 Plus", reading_html)
-        self.assertIn("FNM 主模型：Qwen3.6 Plus", reading_html)
+        self.assertIn("视觉主模型：Qwen3.6 Plus", reading_html)
         self.assertIn("重译本页", reading_html)
         self.assertIn("当前主翻译模型", settings_html)
         self.assertIn("Qwen 3.5 Plus", settings_html)
@@ -1191,10 +1191,10 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertNotIn("distraction-free", html)
         self.assertNotIn('name="focus"', html)
         self.assertNotIn("focus=1", html)
-        self.assertIn('name="usage" value="1"', html)
-        self.assertIn('name="orig" value="1"', html)
-        self.assertIn('name="layout" value="side"', html)
-        self.assertIn('name="pdf" value="1"', html)
+        self.assertIn("usage=1", html)
+        self.assertIn("orig=1", html)
+        self.assertIn("layout=side", html)
+        self.assertIn("pdf=1", html)
         self.assertIn('class="reading-main-layout with-pdf"', html)
 
     def test_save_settings_accepts_valid_translation_model_pool_config(self):
@@ -1229,36 +1229,36 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn('name="translation_model_pool_slot1_model_id"', html)
         self.assertIn('value="qwen3.5-plus"', html)
 
-    def test_save_settings_accepts_valid_fnm_model_pool_token_plan_config(self):
+    def test_save_settings_accepts_valid_visual_model_pool_token_plan_config(self):
         config.save_config({
-            "fnm_model_pool": [{
+            "visual_model_pool": [{
                 "mode": "builtin",
                 "builtin_key": "qwen3.6-plus",
             }, {"mode": "empty"}, {"mode": "empty"}],
         })
         resp = self._post("/save_settings", data={
-            "section": "fnm_model_pool",
-            "fnm_model_pool_slot1_mode": "custom",
-            "fnm_model_pool_slot1_display_name": "MiMo Omni Token",
-            "fnm_model_pool_slot1_provider_type": "mimo_token_plan",
-            "fnm_model_pool_slot1_model_id": "mimo-v2-omni",
-            "fnm_model_pool_slot1_base_url": "https://token-plan-cn.xiaomimimo.com/v1",
-            "fnm_model_pool_slot1_custom_api_key": "token-plan-key",
-            "fnm_model_pool_slot2_mode": "builtin",
-            "fnm_model_pool_slot2_builtin_key": "qwen3-vl-plus",
-            "fnm_model_pool_slot3_mode": "empty",
+            "section": "visual_model_pool",
+            "visual_model_pool_slot1_mode": "custom",
+            "visual_model_pool_slot1_display_name": "MiMo Omni Token",
+            "visual_model_pool_slot1_provider_type": "mimo_token_plan",
+            "visual_model_pool_slot1_model_id": "mimo-v2-omni",
+            "visual_model_pool_slot1_base_url": "https://token-plan-cn.xiaomimimo.com/v1",
+            "visual_model_pool_slot1_custom_api_key": "token-plan-key",
+            "visual_model_pool_slot2_mode": "builtin",
+            "visual_model_pool_slot2_builtin_key": "qwen3-vl-plus",
+            "visual_model_pool_slot3_mode": "empty",
         }, follow_redirects=True)
         html = resp.get_data(as_text=True)
 
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("FNM 视觉与修补模型池已保存", html)
+        self.assertIn("视觉模型池已保存", html)
         saved = config.load_config()
-        self.assertEqual(saved["fnm_model_pool"][0]["mode"], "custom")
-        self.assertEqual(saved["fnm_model_pool"][0]["provider_type"], "mimo_token_plan")
-        self.assertEqual(saved["fnm_model_pool"][0]["model_id"], "mimo-v2-omni")
-        self.assertEqual(saved["fnm_model_pool"][0]["base_url"], "https://token-plan-cn.xiaomimimo.com/v1")
-        self.assertEqual(saved["fnm_model_pool"][0]["custom_api_key"], "token-plan-key")
-        self.assertEqual(saved["fnm_model_pool"][1]["builtin_key"], "qwen3-vl-plus")
+        self.assertEqual(saved["visual_model_pool"][0]["mode"], "custom")
+        self.assertEqual(saved["visual_model_pool"][0]["provider_type"], "mimo_token_plan")
+        self.assertEqual(saved["visual_model_pool"][0]["model_id"], "mimo-v2-omni")
+        self.assertEqual(saved["visual_model_pool"][0]["base_url"], "https://token-plan-cn.xiaomimimo.com/v1")
+        self.assertEqual(saved["visual_model_pool"][0]["custom_api_key"], "token-plan-key")
+        self.assertEqual(saved["visual_model_pool"][1]["builtin_key"], "qwen3-vl-plus")
 
     def test_save_settings_accepts_glm_and_kimi_provider_configs_with_thinking(self):
         resp = self._post("/save_settings", data={
@@ -1515,30 +1515,6 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertEqual(resp.status_code, 302)
         self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
 
-    def test_start_reading_keeps_standard_view_even_when_fnm_run_is_ready(self):
-        first_bp, _ = get_page_range(self.doc_a_pages)
-        set_current_doc(self.doc_b_id)
-        config.update_doc_meta(self.doc_a_id, cleanup_headers_footers=True)
-        SQLiteRepository().create_fnm_run(
-            self.doc_a_id,
-            status="done",
-            page_count=len(self.doc_a_pages),
-            section_count=1,
-            note_count=1,
-            unit_count=1,
-        )
-
-        with patch.object(storage, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}):
-            resp = self._post("/start_reading", data={
-                "doc_id": self.doc_a_id,
-                "start_page": first_bp,
-                "doc_title": "Doc A",
-            })
-
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
-        self.assertNotIn("view=fnm", resp.location)
-
     def test_start_from_beginning_keeps_existing_translations(self):
         first_bp, _ = get_page_range(self.doc_a_pages)
         save_entries_to_disk([{
@@ -1563,26 +1539,6 @@ class TranslateStopFlowRealDocsTest(ClientCSRFMixin, unittest.TestCase):
         self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
         entries_a, _, _ = load_entries_from_disk(self.doc_a_id)
         self.assertEqual(entries_a[0]["_page_entries"][0]["translation"], "翻译 A")
-
-    def test_start_from_beginning_keeps_standard_view_even_when_fnm_run_is_ready(self):
-        first_bp, _ = get_page_range(self.doc_a_pages)
-        set_current_doc(self.doc_b_id)
-        config.update_doc_meta(self.doc_a_id, cleanup_headers_footers=True)
-        SQLiteRepository().create_fnm_run(
-            self.doc_a_id,
-            status="done",
-            page_count=len(self.doc_a_pages),
-            section_count=1,
-            note_count=1,
-            unit_count=1,
-        )
-
-        with patch.object(storage, "get_translate_args", return_value={"model_id": "fake-model", "api_key": "fake-key", "provider": "fake"}):
-            resp = self._post("/start_from_beginning", data={"doc_id": self.doc_a_id})
-
-        self.assertEqual(resp.status_code, 302)
-        self.assertIn(f"/reading?bp={first_bp}&auto=1&start_bp={first_bp}&doc_id={self.doc_a_id}", resp.location)
-        self.assertNotIn("view=fnm", resp.location)
 
     def test_start_from_beginning_missing_deepseek_key_uses_correct_provider_name(self):
         config.set_model_key("deepseek-chat")

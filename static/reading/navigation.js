@@ -155,10 +155,7 @@ function getPdfItemWidth(container, pageImgW, pageImgH) {
 
 function pageStateLabel(bp) {
   bp = Number(bp);
-  if (store.readingView.mode === 'fnm') {
-    return store.pages.translatedBps.indexOf(bp) >= 0 ? '已投影' : '仅 source';
-  }
-  if (String(store.streamDraft.mode || '') !== 'fnm_unit' && store.streamDraft.bp === bp && (store.streamDraft.status === 'streaming' || store.streamDraft.status === 'aborted' || store.streamDraft.status === 'error')) {
+  if (store.streamDraft.bp === bp && (store.streamDraft.status === 'streaming' || store.streamDraft.status === 'aborted' || store.streamDraft.status === 'error')) {
     if (store.streamDraft.status === 'aborted') return '已停止';
     if (store.streamDraft.status === 'error') return '失败';
     return '翻译中';
@@ -173,7 +170,6 @@ function getReadingUiStateParams() {
     usage: store.ui.taskDetailsOpen ? '1' : '0',
     orig: store.ui.showOriginal ? '1' : '0',
     pdf: store.ui.pdfVisible ? '1' : '0',
-    view: store.readingView.mode === 'fnm' ? 'fnm' : '',
   };
 }
 
@@ -210,11 +206,7 @@ function buildReadingUrl(bp, autoStart, startBp) {
   url.searchParams.set('usage', uiParams.usage);
   url.searchParams.set('orig', uiParams.orig);
   url.searchParams.set('pdf', uiParams.pdf);
-  if (uiParams.view === 'fnm') {
-    url.searchParams.set('view', 'fnm');
-  } else {
-    url.searchParams.delete('view');
-  }
+  url.searchParams.delete('view');
   var curSearch = new URLSearchParams(window.location.search);
   var layoutParam = curSearch.get('layout');
   if (layoutParam === 'side' || layoutParam === 'stack') {
@@ -281,7 +273,6 @@ function scheduleCommittedPageRefresh(bp) {
 
 function maybeRefreshCommittedCurrentPage(state) {
   if (store.guards.manualNavigationInFlight) return;
-  if (String((state && state.task && state.task.kind) || '') === 'fnm') return;
   var translatedFromState = Array.isArray(state && state.translated_bps)
     ? state.translated_bps.map(function(bp) { return Number(bp); })
     : [];
@@ -354,7 +345,7 @@ function renderPageNavigationState() {
     if (bp === store.reading.currentBp) {
       return;
     }
-    if (String(store.streamDraft.mode || '') !== 'fnm_unit' && store.streamDraft.bp === bp && store.streamDraft.status === 'streaming') {
+    if (store.streamDraft.bp === bp && store.streamDraft.status === 'streaming') {
       dot.classList.add('streaming');
     } else if (store.pages.failedBps.indexOf(bp) >= 0) {
       dot.classList.add('failed');
@@ -404,15 +395,6 @@ function updateProgressStatsText(d) {
   if (!el) return;
   var current = Number(store.reading.currentBp || 0);
   var totalPdfPages = Number(store.pages.allBps.length || 0);
-  if (store.readingView.mode === 'fnm') {
-    var projectedPages = Array.isArray(store.pages.translatedBps) ? store.pages.translatedBps.length : 0;
-    var doneUnits = Number(d && d.done_units || 0);
-    var totalUnits = Number(d && d.total_units || 0);
-    var failedUnits = Number(d && d.error_units || 0);
-    var suffix = totalUnits ? '（任务共 ' + totalUnits + ' 个 unit）' : '';
-    el.textContent = '已投影' + projectedPages + '页 · 已完成' + doneUnits + '个 unit · 失败' + failedUnits + '个 unit · 当前 PDF 第' + current + '页 / 第' + totalPdfPages + '页' + suffix;
-    return;
-  }
   var doneForStats = Number(store.readingView.readingStatsDonePages || 0);
   var partial = Array.isArray(store.pages.partialFailedBps) ? store.pages.partialFailedBps.length : 0;
   var failed = Array.isArray(store.pages.failedBps) ? store.pages.failedBps.length : 0;

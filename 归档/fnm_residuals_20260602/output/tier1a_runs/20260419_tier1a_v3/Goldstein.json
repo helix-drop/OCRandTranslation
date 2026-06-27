@@ -1,0 +1,581 @@
+{
+  "slug": "Goldstein",
+  "folder": "post-revolutionary",
+  "doc_id": "7ba9bca783fd",
+  "verdict": "FAIL",
+  "batch_tag": "20260419_tier1a_v3",
+  "commit": "f37b345",
+  "pipeline": {
+    "ok": true,
+    "run_id": 8,
+    "page_count": 431,
+    "section_count": 17,
+    "note_count": 637,
+    "unit_count": 722,
+    "structure_state": "review_required",
+    "manual_toc_required": false,
+    "blocking_reasons": [
+      "link_first_marker_not_one",
+      "link_endnote_not_all_matched",
+      "link_orphan_note_remaining",
+      "link_endnote_only_orphan_anchor_remaining",
+      "freeze_unit_contract_invalid"
+    ],
+    "review_counts": {
+      "link_first_marker_not_one": 1,
+      "link_endnote_not_all_matched": 1,
+      "link_orphan_note_remaining": 1,
+      "link_endnote_only_orphan_anchor_remaining": 1,
+      "freeze_unit_contract_invalid": 1
+    },
+    "export_ready_real": false
+  },
+  "manual_toc_fallback": {},
+  "baseline": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 11,
+      "endnote_orphan_anchor": 267,
+      "ambiguous": 0
+    },
+    "link_count": 904,
+    "body_anchor_count": 903,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {
+      "link": 13,
+      "llm_suggestion": 12
+    }
+  },
+  "after": {
+    "orphans": {
+      "footnote_orphan_note": 0,
+      "footnote_orphan_anchor": 0,
+      "endnote_orphan_note": 11,
+      "endnote_orphan_anchor": 267,
+      "ambiguous": 0
+    },
+    "link_count": 904,
+    "body_anchor_count": 903,
+    "llm_synth_anchor_count": 0,
+    "override_scope_counts": {
+      "link": 19,
+      "llm_suggestion": 14
+    }
+  },
+  "repair": {
+    "cluster_count": 9,
+    "suggestion_count": 14,
+    "auto_applied_count": 6,
+    "suggestions": [
+      {
+        "suggestion_id": "llm-02-001",
+        "cluster_id": "toc-ch-003-theperilsofimaginationat:toc-ch-003-theperilsofimaginationat:endnote",
+        "chapter_id": "toc-ch-003-theperilsofimaginationat",
+        "chapter_title": "The Perils of Imagination at the End of the Old Regime",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "Cluster contains multiple unresolved anchors (e.g., anchor-00027 through anchor-00054) with markers 1–29. The provided page images (pp. 21–23) only show markers 1 and 2 clearly resolved in the text, but do not cover the full range of markers up to 29 found in the cluster data (which references pages up to 53). Without the full set of pages containing the corresponding footnote/endnote markers and text, automatic resolution or ignoring cannot be performed with high confidence.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-03-001",
+        "cluster_id": "toc-ch-012-cousinianhegemony:toc-ch-012-cousinianhegemony:endnote",
+        "chapter_id": "toc-ch-012-cousinianhegemony",
+        "chapter_title": "Cousinian Hegemony",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00467",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "Marker '20' is a footnote reference in the source text (indicated by context and placement), but the cluster is for endnotes only.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-03-002",
+        "cluster_id": "toc-ch-012-cousinianhegemony:toc-ch-012-cousinianhegemony:endnote",
+        "chapter_id": "toc-ch-012-cousinianhegemony",
+        "chapter_title": "Cousinian Hegemony",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00468",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "Marker '21' is a footnote reference in the source text, but the cluster is for endnotes only.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-03-003",
+        "cluster_id": "toc-ch-012-cousinianhegemony:toc-ch-012-cousinianhegemony:endnote",
+        "chapter_id": "toc-ch-012-cousinianhegemony",
+        "chapter_title": "Cousinian Hegemony",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00470",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "Marker '23' is a footnote reference in the source text, but the cluster is for endnotes only.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-03-004",
+        "cluster_id": "toc-ch-012-cousinianhegemony:toc-ch-012-cousinianhegemony:endnote",
+        "chapter_id": "toc-ch-012-cousinianhegemony",
+        "chapter_title": "Cousinian Hegemony",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00471",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "Marker '24' is a footnote reference in the source text, but the cluster is for endnotes only.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-04-001",
+        "cluster_id": "toc-ch-001-introductionpsychologica:toc-ch-001-introductionpsychologica:endnote",
+        "chapter_id": "toc-ch-001-introductionpsychologica",
+        "chapter_title": "Introduction: Psychological Interiority versus Self-Talk",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "No endnote items provided in the cluster to match against the 24 detected anchors; cannot perform ignore_ref without note_item_id.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-05-001",
+        "cluster_id": "toc-ch-014-religiousandsecularacces:toc-ch-014-religiousandsecularacces:endnote",
+        "chapter_id": "toc-ch-014-religiousandsecularacces",
+        "chapter_title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00617",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "OCR artifact '2' is not a valid endnote marker in this context; the actual note markers on p. 234 are 2 and 3 for different sentences.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-05-002",
+        "cluster_id": "toc-ch-014-religiousandsecularacces:toc-ch-014-religiousandsecularacces:endnote",
+        "chapter_id": "toc-ch-014-religiousandsecularacces",
+        "chapter_title": "Religious and Secular Access to the Vie Intérieure: Renan at the Crossroads",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "Multiple consecutive anchors (92-102) on pages 261-262 lack corresponding note items in the cluster; cannot determine if they should be ignored or synthesized without note content.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-06-001",
+        "cluster_id": ":nr-en-bk-0001-none:endnote",
+        "chapter_id": "",
+        "chapter_title": "",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "The provided chapter_body_excerpt is a list of illustration captions (matching the 'Illustrations' page image) rather than narrative body text. The note items correspond to these captions, but there are no in-text citation markers or unique narrative phrases within the excerpt to synthesize as anchors. This appears to be an Illustrations List section where notes describe the figures, requiring manual review to determine if anchors exist in the main body text not provided here.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-07-001",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0013-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "The provided chapter_body_excerpt is incomplete and does not contain the text sections corresponding to the unmatched notes (en-00568, en-00572, en-00596). Specifically, the excerpt cuts off before the discussion of 'Raucourt' (Note 114/118) and the correspondence with 'Spurzheim' (Note 142), making it impossible to locate unique anchor phrases or confirm their absence.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-08-001",
+        "cluster_id": "toc-ch-016-apalpableselfforthesocia:toc-ch-016-apalpableselfforthesocia:endnote",
+        "chapter_id": "toc-ch-016-apalpableselfforthesocia",
+        "chapter_title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00819",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.95,
+        "reason": "The source text for anchor-00819 ends with an ellipsis ('...') after 'fortune', whereas the corresponding page image shows the sentence continuing to 'dint of function or fortune.' followed immediately by the superscript marker '95'. This indicates the OCR extraction for the anchor was truncated and does not contain the reference marker, making a match impossible based on the provided data.",
+        "auto_selected": true
+      },
+      {
+        "suggestion_id": "llm-08-002",
+        "cluster_id": "toc-ch-016-apalpableselfforthesocia:toc-ch-016-apalpableselfforthesocia:endnote",
+        "chapter_id": "toc-ch-016-apalpableselfforthesocia",
+        "chapter_title": "A Palpable Self for the Socially Marginal: The Phrenological Alternative",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "Anchor-00820 (marker 96) is listed as unmatched, but no corresponding note item is present in the 'unmatched_note_items' array to attempt a match against. Additionally, the page image contains a third footnote marker '97' at the end of the page which is not represented in the input anchors, suggesting incomplete data for this cluster.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-09-001",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0014-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "No unique phrase found in chapter_body_excerpt for note en-00597 (marker 143). The corresponding text appears only in the Notes section (page 394), which is not included in the provided body excerpt. Cannot synthesize anchor without valid source text.",
+        "auto_selected": false
+      },
+      {
+        "suggestion_id": "llm-09-002",
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0014-toc-ch-017-epilogue:endnote",
+        "chapter_id": "toc-ch-017-epilogue",
+        "chapter_title": "Epilogue",
+        "action": "needs_review",
+        "note_item_id": "",
+        "anchor_id": "",
+        "anchor_phrase": "",
+        "fuzzy_score": null,
+        "fuzzy_hit": null,
+        "ambiguous": null,
+        "matched_text": "",
+        "confidence": 0.0,
+        "reason": "No unique phrase found in chapter_body_excerpt for note en-00605 (marker 151). The corresponding text appears only in the Notes section (page 394), which is not included in the provided body excerpt. Cannot synthesize anchor without valid source text.",
+        "auto_selected": false
+      }
+    ],
+    "auto_applied": [
+      {
+        "link_id": "link-00844",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00467",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "Marker '20' is a footnote reference in the source text (indicated by context and placement), but the cluster is for endnotes only."
+      },
+      {
+        "link_id": "link-00845",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00468",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "Marker '21' is a footnote reference in the source text, but the cluster is for endnotes only."
+      },
+      {
+        "link_id": "link-00846",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00470",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "Marker '23' is a footnote reference in the source text, but the cluster is for endnotes only."
+      },
+      {
+        "link_id": "link-00847",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00471",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "Marker '24' is a footnote reference in the source text, but the cluster is for endnotes only."
+      },
+      {
+        "link_id": "link-00892",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00617",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "OCR artifact '2' is not a valid endnote marker in this context; the actual note markers on p. 234 are 2 and 3 for different sentences."
+      },
+      {
+        "link_id": "link-00903",
+        "action": "ignore_ref",
+        "note_item_id": "",
+        "anchor_id": "anchor-00819",
+        "anchor_phrase": "",
+        "confidence": 0.95,
+        "reason": "The source text for anchor-00819 ends with an ellipsis ('...') after 'fortune', whereas the corresponding page image shows the sentence continuing to 'dint of function or fortune.' followed immediately by the superscript marker '95'. This indicates the OCR extraction for the anchor was truncated and does not contain the reference marker, making a match impossible based on the provided data."
+      }
+    ],
+    "request_metrics": [
+      {
+        "cluster_id": "toc-ch-010-anaprioriselfforthebourg:toc-ch-010-anaprioriselfforthebourg:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11480,
+        "estimated_prompt_tokens": 3415,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-003-theperilsofimaginationat:toc-ch-003-theperilsofimaginationat:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11319,
+        "estimated_prompt_tokens": 3369,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-012-cousinianhegemony:toc-ch-012-cousinianhegemony:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11341,
+        "estimated_prompt_tokens": 3376,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-001-introductionpsychologica:toc-ch-001-introductionpsychologica:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 11438,
+        "estimated_prompt_tokens": 3403,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 24,
+        "page_context_count": 3,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-014-religiousandsecularacces:toc-ch-014-religiousandsecularacces:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 6467,
+        "estimated_prompt_tokens": 1983,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 11,
+        "page_context_count": 3,
+        "truncated": false
+      },
+      {
+        "cluster_id": ":nr-en-bk-0001-none:endnote",
+        "request_mode": "note_only_with_body",
+        "allowed_actions": [
+          "synthesize_anchor",
+          "needs_review"
+        ],
+        "chars": 2879,
+        "estimated_prompt_tokens": 1006,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 6,
+        "unmatched_anchors": 0,
+        "page_context_count": 1,
+        "truncated": false
+      },
+      {
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0013-toc-ch-017-epilogue:endnote",
+        "request_mode": "note_only_with_body",
+        "allowed_actions": [
+          "synthesize_anchor",
+          "needs_review"
+        ],
+        "chars": 5482,
+        "estimated_prompt_tokens": 1749,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 2,
+        "unmatched_note_items": 3,
+        "unmatched_anchors": 0,
+        "page_context_count": 2,
+        "truncated": true
+      },
+      {
+        "cluster_id": "toc-ch-016-apalpableselfforthesocia:toc-ch-016-apalpableselfforthesocia:endnote",
+        "request_mode": "ref_only",
+        "allowed_actions": [
+          "ignore_ref",
+          "needs_review"
+        ],
+        "chars": 2194,
+        "estimated_prompt_tokens": 762,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 0,
+        "unmatched_note_items": 0,
+        "unmatched_anchors": 2,
+        "page_context_count": 1,
+        "truncated": false
+      },
+      {
+        "cluster_id": "toc-ch-017-epilogue:nr-en-bk-0014-toc-ch-017-epilogue:endnote",
+        "request_mode": "note_only_with_body",
+        "allowed_actions": [
+          "synthesize_anchor",
+          "needs_review"
+        ],
+        "chars": 4639,
+        "estimated_prompt_tokens": 1509,
+        "soft_input_token_budget": 2048,
+        "model_max_input_tokens_thinking": 983616,
+        "model_max_input_tokens_no_think": 991808,
+        "matched_examples": 2,
+        "unmatched_note_items": 2,
+        "unmatched_anchors": 0,
+        "page_context_count": 1,
+        "truncated": true
+      }
+    ],
+    "action_counts": {
+      "needs_review": 8,
+      "ignore_ref": 6
+    },
+    "auto_action_counts": {
+      "ignore_ref": 6
+    },
+    "synth_suggestion_count": 0,
+    "synth_auto_applied_count": 0,
+    "fuzzy_hit_count": 0,
+    "fuzzy_ambiguous_count": 0,
+    "caps": {
+      "matched_examples": 2,
+      "unmatched_note_items": 24,
+      "unmatched_anchors": 24,
+      "cluster_limit": 0
+    }
+  },
+  "rebuild": {
+    "ok": true,
+    "run_id": 8,
+    "page_count": 431,
+    "section_count": 17,
+    "note_count": 637,
+    "unit_count": 722,
+    "structure_state": "review_required",
+    "manual_toc_required": false,
+    "blocking_reasons": [
+      "link_first_marker_not_one",
+      "link_endnote_not_all_matched",
+      "link_orphan_note_remaining",
+      "link_endnote_only_orphan_anchor_remaining",
+      "freeze_unit_contract_invalid"
+    ],
+    "review_counts": {
+      "link_first_marker_not_one": 1,
+      "link_endnote_not_all_matched": 1,
+      "link_orphan_note_remaining": 1,
+      "link_endnote_only_orphan_anchor_remaining": 1,
+      "freeze_unit_contract_invalid": 1
+    },
+    "export_ready_real": false
+  },
+  "blocking_reasons": [
+    "link_first_marker_not_one",
+    "link_endnote_not_all_matched",
+    "link_orphan_note_remaining",
+    "link_endnote_only_orphan_anchor_remaining",
+    "freeze_unit_contract_invalid"
+  ],
+  "manual_toc_required": false
+}

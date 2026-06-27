@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    599
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 599\",\n      \"printed_page\": \"599\",\n      \"lines\": [\n        \"VOLTAIRE : 17n, 226\",\n        \"VON HERRMANN (Friedrich-\",\n        \"Wilhelm) : 322, 504n\",\n        \"VUILLEMIN (Jules) : 224, 490-491n\",\n        \"WAELHENS (Alphonse de) : 48, 86,\",\n        \"92n-93, 95n, 104n, 109, 122,\",\n        \"125-127, 131n, 136n, 150n, 163,\",\n        \"165-166, 172-173n, 180, 234n,\",\n        \"317, 320, 322-323, 331n, 333\",\n        \"WAHL (François) : 217\",\n        \"WAHL (Jean) : 32n, 36-39, 52, 90,\",\n        \"92-98, 103, 115, 117, 128n, 145,\",\n        \"151n, 169-170, 176-178, 180-\",\n        \"181, 203, 208n, 212n, 224, 286,\",\n        \"487, 491\",\n        \"WAGNER (Richard) : 281\",\n        \"WALZER (R.) : 244n\",\n        \"WARIN (François) : 23, 52n, 207\",\n        \"WEBER (Alfred) : 129n, 130n, 131n\",\n        \"WEIL (Éric) : 109, 122-125, 127,\",\n        \"136-137, 189, 192, 198, 271,\",\n        \"373n, 393-394, 397, 519, 521-\",\n        \"522\",\n        \"WEIL (Simone) : 180, 312\",\n        \"WEILL (Nicolas) : 534n\",\n        \"WELTE (Bernhard) : 275, 479n, 486\",\n        \"WEIZMANN (Leopoldine) : 354\",\n        \"WHITEHEAD (Alfred North) : 37-39\",\n        \"WILLIAMS (William C.) : 42\",\n        \"WINCKELMANN (Johann Joachim) :\",\n        \"372\",\n        \"WINDELBAND (Wilhelm) : 437\",\n        \"WISMANN (Heinz) : 491n\",\n        \"WISSER (Richard) : 426n\",\n        \"WITTGENSTEIN (Ludwig) : 249-\",\n        \"250n, 286, 362, 460, 464, 474n,\",\n        \"492n, 523, 538\",\n        \"WOLIN (Richard) : 393n\",\n        \"WYBRANDS (Franz) : 303n, 326n\",\n        \"YORCK von WARTENBURG (Paul) :\",\n        \"44\",\n        \"ZAC (Sylvain) : 153n\",\n        \"ZARADER (Marlène) : 208n, 453-459\",\n        \"ZARATHOUSTRA : 13n, 256\",\n        \"ZERVOS (Christian et Yvonne) : 241\",\n        \"ZIMMER (le menuisier) : 507n\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1026,
+      "total_tokens": 2459
+    }
+  }
+}

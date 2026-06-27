@@ -14,7 +14,7 @@
       <span style="font-size:15px;font-weight:600;">数据来源</span>
       <div class="flex gap-8 items-center">
         <span style="font-size:12px;color:var(--txS);line-height:1.5;">
-          翻译主模型：{{ current_model_label or current_model_id or '-' }} ｜ FNM 主模型：{{ current_visual_model_label or current_visual_model_id or '-' }}
+          翻译主模型：{{ current_model_label or current_model_id or '-' }} ｜ 视觉主模型：{{ current_visual_model_label or current_visual_model_id or '-' }}
         </span>
         <a href="{{ url_for('settings', doc_id=current_doc_id) }}" class="btn btn-sec btn-sm">设置</a>
       </div>
@@ -50,13 +50,6 @@
           未附带词典；若当前文档已有词典仍会继续使用。
         </div>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:10px;">
-          <label for="cleanupHeaderFooterToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
-            <input type="checkbox" id="cleanupHeaderFooterToggle" {% if upload_cleanup_default_enabled %}checked{% endif %} style="margin-top:3px;">
-            <span style="display:block;">
-              <span style="display:block;font-size:13px;color:var(--txt);font-weight:600;">开启 FNM 模式</span>
-              <span style="display:block;font-size:12px;color:var(--txS);line-height:1.7;">更慢，但会自动串起页眉页脚清理、自动视觉目录和 FNM 注释分类。视觉目录失败时，这条 FNM 链路会直接停止，不会偷偷降级。</span>
-            </span>
-          </label>
           <label for="autoTranslateToggle" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg2);border:1px solid var(--bdrL);border-radius:10px;cursor:pointer;">
             <input type="checkbox" id="autoTranslateToggle" checked style="margin-top:3px;">
             <span style="display:block;">
@@ -70,7 +63,7 @@
         </div>
         <button type="button" class="btn btn-pri btn-lg" id="startParseBtn" style="margin-top:12px;width:100%;justify-content:center;" disabled>开始解析</button>
         <div style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.6;">
-          文档页里仍然保留“生成/重新生成自动视觉目录”高级入口；首页上传区现在只决定是否走完整 FNM 链路。FNM 模式不再提供预览视图。
+          文档页里仍然保留“生成/重新生成自动视觉目录”高级入口；首页上传区只负责标准解析和可选自动翻译。
         </div>
       </div>
     </div>
@@ -153,7 +146,7 @@
       <h3 style="font-size:16px;color:var(--txt);margin-bottom:8px;">还没有解析任何文档</h3>
       <p style="font-size:13px;color:var(--txS);line-height:1.8;max-width:400px;margin:0 auto;">
         请在上方<strong>上传PDF或图片</strong>。<br>
-        <span style="font-size:12px;color:var(--txL);">支持快速模式直接开始阅读，也支持 FNM 模式一次完成清理、视觉目录和注释结构化。</span>
+        <span style="font-size:12px;color:var(--txL);">支持直接解析后开始阅读，也可以附带目录和词典改善后续阅读与翻译。</span>
       </p>
     </div>
     {% endif %}
@@ -176,42 +169,12 @@
     </div>
   </div>
 
-  <!-- Action Buttons / FNM Workflow -->
+  <!-- Action Buttons -->
   {% if has_entries %}
   {% set safe_entry_idx = entry_idx if entry_idx < entries|length else (entries|length - 1) %}
   {% set resume_entry = entries[safe_entry_idx] %}
   {% set resume_bp = resume_entry.get('_pageBP', first_page) %}
   {% endif %}
-  {% if has_pages and cleanup_headers_footers_enabled %}
-  <div class="card" id="fnmWorkflowCard" style="margin-top:16px;padding:16px 18px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:15px;font-weight:600;color:var(--txt);">FNM 翻译工作流</div>
-        <div style="margin-top:4px;font-size:12px;color:var(--txS);line-height:1.7;" id="fnmWorkflowSummary">
-          FNM 模式不再提供预览视图；请在首页直接继续 FNM、开始/继续翻译、暂停翻译并导出章节包。
-        </div>
-      </div>
-      <div style="font-size:11px;color:var(--txL);" id="fnmWorkflowMeta">读取当前文档已存储状态…</div>
-    </div>
-    <div style="margin-top:12px;background:var(--bg2);border-radius:6px;height:8px;overflow:hidden;">
-      <div id="fnmWorkflowBar" style="background:var(--acc);height:100%;width:0%;border-radius:6px;transition:width 0.3s;"></div>
-    </div>
-    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--txS);">
-      <span id="fnmWorkflowPhase">状态读取中…</span>
-      <span id="fnmWorkflowPct">0%</span>
-    </div>
-    <div id="fnmWorkflowDetail" style="margin-top:6px;font-size:11px;color:var(--txL);line-height:1.7;">
-      首页会显示已存储的 FNM 状态、可翻译 unit 数、阻塞原因和导出状态。
-    </div>
-    <div id="fnmWorkflowBlockers" style="margin-top:8px;font-size:11px;color:var(--txL);line-height:1.7;"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
-      <button type="button" class="btn btn-pri btn-lg" id="fnmStartTranslateBtn" style="flex:1;justify-content:center;" onclick="startFnmWorkflowTranslate();">开始翻译</button>
-      <button type="button" class="btn btn-sec btn-lg" id="fnmContinueProcessBtn" style="flex:1;justify-content:center;" onclick="continueFnmWorkflowProcessing();">继续 FNM 处理</button>
-      <button type="button" class="btn btn-sec btn-lg" id="fnmPauseTranslateBtn" style="flex:1;justify-content:center;" onclick="pauseFnmWorkflowTranslate();">暂停翻译</button>
-      <button type="button" class="btn btn-grn btn-lg" id="fnmExportBundleBtn" style="flex:1;justify-content:center;" onclick="downloadFnmWorkflowExport();">导出章节包</button>
-    </div>
-  </div>
-  {% else %}
   <div class="flex gap-12 flex-wrap mt-16">
     {% if has_pages %}
     <a href="{{ url_for('reading', bp=first_page, auto=1, start_bp=first_page, doc_id=current_doc_id) }}" class="btn btn-pri btn-lg" style="flex:1;justify-content:center;"
@@ -228,12 +191,9 @@
        onclick="return guardReadingEntrance(event, this);">{{ '继续读 PDF 第' ~ resume_bp ~ '页' }}</a>
     {% endif %}
   </div>
-  {% endif %}
   {% if has_pages %}
   <div class="home-action-note">
-    {% if cleanup_headers_footers_enabled %}
-    当前文档按 FNM 模式处理；FNM 模式不再提供预览视图，请在首页查看处理状态、启动翻译、暂停和导出。
-    {% elif has_entries %}
+    {% if has_entries %}
     当前文档可从 PDF 第{{ resume_bp }}页继续，也可以重新从 PDF 第{{ first_page }}页开始进入阅读。
     {% else %}
     第一次进入建议先从 PDF 第{{ first_page }}页开始，再按页继续往后读。
@@ -394,7 +354,7 @@
         <div style="margin-top:6px;font-size:11px;color:var(--txL);">这里填写的是 PDF 页码，不是书籍原页码。</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-        <button type="button" class="btn btn-pri btn-sm" id="enhancedReparseBtn" onclick="doEnhancedReparse()">{{ '重新进行增强解析' if cleanup_headers_footers_enabled else '增强解析并重跑' }}</button>
+        <button type="button" class="btn btn-pri btn-sm" id="enhancedReparseBtn" onclick="doEnhancedReparse()">增强解析并重跑</button>
         <button type="button" class="btn btn-sec btn-sm" id="runVisualTocBtn" onclick="runVisualTocNow()">生成/重新生成自动视觉目录</button>
       </div>
 
@@ -522,7 +482,6 @@ var startParseBtn = document.getElementById('startParseBtn');
 var docTocPdfInput = document.getElementById('docTocPdfInput');
 var docTocScreenshotInput = document.getElementById('docTocScreenshotInput');
 var uploadArea = document.getElementById('uploadArea');
-var cleanupHeaderFooterToggle = document.getElementById('cleanupHeaderFooterToggle');
 var autoTranslateToggle = document.getElementById('autoTranslateToggle');
 var uploadRouteHint = document.getElementById('uploadRouteHint');
 var progressSection = document.getElementById('progressSection');
@@ -534,7 +493,6 @@ var liveLogPanel = document.getElementById('liveLogPanel');
 var liveLog = document.getElementById('liveLog');
 var readingEntrancesDisabled = false;
 var docStatusPollTimer = null;
-var fnmStatusPollTimer = null;
 var pendingMainFile = null;
 var pendingManualToc = { mode: '', files: [] };
 var pendingGlossary = null;
@@ -542,7 +500,6 @@ var uploadInFlight = false;
 var pendingAutoTranslate = true;
 
 function syncUploadPreferences() {
-  if (!cleanupHeaderFooterToggle) return Promise.resolve();
   return fetch('{{ url_for("api_upload_preferences") }}', {
     method: 'POST',
     headers: {
@@ -550,7 +507,8 @@ function syncUploadPreferences() {
       'X-CSRF-Token': getCsrfToken(),
     },
     body: JSON.stringify({
-      fnm_mode: !!cleanupHeaderFooterToggle.checked,
+      cleanup_headers_footers: false,
+      auto_visual_toc: false,
     }),
   }).catch(function() {
     return null;
@@ -559,10 +517,7 @@ function syncUploadPreferences() {
 
 function updateUploadRouteHint() {
   if (!uploadRouteHint) return;
-  var cleanupEnabled = !!(cleanupHeaderFooterToggle && cleanupHeaderFooterToggle.checked);
-  uploadRouteHint.textContent = cleanupEnabled
-      ? '当前为 FNM 模式：会先生成自动视觉目录和 FNM 分类，完成后请留在首页点击“开始翻译”。'
-    : '当前为快速模式：解析完成后会直接进入标准阅读视图，并自动开始普通翻译。';
+  uploadRouteHint.textContent = '当前为标准解析：解析完成后会进入阅读视图；勾选自动翻译时会从起始页开始翻译。';
 }
 
 function clearPendingManualToc() {
@@ -726,12 +681,6 @@ if (clearPendingGlossaryBtn) {
   });
 }
 
-if (cleanupHeaderFooterToggle) {
-  cleanupHeaderFooterToggle.addEventListener('change', function() {
-    updateUploadRouteHint();
-    syncUploadPreferences();
-  });
-}
 updateUploadRouteHint();
 
 ['dragenter', 'dragover'].forEach(function(evtName) {
@@ -858,16 +807,12 @@ function startUpload(file) {
   pendingAutoTranslate = !!(autoTranslateToggle && autoTranslateToggle.checked);
   updateStartParseBtnState();
   setAttachRowVisible(false);
-  var cleanupEnabled = !!(cleanupHeaderFooterToggle && cleanupHeaderFooterToggle.checked);
   // Show progress, hide upload area interactivity
   progressSection.style.display = '';
   setReadingEntrancesDisabled(true);
   document.getElementById('uploadIcon').textContent = '⏳';
   document.getElementById('uploadTitle').textContent = file.name;
-  document.getElementById('uploadSubtitle').textContent =
-    cleanupEnabled
-      ? '上传中…（FNM 模式）'
-      : '上传中…（快速模式）';
+  document.getElementById('uploadSubtitle').textContent = '上传中…（标准解析）';
   uploadArea.style.pointerEvents = 'none';
   uploadArea.style.opacity = '0.6';
   liveLog.innerHTML = '';
@@ -887,10 +832,6 @@ function startUpload(file) {
   if (pendingGlossary) {
     formData.append('glossary_file', pendingGlossary);
   }
-  if (cleanupEnabled) {
-    formData.append('fnm_mode', '1');
-  }
-
   // Upload progress
   xhr.upload.addEventListener('progress', function(e) {
     if (e.lengthComputable) {
@@ -903,9 +844,7 @@ function startUpload(file) {
     if (xhr.status === 200) {
       var resp = JSON.parse(xhr.responseText);
       if (resp.task_id) {
-        var uploadDetail = (cleanupEnabled
-          ? 'FNM 模式：会先清理页眉页脚、同步生成自动视觉目录，再执行 FNM 分类'
-          : '快速模式：跳过 FNM 链路，完成后可选自动开始普通翻译');
+        var uploadDetail = '标准解析：完成后可选自动开始普通翻译';
         if (!pendingAutoTranslate) {
           uploadDetail += '（已取消自动翻译，解析后需手动触发）';
         }
@@ -968,12 +907,6 @@ function startSSE(taskId) {
     }
     var autoTranslate = !!pendingAutoTranslate;
     if (d.redirect_allowed && d.doc_id && d.start_bp) {
-      if (String(d.route_mode || 'standard') === 'fnm') {
-        setProgress(100, 'FNM 处理完成', d.summary || '请在首页 FNM 工作流卡片继续翻译、收尾和导出。');
-        addLog(d.redirect_message || 'FNM 模式不再提供预览视图；请在首页继续 FNM 工作流。', 'success');
-        refreshFnmWorkflowStatus(true);
-        return;
-      }
       setProgress(100, '解析完成，即将进入标准阅读', d.summary || '');
       var readingUrl;
       if (autoTranslate) {
@@ -984,49 +917,6 @@ function startSSE(taskId) {
         readingUrl = '{{ url_for("reading") }}?doc_id=' + encodeURIComponent(d.doc_id) + '&bp=' + encodeURIComponent(d.start_bp);
       }
       setTimeout(function() { window.location.href = readingUrl; }, 500);
-      return;
-    }
-    if (String(d.route_mode || '') === 'fnm_progress') {
-      setProgress(100, autoTranslate ? '解析完成，正在启动翻译…' : '解析完成，等待首页启动翻译', d.summary || '');
-      progressBar.style.background = 'var(--grn)';
-      addLog(d.summary || '完成', 'success');
-      if (d.redirect_message) {
-        addLog(d.redirect_message, 'success');
-      }
-      setReadingEntrancesDisabled(false);
-      uploadInFlight = false;
-      resetUploadArea();
-      var targetDocId = d.doc_id || '';
-      var afterTrigger = function() {
-        if (targetDocId) {
-          setTimeout(function() {
-            window.location.href = '{{ url_for("home") }}?doc_id=' + encodeURIComponent(targetDocId);
-          }, 500);
-        } else {
-          refreshFnmWorkflowStatus();
-        }
-      };
-      if (autoTranslate && targetDocId) {
-        fetch('/api/doc/' + encodeURIComponent(targetDocId) + '/fnm/translate', {
-          method: 'POST',
-          headers: withCsrfHeaders({ 'Content-Type': 'application/json' }),
-          body: '{}',
-        })
-          .then(function(r) { return r.json().catch(function() { return {}; }); })
-          .then(function(result) {
-            if (result && result.ok === false) {
-              addLog('FNM 自动翻译启动失败：' + (result.error || result.message || '未知错误'), 'error');
-            } else {
-              addLog('FNM 翻译任务已启动。', 'success');
-            }
-          })
-          .catch(function(err) {
-            addLog('FNM 自动翻译请求失败：' + String(err || ''), 'error');
-          })
-          .finally(afterTrigger);
-      } else {
-        afterTrigger();
-      }
       return;
     }
     setProgress(100, '解析完成', d.summary || '');
@@ -1124,7 +1014,7 @@ function renderDocProcessingStatus(data) {
 
   var enhancementMeta = document.getElementById('enhancementMeta');
   if (enhancementMeta) {
-    var modeLabel = data.cleanup_headers_footers_enabled ? 'FNM 模式（清理 + 视觉目录）' : '快速模式';
+    var modeLabel = data.cleanup_headers_footers_enabled ? '页眉页脚清理 + 视觉目录' : '标准解析';
     var translationLabel = data.has_translation_history ? '已有翻译数据' : '暂未生成翻译数据';
     enhancementMeta.textContent = '当前解析模式：' + modeLabel + ' · 自动视觉目录：' + (data.visual_toc_status_label || '-') + ' · ' + translationLabel;
   }
@@ -1158,368 +1048,6 @@ function startDocStatusPolling(docId) {
   docStatusPollTimer = setInterval(function() {
     refreshDocProcessingStatus(targetDocId);
   }, 3000);
-}
-
-function setFnmWorkflowDisabled(btn, disabled) {
-  if (!btn) return;
-  btn.disabled = !!disabled;
-  btn.style.opacity = disabled ? '0.45' : '';
-  btn.style.cursor = disabled ? 'not-allowed' : '';
-}
-
-function renderFnmWorkflowStatus(data) {
-  var card = document.getElementById('fnmWorkflowCard');
-  if (!card) return;
-  var summaryEl = document.getElementById('fnmWorkflowSummary');
-  var metaEl = document.getElementById('fnmWorkflowMeta');
-  var barEl = document.getElementById('fnmWorkflowBar');
-  var phaseEl = document.getElementById('fnmWorkflowPhase');
-  var pctEl = document.getElementById('fnmWorkflowPct');
-  var detailEl = document.getElementById('fnmWorkflowDetail');
-  var blockersEl = document.getElementById('fnmWorkflowBlockers');
-  var startBtn = document.getElementById('fnmStartTranslateBtn');
-  var continueBtn = document.getElementById('fnmContinueProcessBtn');
-  var pauseBtn = document.getElementById('fnmPauseTranslateBtn');
-  var exportBtn = document.getElementById('fnmExportBundleBtn');
-  if (!data || data.ok === false) {
-    if (summaryEl) summaryEl.textContent = 'FNM 状态读取失败，请稍后刷新页面重试。';
-    if (metaEl) metaEl.textContent = '';
-    if (phaseEl) phaseEl.textContent = '状态未知';
-    if (pctEl) pctEl.textContent = '0%';
-    if (detailEl) detailEl.textContent = data && (data.message || data.error) ? String(data.message || data.error) : '无法读取当前文档的 FNM 状态。';
-    if (blockersEl) blockersEl.textContent = '';
-    if (barEl) barEl.style.width = '0%';
-    setFnmWorkflowDisabled(startBtn, true);
-    setFnmWorkflowDisabled(continueBtn, true);
-    setFnmWorkflowDisabled(pauseBtn, true);
-    setFnmWorkflowDisabled(exportBtn, true);
-    return;
-  }
-
-  var totalUnits = Number(data.total_units || data.unit_count || 0);
-  var processedUnits = Number(data.processed_units || data.done_units || 0);
-  var runStatus = String(data.run_status || 'idle');
-  var translateRunning = !!data.translate_running;
-  var pauseTranslateAvailable = (data.pause_translate_available === undefined)
-    ? translateRunning
-    : !!data.pause_translate_available;
-  var workflowState = String(data.workflow_state || '').trim();
-  var isRetryTranslating = workflowState === 'translating_retrying';
-  var isTranslatingState = translateRunning || workflowState === 'translating' || isRetryTranslating;
-  var isTailCheckingState = workflowState === 'post_translate_checking' || workflowState === 'post_translate_repairing';
-  var gatePassCount = Number(data.gate_pass_count || 0);
-  var gateFailCount = Number(data.gate_fail_count || 0);
-  var gateTotalCount = Number(data.gate_total_count || 0);
-  var gatePassRate = Number(data.gate_pass_rate || 0);
-  var workflowStateLabel = String(data.workflow_state_label || '').trim();
-  var pct = totalUnits > 0 ? Math.min(100, Math.round((processedUnits / totalUnits) * 100)) : (runStatus === 'done' ? 100 : 0);
-  var phaseLabel = workflowStateLabel || String(data.run_phase_label || '').trim();
-  if (!phaseLabel) {
-    phaseLabel = '等待 FNM 处理';
-    if (isTranslatingState) {
-      phaseLabel = isRetryTranslating ? '翻译重试中' : '翻译进行中';
-    } else if (workflowState === 'post_translate_repairing') {
-      phaseLabel = '自动修补中';
-    } else if (isTailCheckingState || data.fnm_post_translate_running) {
-      phaseLabel = '最终校验中';
-    } else if (data.can_translate) {
-      phaseLabel = '可开始翻译';
-    } else if (data.export_bundle_available && data.export_has_blockers) {
-      phaseLabel = '可导出（含阻塞说明）';
-    } else if (data.export_ready_real) {
-      phaseLabel = '可导出';
-    } else if (runStatus === 'done') {
-      phaseLabel = '等待结构通过';
-    } else if (runStatus === 'running') {
-      phaseLabel = 'FNM 处理中';
-    } else if (runStatus === 'error' || runStatus === 'failed') {
-      phaseLabel = 'FNM 处理失败';
-    }
-  }
-
-  var detail = [];
-  detail.push('结构状态：' + String(data.structure_state || '-'));
-  detail.push('unit：' + processedUnits + '/' + totalUnits);
-  var translatePhase = String(data.translate_phase || '').trim();
-  if (isRetryTranslating && (!translatePhase || translatePhase === 'stopped' || translatePhase === 'done')) {
-    translatePhase = 'retrying';
-  }
-  if (translatePhase) {
-    detail.push('翻译态：' + translatePhase);
-  }
-  if (gateTotalCount > 0) {
-    detail.push('通过项：' + gatePassCount + '/' + gateTotalCount + '（失败 ' + gateFailCount + '）');
-  }
-  if (data.current_unit_label) {
-    detail.push('当前：' + String(data.current_unit_label));
-  }
-  if (data.execution_mode) {
-    detail.push('模式：' + String(data.execution_mode));
-  }
-  var draftTotal = Number(data.draft_para_total || 0);
-  if (draftTotal > 0) {
-    var draftDone = Number(data.draft_para_done || 0);
-    detail.push('段落完成：' + draftDone + '/' + draftTotal);
-    if (data.draft_para_idx !== null && data.draft_para_idx !== undefined && Number(data.draft_para_idx) >= 0) {
-      detail.push('当前段：' + (Number(data.draft_para_idx) + 1) + '/' + draftTotal);
-    }
-  }
-  if (data.draft_status) {
-    detail.push('流状态：' + String(data.draft_status));
-  }
-  if (data.state_hint) {
-    detail.push(String(data.state_hint));
-  }
-  if (data.translate_log_relpath) {
-    detail.push('日志：' + String(data.translate_log_relpath));
-  }
-
-  var blockerTexts = [];
-  if (data.translate_last_error) {
-    blockerTexts.push('最近错误：' + String(data.translate_last_error));
-  }
-  if (data.draft_last_error) {
-    blockerTexts.push('段落错误：' + String(data.draft_last_error));
-  }
-  if (data.draft_note) {
-    blockerTexts.push('实时状态：' + String(data.draft_note));
-  }
-  if (data.manual_toc_required) {
-    blockerTexts.push('需要先补充手动目录。');
-  }
-  if (Array.isArray(data.blocking_reasons) && data.blocking_reasons.length) {
-    blockerTexts.push('阻塞项：' + data.blocking_reasons.join('、'));
-  }
-  if (Array.isArray(data.gate_failed_labels) && data.gate_failed_labels.length) {
-    blockerTexts.push('未通过检查：' + data.gate_failed_labels.join('、'));
-  }
-  if (Array.isArray(data.tail_blocking_summary) && data.tail_blocking_summary.length) {
-    blockerTexts.push('收尾阻塞：' + data.tail_blocking_summary.join('、'));
-  }
-  if (!blockerTexts.length && data.export_ready_real) {
-    blockerTexts.push('章节包已可导出。');
-  } else if (!blockerTexts.length && data.export_bundle_available) {
-    blockerTexts.push('章节包已生成，可导出并附带阻塞说明。');
-  } else if (!blockerTexts.length && data.can_translate) {
-    blockerTexts.push('FNM 已处理完成，可以直接开始翻译。');
-  }
-
-  if (summaryEl) {
-    if (isTranslatingState) {
-      if (isRetryTranslating) {
-        summaryEl.textContent = data.draft_note
-          ? ('正在执行失败段落重试翻译：' + String(data.draft_note))
-          : '正在执行失败段落重试翻译，请稍候。';
-      } else {
-        summaryEl.textContent = data.draft_note
-          ? ('当前正在首页执行翻译：' + String(data.draft_note))
-          : 'FNM 模式不再提供预览视图；当前正在首页执行翻译。';
-      }
-    } else if (workflowState === 'post_translate_repairing') {
-      summaryEl.textContent = '正在执行 FNM 最终校验（自动修补阶段），请稍候。';
-    } else if (isTailCheckingState || data.fnm_post_translate_running) {
-      summaryEl.textContent = '正在执行 FNM 最终校验（未翻译检查 → 导出校验 → 自动修补），请稍候。';
-    } else if (data.fnm_fullflow_running) {
-      summaryEl.textContent = '正在执行 FNM 一体化流程（结构处理 → 分段翻译），请稍候。';
-    } else if (data.fnm_continue_running) {
-      summaryEl.textContent = '正在继续执行 FNM 处理，完成后会自动刷新到最新状态。';
-    } else if (data.state_persisted) {
-      summaryEl.textContent = '当前显示的是已存储 FNM 状态；重启应用不会自动重跑。';
-    } else {
-      summaryEl.textContent = 'FNM 模式不再提供预览视图；请在首页直接继续 FNM、开始/继续翻译、暂停翻译并导出章节包。';
-    }
-  }
-  if (metaEl) {
-    var gateText = gateTotalCount > 0
-      ? ('gate=' + gatePassCount + '/' + gateTotalCount + ' (' + Math.round(gatePassRate * 100) + '%)')
-      : 'gate=-';
-    metaEl.textContent = 'run=' + runStatus + ' · note=' + Number(data.note_count || 0) + ' · chapter=' + Number(data.chapter_count || 0) + ' · ' + gateText;
-  }
-  if (barEl) barEl.style.width = pct + '%';
-  if (phaseEl) phaseEl.textContent = phaseLabel;
-  if (pctEl) pctEl.textContent = pct + '%';
-  if (detailEl) detailEl.textContent = detail.join(' · ');
-  if (blockersEl) blockersEl.textContent = blockerTexts.join(' ');
-
-  if (startBtn) {
-    if (isTranslatingState) {
-      startBtn.textContent = isRetryTranslating ? '翻译重试中…' : '翻译进行中…';
-    } else if (workflowState === 'post_translate_repairing') {
-      startBtn.textContent = '自动修补中…';
-    } else if (isTailCheckingState || data.fnm_post_translate_running) {
-      startBtn.textContent = '最终校验中…';
-    } else if (data.fnm_fullflow_running) {
-      startBtn.textContent = '流程处理中…';
-    } else if (data.resume_translate_available) {
-      startBtn.textContent = '继续翻译';
-    } else if (data.can_translate) {
-      startBtn.textContent = '开始翻译';
-    } else {
-      startBtn.textContent = '开始一体化流程';
-    }
-  }
-  if (pauseBtn) {
-    if (pauseTranslateAvailable) {
-      pauseBtn.textContent = '暂停翻译';
-    } else if (isTailCheckingState || data.fnm_post_translate_running) {
-      pauseBtn.textContent = '校验中（不可暂停）';
-    } else {
-      pauseBtn.textContent = '暂停翻译';
-    }
-  }
-  setFnmWorkflowDisabled(
-    startBtn,
-    (!data.full_flow_available && !data.can_translate)
-      || isTranslatingState
-      || isTailCheckingState
-      || !!data.fnm_post_translate_running
-      || !!data.fnm_fullflow_running
-  );
-  setFnmWorkflowDisabled(continueBtn, !data.continue_fnm_available || !!data.fnm_fullflow_running);
-  setFnmWorkflowDisabled(pauseBtn, !pauseTranslateAvailable);
-  setFnmWorkflowDisabled(exportBtn, !data.export_bundle_available || !!data.fnm_post_translate_running);
-}
-
-function refreshFnmWorkflowStatus() {
-  var card = document.getElementById('fnmWorkflowCard');
-  var docId = '{{ current_doc_id or "" }}';
-  if (!card || !docId) return Promise.resolve(null);
-  return fetch('/api/doc/' + encodeURIComponent(docId) + '/fnm/status', {
-    headers: withCsrfHeaders()
-  })
-    .then(function(r) {
-      return r.text().then(function(text) {
-        var payload = null;
-        try {
-          payload = text ? JSON.parse(text) : {};
-        } catch (_err) {
-          payload = null;
-        }
-        if (!r.ok) {
-          if (!payload || typeof payload !== 'object') payload = {};
-          payload.ok = false;
-          if (!payload.message) {
-            payload.message = 'FNM 状态接口返回 HTTP ' + r.status;
-          }
-          return payload;
-        }
-        if (!payload || typeof payload !== 'object') {
-          return { ok: false, message: 'FNM 状态接口返回了非 JSON 响应。' };
-        }
-        return payload;
-      });
-    })
-    .then(function(data) {
-      renderFnmWorkflowStatus(data);
-      return data;
-    })
-    .catch(function(err) {
-      renderFnmWorkflowStatus({ ok: false, message: String(err || 'fnm_status_error') });
-      return null;
-    });
-}
-
-function startFnmWorkflowTranslate(forceRestart) {
-  var docId = '{{ current_doc_id or "" }}';
-  if (!docId) return;
-  var startBtn = document.getElementById('fnmStartTranslateBtn');
-  setFnmWorkflowDisabled(startBtn, true);
-  fetch('/api/doc/' + encodeURIComponent(docId) + '/fnm/full-flow', {
-    method: 'POST',
-    headers: withCsrfHeaders(),
-    body: (function() {
-      var form = new FormData();
-      if (forceRestart) form.append('force_restart', '1');
-      return form;
-    })(),
-  })
-    .then(function(r) { return r.json().then(function(data) { return { status: r.status, data: data }; }); })
-    .then(function(result) {
-      if (result.status >= 400 || result.data.error) {
-        renderFnmWorkflowStatus({
-          ok: false,
-          message: result.data.message || result.data.error || 'FNM 一体化流程启动失败',
-        });
-        refreshFnmWorkflowStatus();
-        return;
-      }
-      refreshFnmWorkflowStatus();
-    })
-    .catch(function(err) {
-      renderFnmWorkflowStatus({ ok: false, message: String(err || 'FNM 翻译启动失败') });
-      refreshFnmWorkflowStatus();
-    });
-}
-
-function pauseFnmWorkflowTranslate() {
-  var docId = '{{ current_doc_id or "" }}';
-  if (!docId) return;
-  fetch('{{ url_for("stop_translate") }}', {
-    method: 'POST',
-    headers: withCsrfHeaders(),
-    body: (function() {
-      var form = new FormData();
-      form.append('doc_id', docId);
-      return form;
-    })(),
-  })
-    .then(function() {
-      setTimeout(refreshFnmWorkflowStatus, 200);
-    })
-    .catch(function() {
-      refreshFnmWorkflowStatus();
-    });
-}
-
-function continueFnmWorkflowProcessing() {
-  var docId = '{{ current_doc_id or "" }}';
-  if (!docId) return;
-  var btn = document.getElementById('fnmContinueProcessBtn');
-  setFnmWorkflowDisabled(btn, true);
-  fetch('/api/doc/' + encodeURIComponent(docId) + '/fnm/continue', {
-    method: 'POST',
-    headers: withCsrfHeaders(),
-  })
-    .then(function(r) { return r.json().then(function(data) { return { status: r.status, data: data }; }); })
-    .then(function(result) {
-      if (result.status >= 400 || !result.data || result.data.ok === false) {
-        renderFnmWorkflowStatus({
-          ok: false,
-          message: (result.data && (result.data.message || result.data.error)) || '继续 FNM 处理失败',
-        });
-        refreshFnmWorkflowStatus();
-        return;
-      }
-      refreshFnmWorkflowStatus();
-    })
-    .catch(function(err) {
-      renderFnmWorkflowStatus({ ok: false, message: String(err || '继续 FNM 处理失败') });
-      refreshFnmWorkflowStatus();
-    });
-}
-
-function downloadFnmWorkflowExport() {
-  var docId = '{{ current_doc_id or "" }}';
-  if (!docId) return;
-  window.location.href = '{{ url_for("download_md") }}?doc_id=' + encodeURIComponent(docId) + '&format=fnm_obsidian';
-}
-
-function stopFnmWorkflowPolling() {
-  if (fnmStatusPollTimer) {
-    clearInterval(fnmStatusPollTimer);
-    fnmStatusPollTimer = null;
-  }
-}
-
-function startFnmWorkflowPolling(docId) {
-  stopFnmWorkflowPolling();
-  if (!document.getElementById('fnmWorkflowCard')) return;
-  var targetDocId = docId || '{{ current_doc_id or "" }}';
-  if (!targetDocId) return;
-  refreshFnmWorkflowStatus();
-  fnmStatusPollTimer = setInterval(function() {
-    refreshFnmWorkflowStatus();
-  }, 2500);
 }
 
 function stopDocStatusPolling() {
@@ -3190,9 +2718,6 @@ initBatchDocDelete();
 
 {% if current_doc_id and has_pages %}
 startDocStatusPolling('{{ current_doc_id }}');
-{% if cleanup_headers_footers_enabled %}
-startFnmWorkflowPolling('{{ current_doc_id }}');
-{% endif %}
 {% endif %}
 </script>
 {% endblock %}

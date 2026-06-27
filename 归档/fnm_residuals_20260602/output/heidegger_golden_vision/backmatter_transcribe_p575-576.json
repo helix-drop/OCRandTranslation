@@ -1,0 +1,26 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_transcribe",
+  "pages": [
+    575,
+    576
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_transcribe PDF page 575\",\n      \"printed_page\": \"575\",\n      \"lines\": [\n        \"BIBLIOGRAPHIE\",\n        \"ROCKMORE (Tom), Heidegger and French Philosophy, Londres-New York,\",\n        \"Routledge, 1995.\",\n        \"ROMANO (Claude), L’Événement et le Monde, Paris, PUF, 1998.\",\n        \"– L’Événement et le Temps, Paris, PUF, 1999.\",\n        \"ROUDINESCO (Élisabeth), Histoire de la psychanalyse en France, Paris,\",\n        \"Éditions du Seuil, 1986.\",\n        \"– Jacques Lacan, Paris, Fayard, 1993.\",\n        \"ROVAN (Joseph), Mémoires d’un Français qui se souvient d’avoir été Alle-\",\n        \"mand, Paris, Éditions du Seuil, 1999.\",\n        \"SALANSKIS (Jean-Michel), Herméneutique formelle, Paris, Éditions du\",\n        \"C.N.R.S., 1991.\",\n        \"SARTRE (Jean-Paul), L’Être et le Néant. Essai d’ontologie phénoménolo-\",\n        \"gique, Paris, Gallimard, 1943.\",\n        \"– L’existentialisme est un humanisme, Paris, Nagel, 1946.\",\n        \"– Situations I, Paris, Gallimard, 1947.\",\n        \"– Situations IV, Paris, Gallimard, 1964.\",\n        \"– Cahiers pour une morale, Paris, Gallimard, 1982.\",\n        \"– Les Carnets de la drôle de guerre, Paris, Gallimard, 1983.\",\n        \"– Vérité et existence, Paris, Gallimard, 1989.\",\n        \"SASSO (Robert), Georges Bataille : le système du non-savoir, Paris, Éditions\",\n        \"de Minuit, 1978.\",\n        \"SCHNEEBERGER (Guido), Nachlese zu Heidegger, Berne (chez l’auteur),\",\n        \"1962.\",\n        \"SCHULZ (Walter), Die Vollendung des Deutschen Idealismus in der Spätphi-\",\n        \"losophie Schellings, Stuttgart, Kohlhammer, 1955.\",\n        \"SCHÜRMANN (Reiner), Des hégémonies brisées, Mauvezin, TER, 1996.\",\n        \"SÉRIS (Jean-Pierre), La Technique, Paris, PUF, 1994.\",\n        \"SERRES (Michel), Atlas, Paris, Julliard, 1994.\",\n        \"SOLLERS (Philippe), Studio, Paris, Gallimard, 1997.\",\n        \"SOUCHE-DAGUES (Denise), Nihilismes, Paris, PUF, 1996.\",\n        \"SOULEZ (Antonia) éd., Manifeste du Cercle de Vienne et autres écrits, Paris,\",\n        \"PUF, 1985.\",\n        \"STIEGLER (Bernard), La Technique et le Temps. 1. La Faute d’Épiméthée,\",\n        \"Paris, Galilée / Cité des sciences et de l’industrie, 1994 ; 2. La\",\n        \"Désorientation, 1996.\",\n        \"TAMINIAUX (Jacques), Le Théâtre des philosophes. La tragédie, l’être, l’ac-\",\n        \"tion, Grenoble, Jérôme Millon, 1995.\",\n        \"THOM (René), « Halte au hasard, silence au bruit », Le Débat, n° 3, juillet-\",\n        \"août 1980, pp. 11-132.\",\n        \"– « La science en crise ? », Le Débat, n° 18, janvier 1982, pp. 34-43.\",\n        \"– Paraboles et catastrophes, Paris, Flammarion, 1983.\",\n        \"VEYNE (Paul), « Char et Sade », La Nouvelle Revue française, mars 1984,\",\n        \"pp. 1-19.\"\n      ],\n      \"uncertain\": []\n    },\n    {\n      \"label\": \"backmatter_transcribe PDF page 576\",\n      \"printed_page\": \"576\",\n      \"lines\": [\n        \"– René Char en ses poèmes, Paris, Gallimard, 1990.\",\n        \"– « René Char et l’expérience de l’extase », La Nouvelle Revue fran-\",\n        \"çaise, novembre-décembre 1995, pp. 3-25.\",\n        \"VEZIN (François) (hommage à), L’Enseignement par excellence, textes\",\n        \"rassemblés par Pascal DAVID, Paris, L’Harmattan, 2000.\",\n        \"VOLPI (Franco), Heidegger e Aristotele, Padoue, Daphne, 1984.\",\n        \"WAHL (Jean), Petite histoire de « l’existentialisme », Paris, Club Mainte-\",\n        \"nant, 1947.\",\n        \"– Traité de métaphysique, Paris, Payot, 1953.\",\n        \"WARIN (François), Nietzsche et Bataille. La parodie à l’infini, Paris, PUF,\",\n        \"1994.\",\n        \"WEIL (Éric), Logique de la philosophie, Paris, Vrin, 1951.\",\n        \"WITTGENSTEIN (Ludwig), Tractatus logico-philosophicus, Francfort, Suhr-\",\n        \"kamp, 1971.\",\n        \"ZARADER (Marlène), L’Être et le Neutre. À partir de Maurice Blanchot,\",\n        \"Lagrasse, Verdier, 2001.\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 2476,
+      "completion_tokens": 1418,
+      "total_tokens": 3894
+    }
+  }
+}

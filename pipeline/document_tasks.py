@@ -28,7 +28,6 @@ from config import (
 from document.note_detection import annotate_pages_with_note_scans
 from document.pdf_extract import extract_pdf_toc, extract_pdf_toc_from_links
 from document.text_utils import ensure_str
-from FNM_RE import run_doc_pipeline as run_fnm_pipeline
 from ocr_client import call_paddle_ocr_bytes
 from pipeline.task_document_pipeline import (
     process_file as _process_file_impl,
@@ -36,7 +35,6 @@ from pipeline.task_document_pipeline import (
     reparse_single_page as _reparse_single_page_impl,
 )
 from pipeline.visual_toc import generate_auto_visual_toc_for_doc
-from translation.translate_launch import start_fnm_translate_task
 from translation.translate_progress import (
     reconcile_translate_state_after_page_failure,
     reconcile_translate_state_after_page_success,
@@ -62,9 +60,9 @@ def _resolve_cleanup_headers_footers(task: dict | None, doc_id: str = "") -> boo
 def _resolve_auto_visual_toc(task: dict | None, doc_id: str = "") -> bool:
     options = (task or {}).get("options") or {}
     if "auto_visual_toc" in options:
-        return bool(options.get("auto_visual_toc")) or bool(options.get("clean_header_footer"))
+        return bool(options.get("auto_visual_toc"))
     if doc_id:
-        return bool(app_config.get_doc_cleanup_headers_footers(doc_id)) or get_doc_auto_visual_toc_enabled(
+        return get_doc_auto_visual_toc_enabled(
             doc_id,
             default=app_config.DOC_AUTO_VISUAL_TOC_DEFAULT,
         )
@@ -91,10 +89,10 @@ def _refresh_upload_task_runtime_options(
     auto_visual_toc_enabled: bool,
 ) -> tuple[bool, bool, list[str]]:
     refreshed_cleanup = get_upload_cleanup_headers_footers_enabled(default=cleanup_enabled)
-    refreshed_auto_visual = refreshed_cleanup or get_upload_auto_visual_toc_enabled(default=auto_visual_toc_enabled)
+    refreshed_auto_visual = get_upload_auto_visual_toc_enabled(default=auto_visual_toc_enabled)
     logs: list[str] = []
     if refreshed_cleanup != cleanup_enabled:
-        logs.append("检测到上传后的 FNM 模式勾选已更新，后续将按最新选择继续处理。")
+        logs.append("检测到上传后的页眉页脚清理选项已更新，后续将按最新选择继续处理。")
     if refreshed_auto_visual != auto_visual_toc_enabled:
         logs.append("检测到上传后的自动视觉目录前置要求已更新，后续将按最新选择继续处理。")
     task_registry.update_task_options(
@@ -188,147 +186,6 @@ def _annotate_note_scans(
     )
 
 
-def _run_fnm_pipeline_for_doc(task_id: str, doc_id: str) -> dict:
-    result_payload = {
-        "ok": False,
-        "fnm_available": False,
-        "auto_translate_started": False,
-        "message": "",
-        "log_messages": [],
-    }
-    if not doc_id:
-        return result_payload
-    stage_order = {
-        "toc_structure": 1,
-        "book_note_profile": 2,
-        "chapter_layers": 3,
-        "note_link_table": 4,
-        "frozen_units": 5,
-        "diagnostics": 6,
-        "chapter_markdown_set": 7,
-        "export_bundle": 8,
-    }
-
-    def _on_stage_progress(payload: dict[str, Any]) -> None:
-        stage = str(payload.get("stage") or "").strip()
-        label = str(payload.get("label") or "FNM 主线处理中").strip() or "FNM 主线处理中"
-        pct = float(payload.get("pct") or 97.0)
-        event = str(payload.get("event") or "progress").strip().lower()
-        elapsed_ms = int(payload.get("elapsed_ms") or 0)
-        stage_idx = int(stage_order.get(stage, 0))
-        detail = f"阶段 {stage_idx}/{len(stage_order)}" if stage_idx > 0 else "阶段处理中"
-        task_registry.task_push(
-            task_id,
-            "progress",
-            {
-                "pct": pct,
-                "label": "FNM 主线处理中…",
-                "detail": detail,
-            },
-        )
-        if event == "start":
-            message = f"FNM 阶段开始：{label}"
-        elif event == "done":
-            message = f"FNM 阶段完成：{label}（{elapsed_ms} ms）"
-        else:
-            message = f"FNM 阶段更新：{label}"
-        task_registry.task_push(task_id, "log", {"msg": message, "cls": "success"})
-        result_payload["log_messages"].append(("INFO", message))
-
-    task_registry.task_push(
-        task_id,
-        "progress",
-        {
-            "pct": 96.8,
-            "label": "FNM 主线处理中…",
-            "detail": "准备启动",
-        },
-    )
-    boot_msg = "FNM 主线启动：准备构建结构与翻译单元。"
-    task_registry.task_push(task_id, "log", {"msg": boot_msg, "cls": "success"})
-    result_payload["log_messages"].append(("INFO", boot_msg))
-    try:
-        result = run_fnm_pipeline(doc_id, progress_callback=_on_stage_progress)
-    except Exception as exc:
-        logger.exception("FootNoteMachine 分类失败 doc_id=%s task_id=%s", doc_id, task_id)
-        error_msg = f"FootNoteMachine 分类失败：{exc}"
-        task_registry.task_push(task_id, "log", {"msg": error_msg, "cls": "warning"})
-        result_payload["message"] = error_msg
-        result_payload["log_messages"].append(("WARNING", error_msg))
-        return result_payload
-
-    task_registry.task_push(task_id, "progress", {"pct": 99.99, "label": "FNM 主线处理中…", "detail": "正在汇总 FNM 结果"})
-    run_id = int(result.get("run_id", 0) or 0)
-    structure_state = str(result.get("structure_state") or "").strip().lower() or "unknown"
-    blocking_reasons = [
-        str(item).strip()
-        for item in list(result.get("blocking_reasons") or [])
-        if str(item).strip()
-    ]
-    summary_msg = (
-        "FNM 解析状态："
-        f"run_id={run_id or '-'}，"
-        f"structure_state={structure_state}，"
-        f"manual_toc_required={bool(result.get('manual_toc_required'))}，"
-        f"export_ready_real={bool(result.get('export_ready_real'))}。"
-    )
-    task_registry.task_push(task_id, "log", {"msg": summary_msg, "cls": "success"})
-    result_payload["log_messages"].append(("INFO", summary_msg))
-    if blocking_reasons:
-        blocking_msg = "FNM 阻塞项：" + "、".join(blocking_reasons)
-        task_registry.task_push(task_id, "log", {"msg": blocking_msg, "cls": "warning"})
-        result_payload["log_messages"].append(("WARNING", blocking_msg))
-
-    if result.get("ok"):
-        if bool(result.get("manual_toc_required")):
-            blocked_msg = "FootNoteMachine 诊断已完成，但缺少手动目录（manual_pdf/manual_images），正式链路保持阻塞。"
-            task_registry.task_push(task_id, "log", {
-                "msg": blocked_msg,
-                "cls": "warning",
-            })
-            result_payload.update({
-                "ok": True,
-                "fnm_available": False,
-                "message": blocked_msg,
-            })
-            result_payload["log_messages"].append(("WARNING", blocked_msg))
-            return result_payload
-        success_msg = (
-            "FootNoteMachine 分类完成："
-            f"{int(result.get('section_count', 0) or 0)} 个 section，"
-            f"{int(result.get('note_count', 0) or 0)} 条注释，"
-            f"{int(result.get('unit_count', 0) or 0)} 个翻译 unit"
-        )
-        task_registry.task_push(task_id, "log", {
-            "msg": success_msg,
-            "cls": "success",
-        })
-        result_payload.update({
-            "ok": True,
-            "fnm_available": True,
-            "message": success_msg,
-        })
-        result_payload["log_messages"].append(("INFO", success_msg))
-        if app_config.get_doc_cleanup_headers_footers(doc_id):
-            started_msg = "FNM 分类完成，请留在首页点击“开始翻译”；FNM 模式不再提供预览视图。"
-            task_registry.task_push(task_id, "log", {
-                "msg": started_msg,
-                "cls": "success",
-            })
-            result_payload["message"] = started_msg
-            result_payload["log_messages"].append(("INFO", started_msg))
-        return result_payload
-
-    error_msg = f"FootNoteMachine 分类失败：{result.get('error') or 'unknown_error'}"
-    task_registry.task_push(task_id, "log", {
-        "msg": error_msg,
-        "cls": "warning",
-    })
-    result_payload["message"] = error_msg
-    result_payload["log_messages"].append(("WARNING", error_msg))
-    return result_payload
-
-
 def _create_doc_task_log(doc_id: str, task_kind: str, *, task_id: str) -> str:
     return task_logs.create_doc_task_log(
         doc_id,
@@ -379,7 +236,6 @@ def _document_pipeline_deps() -> dict:
         "resolve_auto_visual_toc": _resolve_auto_visual_toc,
         "resolve_cleanup_headers_footers": _resolve_cleanup_headers_footers,
         "resolve_visual_model_spec": storage.resolve_visual_model_spec,
-        "run_fnm_pipeline_for_doc": _run_fnm_pipeline_for_doc,
         "run_auto_visual_toc_for_doc": run_auto_visual_toc_for_doc,
         "save_auto_pdf_toc_to_disk": storage.save_auto_pdf_toc_to_disk,
         "save_entry_to_disk": storage.save_entry_to_disk,

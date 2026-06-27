@@ -1,0 +1,462 @@
+[
+  {
+    "doc_id": "67356d1f7d9a",
+    "doc_name": "Bell - 2000 - A History of Madness in Sixteenth-Century Germa.pdf",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 58,
+        "page_count": 464,
+        "section_count": 85,
+        "note_count": 1134,
+        "unit_count": 1240,
+        "structure_state": "review_required"
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "section_count": 85,
+        "note_zone_count": 0,
+        "note_definition_count": 0,
+        "note_ref_candidate_count": 1965,
+        "note_link_count": 3099,
+        "footnote_count": 1134,
+        "structure_state": "review_required",
+        "review_counts": {
+          "orphan_definition": 26,
+          "orphan_ref": 1965,
+          "ambiguous": 0,
+          "boundary_error": 0
+        },
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "link_summary": {
+          "matched": 1108,
+          "orphan_definition": 26,
+          "orphan_ref": 1965,
+          "ambiguous": 0
+        },
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 106,
+        "note_unit_count": 1134,
+        "changed_page_count": 441,
+        "translated_chars": 1568904,
+        "translated_paras": 3355,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "execution_mode": "test"
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  },
+  {
+    "doc_id": "0d285c0800db",
+    "doc_name": "Foucault和Foucault - 2004 - Naissance de la biopolitique.pdf",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 59,
+        "page_count": 370,
+        "section_count": 31,
+        "note_count": 237,
+        "unit_count": 299,
+        "structure_state": "review_required"
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "section_count": 31,
+        "note_zone_count": 12,
+        "note_definition_count": 260,
+        "note_ref_candidate_count": 729,
+        "note_link_count": 806,
+        "footnote_count": 27,
+        "structure_state": "review_required",
+        "review_counts": {
+          "orphan_definition": 59,
+          "orphan_ref": 519,
+          "ambiguous": 0,
+          "boundary_error": 0
+        },
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "link_summary": {
+          "matched": 228,
+          "orphan_definition": 59,
+          "orphan_ref": 519,
+          "ambiguous": 0
+        },
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 62,
+        "note_unit_count": 237,
+        "changed_page_count": 297,
+        "translated_chars": 1085051,
+        "translated_paras": 1135,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "execution_mode": "test"
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  },
+  {
+    "doc_id": "7ba9bca783fd",
+    "doc_name": "Goldstein - 2005 - The post-revolutionary self politics and psyche i.pdf",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 60,
+        "page_count": 431,
+        "section_count": 64,
+        "note_count": 751,
+        "unit_count": 827,
+        "structure_state": "review_required"
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "section_count": 64,
+        "note_zone_count": 5,
+        "note_definition_count": 753,
+        "note_ref_candidate_count": 1478,
+        "note_link_count": 1480,
+        "footnote_count": 0,
+        "structure_state": "review_required",
+        "review_counts": {
+          "orphan_definition": 2,
+          "orphan_ref": 727,
+          "ambiguous": 0,
+          "boundary_error": 0
+        },
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "link_summary": {
+          "matched": 751,
+          "orphan_definition": 2,
+          "orphan_ref": 727,
+          "ambiguous": 0
+        },
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 76,
+        "note_unit_count": 751,
+        "changed_page_count": 340,
+        "translated_chars": 1142300,
+        "translated_paras": 1881,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "execution_mode": "test"
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  },
+  {
+    "doc_id": "a5d9a08d6871",
+    "doc_name": "Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 61,
+        "page_count": 608,
+        "section_count": 90,
+        "note_count": 1547,
+        "unit_count": 1655,
+        "structure_state": "review_required"
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "section_count": 90,
+        "note_zone_count": 0,
+        "note_definition_count": 0,
+        "note_ref_candidate_count": 1218,
+        "note_link_count": 2765,
+        "footnote_count": 1547,
+        "structure_state": "review_required",
+        "review_counts": {
+          "orphan_definition": 1100,
+          "orphan_ref": 1218,
+          "ambiguous": 0,
+          "boundary_error": 0
+        },
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "link_summary": {
+          "matched": 447,
+          "orphan_definition": 1100,
+          "orphan_ref": 1218,
+          "ambiguous": 0
+        },
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 108,
+        "note_unit_count": 1547,
+        "changed_page_count": 566,
+        "translated_chars": 1716490,
+        "translated_paras": 3801,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "execution_mode": "test"
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  },
+  {
+    "doc_id": "bd05138cd773",
+    "doc_name": "Mad_acts_mad_speech_and_mad_people_in_la.pdf",
+    "steps": {
+      "clear": {
+        "ok": true
+      },
+      "pipeline": {
+        "ok": true,
+        "run_id": 62,
+        "page_count": 824,
+        "section_count": 162,
+        "note_count": 181,
+        "unit_count": 337,
+        "structure_state": "review_required"
+      },
+      "structure": {
+        "ok": false,
+        "status": "done",
+        "section_count": 162,
+        "note_zone_count": 0,
+        "note_definition_count": 0,
+        "note_ref_candidate_count": 2437,
+        "note_link_count": 2618,
+        "footnote_count": 181,
+        "structure_state": "review_required",
+        "review_counts": {
+          "orphan_definition": 152,
+          "orphan_ref": 2437,
+          "ambiguous": 0,
+          "boundary_error": 0
+        },
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "link_summary": {
+          "matched": 29,
+          "orphan_definition": 152,
+          "orphan_ref": 2437,
+          "ambiguous": 0
+        },
+        "export_ready_test": false,
+        "export_ready_real": false,
+        "validation_needs_human_review": true,
+        "validation_reason_counts": {}
+      },
+      "placeholders": {
+        "ok": true,
+        "body_unit_count": 156,
+        "note_unit_count": 181,
+        "changed_page_count": 665,
+        "translated_chars": 1236290,
+        "translated_paras": 2521,
+        "retry_summary": {
+          "execution_mode": "test",
+          "retry_progress": {
+            "retry_round": 0,
+            "unresolved_count": 0,
+            "manual_required_count": 0
+          },
+          "failed_locations": [],
+          "manual_required_locations": [],
+          "next_failed_location": null,
+          "blocking_export": false,
+          "blocking_reason": ""
+        }
+      },
+      "export": {
+        "ok": false,
+        "blocked": true,
+        "reason": "structure_review_required",
+        "structure_state": "review_required",
+        "blocking_reasons": [
+          "orphan_definition",
+          "orphan_ref"
+        ],
+        "execution_mode": "test"
+      }
+    },
+    "retry_summary": {
+      "execution_mode": "test",
+      "blocking_export": false,
+      "blocking_reason": "",
+      "retry_progress": {
+        "retry_round": 0,
+        "unresolved_count": 0,
+        "manual_required_count": 0
+      }
+    },
+    "all_ok": false
+  }
+]

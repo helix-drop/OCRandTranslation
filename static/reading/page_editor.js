@@ -12,10 +12,6 @@ function setPageEditorStatus(message, isError) {
   node.style.color = isError ? 'var(--red)' : 'var(--txL)';
 }
 
-function defaultFnmRefRow() {
-  return { kind: 'footnote', note_id: '' };
-}
-
 function fetchJsonWithMeta(url, options) {
   return fetch(url, options)
     .then(function(response) {
@@ -35,14 +31,6 @@ function normalizePageEditorRows(rows) {
       : (typeof (row && row.section_path) === 'string'
         ? String(row.section_path || '').split('>').map(function(item) { return String(item || '').trim(); }).filter(Boolean)
         : []);
-    var fnmRefs = Array.isArray(row && row.fnm_refs)
-      ? row.fnm_refs.map(function(item) {
-          return {
-            kind: String(item && item.kind || ''),
-            note_id: String(item && item.note_id || '')
-          };
-        })
-      : [];
     return {
       order: idx,
       kind: String(row && row.kind || 'body'),
@@ -62,7 +50,6 @@ function normalizePageEditorRows(rows) {
       note_confidence: Number(row && row.note_confidence || 0),
       cross_page: row && row.cross_page ? String(row.cross_page) : null,
       section_path: sectionPath,
-      fnm_refs: fnmRefs,
     };
   });
 }
@@ -87,12 +74,7 @@ function defaultPageEditorRow() {
     note_confidence: 0,
     cross_page: null,
     section_path: [],
-    fnm_refs: [],
   };
-}
-
-function isFnmPageEditorView() {
-  return String(store.pageEditor.view || store.readingView.mode || 'standard') === 'fnm';
 }
 
 function pageEditorSectionPathInputValue(sectionPath) {
@@ -112,30 +94,8 @@ function renderPageEditorCrossPageOptions(value) {
   }).join('');
 }
 
-function renderPageEditorFnmRefs(idx, row) {
-  var refs = Array.isArray(row.fnm_refs) && row.fnm_refs.length ? row.fnm_refs : [defaultFnmRefRow()];
-  return refs.map(function(ref, refIdx) {
-    return '<div class="page-editor-ref-row">'
-      + '<select class="inp" onchange="updatePageEditorFnmRefField(' + idx + ', ' + refIdx + ', \'kind\', this.value)">'
-      + '<option value="footnote"' + (String(ref.kind || '') === 'footnote' ? ' selected' : '') + '>footnote</option>'
-      + '<option value="endnote"' + (String(ref.kind || '') === 'endnote' ? ' selected' : '') + '>endnote</option>'
-      + '</select>'
-      + '<input class="inp" type="text" placeholder="note_id" value="' + escapeHtml(ref.note_id || '') + '" oninput="updatePageEditorFnmRefField(' + idx + ', ' + refIdx + ', \'note_id\', this.value)">'
-      + '<button type="button" class="btn btn-gho" onclick="insertPageEditorFnmRef(' + idx + ', ' + refIdx + ');">新增</button>'
-      + '<button type="button" class="btn btn-gho" onclick="removePageEditorFnmRef(' + idx + ', ' + refIdx + ');">删除</button>'
-      + '</div>';
-  }).join('');
-}
-
 function renderPageEditorAdvancedFields(idx, row) {
-  if (!isFnmPageEditorView()) {
-    return '';
-  }
-  return '<div class="page-editor-row-advanced">'
-    + '<div class="page-editor-row-field"><label>跨页关系</label><select class="inp" onchange="updatePageEditorField(' + idx + ', \'cross_page\', this.value)">' + renderPageEditorCrossPageOptions(row.cross_page) + '</select></div>'
-    + '<div class="page-editor-row-field"><label>章节路径</label><input class="inp" type="text" placeholder="Chapter > Section > Subsection" value="' + escapeHtml(pageEditorSectionPathInputValue(row.section_path)) + '" oninput="updatePageEditorSectionPath(' + idx + ', this.value)"></div>'
-    + '<div class="page-editor-row-field page-editor-row-field-wide"><label>引用的注释</label><div class="page-editor-ref-list">' + renderPageEditorFnmRefs(idx, row) + '</div></div>'
-    + '</div>';
+  return '';
 }
 
 function renderPageEditorHeadingLevelOptions(row) {
@@ -212,35 +172,6 @@ function updatePageEditorSectionPath(idx, value) {
     .filter(Boolean);
 }
 
-function updatePageEditorFnmRefField(idx, refIdx, key, value) {
-  if (!store.pageEditor.rows[idx]) return;
-  if (!Array.isArray(store.pageEditor.rows[idx].fnm_refs) || !store.pageEditor.rows[idx].fnm_refs.length) {
-    store.pageEditor.rows[idx].fnm_refs = [defaultFnmRefRow()];
-  }
-  if (!store.pageEditor.rows[idx].fnm_refs[refIdx]) {
-    store.pageEditor.rows[idx].fnm_refs[refIdx] = defaultFnmRefRow();
-  }
-  store.pageEditor.rows[idx].fnm_refs[refIdx][key] = String(value || '');
-}
-
-function insertPageEditorFnmRef(idx, refIdx) {
-  if (!store.pageEditor.rows[idx]) return;
-  if (!Array.isArray(store.pageEditor.rows[idx].fnm_refs)) {
-    store.pageEditor.rows[idx].fnm_refs = [];
-  }
-  store.pageEditor.rows[idx].fnm_refs.splice(Number(refIdx || 0) + 1, 0, defaultFnmRefRow());
-  renderPageEditorRows();
-}
-
-function removePageEditorFnmRef(idx, refIdx) {
-  if (!store.pageEditor.rows[idx] || !Array.isArray(store.pageEditor.rows[idx].fnm_refs)) return;
-  store.pageEditor.rows[idx].fnm_refs.splice(refIdx, 1);
-  if (!store.pageEditor.rows[idx].fnm_refs.length) {
-    store.pageEditor.rows[idx].fnm_refs = [defaultFnmRefRow()];
-  }
-  renderPageEditorRows();
-}
-
 function insertPageEditorRow(idx, after) {
   var nextRow = defaultPageEditorRow();
   if (idx < 0 || idx >= store.pageEditor.rows.length) {
@@ -313,9 +244,6 @@ function togglePageEditorHistory() {
     var historyUrl = (ROUTES.pageEditorHistory || '/api/page_editor/history')
       + '?doc_id=' + encodeURIComponent(docId)
       + '&bp=' + encodeURIComponent(store.reading.currentBp);
-    if (isFnmPageEditorView()) {
-      historyUrl += '&view=fnm';
-    }
     fetchJsonWithMeta(historyUrl)
       .then(function(data) {
         store.pageEditor.history = Array.isArray(data && data.data && data.data.revisions) ? data.data.revisions : [];
@@ -340,9 +268,6 @@ function openPageEditor() {
   var editorUrl = (ROUTES.pageEditor || '/api/page_editor')
     + '?doc_id=' + encodeURIComponent(docId)
     + '&bp=' + encodeURIComponent(store.reading.currentBp);
-  if (store.readingView.mode === 'fnm') {
-    editorUrl += '&view=fnm';
-  }
   fetchJsonWithMeta(editorUrl)
     .then(function(result) {
       if (!result.ok || !result.data || result.data.ok === false) {
@@ -360,13 +285,9 @@ function openPageEditor() {
       store.pageEditor.open = true;
       var subtitle = document.getElementById('pageEditorSubtitle');
       if (subtitle) {
-        subtitle.textContent = isFnmPageEditorView()
-          ? '整页原子保存。可修改段落、章节路径、跨页关系和引用到的脚注/尾注。'
-          : '整页原子保存。新增段落需要同时填写原文与译文。';
+        subtitle.textContent = '整页原子保存。新增段落需要同时填写原文与译文。';
       }
-      setPageEditorStatus(isFnmPageEditorView()
-        ? '已载入当前页 FNM 投影，可增删段落并整页保存。'
-        : '已载入当前页，可增删段落并整页保存。');
+      setPageEditorStatus('已载入当前页，可增删段落并整页保存。');
     })
     .catch(function(err) {
       setPageEditorStatus(String(err || '打开页编辑器失败'), true);
@@ -388,7 +309,7 @@ function savePageEditor() {
     headers: withCsrfHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({
       bp: store.reading.currentBp,
-      view: isFnmPageEditorView() ? 'fnm' : 'standard',
+      view: 'standard',
       base_updated_at: store.pageEditor.page.updated_at,
       rows: normalizePageEditorRows(store.pageEditor.rows),
     }),

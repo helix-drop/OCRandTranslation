@@ -1,0 +1,32 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter",
+  "pages": [
+    574,
+    575,
+    576,
+    577,
+    578,
+    579,
+    580,
+    581
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter PDF page 574\",\n      \"printed_page\": \"574\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"– Ernst Jünger : rêveries sur un chasseur de cicindèles, Paris, Hachette, 1995.\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页面为参考文献列表，由于格式密集，OCR处理需注意区分不同的书目条目（尤其是破折号开头的从属条目）。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 575\",\n      \"printed_page\": \"575\",\n      \"headings\": [{\"level\": \"chapter\", \"text\": \"BIBLIOGRAPHIE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"ROCKMORE (Tom), Heidegger and French Philosophy, Londres-New York, Routledge, 1995.\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"书目条目密集，需确保层级（如作者与作品）在转换时逻辑一致。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 576\",\n      \"printed_page\": \"576\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"– René Char en ses poèmes, Paris, Gallimard, 1990.\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"页面上方存在少量延续自上一页的参考文献。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 577\",\n      \"printed_page\": \"\",\n      \"headings\": [{\"level\": \"chapter\", \"text\": \"Index historique des traductions françaises de mots clés heideggériens\", \"position\": \"body\"}],\n      \"paragraph_starts\": [\n        {\"text\": \"En matière de traduction, aucun index n'est une panacée. Surtout s'il entend\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Dans le cas présent, notre but n'est nullement de présenter au lecteur\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Un tel bilan n'a jamais été effectué sous cette forme. Différents index\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"Nous avons eu l'idée d'entreprendre une telle tâche, en constatant que\", \"continues_from_previous\": false, \"continues_to_next\": true}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"正文延续至下一页，注意段落拆分。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 578\",\n      \"printed_page\": \"578\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"},\n        {\"level\": \"section\", \"text\": \"ABRÉVIATIONS ET SIGLES\", \"position\": \"body\"}\n      ],\n      \"paragraph_starts\": [\n        {\"text\": \"la sédimentation chronologique des traductions. On s'étonnera peut-être\", \"continues_from_previous\": true, \"continues_to_next\": false},\n        {\"text\": \"On notera également que nous avons élargi notre enquête hors du pré\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"AB : Qu'est-ce que la philosophie ?, trad. Kostas Axelos et Jean Beaufret,\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"存在从上一页延续下来的正文段落。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 579\",\n      \"printed_page\": \"579\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"INDEX DES MOTS-CLÉS HEIDEGGÉRIENS\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [{\"text\": \"– Qu'est-ce que la métaphysique ?, trad. Henry Corbin, Paris, Galli-\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"该页为缩写与索引内容，格式复杂，需避免误读行间距。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 580\",\n      \"printed_page\": \"580\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}],\n      \"paragraph_starts\": [\n        {\"text\": \"LAUNAY : Réponses et questions sur l'histoire et la politique, trad. Jean\", \"continues_from_previous\": false, \"continues_to_next\": false},\n        {\"text\": \"ANWESEN : adestance, présence (KAHN, 1958) ; présence (PRÉAU, 1958) ;\", \"continues_from_previous\": false, \"continues_to_next\": false}\n      ],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"页面底部出现了术语条目，与上方缩写列表格式不同，需正确识别段落性质。\"]\n    },\n    {\n      \"label\": \"backmatter PDF page 581\",\n      \"printed_page\": \"581\",\n      \"headings\": [{\"level\": \"running_header\", \"text\": \"INDEX DES MOTS-CLÉS HEIDEGGÉRIENS\", \"position\": \"top\"}],\n      \"paragraph_starts\": [{\"text\": \"AUSLEGUNG : explicitation, interprétation (BW, 1964 ; MARTINEAU,\", \"continues_from_previous\": false, \"continues_to_next\": false}],\n      \"body_note_refs\": [],\n      \"footnotes\": [],\n      \"risks\": [\"包含大量括号中的引文，确保OCR对特殊符号（如分号、括号）的识别准确。\"]\n    }\n  ],\n  \"correction_guidance\": [\"核对所有索引条目的缩写与年份，确保格式统一。\", \"确认577-578页的正文衔接部分是否存在断行错误。\", \"检查书目列表中的特殊字符（如破折号、引号）是否在转换时保留。\"]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 9087,
+      "completion_tokens": 1685,
+      "total_tokens": 10772
+    }
+  }
+}

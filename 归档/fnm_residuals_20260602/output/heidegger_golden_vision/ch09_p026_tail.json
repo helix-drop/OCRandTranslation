@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/chapters_pdf/09-La lettre et l'esprit.pdf",
+  "chapter": "ch09",
+  "pages": [
+    26
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"ch09 PDF page 26\",\n      \"printed_page\": \"342\",\n      \"headings\": [\n        {\"level\": \"running_header\", \"text\": \"HEIDEGGER EN FRANCE\", \"position\": \"top\"}\n      ],\n      \"paragraph_starts\": [\n        {\n          \"text\": \"texte heideggérien, entretenir avec celui-ci une étrange complicité. Pourtant, il faut prendre\",\n          \"continues_from_previous\": true,\n          \"continues_to_next\": false\n        },\n        {\n          \"text\": \"Il fallait aux auditeurs une oreille très fine - et patiente -, il\",\n          \"continues_from_previous\": false,\n          \"continues_to_next\": true\n        }\n      ],\n      \"body_note_refs\": [\n        {\"marker\": \"97\", \"context\": \"«tranquillement arrogante»\\\"\"},\n        {\"marker\": \"98\", \"context\": \"mal. «De l'esprit,\"},\n        {\"marker\": \"99\", \"context\": \"ou caricatural\\\"\"},\n        {\"marker\": \"100\", \"context\": \"de la parole\\\"\\\"\"},\n        {\"marker\": \"101\", \"context\": \"pas de Heidegger\\\"\\\"\"},\n        {\"marker\": \"102\", \"context\": \"à l'origine\\\"\\\"\"},\n        {\"marker\": \"103\", \"context\": \"(sans s'en douter)\\\"\\\"\"}\n      ],\n      \"footnotes\": [\n        {\"marker\": \"97\", \"text_start\": \"Ibid., p. 110.\"},\n        {\"marker\": \"98\", \"text_start\": \"Ibid., p. 111.\"},\n        {\"marker\": \"99\", \"text_start\": \"Voir, pour ces différentes qualifications, ibid., pp. 28, 109, 111, 178.\"},\n        {\"marker\": \"100\", \"text_start\": \"Ibid., p. 166.\"},\n        {\"marker\": \"101\", \"text_start\": \"Ibid., p. 176.\"},\n        {\"marker\": \"102\", \"text_start\": \"Ibid., p. 184.\"},\n        {\"marker\": \"103\", \"text_start\": \"Jacques Derrida nous l'a confirmé : il n'était absolument pas au courant de la publication prochaine du livre de Farias. Voir Entretiens (DERRIDA).\"}\n      ],\n      \"risks\": [\n        \"上标注释编号 97-102 在原图中呈现为类似双引号的符号，可能被误识别。\",\n        \"段落末尾的断词续接（例如 vertigineuse-）需谨慎处理以免遗漏。\"\n      ]\n    }\n  ],\n  \"correction_guidance\": [\n    \"需抄写的段落：Avec « l’affaire Heidegger », nous allons descendre vertigineuse-\",\n    \"脚注103开头：Jacques Derrida nous l'a confirmé : il n'était absolument pas au courant de la publication prochaine du livre de Farias. Voir Entretiens (DERRIDA).\"\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1523,
+      "completion_tokens": 738,
+      "total_tokens": 2261
+    }
+  }
+}

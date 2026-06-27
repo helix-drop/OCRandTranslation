@@ -6,7 +6,6 @@ from typing import Any
 
 from flask import flash, redirect, render_template, request, url_for
 
-from FNM_RE import build_retry_summary
 from web.services import ReadingServices
 
 Deps = ReadingServices
@@ -40,23 +39,8 @@ def reading(deps: Deps):
         if pg.get("bookPage") is not None
     }
     repo = deps["SQLiteRepository"]()
-    fnm_run = repo.get_latest_fnm_run(current_doc_id)
-    fnm_retry_summary = build_retry_summary(current_doc_id, repo=repo) if fnm_run else {}
-    fnm_export_ready = bool(
-        fnm_run
-        and fnm_run.get("status") == "done"
-        and not bool(fnm_retry_summary.get("blocking_export"))
-    )
-    fnm_view_available = False
     disk_entries = state["entries"]
     entries = disk_entries
-    if current_view == "fnm":
-        entries = deps["load_fnm_diagnostic_view_entries"](
-            current_doc_id,
-            pages=pages,
-            visible_bps=visible_page_bps,
-            repo=repo,
-        )
     task_snapshot = deps["get_translate_snapshot"](
         current_doc_id,
         pages=pages,
@@ -122,30 +106,9 @@ def reading(deps: Deps):
         deps["_render_reading_body_text"](paragraph)
         for paragraph in deps["_build_preview_paragraphs"](current_page_markdown)
     ]
-    fnm_page_context = deps["build_fnm_page_context"](
-        current_doc_id,
-        current_bp=cur_page_bp,
-        fnm_run=fnm_run if current_view == "fnm" else None,
-        repo=repo,
-    )
-    diagnostic_footnotes = list(fnm_page_context.get("footnotes") or [])
-    diagnostic_endnotes = list(fnm_page_context.get("endnotes") or [])
-    fnm_validation = fnm_page_context.get("validation")
-    fnm_unresolved_here = list(fnm_page_context.get("unresolved_here") or [])
-    fnm_failed_here = list(fnm_page_context.get("failed_here") or [])
-    fnm_retry_summary = dict(fnm_page_context.get("retry_summary") or {})
-    if current_view == "fnm" and diagnostic_footnotes:
-        current_page_footnotes = "\n\n".join(
-            str(note.get("translated_text") or note.get("source_text") or "").strip()
-            for note in diagnostic_footnotes
-            if str(note.get("translated_text") or note.get("source_text") or "").strip()
-        ).strip()
-    elif current_view == "fnm":
-        current_page_footnotes = ""
-    else:
-        current_page_footnotes = deps["_render_reading_footnotes_text"](
-            deps["ensure_str"](current_page_data.get("footnotes", ""))
-        ).strip()
+    current_page_footnotes = deps["_render_reading_footnotes_text"](
+        deps["ensure_str"](current_page_data.get("footnotes", ""))
+    ).strip()
 
     display_entries = deps["build_display_entries"](
         page_entries,
@@ -175,10 +138,6 @@ def reading(deps: Deps):
     page_notes_panel = deps["build_page_notes_panel"](
         current_view=current_view,
         display_entries=display_entries,
-        diagnostic_footnotes=diagnostic_footnotes,
-        diagnostic_endnotes=diagnostic_endnotes,
-        diagnostic_failed_locations=fnm_failed_here,
-        diagnostic_failed_summary=fnm_retry_summary,
         next_bp=next_bp,
     )
     translated_bps = list(reading_view_state.get("translated_bps") or [])
@@ -290,14 +249,7 @@ def reading(deps: Deps):
         toc_source=toc_source,
         toc_unresolved_items=toc_unresolved_items,
         current_view=current_view,
-        fnm_view_available=fnm_view_available,
-        fnm_export_ready=fnm_export_ready,
-        fnm_run_status=(fnm_run or {}).get("status", "idle"),
         page_notes_panel=page_notes_panel,
-        diagnostic_footnotes=diagnostic_footnotes,
-        diagnostic_endnotes=diagnostic_endnotes,
-        fnm_validation=fnm_validation,
-        fnm_unresolved_here=fnm_unresolved_here,
     )
 
 
@@ -307,11 +259,6 @@ def switch_reading_mode(deps: Deps):
         flash("文档无效或已删除。", "error")
         return redirect(url_for("home"))
     deps["set_current_doc"](doc_id)
-    target_mode = deps["_normalize_reading_view"](request.values.get("target_mode", "standard"))
-    if target_mode not in {"fnm", "standard"}:
-        flash("无效的切换参数。", "error")
-        return redirect(url_for("reading", doc_id=doc_id))
-
     reading_params: dict = {"doc_id": doc_id}
     bp = request.values.get("bp", type=int)
     if bp is not None:
@@ -324,8 +271,6 @@ def switch_reading_mode(deps: Deps):
     if layout in {"stack", "side"}:
         reading_params["layout"] = layout
 
-    if target_mode == "fnm":
-        flash("FNM 模式不再提供独立阅读视图，请在首页使用 FNM 工作流卡片。", "info")
     return redirect(url_for("reading", **reading_params))
 
 

@@ -1,0 +1,25 @@
+{
+  "pdf": "/Users/hao/海德格尔在法国标准版处理/Heidegger en France (Dominique Janicaud) (Z-Library).pdf",
+  "chapter": "backmatter_index_columns",
+  "pages": [
+    593
+  ],
+  "model": {
+    "provider": "gemini",
+    "model_id": "gemini-3.1-flash-lite",
+    "rate_limits": {
+      "rpm": 15,
+      "rpd": 500,
+      "tpm": 250000
+    }
+  },
+  "result": {
+    "content": "{\n  \"pages\": [\n    {\n      \"label\": \"backmatter_index_columns PDF page 593\",\n      \"printed_page\": \"593\",\n      \"lines\": [\n        \"JAIGU (Yves) : 302n\",\n        \"JAMBET (Christian) : 349, 352-353,\",\n        \"363n, 364n, 365, 379\",\n        \"JAMES (William) : 37-38\",\n        \"JAMME (Christoph) : 406n\",\n        \"JANICAUD (Dominique) : 245n, 326n\",\n        \"JANKÉLÉVITCH (Vladimir) : 150\",\n        \"JASPERS (Karl) : 40, 62n, 78, 81, 86n,\",\n        \"87, 91, 130, 180, 381n, 391n,\",\n        \"437, 473, 523\",\n        \"JAUSS (Hans Robert) : 20\",\n        \"JAWEH : 160\",\n        \"JDANOV (Andreï) : 265\",\n        \"JEAN de la CROIX (saint) : 41\",\n        \"JEANNIÈRE (Abel) : 144n, 145\",\n        \"JÉSUS : 157\",\n        \"JONAS (Hans) : 487n\",\n        \"JOSEPH (Gilbert) : 62n, 79n\",\n        \"JOUHANDEAU (Marcel) : 212n\",\n        \"JOYCE (James) : 42, 205\",\n        \"JÜNGER (Ernst) : 8n, 12n, 105n, 126,\",\n        \"190n, 210n, 224, 235, 418, 502\",\n        \"JURANVILLE (Alain) : 217n\",\n        \"KAFKA (Franz) : 61, 206\",\n        \"KAHN (Gilbert) : 150n, 166, 168\",\n        \"KAJMAN (Michel) : 355n\",\n        \"KALINOWSKI (Isabelle) : 336n\",\n        \"KANT (Immanuel) : 15, 27, 30; 32,\",\n        \"44, 102n, 130, 136n, 152-154,\",\n        \"156, 160, 163n, 165-166, 171-\",\n        \"172, 181, 183, 224-225, 249, 258,\",\n        \"290, 393n, 406n, 414, 449, 476,\",\n        \"480, 490, 491n, 492, 494n, 497\",\n        \"KÄSTNER (Erhart) : 357, 380n, 408\",\n        \"KATZ (Joseph) : 89\",\n        \"KEARNEY (Richard) : 300n, 481\",\n        \"KELKEL (Arion) : 290n\",\n        \"KEMPF (Roger) : 128\",\n        \"KIERKEGAARD (Sören) : 36-37, 39,\",\n        \"81, 87, 91, 111n, 140n, 177, 180,\",\n        \"228\",\n        \"KISIEL (Theodore) : 406\",\n        \"KLEIBER (le P.) : 145, 150n\",\n        \"KLEIST (Heinrich von) : 91\",\n        \"KLIBANSKY (Raymond) : 296n, 519-\",\n        \"522, 528\",\n        \"KLOSSOWSKI (Pierre) : 23, 224\",\n        \"KOJÈVE (Alexandre) : 53n, 90, 173,\",\n        \"503n\",\n        \"KOHN : 355n\",\n        \"KOMMERELL (Max) : 224, 334-335,\",\n        \"356n\",\n        \"KOYRÉ (Alexandre) : 41-42, 52, 90,\",\n        \"92-94, 96, 165, 502\",\n        \"KRIECK (Ernst) : 190n, 196, 235,\",\n        \"305, 364n, 373, 378n, 432, 433\",\n        \"KREUTZER (Conradin) : 195\",\n        \"KRUMMER-SCHROTH (Ingeborg) :\",\n        \"212n\",\n        \"LACAN (Jacques) : 7, 9, 16, 128, 147,\",\n        \"149-150n, 187n, 215-222, 227,\",\n        \"238, 252, 256n, 293, 434, 524\",\n        \"LACAN (Judith) : 187n\",\n        \"LACAN (Sylvia) : 150n\",\n        \"LACANT (Jacques) : 353n\",\n        \"LACHELIER (Jules) : 110n\",\n        \"LACHIÈZE-REY (Pierre-Albert) : 100\",\n        \"LACOSTE (Jean) : 8n, 326n\",\n        \"LACOSTE (Jean-Yves) : 479-480, 487\",\n        \"LACOUE-LABARTHE (Philippe) : 23,\",\n        \"222n, 282n, 299-300, 303n,\",\n        \"326n, 328, 338, 356-357, 370-\",\n        \"374, 377-378, 385n, 425n, 531\",\n        \"LACROIX (Jean) : 276\",\n        \"LADMIRAL (Jean-René) : 288\",\n        \"LAFFOUCRIÈRE (Odette) : 257n\",\n        \"LA FONTAINE (Jean de) : 259, 484\",\n        \"LAKS (André) : 395n\",\n        \"LAPLANCHE (Jean) : 382n\",\n        \"LAPORTE (Roger) : 212n, 213\",\n        \"LARESE (Franz) : 248n\",\n        \"LARTHOMAS (Jean-Paul) : 440\",\n        \"LARUELLE (François) : 280n, 337n\",\n        \"LASK (Emil) : 25\",\n        \"LASSNER (Jean) : 353n\",\n        \"LAUNAY (Jean) : 66n\",\n        \"LAUNAY (Marc de) : 23, 326n, 540n\",\n        \"LAUXEROIS (Jean) : 266n, 322\"\n      ],\n      \"uncertain\": []\n    }\n  ]\n}",
+    "model": "gemini-3.1-flash-lite",
+    "usage": {
+      "prompt_tokens": 1433,
+      "completion_tokens": 1920,
+      "total_tokens": 3353
+    }
+  }
+}
